@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<!--projecttitle--><title>Virtual-tour</title><!--projecttitle-end-->
+		<!--projectdescription--><meta name="description" content="Project 3Sixty Baru"><!--projectdescription-end-->
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta charset="utf-8">
+		<meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width, shrink-to-fit=no">
+		
+		<link rel="stylesheet" type="text/css" href="css/font-awesome.css">
+		<link rel="stylesheet" type="text/css" href="style.css">
+		
+		<!-- Insert this line above script imports  -->
+		<script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+		
+		<script src="js/jquery.js"></script>
+		<script src="js/imagedata.js"></script>
+		
+		<!-- Insert this line after script imports -->
+		<script>if (window.module) module = window.module;</script>
+		
+		<style>
+		
+			
+						
+			/* SCROLLBAR STYLING */
+			/* width */
+			::-webkit-scrollbar {
+				width: 0.25em;
+				height: 0.25em;
+			}
+			/* Track */
+			::-webkit-scrollbar-track {
+				background: #2c3643; 
+			}
+			/* Handle */
+			::-webkit-scrollbar-thumb {
+				background: #0d9e59; 
+				transition: background .5s;
+			}
+			/* Handle on hover */
+			::-webkit-scrollbar-thumb:hover {
+				background: #00e075; 
+			}
+
+
+			body {
+				margin: 0;
+				overflow: hidden;
+			}
+			#container {
+				width: 100vw;
+				height: 100vh;
+				display: block;
+			}
+			#overlay {
+				position: absolute;
+				top: 0; left: 0;
+				width: 100vw;
+				height: 100vh;
+				background-color: rgba(0, 0, 0, 0.8);
+				color: white;
+				font-size: 2rem;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				z-index: 10;
+				opacity: 0;
+				pointer-events: none;
+				transition: opacity 0.5s ease;
+			}
+			
+			#tmp{
+				position: fixed;
+				top: 0;
+				left: 0; 
+				right: 0;
+				bottom: 0;
+				padding: 3em;
+				background-color: rgba(0,0,0,.5);
+				backdrop-filter: blur(5px);
+				display: none;
+				z-index: 21;
+			}
+		</style>
+	</head>
+	<body id="body">
+	    <div id="container"></div>
+		<div id="overlay">Loading...</div>
+    	
+		
+		
+		<!--customhtml--><!--customhtml-end-->
+		
+		<div id="tmp">
+			<div style="width: 100%; height: 100%; overflow: hidden; overflow-y: auto; box-sizing: border-box; position: relative;" id="tmpcontent"></div>
+			<div class="mediaclosebutton" onclick="hideTemp()"><i class="fa fa-times-circle"></i></div>
+		</div>
+
+
+		<div id="loading" class="fullwrapper" style="display: table; width: 100%; height: 100%;">
+    		<div style="display: table-cell; vertical-align: middle; text-align: center; color: white; font-size: 30px; padding: 50px;">
+    			<!--loadingtext-->Loading...<!--loadingtext-end-->
+				<div id="loadingperc" style="font-size:12px;"></div>
+    		</div>
+    	</div>
+		
+		<!-- Three.js Core -->
+		<script src="js/three.min.js"></script>
+		<!-- OrbitControls -->
+		<script src="js/OrbitControls.js"></script>
+		
+    	<script>
+			
+			let scene, camera, renderer, controls;
+			let spriteHotspots = [];
+			
+			let panoramaMesh;
+
+			let targetFov = 75;
+			let initialFov = 75;
+			let initialPinchDistance = null;
+
+			const overlay = document.getElementById('overlay');
+			const raycaster = new THREE.Raycaster();
+			const mouse = new THREE.Vector2();
+
+			init();
+			animate();
+			
+			/*initfunction*/
+
+		let currentPanorama = '4centro.jpg';
+		function init() {
+			const container = document.getElementById('container');
+
+			scene = new THREE.Scene();
+
+			camera = new THREE.PerspectiveCamera(targetFov, container.clientWidth / container.clientHeight, 0.1, 1000);
+			camera.position.set(0, 0, 0.1);
+
+			renderer = new THREE.WebGLRenderer({ antialias: true });
+			renderer.setSize(container.clientWidth, container.clientHeight);
+			container.appendChild(renderer.domElement);
+
+			controls = new THREE.OrbitControls(camera, renderer.domElement);
+			controls.enableZoom = true;
+			controls.minDistance = 0.1;
+			controls.maxDistance = 5;
+			controls.enablePan = false;
+			controls.rotateSpeed = -0.3;
+			controls.enableDamping = true;
+			controls.dampingFactor = 0.1;
+
+			const geometry = new THREE.SphereGeometry(500, 60, 40);
+			geometry.scale(-1, 1, 1);
+
+			const texture = new THREE.TextureLoader().load('panoramas/4centro.jpg');
+			const material = new THREE.MeshBasicMaterial({ map: texture });
+
+			panoramaMesh = new THREE.Mesh(geometry, material);
+			scene.add(panoramaMesh);
+
+			loadHotspotsFor('4centro.jpg');
+
+			window.addEventListener('resize', onWindowResize);
+			renderer.domElement.addEventListener('wheel', onMouseWheel, { passive: false });
+			renderer.domElement.addEventListener('touchstart', handleTouchStart, { passive: false });
+			renderer.domElement.addEventListener('touchmove', handleTouchMove, { passive: false });
+			renderer.domElement.addEventListener('pointermove', onPointerMove, false);
+		}
+		
+/*initfunction-end*/
+
+			function onMouseWheel(e) {
+				e.preventDefault();
+				targetFov += e.deltaY * 0.05;
+				targetFov = THREE.MathUtils.clamp(targetFov, 30, 100);
+			}
+
+			function handleTouchStart(e) {
+				if (e.touches.length === 2) {
+					const dx = e.touches[0].pageX - e.touches[1].pageX;
+					const dy = e.touches[0].pageY - e.touches[1].pageY;
+					initialPinchDistance = Math.sqrt(dx * dx + dy * dy);
+					initialFov = targetFov;
+				}
+			}
+
+			function handleTouchMove(e) {
+				if (e.touches.length === 2 && initialPinchDistance !== null) {
+					e.preventDefault();
+					const dx = e.touches[0].pageX - e.touches[1].pageX;
+					const dy = e.touches[0].pageY - e.touches[1].pageY;
+					const newDistance = Math.sqrt(dx * dx + dy * dy);
+					const zoomFactor = initialPinchDistance / newDistance;
+					targetFov = THREE.MathUtils.clamp(initialFov * zoomFactor, 30, 100);
+				}
+			}
+
+			function loadHotspotsFor(panorama) {
+				clearHotspots();
+				/*panoramas*/
+
+			if (panorama === '4centro.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(-127.34082161292653, -38.62671588925437, -376.6351246272548), () => {
+		switchPanorama('2joypavillionandevelyncottage.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-367.6109886276537, -38.812576325691836, -150.62696389088086), () => {
+		switchPanorama('3tonicottageandihawan.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-58.143036078194754, -21.76972460410768, 394.1582900654654), () => {
+		switchPanorama('5frontpool.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(354.2011950899555, -86.75522954203637, 163.05615855972073), () => {
+		switchPanorama('6arcelicottageandhardin.jpg');
+	});
+}
+
+			if (panorama === '2joypavillionandevelyncottage.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(318.81302180775106, -119.49857981265338, 208.41852860805886), () => {
+		switchPanorama('1lobbyandfountain.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-391.62869715529496, -52.878056126959514, 55.512099353512596), () => {
+		switchPanorama('4centro.jpg');
+	});
+}
+
+			if (panorama === '1lobbyandfountain.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(-358.42712687229033, -104.00344769376686, -141.19493124750585), () => {
+		switchPanorama('2joypavillionandevelyncottage.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(351.82312095315274, -57.95190524750783, -179.3639057365445), () => {
+		switchPanorama('villaelenafront.jpg');
+	});
+}
+
+			if (panorama === 'villaelenafront.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(383.92409670906454, -50.01832722240533, 96.5048778888426), () => {
+		switchPanorama('1lobbyandfountain.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-390.74790109903347, -82.0998781827788, -5.822792871076511), () => {
+		switchPanorama('villaelenaparking.jpg');
+	});
+}
+
+			if (panorama === 'villaelenaparking.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(29.025935120404, -28.092274162092217, 397.23071226976055), () => {
+		switchPanorama('villaelenafront.jpg');
+	});
+}
+
+			if (panorama === '3tonicottageandihawan.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(113.35036696258908, -56.89391661872861, -378.6299930965618), () => {
+		switchPanorama('4centro.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-343.050672539949, -37.38490332258875, -201.45547865482348), () => {
+		switchPanorama('1lobbyandfountain.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(380.3741184107855, -18.12353594364405, -120.61630686762722), () => {
+		switchPanorama('5frontpool.jpg');
+	});
+}
+
+			if (panorama === '7hardin.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(-187.61128158802947, -40.51372744753416, -349.92841015695194), () => {
+		switchPanorama('6arcelicottageandhardin.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(237.91433459059624, -36.14643434725743, -318.90394686291137), () => {
+		switchPanorama('1lobbyandfountain.jpg');
+	});
+}
+
+			if (panorama === '6arcelicottageandhardin.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(-351.10365352941653, -67.08124072962028, 177.5988449785769), () => {
+		switchPanorama('7hardin.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(317.4531336544994, -78.64252339040956, 229.53474254292112), () => {
+		switchPanorama('4centro.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-15.041904000236265, -70.34302164816367, -392.5564138965774), () => {
+		switchPanorama('8poolviewsadaan~2.jpg');
+	});
+}
+
+			if (panorama === '8poolviewsadaan~2.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(-3.9601289626440517, -60.86800306867525, -395.00703134239325), () => {
+		switchPanorama('6arcelicottageandhardin.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-395.66094308033064, -45.69774660767814, 22.892934954479763), () => {
+		switchPanorama('5frontpool.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(10.833143541521128, -67.76844001871945, 393.32478891886313), () => {
+		switchPanorama('9estercottage.jpg');
+	});
+}
+
+			if (panorama === '9estercottage.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(22.513032012833946, -98.68090778460387, 386.09380992607254), () => {
+		switchPanorama('8poolviewsadaan~2.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(324.55673950089556, -44.866979859478974, 228.19828479678222), () => {
+		switchPanorama('5frontpool.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-25.354835821205945, -77.80449022116667, -390.5114160475177), () => {
+		switchPanorama('10sunflowerhouse.jpg');
+	});
+}
+
+			if (panorama === '5frontpool.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(81.22196078945217, -54.58465106818031, -387.4694995640885), () => {
+		switchPanorama('4centro.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(386.5712359242281, -66.34974295678838, 75.87252769806017), () => {
+		switchPanorama('8poolviewsadaan~2.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(106.08120412782577, -47.4688429632817, 381.6589230917667), () => {
+		switchPanorama('12sunflowerhouseandwellnesscenter.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-162.08248855959286, -53.348758797252934, -361.34624147453746), () => {
+		switchPanorama('3tonicottageandihawan.jpg');
+	});
+}
+
+			if (panorama === '10sunflowerhouse.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(-335.85189644250397, -69.01412893283248, -204.61053151258616), () => {
+		switchPanorama('12sunflowerhouseandwellnesscenter.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-34.042481675586515, -36.227366958523355, -396.28728946768535), () => {
+		switchPanorama('9estercottage.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(17.279233589258553, -38.9501241844489, 396.77573625543886), () => {
+		switchPanorama('11backresortandcr.jpg');
+	});
+}
+
+			if (panorama === '11backresortandcr.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(33.07008934602927, -43.58410867562924, -395.4273675569621), () => {
+		switchPanorama('10sunflowerhouse.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-398.70908574591493, -28.51468077317687, 2.2380334062585843), () => {
+		switchPanorama('13backside.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-232.6512757521521, -45.924275024125855, 321.58434755407603), () => {
+		switchPanorama('14backpool.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-36.41982962445325, -41.60803764656071, 395.52062079250936), () => {
+		switchPanorama('17poolviewsadaanan.jpg');
+	});
+}
+
+			if (panorama === '12sunflowerhouseandwellnesscenter.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(-389.08609484959663, -87.25986418174082, 17.158295171619343), () => {
+		switchPanorama('33sunflowerhousesala.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-236.57678209881306, -54.095944181067956, 317.2316183047975), () => {
+		switchPanorama('10sunflowerhouse.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-42.561960133204586, -56.30592642621858, -393.39490620780543), () => {
+		switchPanorama('51wellnesscenter.jpg');
+	});
+}
+
+			if (panorama === '13backside.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(120.99797898079001, -59.18024075321283, 376.3982315527416), () => {
+		switchPanorama('11backresortandcr.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-319.26366003123127, -59.33581493584525, 233.20481770084717), () => {
+		switchPanorama('14backpool.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-395.08215057712084, -61.51724183990672, -1.665755201367605), () => {
+		switchPanorama('16backminicottages.jpg');
+	});
+}
+
+			if (panorama === '14backpool.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(-351.6057279335354, -109.34876491393672, -155.05793965258988), () => {
+		switchPanorama('15backpoolview.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-173.47004844289967, -81.48736956410741, -349.9647907983748), () => {
+		switchPanorama('16backminicottages.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(390.01241942533056, -82.82470616827274, -15.963405690718485), () => {
+		switchPanorama('13backside.jpg');
+	});
+}
+
+			if (panorama === '15backpoolview.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(-398.55518800201384, -6.667977068633421, -18.98680298513224), () => {
+		switchPanorama('14backpool.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-30.273436800696707, -18.115240208314003, 397.5172976956822), () => {
+		switchPanorama('16backminicottages.jpg');
+	});
+}
+
+			if (panorama === '16backminicottages.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(8.088487660151777, -17.525056596995444, -398.7258277901803), () => {
+		switchPanorama('13backside.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(183.93824758887433, -18.323812656883753, -353.55353222687495), () => {
+		switchPanorama('14backpool.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(393.2688792074785, -51.76306954280934, 46.38767468442593), () => {
+		switchPanorama('15backpoolview.jpg');
+	});
+}
+
+			if (panorama === '33sunflowerhousesala.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(67.97811592327238, -190.7909975674623, 344.2392474971268), () => {
+		switchPanorama('12sunflowerhouseandwellnesscenter.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(242.5229357874336, -151.33727675622276, -279.1906154456716), () => {
+		switchPanorama('34sunflowerhousecenter.jpg');
+	});
+}
+
+			if (panorama === '51wellnesscenter.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(388.09305115243313, -87.25947121244488, -37.923197592763245), () => {
+		switchPanorama('12sunflowerhouseandwellnesscenter.jpg');
+	});
+}
+
+			if (panorama === '17poolviewsadaanan.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(205.73737145714352, -26.24604748611137, 341.30998508474204), () => {
+		switchPanorama('14backpool.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(391.3520791647428, -49.094081610282274, -59.97740788627316), () => {
+		switchPanorama('15backpoolview.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(23.050518297824894, -9.079347135724188, 398.2360330674327), () => {
+		switchPanorama('11backresortandcr.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-1.7968063914771983, -31.8933134487201, -398.5848419154767), () => {
+		switchPanorama('18farmentrance.jpg');
+	});
+}
+
+			if (panorama === '18farmentrance.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(355.9966923652707, -36.07963378417472, -176.8727815233643), () => {
+		switchPanorama('17poolviewsadaanan.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-114.96515721761713, -75.80132409326696, -374.7727512733853), () => {
+		switchPanorama('19farmentranceotherside.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-331.0725760412543, -56.14955767343598, 215.64136536013976), () => {
+		switchPanorama('20entranceandjoybridge.jpg');
+	});
+}
+
+			if (panorama === '19farmentranceotherside.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(36.34824538661482, -69.75661266929004, 391.6296344031122), () => {
+		switchPanorama('18farmentrance.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-303.58707958771913, -87.21097965217331, -243.95545693120656), () => {
+		switchPanorama('20othersidepajoybridge.jpg');
+	});
+}
+
+			if (panorama === '20entranceandjoybridge.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(1.7962948217623307, -32.782380497162364, -398.4713394854347), () => {
+		switchPanorama('18farmentrance.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-396.8228438798068, -37.128515770387004, 20.616240719086523), () => {
+		switchPanorama('21bridge.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-17.940293637301636, -0.7296745823662227, 398.88962860475806), () => {
+		switchPanorama('22papaya.jpg');
+	});
+}
+
+			if (panorama === '20othersidepajoybridge.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(-391.439955190429, -26.649835374572454, -74.5207314335338), () => {
+		switchPanorama('19farmentranceotherside.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(398.19568343577953, -27.171427483296007, 11.31402012948139), () => {
+		switchPanorama('21bridgeatsunflowerfarmentrance.jpg');
+	});
+}
+
+			if (panorama === '21bridgeatsunflowerfarmentrance.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(84.61286333142141, -60.46205317539096, 385.98599594424604), () => {
+		switchPanorama('20othersidepajoybridge.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-102.60454227729032, -38.63972988424784, -383.68856212426886), () => {
+		switchPanorama('24sunflowerfarmcenter.jpg');
+	});
+}
+
+			if (panorama === '22papaya.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(-23.442474381717822, -31.763103957142373, -397.3545654624302), () => {
+		switchPanorama('20entranceandjoybridge.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-2.153805385204436, -19.783720803705496, 399.01115017104513), () => {
+		switchPanorama('23entrancesasunflower.jpg');
+	});
+}
+
+			if (panorama === '23entrancesasunflower.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(34.0366813483168, -74.43398307329927, 390.7815607753411), () => {
+		switchPanorama('24sunflowerfarmcenter.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(354.56819093754905, -22.186235061438918, 181.630376407176), () => {
+		switchPanorama('25sunflowertocampsite.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(398.49695707683475, -29.980340213220913, -4.8781563433471415), () => {
+		switchPanorama('26papuntangduloatcampsite.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-398.8867943154993, -5.01838116248521, 14.327634920219493), () => {
+		switchPanorama('22papaya.jpg');
+	});
+}
+
+			if (panorama === '24sunflowerfarmcenter.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(-83.67470841195608, -29.28083284914107, 389.90272294948556), () => {
+		switchPanorama('25sunflowertocampsite.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-91.89932847626355, -29.78964439203547, -387.59542263434264), () => {
+		switchPanorama('21bridgeatsunflowerfarmentrance.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(393.5217256372467, -65.4171696018893, 15.88633807673806), () => {
+		switchPanorama('23entrancesasunflower.jpg');
+	});
+}
+
+			if (panorama === '25sunflowertocampsite.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(-398.1433821362791, -30.597364832905914, -10.396682784969364), () => {
+		switchPanorama('24sunflowerfarmcenter.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-364.17719325625245, -38.664248492159444, -159.86287853136196), () => {
+		switchPanorama('23entrancesasunflower.jpg');
+	});
+}
+
+			if (panorama === '26papuntangduloatcampsite.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(5.092398798245229, -52.394351608731064, -395.88655599199933), () => {
+		switchPanorama('23entrancesasunflower.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-32.634941277636145, -47.59024549302916, 394.96966962140846), () => {
+		switchPanorama('26papuntangduloatcampsite.jpg');
+	});
+}
+
+			if (panorama === '27duloatcampsiteentrance.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(-395.3757423992473, -47.71510327858903, 23.80521726777833), () => {
+		switchPanorama('26papuntangduloatcampsite.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(81.78081297250446, -43.13611298094295, 388.74055509067097), () => {
+		switchPanorama('29campsite2.jpg');
+	});
+}
+
+			if (panorama === '28campsite1.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(368.3144312419736, -20.122024687540275, 152.46087219697588), () => {
+		switchPanorama('31campsite4.jpg');
+	});
+}
+
+			if (panorama === '29campsite2.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(-385.4574395481892, -69.06185871344223, 79.60351417894763), () => {
+		switchPanorama('27duloatcampsiteentrance.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(9.242127578189574, -40.37163459416265, 397.06048183368176), () => {
+		switchPanorama('25sunflowertocampsite.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(2.999092146644816, -74.98839236912795, -392.33652916454264), () => {
+		switchPanorama('30campsite3.jpg');
+	});
+}
+
+			if (panorama === '30campsite3.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(-83.04454135215238, -75.87386040339804, -383.3650057046175), () => {
+		switchPanorama('29campsite2.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(242.8287759654353, -29.221657661383503, -315.7236675342642), () => {
+		switchPanorama('27duloatcampsiteentrance.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(35.67475641228329, -48.11601463689997, 394.77434896130643), () => {
+		switchPanorama('31campsite4.jpg');
+	});
+}
+
+			if (panorama === '31campsite4.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(-389.01802557556897, -88.81917015672829, -13.010028168545443), () => {
+		switchPanorama('32pavillion2.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-84.37655784632469, -56.15991220497108, 386.54766708576517), () => {
+		switchPanorama('28campsite1.jpg');
+	});
+}
+
+			if (panorama === '32pavillion2.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(181.14408945296282, -139.0123752957594, 327.53033672184904), () => {
+		switchPanorama('31campsite4.jpg');
+	});
+}
+
+			if (panorama === '21bridge.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(384.3527241374929, -105.98126076763194, -15.95192770834879), () => {
+		switchPanorama('20entranceandjoybridge.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-116.24230202151801, -42.09259972749869, 379.66126944703467), () => {
+		switchPanorama('21bridgeatsunflowerfarmentrance.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-95.40028965321197, -45.531956425396665, -384.7719532664319), () => {
+		switchPanorama('19farmentranceotherside.jpg');
+	});
+}
+
+			if (panorama === '34sunflowerhousecenter.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(-370.42645839367424, -142.07430391438342, -45.295555150598155), () => {
+		switchPanorama('33sunflowerhousesala.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(270.6917982189166, -106.34618559776882, -273.14801345234434), () => {
+		switchPanorama('35sunflowerhousekusina.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-200.39380325519846, -267.1218561152308, 219.41546972426931), () => {
+		switchPanorama('37sunflowerhouseroom1ulit.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(37.797536711722, -140.82308804832962, 371.9941589633612), () => {
+		switchPanorama('38sunflowerhouselobbypapuntangroom2.jpg');
+	});
+}
+
+			if (panorama === '35sunflowerhousekusina.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(-297.70221401130664, -111.3026318755473, -241.21279260526214), () => {
+		switchPanorama('34sunflowerhousecenter.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-332.8092723856351, -147.062293569768, -164.21750843299276), () => {
+		switchPanorama('36sunflowerhousefunctionhall.jpg');
+	});
+}
+
+			if (panorama === '36sunflowerhousefunctionhall.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(-274.3790328144876, -98.736064629317, -272.5339662517376), () => {
+		switchPanorama('35sunflowerhousekusina.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-314.77871665993143, -67.64277425273514, -236.4216143400501), () => {
+		switchPanorama('33sunflowerhousesala.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(379.66112476754364, -125.09747410620062, 3.0251382038884267), () => {
+		switchPanorama('13backside.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-230.5296612300567, -133.4626469774648, 297.25579580270056), () => {
+		switchPanorama('41sunflowerhouseroom4ulit.jpg');
+	});
+	addHotspot('images/chevronleft.png', new THREE.Vector3(-108.4528216853101, -150.57598274482444, 353.8607687174278), () => {
+		switchPanorama('42sunflowerhouseroom5.jpg');
+	});
+}
+
+			if (panorama === '37sunflowerhouseroom1ulit.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(198.7529094035732, -294.17145049142675, 183.1798009493573), () => {
+		switchPanorama('34sunflowerhousecenter.jpg');
+	});
+}
+
+			if (panorama === '38sunflowerhouselobbypapuntangroom2.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(-157.4330029389963, -316.79940774777816, -185.50011817054965), () => {
+		switchPanorama('39sunflowerhouseroom2.jpg');
+	});
+	addHotspot('images/chevrontilted.png', new THREE.Vector3(-377.4673427411711, -119.77013759399286, -51.268306929781076), () => {
+		switchPanorama('40sunflowerhouseroom3.jpg');
+	});
+}
+
+			if (panorama === '39sunflowerhouseroom2.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(224.67492645518362, -327.48118839584583, 44.48041846670139), () => {
+		switchPanorama('38sunflowerhouselobbypapuntangroom2.jpg');
+	});
+}
+
+			if (panorama === '40sunflowerhouseroom3.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(159.526647590339, -141.34648775905086, 337.5700830722742), () => {
+		switchPanorama('38sunflowerhouselobbypapuntangroom2.jpg');
+	});
+}
+
+			if (panorama === '41sunflowerhouseroom4ulit.jpg') {
+				addHotspot('images/chevrontilted.png', new THREE.Vector3(-264.1033209075996, -196.20990968493587, 226.14922674078693), () => {
+		switchPanorama('38sunflowerhouselobbypapuntangroom2.jpg');
+	});
+}
+
+			if (panorama === '42sunflowerhouseroom5.jpg') {
+			}
+
+			if (panorama === '43sunflowerhouselobby2ndfloor.jpg') {
+			}
+
+			if (panorama === '44sunflowerhouseroom6.jpg') {
+			}
+
+			if (panorama === '45sunflowerhouseroom7.jpg') {
+			}
+
+			if (panorama === '46sunflowerhouseroom8siguro.jpg') {
+			}
+
+			if (panorama === '47sunflowerhouseroom9siguro.jpg') {
+			}
+
+			if (panorama === '48sunflowerhouselobby2ndfloorpart2retake.jpg') {
+			}
+
+			if (panorama === '49sunflowerhouseroom11ulit.jpg') {
+			}
+
+			if (panorama === '50sunflowerhousebalconyview.jpg') {
+			}
+
+			if (panorama === '52room10.jpg') {
+			}
+
+/*panoramas-end*/
+				
+			}
+
+			function switchPanorama(panoramaName) {
+				overlay.style.pointerEvents = 'auto';
+				overlay.style.opacity = '1';
+				overlay.textContent = 'Loading...';
+
+				const newTexture = new THREE.TextureLoader().load(`panoramas/${panoramaName}`, (tex) => {
+					panoramaMesh.material.map = tex;
+					panoramaMesh.material.needsUpdate = true;
+					currentPanorama = panoramaName;
+					loadHotspotsFor(currentPanorama);
+					overlay.style.opacity = '0';
+					overlay.style.pointerEvents = 'none';
+				}, (xhr) => {
+					const progress = (xhr.loaded / xhr.total) * 100;
+					overlay.textContent = `Loading... ${progress.toFixed(0)}%`;
+				});
+			}
+
+			function addHotspot(imageUrl, position, onClickCallback) {
+				const textureLoader = new THREE.TextureLoader();
+				textureLoader.load(imageUrl, (texture) => {
+					const material = new THREE.SpriteMaterial({ map: texture });
+					const sprite = new THREE.Sprite(material);
+					sprite.position.copy(position);
+					sprite.scale.set(40, 40, 1);
+					sprite.userData = {
+						onClick: onClickCallback,
+						targetScale: 40
+					};
+					spriteHotspots.push(sprite);
+					scene.add(sprite);
+				});
+			}
+
+			function clearHotspots() {
+				spriteHotspots.forEach(sprite => scene.remove(sprite));
+				spriteHotspots = [];
+			}
+
+			function onPointerMove(event) {
+				mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+				mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+				raycaster.setFromCamera(mouse, camera);
+				const intersects = raycaster.intersectObjects(spriteHotspots);
+
+				spriteHotspots.forEach(sprite => {
+					sprite.userData.targetScale = 40;
+				});
+
+				if (intersects.length > 0) {
+					intersects[0].object.userData.targetScale = 50;
+				}
+			}
+
+			function onWindowResize() {
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+				renderer.setSize(window.innerWidth, window.innerHeight);
+			}
+
+			function animate() {
+				requestAnimationFrame(animate);
+
+				// Smooth transition FOV
+				camera.fov += (targetFov - camera.fov) * 0.1;
+				camera.updateProjectionMatrix();
+
+				// Smooth hotspot scale animation
+				spriteHotspots.forEach(sprite => {
+					const currentScale = sprite.scale.x;
+					const target = sprite.userData.targetScale || 40;
+					const newScale = THREE.MathUtils.lerp(currentScale, target, 0.1);
+					sprite.scale.set(newScale, newScale, 1);
+				});
+
+				controls.update();
+				renderer.render(scene, camera);
+			}
+
+			// Klik pada hotspot
+			document.addEventListener('click', function (event) {
+				const mouseClick = new THREE.Vector2(
+					(event.clientX / window.innerWidth) * 2 - 1,
+					-(event.clientY / window.innerHeight) * 2 + 1
+				);
+
+				const clickRaycaster = new THREE.Raycaster();
+				clickRaycaster.setFromCamera(mouseClick, camera);
+				const intersects = clickRaycaster.intersectObjects(spriteHotspots);
+
+				if (intersects.length > 0) {
+					const clicked = intersects[0].object;
+					if (clicked.userData.onClick) clicked.userData.onClick();
+				}
+			});
+			
+			
+			
+            
+			
+			
+			function hideTemp(){
+				$("#tmp").fadeOut();
+				setTimeout(function(){
+					$("#tmpcontent").html("");
+				},1000);
+			}
+			
+			function showMedia(type, content){
+				switch(type){
+					case 1 :
+						//Image
+						$("#tmpcontent").html("<img src='"+content+"' style='width: 100%;'>");
+						$("#tmp").fadeIn();
+						break;
+					case 2 :
+						//Video
+						$("#tmpcontent").html("<video id='webvideo' controls autoplay style='width: 100%; height: 100%;'><source src='" +content+ "' type='video/mp4'> Your browser does not support the video tag. </video>");
+						$("#tmp").fadeIn();
+						break;
+					case 3 :
+						//Audio
+						$("#tmpcontent").html("<audio controls style='width: 100%;'><source src='"+content+"' type='audio/ogg'>Your browser does not support the audio tag.</audio>");
+						$("#tmp").fadeIn();
+						break;
+					case 4 :
+						//PDF
+						$("#tmpcontent").html("<iframe src='pdfjs/web/viewer.html?file=../../"+content+"' style='width: 100%; height: 99%;'></iframe>");
+						$("#tmp").fadeIn();
+						break;
+				}
+			}
+			
+			
+			/*customjs*/
+
+/*customjs-end*/
+        </script>
+	</body>
+</html>
