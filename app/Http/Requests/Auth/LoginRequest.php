@@ -50,12 +50,12 @@ class LoginRequest extends FormRequest
             if ($userExists) {
                 // Kung existing ang email pero mali password, sa password field mag-error
                 throw ValidationException::withMessages([
-                    'password' => 'The provided password is incorrect.',
+                    'password' => 'Incorrect Password. Please Try Again.',
                 ]);
             } else {
                 // Kung hindi existing ang email, sa email field mag-error
                 throw ValidationException::withMessages([
-                    'email' => 'These credentials do not match our records.',
+                    'email' => 'Invalid credentials .',
                 ]);
             }
         }
