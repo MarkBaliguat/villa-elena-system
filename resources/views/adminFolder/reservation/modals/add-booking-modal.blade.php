@@ -132,7 +132,12 @@
                 </button>
                 <button type="submit" id="submitBookingBtn"
                         class="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed">
-                    Create Booking
+                    <!-- Loading spinner - hidden by default -->
+                    <span id="submitText">Create Booking</span>
+                    <span id="submitSpinner" class="hidden">
+                        <i class="fas fa-spinner fa-spin mr-2"></i>
+                        Creating...
+                    </span>
                 </button>
             </div>
         </form>
@@ -277,6 +282,32 @@ function validateFormEmail() {
     return validation;
 }
 
+// Show loading state on submit button
+function showSubmitLoading() {
+    const submitBtn = document.getElementById('submitBookingBtn');
+    const submitText = document.getElementById('submitText');
+    const submitSpinner = document.getElementById('submitSpinner');
+    
+    if (submitBtn && submitText && submitSpinner) {
+        submitBtn.disabled = true;
+        submitText.classList.add('hidden');
+        submitSpinner.classList.remove('hidden');
+    }
+}
+
+// Hide loading state on submit button
+function hideSubmitLoading() {
+    const submitBtn = document.getElementById('submitBookingBtn');
+    const submitText = document.getElementById('submitText');
+    const submitSpinner = document.getElementById('submitSpinner');
+    
+    if (submitBtn && submitText && submitSpinner) {
+        submitBtn.disabled = false;
+        submitText.classList.remove('hidden');
+        submitSpinner.classList.add('hidden');
+    }
+}
+
 // Modal functions
 function openModal() {
     document.getElementById('addBookingModal').classList.remove('hidden');
@@ -305,6 +336,9 @@ function closeModal() {
     
     // Clear email error
     clearEmailError();
+    
+    // Reset button loading state
+    hideSubmitLoading();
     
     // Reset special event conflict flag
     hasSpecialEventConflict = false;
@@ -854,7 +888,7 @@ document.getElementById('unit_type').addEventListener('change', function() {
 });
 
 // Create booking
-document.getElementById('bookingForm').addEventListener('submit', function(e) {
+document.getElementById('bookingForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
     // Validate email first
@@ -926,28 +960,36 @@ document.getElementById('bookingForm').addEventListener('submit', function(e) {
         data.email = data.email.toLowerCase().trim();
     }
 
-    fetch('/admin/bookings', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': csrfToken
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Booking response:', data);
-        if (data.success) {
+    // Show loading state
+    showSubmitLoading();
+
+    try {
+        const response = await fetch('/admin/bookings', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        console.log('Booking response:', result);
+        
+        if (result.success) {
             alert('Booking created successfully!');
             closeModal();
             loadBookings(getCurrentStatus(), getCurrentSearch(), currentPage);
         } else {
-            alert('Error: ' + (data.message || 'Failed to create booking'));
+            alert('Error: ' + (result.message || 'Failed to create booking'));
+            // Hide loading state on error
+            hideSubmitLoading();
         }
-    })
-    .catch(error => {
+    } catch (error) {
         console.error('Error:', error);
         alert('Error creating booking');
-    });
+        // Hide loading state on error
+        hideSubmitLoading();
+    }
 });
 </script>

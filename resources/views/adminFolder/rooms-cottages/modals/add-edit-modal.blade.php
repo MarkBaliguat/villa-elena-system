@@ -104,8 +104,12 @@
                 <button type="button" onclick="closeModal()" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 rounded-lg font-medium transition">
                     Cancel
                 </button>
-                <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium transition">
-                    Save
+                <button type="submit" id="submitUnitBtn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium transition disabled:bg-gray-400 disabled:cursor-not-allowed">
+                    <span id="submitUnitText">Save</span>
+                    <span id="submitUnitSpinner" class="hidden">
+                        <i class="fas fa-spinner fa-spin mr-2"></i>
+                        Saving...
+                    </span>
                 </button>
             </div>
         </form>
@@ -416,36 +420,32 @@ function resetImageSections() {
 }
 
 /**
- * Sets the submit button to loading state
+ * Shows loading state on submit button
  */
-function setButtonLoading(button, isLoading) {
-    if (isLoading) {
-        button.disabled = true;
-        button.dataset.originalText = button.innerHTML;
-        button.innerHTML = `
-            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Saving...
-        `;
-        
-        // Disable cancel button too
-        const cancelBtn = document.querySelector('#unitModal button[onclick="closeModal()"]');
-        if (cancelBtn) {
-            cancelBtn.disabled = true;
-            cancelBtn.classList.add('opacity-50', 'cursor-not-allowed');
-        }
-    } else {
-        button.disabled = false;
-        button.innerHTML = button.dataset.originalText || 'Save';
-        
-        // Re-enable cancel button
-        const cancelBtn = document.querySelector('#unitModal button[onclick="closeModal()"]');
-        if (cancelBtn) {
-            cancelBtn.disabled = false;
-            cancelBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-        }
+function showSubmitLoading() {
+    const submitBtn = document.getElementById('submitUnitBtn');
+    const submitText = document.getElementById('submitUnitText');
+    const submitSpinner = document.getElementById('submitUnitSpinner');
+    
+    if (submitBtn && submitText && submitSpinner) {
+        submitBtn.disabled = true;
+        submitText.classList.add('hidden');
+        submitSpinner.classList.remove('hidden');
+    }
+}
+
+/**
+ * Hides loading state on submit button
+ */
+function hideSubmitLoading() {
+    const submitBtn = document.getElementById('submitUnitBtn');
+    const submitText = document.getElementById('submitUnitText');
+    const submitSpinner = document.getElementById('submitUnitSpinner');
+    
+    if (submitBtn && submitText && submitSpinner) {
+        submitBtn.disabled = false;
+        submitText.classList.remove('hidden');
+        submitSpinner.classList.add('hidden');
     }
 }
 
@@ -453,10 +453,7 @@ function setButtonLoading(button, isLoading) {
  * Resets the submit button to its original state
  */
 function resetSubmitButton() {
-    const submitBtn = document.querySelector('#unitForm button[type="submit"]');
-    if (submitBtn) {
-        setButtonLoading(submitBtn, false);
-    }
+    hideSubmitLoading();
 }
 
 /**
@@ -473,9 +470,7 @@ function closeModal() {
  * Handles form submission with loading state
  */
 function handleFormSubmit(event) {
-    const submitBtn = event.target.querySelector('button[type="submit"]');
-    setButtonLoading(submitBtn, true);
-    
+    showSubmitLoading();
     // Note: The form will submit normally, and the page will reload
     // The loading state will be visible until the page reloads
 }

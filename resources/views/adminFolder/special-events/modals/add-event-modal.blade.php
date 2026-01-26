@@ -141,7 +141,11 @@
                 </button>
                 <button type="submit" id="submitButton"
                         class="flex-1 px-4 py-2.5 bg-violet-600 text-white rounded-lg font-medium hover:bg-violet-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed">
-                    Create Special Event
+                    <span id="submitText">Create Special Event</span>
+                    <span id="submitSpinner" class="hidden">
+                        <i class="fas fa-spinner fa-spin mr-2"></i>
+                        Creating...
+                    </span>
                 </button>
             </div>
         </form>
@@ -150,10 +154,36 @@
 
 <script>
 // ============================================
-// ENHANCED SPECIAL EVENTS BOOKING WITH MULTIPLE EVENTS ALLOWED
+// ENHANCED SPECIAL EVENTS BOOKING WITH LOADING BUTTON
 // ============================================
 
 let currentDateConflict = false;
+
+// Show loading state on submit button
+function showSubmitLoading() {
+    const submitBtn = document.getElementById('submitButton');
+    const submitText = document.getElementById('submitText');
+    const submitSpinner = document.getElementById('submitSpinner');
+    
+    if (submitBtn && submitText && submitSpinner) {
+        submitBtn.disabled = true;
+        submitText.classList.add('hidden');
+        submitSpinner.classList.remove('hidden');
+    }
+}
+
+// Hide loading state on submit button
+function hideSubmitLoading() {
+    const submitBtn = document.getElementById('submitButton');
+    const submitText = document.getElementById('submitText');
+    const submitSpinner = document.getElementById('submitSpinner');
+    
+    if (submitBtn && submitText && submitSpinner) {
+        submitBtn.disabled = false;
+        submitText.classList.remove('hidden');
+        submitSpinner.classList.add('hidden');
+    }
+}
 
 // Email validation function
 function validateEmail(email) {
@@ -320,6 +350,9 @@ function closeModal() {
     // Clear email error
     clearEmailError();
     
+    // Reset loading button state
+    hideSubmitLoading();
+    
     const phoneInput = document.getElementById('phone');
     if (phoneInput) {
         phoneInput.classList.remove('border-red-500', 'border-green-500');
@@ -358,9 +391,6 @@ function checkDateAvailability(date) {
                 if (data.has_conflict) {
                     showDateConflictWarning(data.message);
                     currentDateConflict = true;
-                    
-                    // **CHANGE**: Hindi na dinidisable ang submit button
-                    // document.getElementById('submitButton').disabled = true;
                     
                     // Clear unit selection pero HINDI disable dropdown
                     document.getElementById('unit_id').innerHTML = '<option value="">Select an event venue</option>';
@@ -439,7 +469,6 @@ function loadSpecialEventUnits() {
                 unitSelect.innerHTML = '<option value="">Select an event venue</option>';
                 
                 if (data.data.length === 0) {
-                    // **CHANGE**: Hindi na nag-che-check ng "has_special_event_conflict"
                     unitSelect.innerHTML = '<option value="">No available event venues for selected date</option>';
                     availabilityStatus.innerHTML = '<div class="text-yellow-600 flex items-center"><i class="fas fa-info-circle mr-1"></i> No venues available for selected date</div>';
                 } else {
@@ -568,11 +597,15 @@ document.getElementById('bookingForm').addEventListener('submit', function(e) {
         return;
     }
     
+    // Show loading state
+    showSubmitLoading();
+    
     // Final unit availability check
     fetch(`/admin/special-events/check-date-availability?checkin_date=${checkinDate}&unit_id=${unitId}`)
         .then(response => response.json())
         .then(data => {
             if (data.success && data.has_conflict) {
+                hideSubmitLoading();
                 alert('Cannot create special event: ' + data.message);
                 return;
             }
@@ -588,6 +621,7 @@ document.getElementById('bookingForm').addEventListener('submit', function(e) {
 
 function submitBookingForm() {
     if (!validateFormPhoneNumbers()) {
+        hideSubmitLoading();
         alert('Please fix the phone number validation errors before submitting.');
         return;
     }
@@ -599,11 +633,13 @@ function submitBookingForm() {
 
     // Additional validation
     if (!data.event_name) {
+        hideSubmitLoading();
         alert('Please select an event type');
         return;
     }
 
     if (data.event_start_time >= data.event_end_time) {
+        hideSubmitLoading();
         alert('Event end time must be after start time');
         return;
     }
@@ -635,6 +671,7 @@ function submitBookingForm() {
             closeModal();
             loadBookings(getCurrentStatus(), getCurrentSearch(), currentPage);
         } else {
+            hideSubmitLoading();
             let errorMessage = 'Failed to create special event';
             if (data.message) {
                 errorMessage = data.message;
@@ -646,6 +683,7 @@ function submitBookingForm() {
         }
     })
     .catch(error => {
+        hideSubmitLoading();
         console.error('Error:', error);
         alert('Error creating special event: ' + error.message);
     });
