@@ -251,7 +251,33 @@ class UnitsController extends Controller
             ], 500);
         }
     }
+    /**
+     * Unblock multiple units
+     */
+    public function unblockDates(Request $request)
+    {
+        $request->validate([
+            'unitIDs' => 'required|array',
+            'unitIDs.*' => 'exists:units,unitID',
+        ]);
 
+        try {
+            $updatedCount = Unit::whereIn('unitID', $request->unitIDs)->update([
+                'unitStatus' => 'available',
+                'blockStartDate' => null,
+                'blockEndDate' => null,
+                'blockReason' => null,
+            ]);
+
+            return redirect()->route('admin.rooms-cottages')
+                ->with('success', "{$updatedCount} unit(s) unblocked successfully!");
+                
+        } catch (\Exception $e) {
+            Log::error('Error unblocking units: ' . $e->getMessage());
+            return redirect()->route('admin.rooms-cottages')
+                ->with('error', 'Error unblocking units: ' . $e->getMessage());
+        }
+    }
     /**
      * Block multiple units with date range
      */
