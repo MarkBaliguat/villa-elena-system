@@ -108,6 +108,7 @@ Route::middleware(['auth', 'role:manager,staff'])->prefix('admin')->group(functi
     
     // Block dates route - accessible to both manager and staff
     Route::post('/units/block-dates', [UnitsController::class, 'blockDates'])->name('admin.units.block-dates');
+    Route::post('/admin/units/unblock-dates', [UnitsController::class, 'unblockDates'])->name('admin.units.unblock-dates');
     
     // Manager-only CRUD operations
     Route::middleware(['role:manager'])->group(function () {
