@@ -114,14 +114,13 @@
 
 <script>
 // ============================================
-// ADD/EDIT MODAL FUNCTIONS
+// ADD/EDIT MODAL FUNCTIONS WITH LOADING STATES
 // ============================================
 
 let currentEditingUnit = null;
 
 /**
  * Toggles special event field based on unit type
- * @param {string} unitType - Selected unit type
  */
 function toggleSpecialEventField(unitType) {
     const specialEventField = document.getElementById('specialEventField');
@@ -129,7 +128,6 @@ function toggleSpecialEventField(unitType) {
         specialEventField.classList.remove('hidden');
     } else {
         specialEventField.classList.add('hidden');
-        // Uncheck the checkbox when hidden
         document.getElementById('for_special_events').checked = false;
     }
 }
@@ -144,19 +142,14 @@ function openAddModal() {
     document.getElementById('methodField').innerHTML = '';
     document.getElementById('unitForm').reset();
     document.getElementById('blockDatesSection').classList.add('hidden');
-    
-    // Reset special event field
     document.getElementById('specialEventField').classList.add('hidden');
-    
-    // Reset image sections
     resetImageSections();
-    
+    resetSubmitButton();
     document.getElementById('unitModal').classList.remove('hidden');
 }
 
 /**
  * Opens the modal for editing an existing unit
- * @param {number} unitId - The ID of the unit to edit
  */
 function openEditModal(unitId) {
     console.log('Opening edit modal for unit ID:', unitId);
@@ -164,7 +157,6 @@ function openEditModal(unitId) {
     
     const editUrl = "{{ route('admin.units.edit', ':id') }}".replace(':id', unitId);
     
-    // Fetch unit data via AJAX
     fetch(editUrl, {
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
@@ -187,17 +179,11 @@ function openEditModal(unitId) {
         document.getElementById('unitForm').method = 'POST';
         document.getElementById('methodField').innerHTML = '<input type="hidden" name="_method" value="PUT">';
         
-        // Fill form with unit data
         populateFormFields(unit);
-        
-        // Display existing images
         displayExistingImages(unit.images || []);
-        
-        // Show/hide special event field
         toggleSpecialEventField(unit.unitType || 'room');
-        
-        // Show/hide block dates section
         toggleBlockDates(unit.unitStatus || 'available');
+        resetSubmitButton();
         
         document.getElementById('unitModal').classList.remove('hidden');
     })
@@ -209,7 +195,6 @@ function openEditModal(unitId) {
 
 /**
  * Populates form fields with unit data
- * @param {object} unit - Unit data object
  */
 function populateFormFields(unit) {
     document.querySelector('input[name="unitName"]').value = unit.unitName || '';
@@ -218,11 +203,7 @@ function populateFormFields(unit) {
     document.querySelector('input[name="capacity"]').value = unit.capacity || 1;
     document.querySelector('input[name="unitRatePrice"]').value = unit.unitRatePrice || 0;
     document.querySelector('select[name="unitStatus"]').value = unit.unitStatus || 'available';
-    
-    // Fill special events field
     document.querySelector('input[name="for_special_events"]').checked = unit.for_special_events || false;
-    
-    // Fill block dates if they exist
     document.querySelector('input[name="blockStartDate"]').value = unit.blockStartDate || '';
     document.querySelector('input[name="blockEndDate"]').value = unit.blockEndDate || '';
     document.querySelector('textarea[name="blockReason"]').value = unit.blockReason || '';
@@ -230,7 +211,6 @@ function populateFormFields(unit) {
 
 /**
  * Displays existing images in the edit modal
- * @param {array} images - Array of image paths
  */
 function displayExistingImages(images) {
     const existingImages = document.getElementById('existingImages');
@@ -251,9 +231,6 @@ function displayExistingImages(images) {
 
 /**
  * Creates an image container for existing images
- * @param {string} image - Image path
- * @param {number} index - Image index
- * @returns {HTMLElement} Image container element
  */
 function createExistingImageContainer(image, index) {
     const imgContainer = document.createElement('div');
@@ -277,9 +254,6 @@ function createExistingImageContainer(image, index) {
 
 /**
  * Creates delete button for existing images
- * @param {string} image - Image path
- * @param {HTMLElement} imgContainer - Parent container
- * @returns {HTMLElement} Delete button
  */
 function createImageDeleteButton(image, imgContainer) {
     const removeBtn = document.createElement('button');
@@ -296,8 +270,6 @@ function createImageDeleteButton(image, imgContainer) {
 
 /**
  * Handles image deletion
- * @param {string} image - Image path
- * @param {HTMLElement} imgContainer - Container to remove
  */
 function handleImageDelete(image, imgContainer) {
     if (!confirm('Are you sure you want to delete this image?')) {
@@ -372,17 +344,13 @@ function setupImagePreview() {
 
 /**
  * Validates image file
- * @param {File} file - File to validate
- * @returns {boolean} True if valid
  */
 function validateImageFile(file) {
-    // Check file size (2MB limit)
     if (file.size > 2 * 1024 * 1024) {
         alert('File ' + file.name + ' is too large. Maximum size is 2MB.');
         return false;
     }
     
-    // Check file type
     if (!file.type.match('image.*')) {
         alert('File ' + file.name + ' is not an image.');
         return false;
@@ -393,10 +361,6 @@ function validateImageFile(file) {
 
 /**
  * Creates preview container for new image
- * @param {string} src - Image source
- * @param {number} index - Image index
- * @param {string} fileName - File name
- * @returns {HTMLElement} Preview container
  */
 function createPreviewContainer(src, index, fileName) {
     const imgContainer = document.createElement('div');
@@ -430,7 +394,6 @@ function createPreviewContainer(src, index, fileName) {
 
 /**
  * Toggles block dates section visibility
- * @param {string} status - Unit status
  */
 function toggleBlockDates(status) {
     const blockDatesSection = document.getElementById('blockDatesSection');
@@ -453,17 +416,79 @@ function resetImageSections() {
 }
 
 /**
+ * Sets the submit button to loading state
+ */
+function setButtonLoading(button, isLoading) {
+    if (isLoading) {
+        button.disabled = true;
+        button.dataset.originalText = button.innerHTML;
+        button.innerHTML = `
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Saving...
+        `;
+        
+        // Disable cancel button too
+        const cancelBtn = document.querySelector('#unitModal button[onclick="closeModal()"]');
+        if (cancelBtn) {
+            cancelBtn.disabled = true;
+            cancelBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+    } else {
+        button.disabled = false;
+        button.innerHTML = button.dataset.originalText || 'Save';
+        
+        // Re-enable cancel button
+        const cancelBtn = document.querySelector('#unitModal button[onclick="closeModal()"]');
+        if (cancelBtn) {
+            cancelBtn.disabled = false;
+            cancelBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+    }
+}
+
+/**
+ * Resets the submit button to its original state
+ */
+function resetSubmitButton() {
+    const submitBtn = document.querySelector('#unitForm button[type="submit"]');
+    if (submitBtn) {
+        setButtonLoading(submitBtn, false);
+    }
+}
+
+/**
  * Closes the unit modal
  */
 function closeModal() {
     document.getElementById('unitModal').classList.add('hidden');
     resetImageSections();
+    resetSubmitButton();
     currentEditingUnit = null;
+}
+
+/**
+ * Handles form submission with loading state
+ */
+function handleFormSubmit(event) {
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    setButtonLoading(submitBtn, true);
+    
+    // Note: The form will submit normally, and the page will reload
+    // The loading state will be visible until the page reloads
 }
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
     setupImagePreview();
+    
+    // Add form submit handler
+    const unitForm = document.getElementById('unitForm');
+    if (unitForm) {
+        unitForm.addEventListener('submit', handleFormSubmit);
+    }
     
     // Close modal when clicking outside
     document.getElementById('unitModal')?.addEventListener('click', function(e) {
