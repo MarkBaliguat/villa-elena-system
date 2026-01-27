@@ -144,7 +144,7 @@
         
         /* About Section */
         .about-section {
-            background: linear-gradient(135deg, #ffffff 0%, #FFF9E6 100%);
+            background: linear-gradient(to bottom, #FFF9E6 0%,#FFF9E6 70%,#ffffff 100%);
             position: relative;
             overflow: hidden;
             padding: 100px 0;
@@ -276,7 +276,8 @@
         /* Facilities Section */
         .facilities-section {
             padding: 100px 0;
-            background: linear-gradient(135deg, #FFF9E6 0%, #FFFAF0 100%);
+            background: linear-gradient(to bottom, #FFF9E6 0%,#FFF9E6 70%,#ffffff 100%);
+
         }
         
         .facility-card {
@@ -387,7 +388,7 @@
         /* Contact Section */
         .contact-section {
             padding: 100px 0;
-            background: linear-gradient(135deg, #FFF9E6 0%, #ffffff 100%);
+            background: linear-gradient(to top, #FFF9E6 0%,#FFF9E6 70%,#ffffff 100%);
         }
         
         .contact-card {
