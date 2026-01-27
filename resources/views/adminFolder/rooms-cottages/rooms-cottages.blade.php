@@ -86,7 +86,7 @@
                     <div class="flex gap-3">
                         <button id="blockDatesBtn" onclick="openBlockModal()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-lg font-medium flex items-center gap-2 transition disabled:bg-red-400 disabled:cursor-not-allowed" disabled>
                             <i class="far fa-calendar-times"></i>
-                            Block Dates
+                            Block Units
                         </button>
                         @if(auth()->user()->role === 'manager')
                         <button onclick="openAddModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium flex items-center gap-2 transition">
@@ -387,7 +387,49 @@
             
             if (blockDatesBtn) {
                 blockDatesBtn.disabled = selectedCount === 0;
+                
+                // Check if all selected units are blocked
+                if (selectedCount > 0) {
+                    const allBlocked = checkIfAllSelectedUnitsAreBlocked();
+                    
+                    if (allBlocked) {
+                        // All selected units are blocked - show "Unblock Units"
+                        blockDatesBtn.innerHTML = '<i class="far fa-calendar-check"></i> Unblock Units';
+                        blockDatesBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'disabled:bg-red-400');
+                        blockDatesBtn.classList.add('bg-green-600', 'hover:bg-green-700', 'disabled:bg-green-400');
+                    } else {
+                        // Some or all units are not blocked - show "Block Units"
+                        blockDatesBtn.innerHTML = '<i class="far fa-calendar-times"></i> Block Units';
+                        blockDatesBtn.classList.remove('bg-green-600', 'hover:bg-green-700', 'disabled:bg-green-400');
+                        blockDatesBtn.classList.add('bg-red-600', 'hover:bg-red-700', 'disabled:bg-red-400');
+                    }
+                }
             }
+        }
+        
+        /**
+         * Checks if all selected units are currently blocked
+         * @returns {boolean}
+         */
+        function checkIfAllSelectedUnitsAreBlocked() {
+            if (selectedUnits.size === 0) return false;
+            
+            let allBlocked = true;
+            
+            selectedUnits.forEach(unitId => {
+                const card = document.querySelector(`.unit-card[data-unit-id="${unitId}"]`);
+                if (card) {
+                    const statusBadge = card.querySelector('.px-3.py-1.text-xs.font-semibold.rounded-full');
+                    if (statusBadge) {
+                        const statusText = statusBadge.textContent.trim().toLowerCase();
+                        if (statusText !== 'blocked') {
+                            allBlocked = false;
+                        }
+                    }
+                }
+            });
+            
+            return allBlocked;
         }
 
         /**
