@@ -40,10 +40,10 @@
 
                     <!-- Email Address -->
                     <div>
-                        <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+                        <!-- <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label> -->
                         <input 
                             id="email" 
-                            type="email" 
+                            type="hidden" 
                             name="email" 
                             value="{{ old('email', $request->email) }}" 
                             required 
