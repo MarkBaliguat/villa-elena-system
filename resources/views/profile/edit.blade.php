@@ -156,6 +156,30 @@
             cursor: not-allowed;
             opacity: 0.6;
         }
+
+        /* Password input with icon */
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-wrapper input {
+            padding-right: 50px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #6B7280;
+            transition: color 0.3s ease;
+            z-index: 10;
+        }
+
+        .password-toggle:hover {
+            color: var(--primary-yellow);
+        }
         
         /* Alert styling */
         .alert-modern {
@@ -189,6 +213,11 @@
         .alert-success {
             background: linear-gradient(135deg, #D4EDDA, #C3E6CB);
             border-left: 4px solid #28A745;
+        }
+
+        .alert-error {
+            background: linear-gradient(135deg, #FEE2E2, #FECACA);
+            border-left: 4px solid #DC2626;
         }
         
         /* Main content spacing */
@@ -295,6 +324,28 @@
             border-radius: 10px;
             border-left: 4px solid #28a745;
         }
+
+        /* Password requirements */
+        .password-requirements {
+            background: linear-gradient(135deg, #F0F9FF, #E0F2FE);
+            border-left: 4px solid #3B82F6;
+            padding: 16px;
+            border-radius: 12px;
+            margin-top: 12px;
+        }
+
+        .requirement-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.875rem;
+            color: #1E40AF;
+            margin: 6px 0;
+        }
+
+        .requirement-item i {
+            font-size: 0.75rem;
+        }
     </style>
 </head>
 
@@ -349,7 +400,7 @@
                     @csrf
                 </form>
 
-                <form method="post" action="{{ route('profile.update') }}">
+                <form method="post" action="{{ route('profile.update') }}" id="profile-form">
                     @csrf
                     @method('patch')
 
@@ -410,7 +461,8 @@
                                     value="{{ old('email', $user->email) }}" 
                                     required 
                                     autocomplete="email"
-                                    placeholder="your.email@example.com"
+                                    placeholder="your.email@example.com"                                  
+                                    readonly
                                 />
                                 <x-input-error class="error-message" :messages="$errors->get('email')" />
                             </div>
@@ -452,7 +504,7 @@
 
             <!-- Password Update Card -->
             <div class="glass-card rounded-2xl p-8 mb-8 fade-in">
-                <form method="post" action="{{ route('password.update') }}">
+                <form method="post" action="{{ route('password.update') }}" id="password-form">
                     @csrf
                     @method('put')
 
@@ -475,50 +527,88 @@
                         </div>
 
                         <div class="space-y-6">
+                            <!-- Current Password -->
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">
                                     <i class="fas fa-key mr-2 text-yellow-500"></i>Current Password
                                 </label>
-                                <input 
-                                    id="current_password" 
-                                    name="current_password" 
-                                    type="password" 
-                                    class="input-modern"
-                                    autocomplete="current-password"
-                                    placeholder="Enter current password"
-                                />
+                                <div class="password-wrapper">
+                                    <input 
+                                        id="current_password" 
+                                        name="current_password" 
+                                        type="password" 
+                                        class="input-modern"
+                                        autocomplete="current-password"
+                                        placeholder="Enter current password"
+                                    />
+                                    <i class="far fa-eye password-toggle" id="toggleCurrentPassword"></i>
+                                </div>
                                 <x-input-error class="error-message" :messages="$errors->updatePassword->get('current_password')" />
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- New Password -->
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">
                                         <i class="fas fa-lock mr-2 text-yellow-500"></i>New Password
                                     </label>
-                                    <input 
-                                        id="password" 
-                                        name="password" 
-                                        type="password" 
-                                        class="input-modern"
-                                        autocomplete="new-password"
-                                        placeholder="Enter new password"
-                                    />
+                                    <div class="password-wrapper">
+                                        <input 
+                                            id="password" 
+                                            name="password" 
+                                            type="password" 
+                                            class="input-modern"
+                                            autocomplete="new-password"
+                                            placeholder="Enter new password"
+                                        />
+                                        <i class="far fa-eye password-toggle" id="togglePassword"></i>
+                                    </div>
                                     <x-input-error class="error-message" :messages="$errors->updatePassword->get('password')" />
                                 </div>
 
+                                <!-- Confirm Password -->
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">
                                         <i class="fas fa-check-circle mr-2 text-yellow-500"></i>Confirm Password
                                     </label>
-                                    <input 
-                                        id="password_confirmation" 
-                                        name="password_confirmation" 
-                                        type="password" 
-                                        class="input-modern"
-                                        autocomplete="new-password"
-                                        placeholder="Confirm new password"
-                                    />
+                                    <div class="password-wrapper">
+                                        <input 
+                                            id="password_confirmation" 
+                                            name="password_confirmation" 
+                                            type="password" 
+                                            class="input-modern"
+                                            autocomplete="new-password"
+                                            placeholder="Confirm new password"
+                                        />
+                                        <i class="far fa-eye password-toggle" id="togglePasswordConfirmation"></i>
+                                    </div>
                                     <x-input-error class="error-message" :messages="$errors->updatePassword->get('password_confirmation')" />
+                                </div>
+                            </div>
+
+                            <!-- Password Requirements Info -->
+                            <div class="password-requirements">
+                                <h4 class="font-bold text-blue-800 mb-3 flex items-center gap-2">
+                                    <i class="fas fa-info-circle"></i>
+                                    Password Requirements
+                                </h4>
+                                <div class="space-y-2">
+                                    <div class="requirement-item">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>At least 8 characters long</span>
+                                    </div>
+                                    <div class="requirement-item">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>Contains both uppercase and lowercase letters</span>
+                                    </div>
+                                    <div class="requirement-item">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>Contains at least one number</span>
+                                    </div>
+                                    <div class="requirement-item">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>Contains at least one special character (!@#$%^&*)</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -540,7 +630,7 @@
                 </form>
             </div>
 
-            <!-- Delete Account Card
+            <!-- Delete Account Card (Commented Out)
             <div class="glass-card rounded-2xl p-8 fade-in border-l-4 border-red-500">
                 <div class="form-section">
                     <div class="section-header">
@@ -576,5 +666,157 @@
 
     <!-- Import Footer -->
     @include('customerFolder.partials.footer')
+
+    <script>
+        // Password visibility toggle functionality
+        function togglePasswordVisibility(inputId, toggleId) {
+            const passwordInput = document.getElementById(inputId);
+            const toggleIcon = document.getElementById(toggleId);
+            
+            toggleIcon.addEventListener('click', function() {
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    toggleIcon.classList.remove('fa-eye');
+                    toggleIcon.classList.add('fa-eye-slash');
+                } else {
+                    passwordInput.type = 'password';
+                    toggleIcon.classList.remove('fa-eye-slash');
+                    toggleIcon.classList.add('fa-eye');
+                }
+            });
+        }
+
+        // Initialize password toggles
+        togglePasswordVisibility('current_password', 'toggleCurrentPassword');
+        togglePasswordVisibility('password', 'togglePassword');
+        togglePasswordVisibility('password_confirmation', 'togglePasswordConfirmation');
+
+        // Form validation for password update
+        document.getElementById('password-form').addEventListener('submit', function(e) {
+            const currentPassword = document.getElementById('current_password').value;
+            const newPassword = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('password_confirmation').value;
+
+            // Check if trying to update password
+            if (newPassword || confirmPassword) {
+                // Validate current password is provided
+                if (!currentPassword) {
+                    e.preventDefault();
+                    alert('⚠️ Please enter your current password to update your password.');
+                    document.getElementById('current_password').focus();
+                    return false;
+                }
+
+                // Validate new password is provided
+                if (!newPassword) {
+                    e.preventDefault();
+                    alert('⚠️ Please enter a new password.');
+                    document.getElementById('password').focus();
+                    return false;
+                }
+
+                // Validate password confirmation
+                if (!confirmPassword) {
+                    e.preventDefault();
+                    alert('⚠️ Please confirm your new password.');
+                    document.getElementById('password_confirmation').focus();
+                    return false;
+                }
+
+                // Check if passwords match
+                if (newPassword !== confirmPassword) {
+                    e.preventDefault();
+                    alert('⚠️ New password and confirmation password do not match!');
+                    document.getElementById('password_confirmation').focus();
+                    return false;
+                }
+
+                // Validate password strength
+                if (newPassword.length < 8) {
+                    e.preventDefault();
+                    alert('⚠️ Password must be at least 8 characters long.');
+                    document.getElementById('password').focus();
+                    return false;
+                }
+
+                if (!/[a-z]/.test(newPassword)) {
+                    e.preventDefault();
+                    alert('⚠️ Password must contain at least one lowercase letter.');
+                    document.getElementById('password').focus();
+                    return false;
+                }
+
+                if (!/[A-Z]/.test(newPassword)) {
+                    e.preventDefault();
+                    alert('⚠️ Password must contain at least one uppercase letter.');
+                    document.getElementById('password').focus();
+                    return false;
+                }
+
+                if (!/[0-9]/.test(newPassword)) {
+                    e.preventDefault();
+                    alert('⚠️ Password must contain at least one number.');
+                    document.getElementById('password').focus();
+                    return false;
+                }
+
+                if (!/[!@#$%^&*(),.?":{}|<>]/.test(newPassword)) {
+                    e.preventDefault();
+                    alert('⚠️ Password must contain at least one special character (!@#$%^&*).');
+                    document.getElementById('password').focus();
+                    return false;
+                }
+            }
+        });
+
+        // Form validation for profile update
+        document.getElementById('profile-form').addEventListener('submit', function(e) {
+            const name = document.getElementById('name').value.trim();
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+
+            if (!name) {
+                e.preventDefault();
+                alert('⚠️ Please enter your full name.');
+                document.getElementById('name').focus();
+                return false;
+            }
+
+            if (!username) {
+                e.preventDefault();
+                alert('⚠️ Please enter a username.');
+                document.getElementById('username').focus();
+                return false;
+            }
+
+            if (!email) {
+                e.preventDefault();
+                alert('⚠️ Please enter your email address.');
+                document.getElementById('email').focus();
+                return false;
+            }
+
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                e.preventDefault();
+                alert('⚠️ Please enter a valid email address.');
+                document.getElementById('email').focus();
+                return false;
+            }
+        });
+
+        // Auto-hide success messages after 5 seconds
+        setTimeout(function() {
+            const successMessages = document.querySelectorAll('.save-feedback');
+            successMessages.forEach(function(message) {
+                message.style.transition = 'opacity 0.5s ease';
+                message.style.opacity = '0';
+                setTimeout(function() {
+                    message.remove();
+                }, 500);
+            });
+        }, 5000);
+    </script>
 </body>
 </html>

@@ -681,7 +681,7 @@
                                     <i class="fas fa-user"></i>
                                     Full Name
                                 </label>
-                                <input type="text" name="full_name" class="form-input" required>
+                                <input type="text" name="full_name" class="form-input" required  readonly>
                             </div>
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -690,7 +690,7 @@
                                         <i class="fas fa-envelope"></i>
                                         Email Address
                                     </label>
-                                    <input type="email" name="email" class="form-input" required>
+                                    <input type="email" name="email" class="form-input" required  readonly>
                                 </div>
                                 
                                 <div class="form-group">
@@ -698,7 +698,7 @@
                                         <i class="fas fa-phone"></i>
                                         Phone Number
                                     </label>
-                                    <input type="tel" name="phone" class="form-input" required>
+                                    <input type="tel" name="phone" class="form-input" required readonly>
                                 </div>
                             </div>
                             
@@ -1139,7 +1139,7 @@
         function prefillUserInfo() {
             // Pre-fill user information from authenticated user
             const user = {
-                name: '{{ Auth::user()->firstName ?? "" }} {{ Auth::user()->lastName ?? "" }}',
+                name: '{{ Auth::user()->name ?? "" }}',
                 email: '{{ Auth::user()->email ?? "" }}',
                 phone: '{{ Auth::user()->phoneNumber ?? "" }}'
             };
