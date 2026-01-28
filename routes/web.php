@@ -41,7 +41,7 @@ Route::get('/about', function () {
 })->name('about');
 
 // ========== CART ROUTES USING CART CONTROLLER ==========
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'verified', 'role:guest'])->group(function () {
     // Main cart API endpoints
     Route::get('/api/cart/items', [CartController::class, 'getActiveCartItems'])->name('api.cart.items');
     Route::get('/api/cart/all-items', [CartController::class, 'getAllCartItems'])->name('api.cart.all-items');

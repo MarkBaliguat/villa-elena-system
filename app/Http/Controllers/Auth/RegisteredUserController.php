@@ -53,11 +53,14 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        event(new Registered($user));
-        Mail::to($user->email)->send(new WelcomeEmail($user));
+        // IMPORTANT: Refresh the user to make sure ID is available
+        $user->refresh();
+
+        // Send custom welcome email with verification link
+        //Mail::to($user->email)->send(new WelcomeEmail($user));
 
         Auth::login($user);
 
-        return redirect()->route('home');
+        return redirect()->route('verification.notice');
     }
 }

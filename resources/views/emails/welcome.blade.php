@@ -60,6 +60,17 @@
             margin: 20px 0;
             font-weight: 500;
         }
+        .button-verify {
+            background-color: #4CAF50;
+            font-size: 16px;
+        }
+        .alert-box {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
         .features {
             background-color: #f9f9f9;
             padding: 20px;
@@ -90,6 +101,11 @@
             font-size: 12px;
             color: #999;
         }
+        .link-text {
+            word-break: break-all;
+            font-size: 11px;
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -104,7 +120,15 @@
             
             <p>Salamat sa pag-register sa Villa Elena Family Resort! Kami ay excited na maging bahagi ka ng aming community.</p>
             
-            <p>Sa iyong account, makaka-access ka na ng:</p>
+            <div class="alert-box">
+                <strong>⚠️ Important:</strong> Please verify your email address to activate your account and start booking.
+            </div>
+            
+            <center>
+                <a href="{{ $verificationUrl }}" class="button button-verify">Verify Email Address</a>
+            </center>
+            
+            <p>Sa iyong verified account, makaka-access ka na ng:</p>
             
             <div class="features">
                 <ul>
@@ -114,17 +138,18 @@
                 </ul>
             </div>
             
-            <p>Ready na mag-book ng iyong next getaway?</p>
-            
-            <center>
-                <a href="{{ config('app.url') }}/booking" class="button">Start Booking Now</a>
-            </center>
+            <p>After verification, ready ka na mag-book ng iyong next getaway!</p>
             
             <p style="margin-top: 30px;">Kung may tanong ka, feel free to contact us anytime. We're here to help!</p>
             
             <p style="margin-top: 20px;">
                 <strong>Villa Elena Team</strong><br>
                 <a href="mailto:{{ config('mail.from.address') }}">{{ config('mail.from.address') }}</a>
+            </p>
+            
+            <p class="link-text" style="margin-top: 30px;">
+                If you're having trouble clicking the button, copy and paste this URL into your browser:<br>
+                {{ $verificationUrl }}
             </p>
         </div>
         
