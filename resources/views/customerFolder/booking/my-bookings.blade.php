@@ -27,8 +27,8 @@
         ::-webkit-scrollbar {
             width: 12px;
             background-color: #F1F1F1;
-            }
-            ::-webkit-scrollbar-thumb {
+        }
+        ::-webkit-scrollbar-thumb {
             background-color: #FFD700; 
             border-radius: 6px;
         }
@@ -727,6 +727,11 @@
                 font-size: 1.75rem;
             }
         }
+
+        /* ✅ FIXED: Add this to make sure cards are visible */
+        .booking-card.filtered-out {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
@@ -847,8 +852,10 @@
     @include('customerFolder.partials.footer')
 
     <script>
+        // ✅ FIXED: Global variables for state management
         let currentStatus = 'all';
         let currentBookingId = null;
+        let allBookings = []; // Store all bookings for client-side filtering
         
         document.addEventListener('DOMContentLoaded', function() {
             loadBookings();
@@ -859,13 +866,17 @@
             // Filter tabs
             document.querySelectorAll('.filter-tab').forEach(tab => {
                 tab.addEventListener('click', function() {
+                    console.log('Filter clicked:', this.dataset.status);
+                    
                     // Update active tab
                     document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
                     this.classList.add('active');
                     
-                    // Load bookings with new filter
+                    // Update current status
                     currentStatus = this.dataset.status;
-                    loadBookings();
+                    
+                    // Filter bookings (client-side)
+                    filterBookings(currentStatus);
                 });
             });
         }
@@ -875,10 +886,10 @@
             const loadingSpinner = document.getElementById('loading-spinner');
             
             // Show loading
-            bookingsList.innerHTML = '';
-            loadingSpinner.style.display = 'flex';
+            bookingsList.innerHTML = '<div class="loading-container" id="loading-spinner"><div class="loading-spinner"></div><p class="loading-text">Loading your bookings...</p></div>';
             
-            fetch(`/api/my-bookings?status=${currentStatus}`, {
+            // ✅ FIXED: Always fetch ALL bookings, then filter client-side
+            fetch('/api/my-bookings?status=all', {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
@@ -892,23 +903,30 @@
                 return response.json();
             })
             .then(data => {
-                loadingSpinner.style.display = 'none';
+                console.log('Bookings loaded:', data);
                 
                 if (data.success) {
+                    // Store all bookings globally
+                    allBookings = data.bookings;
+                    
                     // Update statistics
                     updateStatistics(data);
                     
                     if (data.bookings.length === 0) {
                         showNoBookingsMessage();
                     } else {
+                        // Render ALL bookings first
                         renderBookingsCards(data.bookings);
+                        
+                        // Then apply current filter
+                        filterBookings(currentStatus);
                     }
                 } else {
                     throw new Error(data.message);
                 }
             })
             .catch(error => {
-                loadingSpinner.style.display = 'none';
+                console.error('Error loading bookings:', error);
                 bookingsList.innerHTML = `
                     <div class="booking-card text-center">
                         <div class="text-red-500 text-4xl mb-4">
@@ -924,15 +942,98 @@
             });
         }
         
+        // ✅ FIXED: Client-side filtering function
+        function filterBookings(status) {
+            console.log('Filtering bookings by status:', status);
+            
+            const bookingsList = document.getElementById('bookings-list');
+            const bookingCards = bookingsList.querySelectorAll('.booking-card');
+            let visibleCount = 0;
+            
+            console.log('Total booking cards found:', bookingCards.length);
+            
+            bookingCards.forEach(card => {
+                const cardStatus = card.dataset.status;
+                console.log('Card status:', cardStatus, 'Filter status:', status);
+                
+                if (status === 'all' || cardStatus === status) {
+                    card.classList.remove('filtered-out');
+                    card.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    card.classList.add('filtered-out');
+                    card.style.display = 'none';
+                }
+            });
+            
+            console.log(`Showing ${visibleCount} bookings for status: ${status}`);
+            
+            // Show empty state if no bookings match filter
+            if (visibleCount === 0 && bookingCards.length > 0) {
+                // Don't clear the list, just hide all cards and show message
+                const existingEmpty = bookingsList.querySelector('.empty-state');
+                if (!existingEmpty) {
+                    const emptyDiv = document.createElement('div');
+                    emptyDiv.innerHTML = getEmptyStateHTML();
+                    bookingsList.appendChild(emptyDiv.firstElementChild);
+                }
+            } else {
+                // Remove empty state if it exists
+                const existingEmpty = bookingsList.querySelector('.empty-state');
+                if (existingEmpty) {
+                    existingEmpty.remove();
+                }
+            }
+        }
+        
+        // Helper function to generate empty state HTML
+        function getEmptyStateHTML() {
+            const emptyMessage = currentStatus !== 'all' 
+                ? `You don't have any ${currentStatus} bookings yet.`
+                : "You haven't made any bookings yet.";
+            
+            const actionButton = currentStatus !== 'all' 
+                ? `<button onclick="resetFilter()" class="action-btn btn-view" style="max-width: 200px; margin: 0 auto;">
+                        <i class="fas fa-list mr-2"></i> View All Bookings
+                   </button>`
+                : `<a href="/room-booking" class="action-btn btn-view" style="max-width: 200px; margin: 0 auto; text-decoration: none;">
+                        <i class="fas fa-plus mr-2"></i> Make a New Booking
+                   </a>`;
+            
+            return `
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="far fa-calendar-alt"></i>
+                    </div>
+                    <h3 class="empty-title">No bookings found</h3>
+                    <p class="empty-description">${emptyMessage}</p>
+                    ${actionButton}
+                </div>
+            `;
+        }
+        
+        // Helper function to reset filter
+        function resetFilter() {
+            currentStatus = 'all';
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector('.filter-tab[data-status="all"]').classList.add('active');
+            filterBookings('all');
+        }
+        
         function updateStatistics(data) {
-            document.getElementById('total-bookings').textContent = data.total;
-            document.getElementById('pending-bookings').textContent = data.pending;
-            document.getElementById('confirmed-bookings').textContent = data.confirmed;
-            document.getElementById('completed-bookings').textContent = data.completed;
+            document.getElementById('total-bookings').textContent = data.total || 0;
+            document.getElementById('pending-bookings').textContent = data.pending || 0;
+            document.getElementById('confirmed-bookings').textContent = data.confirmed || 0;
+            document.getElementById('completed-bookings').textContent = data.completed || 0;
         }
         
         function renderBookingsCards(bookings) {
             const bookingsList = document.getElementById('bookings-list');
+            
+            if (!bookings || bookings.length === 0) {
+                showNoBookingsMessage();
+                return;
+            }
             
             const cardsHTML = bookings.map(booking => {
                 // Get status badge
@@ -959,41 +1060,34 @@
                 }
                 
                 // Format prices
-                const totalPrice = parseFloat(booking.totalPrice).toFixed(2);
-                const totalPaid = parseFloat(booking.total_paid).toFixed(2);
+                const totalPrice = parseFloat(booking.totalPrice || 0).toFixed(2);
+                const totalPaid = parseFloat(booking.total_paid || 0).toFixed(2);
                 const remainingBalance = (parseFloat(totalPrice) - parseFloat(totalPaid)).toFixed(2);
                 
-                // Create accommodations list
-                const accommodationsHTML = booking.accommodations.map(acc => `
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="text-gray-700">${acc.name}</span>
-                        <span class="font-semibold text-gray-800">₱${parseFloat(acc.price).toFixed(2)}</span>
-                    </div>
-                `).join('');
-                
+                // ✅ FIXED: Add data-status attribute for filtering
                 return `
-                    <div class="booking-card">
+                    <div class="booking-card" data-status="${booking.bookingStatus}">
                         <div class="booking-header">
                             <div class="booking-info">
                                 <h3>Booking #${booking.bookingID}</h3>
                                 <div class="booking-meta">
                                     <span class="meta-item">
                                         <i class="far fa-calendar"></i>
-                                        ${booking.formatted_event_start}
+                                        ${booking.formatted_event_start || 'N/A'}
                                     </span>
                                     <span class="meta-item">
                                         <i class="fas fa-users"></i>
-                                        ${booking.numGuests} guest${booking.numGuests > 1 ? 's' : ''}
+                                        ${booking.numGuests || 0} guest${(booking.numGuests || 0) > 1 ? 's' : ''}
                                     </span>
                                     <span class="meta-item">
                                         <i class="far fa-clock"></i>
-                                        ${booking.formatted_created_at}
+                                        ${booking.formatted_created_at || 'N/A'}
                                     </span>
                                 </div>
                             </div>
                             <span class="${statusClass} status-badge">
                                 <i class="fas ${statusIcon}"></i>
-                                ${booking.bookingStatus.charAt(0).toUpperCase() + booking.bookingStatus.slice(1)}
+                                ${booking.bookingStatus ? booking.bookingStatus.charAt(0).toUpperCase() + booking.bookingStatus.slice(1) : 'Pending'}
                             </span>
                         </div>
                         
@@ -1002,14 +1096,14 @@
                                 <div class="detail-group">
                                     <h4><i class="fas fa-calendar-day"></i> Event Dates</h4>
                                     <div class="detail-content">
-                                        ${booking.formatted_event_start} to ${booking.formatted_event_end}
+                                        ${booking.formatted_event_start || 'N/A'} to ${booking.formatted_event_end || 'N/A'}
                                     </div>
                                 </div>
                                 
                                 <div class="detail-group">
                                     <h4><i class="fas fa-home"></i> Accommodations</h4>
                                     <div class="detail-content">
-                                        ${booking.accommodations.length} item${booking.accommodations.length > 1 ? 's' : ''}
+                                        ${booking.accommodations ? booking.accommodations.length : 0} item${(booking.accommodations && booking.accommodations.length > 1) ? 's' : ''}
                                     </div>
                                 </div>
                                 
@@ -1059,29 +1153,7 @@
         
         function showNoBookingsMessage() {
             const bookingsList = document.getElementById('bookings-list');
-            
-            const emptyMessage = currentStatus !== 'all' 
-                ? `You don't have any ${currentStatus} bookings yet.`
-                : "You haven't made any bookings yet.";
-            
-            const actionButton = currentStatus !== 'all' 
-                ? `<button onclick="currentStatus = 'all'; document.querySelector('.filter-tab[data-status=\"all\"]').click();" class="action-btn btn-view" style="max-width: 200px; margin: 0 auto;">
-                        <i class="fas fa-list mr-2"></i> View All Bookings
-                   </button>`
-                : `<a href="{{ route('roomBooking') }}" class="action-btn btn-view" style="max-width: 200px; margin: 0 auto; text-decoration: none;">
-                        <i class="fas fa-plus mr-2"></i> Make a New Booking
-                   </a>`;
-            
-            bookingsList.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-icon">
-                        <i class="far fa-calendar-alt"></i>
-                    </div>
-                    <h3 class="empty-title">No bookings found</h3>
-                    <p class="empty-description">${emptyMessage}</p>
-                    ${actionButton}
-                </div>
-            `;
+            bookingsList.innerHTML = getEmptyStateHTML();
         }
         
         function viewBooking(bookingId) {
