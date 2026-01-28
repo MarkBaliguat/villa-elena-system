@@ -23,6 +23,8 @@
             --border-color: #E5E7EB;
             --shadow-light: rgba(0, 0, 0, 0.05);
             --shadow-medium: rgba(0, 0, 0, 0.1);
+            --cash-color: #10B981;
+            --gcash-color: #0066A8;
         }
         
         body {
@@ -89,6 +91,214 @@
         .booking-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12);
+        }
+
+        /* Payment Method Container */
+        .payment-methods-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Payment Method Card */
+        .payment-method-card {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .payment-method-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .payment-method-card.selected {
+            border-width: 3px;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        .payment-method-card.cash.selected {
+            border-color: var(--cash-color);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(16, 185, 129, 0.1));
+        }
+
+        .payment-method-card.gcash.selected {
+            border-color: var(--gcash-color);
+            background: linear-gradient(135deg, rgba(0, 102, 168, 0.05), rgba(0, 102, 168, 0.1));
+        }
+
+        /* Payment Method Icon */
+        .payment-method-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            transition: all 0.3s ease;
+            margin-bottom: 0.5rem;
+        }
+
+        .payment-method-icon.cash {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.2));
+            color: var(--cash-color);
+            border: 2px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .payment-method-card.cash.selected .payment-method-icon.cash {
+            background: linear-gradient(135deg, var(--cash-color), #059669);
+            color: white;
+            border-color: var(--cash-color);
+            transform: scale(1.1);
+        }
+
+        .payment-method-icon.gcash {
+            background: linear-gradient(135deg, rgba(0, 102, 168, 0.1), rgba(0, 102, 168, 0.2));
+            color: var(--gcash-color);
+            border: 2px solid rgba(0, 102, 168, 0.3);
+        }
+
+        .payment-method-card.gcash.selected .payment-method-icon.gcash {
+            background: linear-gradient(135deg, var(--gcash-color), #004D84);
+            color: white;
+            border-color: var(--gcash-color);
+            transform: scale(1.1);
+        }
+
+        /* Payment Method Name */
+        .payment-method-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            transition: color 0.3s ease;
+        }
+
+        .payment-method-card.cash.selected .payment-method-name {
+            color: var(--cash-color);
+        }
+
+        .payment-method-card.gcash.selected .payment-method-name {
+            color: var(--gcash-color);
+        }
+
+        /* Payment Method Description */
+        .payment-method-desc {
+            font-size: 0.875rem;
+            color: var(--text-medium);
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        /* Check Icon (Selected State) */
+        .check-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .payment-method-card.selected .check-icon {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .payment-method-card.cash.selected .check-icon {
+            background: var(--cash-color);
+            color: white;
+            border-color: var(--cash-color);
+        }
+
+        .payment-method-card.gcash.selected .check-icon {
+            background: var(--gcash-color);
+            color: white;
+            border-color: var(--gcash-color);
+        }
+
+        .check-icon i {
+            font-size: 0.75rem;
+        }
+
+        /* Payment Details Panel */
+        .payment-details-panel {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border: 1px solid #e2e8f0;
+            animation: slideDown 0.3s ease;
+            display: none;
+        }
+
+        .payment-details-panel.show {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .payment-details-header {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .payment-details-content {
+            font-size: 0.9rem;
+            color: var(--text-medium);
+            line-height: 1.5;
+        }
+
+        .payment-details-content ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .payment-details-content li {
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .payment-details-content li i {
+            color: var(--primary-yellow);
+            margin-top: 0.25rem;
+            flex-shrink: 0;
         }
 
         /* Form Elements */
@@ -631,6 +841,10 @@
             .form-textarea {
                 padding: 12px 14px;
             }
+            
+            .payment-methods-container {
+                grid-template-columns: 1fr;
+            }
         }
 
         @media (max-width: 576px) {
@@ -653,6 +867,10 @@
             
             .help-section {
                 padding: 1rem;
+            }
+            
+            .payment-method-card {
+                padding: 1.25rem;
             }
         }
     </style>
@@ -681,7 +899,7 @@
                                     <i class="fas fa-user"></i>
                                     Full Name
                                 </label>
-                                <input type="text" name="full_name" class="form-input" required  readonly>
+                                <input type="text" name="full_name" class="form-input" required readonly>
                             </div>
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -690,7 +908,7 @@
                                         <i class="fas fa-envelope"></i>
                                         Email Address
                                     </label>
-                                    <input type="email" name="email" class="form-input" required  readonly>
+                                    <input type="email" name="email" class="form-input" required readonly>
                                 </div>
                                 
                                 <div class="form-group">
@@ -744,18 +962,74 @@
                                 <p class="text-xs text-gray-500 mt-2 ml-6">Enter the amount you wish to pay</p>
                             </div>
                             
+                            <!-- Payment Method Selection -->
                             <div class="form-group">
                                 <label class="form-label">
                                     <i class="fas fa-credit-card"></i>
                                     Payment Method
                                 </label>
-                                <select name="payment_method" class="form-select" id="payment_method" required>
-                                    <option value="">Select Payment Method</option>
-                                    <option value="cash">Cash</option>
-                                    <option value="bank_transfer">Bank Transfer</option>
-                                    <option value="credit_card">Credit Card</option>
-                                    <option value="debit_card">Debit Card</option>
-                                </select>
+                                
+                                <div class="payment-methods-container" id="payment-methods-container">
+                                    <!-- Cash Option -->
+                                    <div class="payment-method-card cash" data-method="cash">
+                                        <div class="check-icon">
+                                            <i class="fas fa-check"></i>
+                                        </div>
+                                        <div class="payment-method-icon cash">
+                                            <i class="fas fa-money-bill-wave"></i>
+                                        </div>
+                                        <div class="payment-method-name">Cash</div>
+                                        <div class="payment-method-desc">Pay in cash upon arrival</div>
+                                    </div>
+                                    
+                                    <!-- GCash Option -->
+                                    <div class="payment-method-card gcash" data-method="gcash">
+                                        <div class="check-icon">
+                                            <i class="fas fa-check"></i>
+                                        </div>
+                                        <div class="payment-method-icon gcash">
+                                            <i class="fab fa-google-wallet"></i>
+                                        </div>
+                                        <div class="payment-method-name">GCash</div>
+                                        <div class="payment-method-desc">Pay securely with GCash</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Hidden input for payment method -->
+                                <input type="hidden" name="payment_method" id="selected_payment_method" value="">
+                                
+                                <!-- Payment Details Panel -->
+                                <div class="payment-details-panel" id="cash-details-panel">
+                                    <div class="payment-details-header">
+                                        <i class="fas fa-info-circle text-green-500"></i>
+                                        Cash Payment Instructions
+                                    </div>
+                                    <div class="payment-details-content">
+                                        <ul>
+                                            <li><i class="fas fa-check-circle"></i> Pay in cash upon check-in at Villa Elena</li>
+                                            <li><i class="fas fa-check-circle"></i> Minimum downpayment: 50% of total amount</li>
+                                            <li><i class="fas fa-check-circle"></i> Bring valid ID for verification</li>
+                                            <li><i class="fas fa-check-circle"></i> Official receipt will be provided upon payment</li>
+                                            <li><i class="fas fa-check-circle"></i> Balance can be paid upon check-out</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                
+                                <div class="payment-details-panel" id="gcash-details-panel">
+                                    <div class="payment-details-header">
+                                        <i class="fas fa-info-circle text-blue-500"></i>
+                                        GCash Payment Instructions
+                                    </div>
+                                    <div class="payment-details-content">
+                                        <ul>
+                                            <li><i class="fas fa-check-circle"></i> Payment will be sent via GCash upon booking confirmation</li>
+                                            <li><i class="fas fa-check-circle"></i> Use booking reference as payment note</li>
+                                            <li><i class="fas fa-check-circle"></i> Send payment to: <strong>0912 345 6789</strong></li>
+                                            <li><i class="fas fa-check-circle"></i> Screenshot payment confirmation for verification</li>
+                                            <li><i class="fas fa-check-circle"></i> Payment must be completed within 24 hours</li>
+                                        </ul>
+                                    </div>
+                                </div>
                             </div>
                             
                             <!-- Action Buttons -->
@@ -830,6 +1104,9 @@
         let hasActiveEntranceFee = false;
 
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize payment method selection
+            initPaymentMethodSelection();
+            
             // Load booking summary and entrance fee
             Promise.all([
                 loadEntranceFee(),
@@ -841,6 +1118,46 @@
                 updatePaymentAmountField();
             });
         });
+
+        // Initialize payment method selection
+        function initPaymentMethodSelection() {
+            const paymentCards = document.querySelectorAll('.payment-method-card');
+            const cashDetailsPanel = document.getElementById('cash-details-panel');
+            const gcashDetailsPanel = document.getElementById('gcash-details-panel');
+            
+            paymentCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    // Remove selected class from all cards
+                    paymentCards.forEach(c => {
+                        c.classList.remove('selected');
+                    });
+                    
+                    // Add selected class to clicked card
+                    this.classList.add('selected');
+                    
+                    // Get selected payment method
+                    const selectedMethod = this.getAttribute('data-method');
+                    
+                    // Set hidden input value
+                    document.getElementById('selected_payment_method').value = selectedMethod;
+                    
+                    // Show/hide payment details panels
+                    if (selectedMethod === 'cash') {
+                        cashDetailsPanel.classList.add('show');
+                        gcashDetailsPanel.classList.remove('show');
+                    } else if (selectedMethod === 'gcash') {
+                        gcashDetailsPanel.classList.add('show');
+                        cashDetailsPanel.classList.remove('show');
+                    }
+                });
+            });
+            
+            // Select cash by default
+            const cashCard = document.querySelector('.payment-method-card[data-method="cash"]');
+            if (cashCard) {
+                cashCard.click();
+            }
+        }
 
         async function loadEntranceFee() {
             try {
@@ -1251,13 +1568,20 @@
             });
 
             // Check payment method is selected
-            const paymentMethod = document.getElementById('payment_method');
-            if (!paymentMethod.value) {
+            const selectedPaymentMethod = document.getElementById('selected_payment_method').value;
+            if (!selectedPaymentMethod) {
                 isValid = false;
-                paymentMethod.style.borderColor = '#dc2626';
                 errors.push('Please select a payment method');
+                
+                // Highlight payment method container
+                const paymentContainer = document.getElementById('payment-methods-container');
+                paymentContainer.style.border = '2px solid #dc2626';
+                paymentContainer.style.borderRadius = '12px';
+                paymentContainer.style.padding = '10px';
             } else {
-                paymentMethod.style.borderColor = '';
+                const paymentContainer = document.getElementById('payment-methods-container');
+                paymentContainer.style.border = '';
+                paymentContainer.style.padding = '';
             }
 
             // Check payment amount
@@ -1282,7 +1606,7 @@
 
             if (!isValid) {
                 const errorMessage = errors.join('\n');
-                alert('Please fix the following errors:\n\n' + errorMessage);
+                showAlert('error', errorMessage);
             }
 
             return isValid;
@@ -1353,6 +1677,7 @@
                                         <p class="mb-1"><strong>Booking Reference:</strong> ${data.booking_reference}</p>
                                         <p class="mb-1"><strong>Booking ID:</strong> ${data.booking_id}</p>
                                         <p class="mb-1"><strong>Status:</strong> ${data.booking_status}</p>
+                                        <p class="mb-1"><strong>Payment Method:</strong> ${data.payment_method || 'Not specified'}</p>
                                         <p class="mb-1"><strong>Amount Paid:</strong> ₱${data.payment_amount?.toFixed(2) || '0.00'}</p>
                                         ${data.calculation_breakdown ? `
                                             <div class="mt-3 pt-3 border-t">
