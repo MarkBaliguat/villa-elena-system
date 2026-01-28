@@ -38,7 +38,7 @@ class ProfileUpdateRequest extends FormRequest
                 'nullable',
                 'string',
                 'max:20',
-                Rule::unique('users', 'phoneNumber')->ignore($userId, 'userID'),
+               // Rule::unique('users', 'phoneNumber')->ignore($userId, 'userID'),
             ],
         ];
     }
@@ -54,7 +54,7 @@ class ProfileUpdateRequest extends FormRequest
             'username.regex' => 'The username may only contain letters, numbers, spaces, dashes, and underscores.',
             'username.unique' => 'The username has already been taken.',
             'email.unique' => 'The email has already been taken.',
-            'phoneNumber.unique' => 'The phone number has already been taken.',
+          //  'phoneNumber.unique' => 'The phone number has already been taken.',
         ];
     }
 }
