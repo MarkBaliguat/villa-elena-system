@@ -1,5 +1,5 @@
 <nav class="main-header">
-    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center relative">
         <!-- Left Section - Mobile Menu + Home Text (hidden on mobile) -->
         <div class="flex items-center">
             <button id="mobile-menu-btn" class="text-white mr-4 hover-effect" aria-label="Open menu">
@@ -10,7 +10,7 @@
         </div>
         
         <!-- Center Section - Logo/Title -->
-        <div class="text-center">
+        <div class="absolute left-1/2 -translate-x-1/2 text-center pointer-events-none">
             <h1 class="text-xl sm:text-2xl md:text-3xl cursive-font">Villa Elena</h1>
             <!-- Hide subtitle on small screens -->
             <p class="text-xs hidden sm:block">Family Resort & Agri-Tourism Farm</p>
