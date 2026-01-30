@@ -14,6 +14,7 @@ class Booking extends Model
         'totalPrice',
         'entranceFeeID', // IDAGDAG ITO
         'bookingStatus',
+        'gcash_payment_intent_id',
         'bookingType',
         'eventType',
         'specialRequirements',
