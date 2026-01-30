@@ -3,7 +3,7 @@
         <div class="bg-white w-full max-w-5xl rounded-2xl shadow-2xl grid grid-cols-1 lg:grid-cols-2 overflow-hidden">
             
             <!-- LEFT SIDE IMAGE - Hidden on mobile/tablet, shown on desktop -->
-            <div class="hidden lg:block relative bg-cover bg-center" style="background-image: url('/images/login-bg.jpg'); min-height: 600px;">
+            <div class="hidden lg:block relative bg-cover bg-center" style="background-image: url('/images/contact-image.jpg'); min-height: 600px;">
                 <div class="absolute inset-0 bg-gradient-to-br from-black/50 to-black/30 flex flex-col justify-center items-center text-center px-8">
                     <p class="text-white text-base mb-2 tracking-wide">Welcome to</p>
                     <h1 class="text-6xl cursive-font text-white mb-3 drop-shadow-lg">Villa Elena</h1>
@@ -14,7 +14,7 @@
             </div>
 
             <!-- MOBILE/TABLET IMAGE - Only shown on smaller screens -->
-            <div class="lg:hidden relative bg-cover bg-center" style="background-image: url('/images/login-bg.jpg'); height: 220px;">
+            <div class="lg:hidden relative bg-cover bg-center" style="background-image: url('/images/contact-image.jpg'); height: 220px;">
                 <div class="absolute inset-0 bg-gradient-to-br from-black/50 to-black/30 flex flex-col justify-center items-center text-center px-6">
                     <p class="text-white text-sm sm:text-base mb-1 tracking-wide">Welcome to</p>
                     <h1 class="text-4xl sm:text-5xl cursive-font text-white mb-2 drop-shadow-lg">Villa Elena</h1>

@@ -33,7 +33,7 @@
         <!-- LEFT SIDE IMAGE - Hidden on mobile, shown on tablet and desktop -->
         <div 
             class="hidden md:block relative bg-cover bg-center"
-            style="background-image: url('/images/login-bg.jpg');">
+            style="background-image: url('/images/contact-image.jpg');">
             
             <div class="absolute inset-0 bg-black/40 flex flex-col justify-center items-center text-center px-6">
                 <p class="text-white text-sm mb-1">Welcome to</p>
@@ -47,7 +47,8 @@
         <!-- MOBILE IMAGE - Only shown on mobile devices -->
         <div 
             class="md:hidden mobile-image relative bg-cover bg-center"
-            style="background-image: url('/images/login-bg.jpg');">
+            style="background-image: url('/images/contact-image.jpg');">
+          
             
             <div class="absolute inset-0 bg-black/40 flex flex-col justify-center items-center text-center px-6">
                 <p class="text-white text-sm mb-1">Welcome to</p>
