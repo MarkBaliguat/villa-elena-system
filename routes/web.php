@@ -40,6 +40,27 @@ Route::get('/about', function () {
     return view('customerFolder.about.about');
 })->name('about');
 
+// ========== ✅ GCASH PAYMENT ROUTES ==========
+Route::middleware(['auth'])->group(function () {
+    // Process payment (create PayMongo intent)
+    Route::post('/gcash/process-payment', [CustomerBookingController::class, 'processGCashPayment'])
+        ->name('customer.payment.process');
+    
+    // ✅ SUCCESS ROUTE - Shows the success page (gcash-success.blade.php)
+    Route::get('/payment/gcash/success', [CustomerBookingController::class, 'gcashPaymentSuccess'])
+        ->name('customer.payment.success');
+    
+    // ✅ VERIFICATION ROUTE - Called via AJAX from success page
+    Route::get('/payment/gcash/verify', [CustomerBookingController::class, 'verifyGCashPayment'])
+        ->name('customer.payment.verify');
+    
+    // ✅ FAILED ROUTE - Shows the failed page (gcash-failed.blade.php)
+    Route::get('/payment/gcash/failed', [CustomerBookingController::class, 'gcashPaymentFailed'])
+        ->name('customer.payment.failed');
+});
+// ========== END GCASH PAYMENT ROUTES ==========
+
+
 // ========== CART ROUTES USING CART CONTROLLER ==========
 Route::middleware(['auth', 'verified', 'role:guest'])->group(function () {
     // Main cart API endpoints
@@ -175,7 +196,10 @@ Route::middleware(['auth', 'role:manager,staff'])->prefix('admin')->group(functi
         Route::get('/{id}/edit', [StaffController::class, 'edit'])->name('admin.staff.edit');
         Route::put('/{id}', [StaffController::class, 'update'])->name('admin.staff.update');
         Route::delete('/{id}', [StaffController::class, 'destroy'])->name('admin.staff.destroy');
-        Route::put('/{id}/toggle-status', [StaffController::class, 'toggleStatus'])->name('admin.staff.toggle-status');
+        
+        // Email verification routes
+        Route::post('/{id}/verify-email', [StaffController::class, 'verifyEmail'])->name('admin.staff.verify-email');
+        Route::post('/{id}/unverify-email', [StaffController::class, 'unverifyEmail'])->name('admin.staff.unverify-email');
     });
 });
 
@@ -191,11 +215,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-//Route for my  Virtual Tour
+//Route for my Virtual Tour
 Route::get('/virtual-tour/index', function () {
     return response()->file(public_path('virtual-tour/index.html'));
 })->name('virtual-tour.index');
-require __DIR__.'/auth.php';
-
 
 require __DIR__.'/auth.php';
