@@ -798,7 +798,7 @@ class SpecialEventsController extends Controller
             $userHasOtherBookings = $this->checkUserHasOtherBookings($userID, $cartID);
             
             if (!$userHasOtherBookings) {
-                User::where('userID', $userID)->delete();
+                //User::where('userID', $userID)->delete();
                 Log::info("User {$userID} deleted along with special event {$id}");
             } else {
                 Log::info("User {$userID} has other bookings, preserved user data");

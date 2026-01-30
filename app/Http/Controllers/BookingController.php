@@ -866,7 +866,7 @@ class BookingController extends Controller
             $userHasOtherBookings = $this->checkUserHasOtherBookings($userID, $cartID);
             
             if (!$userHasOtherBookings) {
-                User::where('userID', $userID)->delete();
+               // User::where('userID', $userID)->delete();
                 Log::info("User {$userID} deleted along with booking {$id}");
             }
 
