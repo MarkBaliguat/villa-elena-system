@@ -63,6 +63,7 @@ class StaffController extends Controller
             'phoneNumber' => $request->phoneNumber,
             'role' => $request->role,
             'password' => Hash::make($request->password),
+            'email_verified_at' => now(), // Automatically verify email when created by admin
         ]);
 
         return redirect()->route('admin.staff.index')

@@ -308,6 +308,7 @@ class BookingController extends Controller
                     'email' => $validated['email'],
                     'phoneNumber' => $validated['phone'],
                     'password' => bcrypt('temporary123'),
+                    'email_verified_at' => now(),
                     'role' => 'guest'
                 ]);
             }
