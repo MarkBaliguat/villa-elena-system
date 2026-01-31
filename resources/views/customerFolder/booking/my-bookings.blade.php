@@ -996,7 +996,7 @@
                 ? `<button onclick="resetFilter()" class="action-btn btn-view" style="max-width: 200px; margin: 0 auto;">
                         <i class="fas fa-list mr-2"></i> View All Bookings
                    </button>`
-                : `<a href="/room-booking" class="action-btn btn-view" style="max-width: 200px; margin: 0 auto; text-decoration: none;">
+                : `<a href="{{ route('roomBooking') }}" class="action-btn btn-view" style="max-width: 200px; margin: 0 auto; text-decoration: none;">
                         <i class="fas fa-plus mr-2"></i> Make a New Booking
                    </a>`;
             
