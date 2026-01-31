@@ -15,6 +15,8 @@ return new class extends Migration
             $table->foreignId('entranceFeeID')->nullable(); 
             $table->decimal('totalPrice', 10, 2);
             $table->enum('bookingStatus', ['pending', 'confirmed', 'cancelled', 'completed'])->default('pending');
+            $table->string('gcash_payment_intent_id')->nullable();
+            $table->enum('paymentStatus', ['unpaid', 'partial', 'paid'])->default('unpaid');
             $table->enum('bookingType', ['day-use', 'overnight', 'special-event']);
             $table->enum('eventType', ['normal-booking', 'birthday', 'anniversary', 'wedding', 'corporate', 'christening','reunion','other'])->default('normal-booking');
             $table->text('specialRequirements')->nullable();
