@@ -261,7 +261,8 @@
                                                value="{{ old('feeName', $entranceFee->feeName ?? 'Standard Entrance Fee') }}"
                                                class="w-full pl-12 pr-4 py-3 md:py-3.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm md:text-base"
                                                placeholder="e.g., Standard Entrance Fee"
-                                               required>
+                                               required
+                                               readonly>
                                     </div>
                                     @error('feeName')
                                         <p class="text-red-500 text-sm mt-1 flex items-center gap-1">
