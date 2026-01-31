@@ -818,7 +818,6 @@
     <script>
         const sidebar = document.getElementById('sidebar');
         const toggleBtn = document.getElementById('toggleBtn');
-        const mainContent = document.getElementById('mainContent');
 
         // Desktop toggle only - mobile stays collapsed
         if (window.innerWidth > 768) {
@@ -827,10 +826,6 @@
             if (savedState === 'collapsed') {
                 sidebar.classList.remove('expanded');
                 sidebar.classList.add('collapsed');
-                if (mainContent) {
-                    mainContent.classList.remove('ml-64');
-                    mainContent.classList.add('ml-24');
-                }
             }
 
             // Toggle and save state
@@ -838,20 +833,17 @@
                 sidebar.classList.toggle('expanded');
                 sidebar.classList.toggle('collapsed');
                 
-                // Adjust main content margin
+                // Save state
                 if (sidebar.classList.contains('collapsed')) {
-                    if (mainContent) {
-                        mainContent.classList.remove('ml-64');
-                        mainContent.classList.add('ml-24');
-                    }
                     localStorage.setItem('sidebarState', 'collapsed');
                 } else {
-                    if (mainContent) {
-                        mainContent.classList.remove('ml-24');
-                        mainContent.classList.add('ml-64');
-                    }
                     localStorage.setItem('sidebarState', 'expanded');
                 }
+                
+                // Broadcast event to dashboard
+                window.dispatchEvent(new CustomEvent('sidebarToggled', { 
+                    detail: { collapsed: sidebar.classList.contains('collapsed') }
+                }));
             });
         }
 
@@ -870,7 +862,7 @@
                         const sidebarWidth = sidebar.offsetWidth;
                         
                         // Position tooltip to the right of the sidebar
-                        tooltip.style.left = `${sidebarWidth + 1}px`;
+                        tooltip.style.left = `${sidebarWidth + 12}px`;
                         tooltip.style.top = `${rect.top + (rect.height / 2)}px`;
                         tooltip.style.transform = 'translateY(-50%)';
                     });

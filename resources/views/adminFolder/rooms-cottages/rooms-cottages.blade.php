@@ -9,6 +9,46 @@
     <link rel="icon" type="image/x-icon" href="{{ asset('images/sunflower1.png') }}">
     <title>Rooms & Cottages - Villa Elena</title>
     <style>
+        /* ===== SIDEBAR RESPONSIVE LAYOUT (same pattern as history page) ===== */
+        .page-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        #mainContent {
+            flex: 1;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-left: 16rem;
+            width: calc(100% - 16rem);
+        }
+
+        #mainContent.ml-24 {
+            margin-left: 5.5rem;
+            width: calc(100% - 5.5rem);
+        }
+
+        #mainContent.ml-64 {
+            margin-left: 16rem;
+            width: calc(100% - 16rem);
+        }
+
+        /* Tablet */
+        @media (max-width: 768px) {
+            #mainContent {
+                margin-left: 5.5rem !important;
+                width: calc(100% - 5.5rem) !important;
+                padding: 1rem !important;
+            }
+        }
+
+        /* Extra Small */
+        @media (max-width: 640px) {
+            #mainContent {
+                padding: 0.75rem !important;
+            }
+        }
+
+        /* ===== UNIT CARD STYLES ===== */
         .selected-unit {
             border: 2px solid #3b82f6;
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
@@ -28,6 +68,8 @@
         .search-loading .search-icon {
             display: none;
         }
+
+        /* ===== PAGINATION ===== */
         .pagination .page-item {
             display: inline-block;
             margin: 0 2px;
@@ -48,26 +90,129 @@
             color: #9ca3af;
             cursor: not-allowed;
         }
+
+        /* ===== RESPONSIVE GRID ===== */
+        .units-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        #mainContent.ml-64 .units-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        #mainContent.ml-24 .units-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        @media (max-width: 1024px) {
+            .units-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .units-grid {
+                grid-template-columns: 1fr !important;
+                gap: 1rem;
+            }
+        }
+
+        /* ===== RESPONSIVE FILTER BAR ===== */
+        .filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .filter-bar .search-wrapper {
+            position: relative;
+            flex: 1;
+            min-width: 180px;
+            max-width: 300px;
+            transition: max-width 0.3s ease;
+        }
+
+        #mainContent.ml-24 .filter-bar .search-wrapper {
+            max-width: 360px;
+        }
+
+        @media (max-width: 768px) {
+            .filter-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .filter-bar .search-wrapper {
+                max-width: 100% !important;
+            }
+            .filter-bar select,
+            .filter-bar button {
+                width: 100%;
+            }
+        }
+
+        /* ===== ACTION BUTTONS ROW ===== */
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 640px) {
+            .action-buttons {
+                width: 100%;
+            }
+            .action-buttons button {
+                flex: 1;
+                justify-content: center;
+                font-size: 0.8125rem;
+                padding: 0.5rem 0.75rem;
+            }
+        }
+
+        /* ===== HEADER ROW ===== */
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 640px) {
+            .header-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .header-row .action-buttons {
+                order: -1;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-50">
-    <div class="flex">
+    <div class="page-container">
         {{-- Sidebar --}}
         @include('adminFolder.partials.sidebar')
         @include('adminFolder.rooms-cottages.modals.add-edit-modal')
         @include('adminFolder.rooms-cottages.modals.block-modal')
         
         {{-- Main Content --}}
-        <div class="flex-1 ml-64 p-8">
+        <div class="p-8" id="mainContent">
             {{-- Header Section --}}
             <div class="mb-6">
-                <div class="flex justify-between items-start mb-2">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2">
                     <div>
-                        <h1 class="text-3xl font-bold text-gray-800">Rooms & Cottages</h1>
+                        <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Rooms & Cottages</h1>
                         <p class="text-gray-500 text-sm mt-1">Manage your rooms, cottages, and special units</p>
                     </div>
                     <div class="flex items-center gap-4">
-                        <span class="text-sm text-gray-600">{{ now()->format('l, F j, Y') }}</span>
+                        <span class="text-xs md:text-sm text-gray-600">{{ now()->format('l, F j, Y') }}</span>
                     </div>
                 </div>
             </div>
@@ -81,9 +226,11 @@
 
             {{-- Action Buttons and Filters --}}
             <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-                <div class="flex justify-between items-center mb-6">
+
+                {{-- Top Row: Title + Buttons --}}
+                <div class="header-row">
                     <h2 class="text-xl font-semibold text-gray-800">Rooms & Cottages</h2>
-                    <div class="flex gap-3">
+                    <div class="action-buttons">
                         <button id="blockDatesBtn" onclick="openBlockModal()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-lg font-medium flex items-center gap-2 transition disabled:bg-red-400 disabled:cursor-not-allowed" disabled>
                             <i class="far fa-calendar-times"></i>
                             Block Units
@@ -99,35 +246,32 @@
 
                 {{-- Search and Filter --}}
                 <form method="GET" action="{{ route('admin.rooms-cottages') }}" id="searchForm">
-                    <div class="flex justify-between items-center mb-6">
-                        <div class="flex gap-4">
-                            <div class="relative">
-                                <i class="fas fa-search search-icon absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                                <input 
-                                    type="text" 
-                                    name="search"
-                                    id="searchInput"
-                                    placeholder="Search rooms, cottages, or special units..." 
-                                    value="{{ request('search') }}"
-                                    class="pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
-                                >
-                            </div>
-                            <select name="status" id="statusFilter" class="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                                <option value="">All Status</option>
-                                <option value="available" {{ request('status') == 'available' ? 'selected' : '' }}>Available</option>
-
-                                <option value="blocked" {{ request('status') == 'blocked' ? 'selected' : '' }}>Blocked</option>
-                            </select>
-                            <select name="type" id="typeFilter" class="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                                <option value="">All Types</option>
-                                <option value="room" {{ request('type') == 'room' ? 'selected' : '' }}>Rooms</option>
-                                <option value="cottage" {{ request('type') == 'cottage' ? 'selected' : '' }}>Cottages</option>
-                                <option value="special" {{ request('type') == 'special' ? 'selected' : '' }}>Special Units</option>
-                            </select>
-                            <button type="button" onclick="clearFilters()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2.5 rounded-lg font-medium">
-                                Clear
-                            </button>
+                    <div class="filter-bar mb-6">
+                        <div class="search-wrapper">
+                            <i class="fas fa-search search-icon absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            <input 
+                                type="text" 
+                                name="search"
+                                id="searchInput"
+                                placeholder="Search rooms or cottages..." 
+                                value="{{ request('search') }}"
+                                class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
                         </div>
+                        <select name="status" id="statusFilter" class="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                            <option value="">All Status</option>
+                            <option value="available" {{ request('status') == 'available' ? 'selected' : '' }}>Available</option>
+                            <option value="blocked" {{ request('status') == 'blocked' ? 'selected' : '' }}>Blocked</option>
+                        </select>
+                        <select name="type" id="typeFilter" class="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                            <option value="">All Types</option>
+                            <option value="room" {{ request('type') == 'room' ? 'selected' : '' }}>Rooms</option>
+                            <option value="cottage" {{ request('type') == 'cottage' ? 'selected' : '' }}>Cottages</option>
+                            <option value="special" {{ request('type') == 'special' ? 'selected' : '' }}>Special Units</option>
+                        </select>
+                        <button type="button" onclick="clearFilters()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2.5 rounded-lg font-medium">
+                            Clear
+                        </button>
                     </div>
                 </form>
 
@@ -147,7 +291,7 @@
                 {{-- Units Container --}}
                 <div id="unitsContainer">
                     {{-- Units Grid --}}
-                    <div id="unitsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    <div id="unitsGrid" class="units-grid">
                         @foreach($units as $unit)
                         <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition relative unit-card" data-unit-id="{{ $unit->unitID }}">
                             @if(auth()->user()->role === 'manager')
@@ -182,7 +326,6 @@
                                     <h3 class="text-lg font-bold text-gray-800">{{ $unit->unitName }}</h3>
                                     <span class="px-3 py-1 text-xs font-semibold rounded-full 
                                         {{ $unit->unitStatus == 'available' ? 'bg-green-100 text-green-700' : '' }}
-
                                         {{ $unit->unitStatus == 'blocked' ? 'bg-red-100 text-red-700' : '' }}">
                                         {{ ucfirst($unit->unitStatus) }}
                                     </span>
@@ -273,14 +416,37 @@
 
     <script>
         // ============================================
+        // SIDEBAR RESPONSIVE
+        // ============================================
+        window.addEventListener('sidebarToggled', (event) => {
+            const mainContent = document.getElementById('mainContent');
+            if (event.detail.collapsed) {
+                mainContent.classList.remove('ml-64');
+                mainContent.classList.add('ml-24');
+            } else {
+                mainContent.classList.remove('ml-24');
+                mainContent.classList.add('ml-64');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedState = localStorage.getItem('sidebarState');
+            const mainContent = document.getElementById('mainContent');
+            if (savedState === 'collapsed') {
+                mainContent.classList.remove('ml-64');
+                mainContent.classList.add('ml-24');
+            }
+        });
+        // ============================================
+        // END SIDEBAR RESPONSIVE
+        // ============================================
+
+        // ============================================
         // UNIT SELECTION FUNCTIONS
         // ============================================
 
         let selectedUnits = new Set();
 
-        /**
-         * Initializes unit selection functionality
-         */
         function initializeUnitSelection() {
             selectedUnits.clear();
             updateSelection();
@@ -290,22 +456,15 @@
             });
         }
 
-        /**
-         * Sets up selection for a unit card
-         * @param {HTMLElement} card - Unit card element
-         */
         function setupUnitCardSelection(card) {
             const checkbox = card.querySelector('.unit-checkbox');
             
-            // Clone to remove old listeners
             const newCard = card.cloneNode(true);
             card.parentNode.replaceChild(newCard, card);
             
             const updatedCheckbox = newCard.querySelector('.unit-checkbox');
             
-            // Card click handler
             newCard.addEventListener('click', function(e) {
-                // Don't trigger if clicking buttons, forms, or links
                 if (e.target.closest('button') || e.target.closest('form') || e.target.closest('a')) {
                     return;
                 }
@@ -321,7 +480,6 @@
                 updateSelection();
             });
             
-            // Checkbox click handler
             if (updatedCheckbox) {
                 updatedCheckbox.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -338,9 +496,6 @@
             }
         }
 
-        /**
-         * Selects a unit
-         */
         function selectUnit(unitId, card, checkbox) {
             selectedUnits.add(unitId);
             card.classList.add('selected-unit');
@@ -351,9 +506,6 @@
             }
         }
 
-        /**
-         * Deselects a unit
-         */
         function deselectUnit(unitId, card, checkbox) {
             selectedUnits.delete(unitId);
             card.classList.remove('selected-unit');
@@ -364,9 +516,6 @@
             }
         }
 
-        /**
-         * Updates selection info and button states
-         */
         function updateSelection() {
             const selectedCount = selectedUnits.size;
             const selectionInfo = document.getElementById('selectionInfo');
@@ -388,17 +537,14 @@
             if (blockDatesBtn) {
                 blockDatesBtn.disabled = selectedCount === 0;
                 
-                // Check if all selected units are blocked
                 if (selectedCount > 0) {
                     const allBlocked = checkIfAllSelectedUnitsAreBlocked();
                     
                     if (allBlocked) {
-                        // All selected units are blocked - show "Unblock Units"
                         blockDatesBtn.innerHTML = '<i class="far fa-calendar-check"></i> Unblock Units';
                         blockDatesBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'disabled:bg-red-400');
                         blockDatesBtn.classList.add('bg-green-600', 'hover:bg-green-700', 'disabled:bg-green-400');
                     } else {
-                        // Some or all units are not blocked - show "Block Units"
                         blockDatesBtn.innerHTML = '<i class="far fa-calendar-times"></i> Block Units';
                         blockDatesBtn.classList.remove('bg-green-600', 'hover:bg-green-700', 'disabled:bg-green-400');
                         blockDatesBtn.classList.add('bg-red-600', 'hover:bg-red-700', 'disabled:bg-red-400');
@@ -407,10 +553,6 @@
             }
         }
         
-        /**
-         * Checks if all selected units are currently blocked
-         * @returns {boolean}
-         */
         function checkIfAllSelectedUnitsAreBlocked() {
             if (selectedUnits.size === 0) return false;
             
@@ -432,9 +574,6 @@
             return allBlocked;
         }
 
-        /**
-         * Clears all selections
-         */
         function clearSelection() {
             selectedUnits.clear();
             
@@ -456,9 +595,6 @@
 
         let searchTimeout;
 
-        /**
-         * Performs search with filters
-         */
         function performSearch() {
             const searchForm = document.getElementById('searchForm');
             const loadingIndicator = document.getElementById('loadingIndicator');
@@ -466,18 +602,16 @@
             const paginationSection = document.getElementById('paginationSection');
             const noResults = document.getElementById('noResults');
             
-            // Show loading
             if (loadingIndicator) loadingIndicator.classList.remove('hidden');
             if (unitsGrid) unitsGrid.classList.add('hidden');
             if (paginationSection) paginationSection.classList.add('hidden');
             if (noResults) noResults.classList.add('hidden');
             
-            const searchContainer = document.querySelector('.relative');
+            const searchContainer = document.querySelector('.search-wrapper');
             if (searchContainer) {
                 searchContainer.classList.add('search-loading');
             }
             
-            // Get form data
             const formData = new FormData(searchForm);
             const params = new URLSearchParams();
             
@@ -487,7 +621,6 @@
                 }
             }
             
-            // AJAX search
             fetch(searchForm.action + '?' + params.toString(), {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
@@ -513,9 +646,6 @@
             });
         }
 
-        /**
-         * Updates units display with new HTML
-         */
         function updateUnitsDisplay(html) {
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = html;
@@ -528,10 +658,8 @@
                     currentContainer.innerHTML = newUnitsContainer.innerHTML;
                 }
                 
-                // Reinitialize
                 initializeUnitSelection();
                 
-                // Check results
                 const unitsGrid = document.getElementById('unitsGrid');
                 const noResults = document.getElementById('noResults');
                 
@@ -547,9 +675,6 @@
             }
         }
 
-        /**
-         * Clears all filters
-         */
         function clearFilters() {
             document.getElementById('searchInput').value = '';
             document.getElementById('statusFilter').value = '';
@@ -561,9 +686,6 @@
         // EDIT BUTTON HANDLER
         // ============================================
 
-        /**
-         * Handles edit button clicks using event delegation
-         */
         function handleEditButtonClick(e) {
             const editBtn = e.target.closest('.edit-btn');
             if (editBtn) {
@@ -586,13 +708,10 @@
         // ============================================
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Use event delegation for edit buttons
             document.addEventListener('click', handleEditButtonClick);
             
-            // Initialize selection
             initializeUnitSelection();
             
-            // Search with debounce
             const searchInput = document.getElementById('searchInput');
             if (searchInput) {
                 searchInput.addEventListener('input', function() {
@@ -601,7 +720,6 @@
                 });
             }
             
-            // Filter changes
             const statusFilter = document.getElementById('statusFilter');
             if (statusFilter) {
                 statusFilter.addEventListener('change', performSearch);

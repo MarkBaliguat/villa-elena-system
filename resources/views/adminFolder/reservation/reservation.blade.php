@@ -10,23 +10,361 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <title>Reservations - Villa Elena</title>
+    <style>
+        /* ===== SIDEBAR RESPONSIVE LAYOUT ===== */
+        .page-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        #mainContent {
+            flex: 1;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-left: 16rem;
+            width: calc(100% - 16rem);
+        }
+
+        #mainContent.ml-24 {
+            margin-left: 5.5rem;
+            width: calc(100% - 5.5rem);
+        }
+
+        #mainContent.ml-64 {
+            margin-left: 16rem;
+            width: calc(100% - 16rem);
+        }
+
+        /* ===== RESPONSIVE TABLE ===== */
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .table-responsive::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .table-responsive::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .table-responsive::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .table-responsive::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        #bookingsTable {
+            width: 100%;
+            table-layout: auto;
+        }
+
+        #bookingsTable th,
+        #bookingsTable td {
+            white-space: nowrap;
+            transition: padding 0.3s ease, font-size 0.3s ease;
+        }
+
+        /* Compact when sidebar expanded */
+        #mainContent.ml-64 #bookingsTable th,
+        #mainContent.ml-64 #bookingsTable td {
+            padding: 0.75rem 0.5rem;
+            font-size: 0.8125rem;
+        }
+
+        /* Spacious when sidebar collapsed */
+        #mainContent.ml-24 #bookingsTable th,
+        #mainContent.ml-24 #bookingsTable td {
+            padding: 0.875rem 0.75rem;
+            font-size: 0.875rem;
+        }
+
+        /* Column sizing */
+        #bookingsTable th:nth-child(1), #bookingsTable td:nth-child(1) { min-width: 160px; }
+        #bookingsTable th:nth-child(2), #bookingsTable td:nth-child(2) { min-width: 200px; }
+        #bookingsTable th:nth-child(3), #bookingsTable td:nth-child(3) { min-width: 160px; }
+        #bookingsTable th:nth-child(4), #bookingsTable td:nth-child(4) { min-width: 140px; }
+        #bookingsTable th:nth-child(5), #bookingsTable td:nth-child(5) { min-width: 100px; }
+        #bookingsTable th:nth-child(6), #bookingsTable td:nth-child(6) { min-width: 130px; }
+
+        /* Allow wrapping on booking details column */
+        #bookingsTable td:nth-child(2) {
+            white-space: normal;
+        }
+
+        /* ===== FILTER BAR ===== */
+        .filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .filter-bar .search-wrapper {
+            position: relative;
+            flex: 1;
+            min-width: 180px;
+            max-width: 280px;
+            transition: max-width 0.3s ease;
+        }
+
+        #mainContent.ml-24 .filter-bar .search-wrapper {
+            max-width: 340px;
+        }
+
+        /* ===== EXPORT BUTTONS ===== */
+        .export-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        #mainContent.ml-64 .export-btn {
+            padding: 0.625rem 0.75rem;
+            font-size: 0.8125rem;
+        }
+
+        #mainContent.ml-24 .export-btn {
+            padding: 0.625rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        /* ===== HEADER ROW ===== */
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* ===== MOBILE CARD VIEW ===== */
+        .booking-card {
+            display: none;
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-left: 4px solid #3b82f6;
+        }
+
+        .booking-card .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .booking-card .card-body {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+
+        .booking-card .card-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .booking-card .card-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+        }
+
+        .booking-card .card-value {
+            font-size: 0.875rem;
+            color: #111827;
+        }
+
+        .booking-card .card-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .booking-card .card-actions button {
+            flex: 1;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.375rem;
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .booking-card .card-actions button:hover {
+            opacity: 0.85;
+        }
+
+        .btn-card-edit { background: #2563eb; color: white; }
+        .btn-card-payment { background: #16a34a; color: white; }
+        .btn-card-delete { background: #dc2626; color: white; }
+
+        .booking-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+            transition: all 0.3s ease;
+        }
+
+        /* Table row hover */
+        .table-row-hover {
+            transition: all 0.2s ease;
+        }
+
+        .table-row-hover:hover {
+            background-color: #f9fafb !important;
+        }
+
+        /* Status badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* ===== SHOW CARDS / HIDE TABLE ON MOBILE ===== */
+        @media (max-width: 1024px) {
+            #bookingsTable {
+                display: none;
+            }
+
+            .booking-card {
+                display: block;
+            }
+
+            .filter-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-bar .search-wrapper {
+                max-width: 100% !important;
+            }
+
+            .filter-bar select {
+                width: 100%;
+            }
+
+            .export-buttons {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .export-btn {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+
+        /* ===== TABLET ===== */
+        @media (max-width: 768px) {
+            #mainContent {
+                margin-left: 5.5rem !important;
+                width: calc(100% - 5.5rem) !important;
+                padding: 1rem !important;
+            }
+
+            .booking-card .card-body {
+                grid-template-columns: 1fr;
+            }
+
+            .export-buttons {
+                flex-direction: column;
+            }
+
+            .export-btn {
+                width: 100%;
+            }
+
+            .header-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .header-row .action-buttons {
+                width: 100%;
+            }
+
+            .header-row .action-buttons button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* ===== EXTRA SMALL ===== */
+        @media (max-width: 640px) {
+            #mainContent {
+                padding: 0.75rem !important;
+            }
+
+            .booking-card {
+                padding: 0.75rem;
+            }
+
+            .booking-card .card-actions {
+                flex-direction: column;
+            }
+
+            .filter-bar button {
+                width: 100%;
+            }
+        }
+
+        /* Pagination responsive */
+        .pagination-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            justify-content: center;
+        }
+
+        @media (max-width: 640px) {
+            .pagination-container button {
+                min-width: 36px;
+                padding: 0.5rem 0.625rem;
+                font-size: 0.75rem;
+            }
+        }
+    </style>
 </head>
 <body class="bg-gray-50">
-    <div class="flex">
+    <div class="page-container">
         {{-- Sidebar --}}
         @include('adminFolder.partials.sidebar')
         
         {{-- Main Content --}}
-        <div class="ml-64 flex-1 p-8">
+        <div class="p-8" id="mainContent">
             {{-- Header Section --}}
             <div class="mb-6">
-                <div class="flex justify-between items-start mb-2">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2">
                     <div>
-                        <h1 class="text-3xl font-bold text-gray-800">Reservations</h1>
+                        <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Reservations</h1>
                         <p class="text-gray-500 text-sm mt-1">Manage all bookings and reservations</p>
                     </div>
                     <div class="flex items-center gap-4">
-                        <span class="text-sm text-gray-600" id="currentDate"></span>
+                        <span class="text-xs md:text-sm text-gray-600" id="currentDate"></span>
                     </div>
                 </div>
             </div>
@@ -38,9 +376,11 @@
 
             {{-- Filters and Add Button --}}
             <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-                <div class="flex justify-between items-center mb-6">
+
+                {{-- Top Row: Title + Add Button --}}
+                <div class="header-row">
                     <h2 class="text-xl font-semibold text-gray-800">Active Reservations</h2>
-                    <div class="flex gap-3">
+                    <div class="action-buttons">
                         <button onclick="openModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium flex items-center gap-2 transition">
                             <i class="fas fa-plus"></i>
                             Add Booking
@@ -50,47 +390,48 @@
 
                 {{-- Search and Filter --}}
                 <form method="GET" action="" id="searchForm">
-                    <div class="flex justify-between items-center mb-6">
-                        <div class="flex gap-4">
-                            <div class="relative">
-                                <i class="fas fa-search search-icon absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                                <input 
-                                    type="text" 
-                                    name="search"
-                                    id="searchInput"
-                                    placeholder="Search by guest name, email, or phone" 
-                                    class="pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
-                                >
-                            </div>
-                            <select id="statusFilter" class="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                                <option value="all">All Status</option>
-                                <option value="pending">Pending</option>
-                                <option value="confirmed">Confirmed</option>
-                            </select>
-                            <button type="button" onclick="clearFilters()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2.5 rounded-lg font-medium">
-                                Clear
+                    <div class="filter-bar mb-6">
+                        <div class="search-wrapper">
+                            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            <input 
+                                type="text" 
+                                name="search"
+                                id="searchInput"
+                                placeholder="Search by guest name, email, or phone" 
+                                class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                        </div>
+                        <select id="statusFilter" class="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                            <option value="all">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="confirmed">Confirmed</option>
+                        </select>
+                        <button type="button" onclick="clearFilters()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2.5 rounded-lg font-medium">
+                            Clear
+                        </button>
+                        {{-- Export Buttons --}}
+                        <div class="export-buttons">
+                            <button type="button" onclick="exportToCSV()" class="export-btn bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg font-medium flex items-center gap-2 transition text-sm">
+                                <i class="fas fa-file-csv"></i>
+                                <span class="hidden sm:inline">Export CSV</span>
+                                <span class="sm:hidden">CSV</span>
                             </button>
-                            {{-- Export Buttons --}}
-                            <div class="flex gap-2">
-                                <button type="button" onclick="exportToCSV()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg font-medium flex items-center gap-2 transition text-sm">
-                                    <i class="fas fa-file-csv"></i>
-                                    Export CSV
-                                </button>
-                                <button type="button" onclick="printTable()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium flex items-center gap-2 transition text-sm">
-                                    <i class="fas fa-print"></i>
-                                    Print
-                                </button>
-                                <button type="button" onclick="exportToPDF()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2.5 rounded-lg font-medium flex items-center gap-2 transition text-sm">
-                                    <i class="fas fa-file-pdf"></i>
-                                    Export PDF
-                                </button>
-                            </div>
+                            <button type="button" onclick="printTable()" class="export-btn bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium flex items-center gap-2 transition text-sm">
+                                <i class="fas fa-print"></i>
+                                <span class="hidden sm:inline">Print</span>
+                                <span class="sm:hidden">Print</span>
+                            </button>
+                            <button type="button" onclick="exportToPDF()" class="export-btn bg-red-600 hover:bg-red-700 text-white px-4 py-2.5 rounded-lg font-medium flex items-center gap-2 transition text-sm">
+                                <i class="fas fa-file-pdf"></i>
+                                <span class="hidden sm:inline">Export PDF</span>
+                                <span class="sm:hidden">PDF</span>
+                            </button>
                         </div>
                     </div>
                 </form>
 
-                {{-- Reservations Table --}}
-                <div class="overflow-x-auto">
+                {{-- Desktop Table View --}}
+                <div class="table-responsive">
                     <table class="w-full" id="bookingsTable">
                         <thead>
                             <tr class="border-b border-gray-200">
@@ -113,13 +454,18 @@
                     </table>
                 </div>
 
+                {{-- Mobile Card View --}}
+                <div id="bookingsCardsContainer">
+                    <!-- Cards generated here for mobile -->
+                </div>
+
                 {{-- Pagination --}}
-                <div class="flex flex-col sm:flex-row justify-between items-center mt-6 pt-6 border-t border-gray-200 space-y-4 sm:space-y-0">
-                    <div class="text-sm text-gray-600">
+                <div class="flex flex-col sm:flex-row justify-between items-center mt-6 pt-6 border-t border-gray-200 gap-4">
+                    <div class="text-sm text-gray-600 text-center sm:text-left">
                         Showing <span id="showingFrom">0</span> to <span id="showingTo">0</span> of <span id="totalRecords">0</span> results
                     </div>
-                    <div class="flex gap-1" id="pagination">
-                        <!-- Pagination buttons will be generated here -->
+                    <div class="pagination-container" id="pagination">
+                        <!-- Pagination buttons generated here -->
                     </div>
                 </div>
             </div>
@@ -127,7 +473,33 @@
     </div>
 
     <script>
-        // Setup CSRF token for all AJAX requests
+        // ============================================
+        // SIDEBAR RESPONSIVE
+        // ============================================
+        window.addEventListener('sidebarToggled', (event) => {
+            const mainContent = document.getElementById('mainContent');
+            if (event.detail.collapsed) {
+                mainContent.classList.remove('ml-64');
+                mainContent.classList.add('ml-24');
+            } else {
+                mainContent.classList.remove('ml-24');
+                mainContent.classList.add('ml-64');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedState = localStorage.getItem('sidebarState');
+            const mainContent = document.getElementById('mainContent');
+            if (savedState === 'collapsed') {
+                mainContent.classList.remove('ml-64');
+                mainContent.classList.add('ml-24');
+            }
+        });
+        // ============================================
+        // END SIDEBAR RESPONSIVE
+        // ============================================
+
+        // Setup CSRF token
         const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
         // Pagination variables
@@ -144,21 +516,17 @@
             day: 'numeric'
         });
 
-        // Clear filters function
+        // Clear filters
         function clearFilters() {
             document.getElementById('searchInput').value = '';
             document.getElementById('statusFilter').value = 'all';
             loadBookings('all', '', 1);
         }
 
-        // Phone number validation function
+        // Phone number validation
         function validatePhoneNumber(phone) {
-            // Remove any non-digit characters
             const cleaned = phone.replace(/\D/g, '');
-            
-            // Check if it's exactly 11 digits and starts with 09
             const isValid = /^09\d{9}$/.test(cleaned);
-            
             return {
                 isValid: isValid,
                 formatted: isValid ? cleaned : phone,
@@ -166,65 +534,40 @@
             };
         }
 
-        // Phone number input handler
         function setupPhoneValidation(inputId) {
             const phoneInput = document.getElementById(inputId);
-            
             if (!phoneInput) return;
-            
-            // Format phone number as user types
+
             phoneInput.addEventListener('input', function(e) {
                 let value = e.target.value.replace(/\D/g, '');
-                
-                // Limit to 11 digits
-                if (value.length > 11) {
-                    value = value.substring(0, 11);
-                }
-                
-                // Format with spaces for readability (optional)
-                if (value.length > 0) {
-                    value = value.replace(/(\d{4})(\d{3})(\d{4})/, '$1 $2 $3');
-                }
-                
+                if (value.length > 11) value = value.substring(0, 11);
+                if (value.length > 0) value = value.replace(/(\d{4})(\d{3})(\d{4})/, '$1 $2 $3');
                 e.target.value = value;
-                
-                // Real-time validation
                 validatePhoneField(phoneInput);
             });
-            
-            // Validate on blur
+
             phoneInput.addEventListener('blur', function() {
                 validatePhoneField(phoneInput);
             });
         }
 
-        // Validate phone field and show error
         function validatePhoneField(phoneInput) {
             const value = phoneInput.value.replace(/\D/g, '');
             const validation = validatePhoneNumber(value);
-            
-            // Remove existing error message
+
             const existingError = phoneInput.parentNode.querySelector('.phone-error');
-            if (existingError) {
-                existingError.remove();
-            }
-            
-            // Remove error styling
+            if (existingError) existingError.remove();
+
             phoneInput.classList.remove('border-red-500', 'border-green-500');
-            
-            if (value === '') {
-                return true; // Empty is okay for optional fields
-            }
-            
+
+            if (value === '') return true;
+
             if (!validation.isValid) {
                 phoneInput.classList.add('border-red-500');
-                
-                // Add error message
                 const errorDiv = document.createElement('div');
                 errorDiv.className = 'phone-error text-red-500 text-xs mt-1';
                 errorDiv.textContent = validation.error;
                 phoneInput.parentNode.appendChild(errorDiv);
-                
                 return false;
             } else {
                 phoneInput.classList.add('border-green-500');
@@ -232,39 +575,35 @@
             }
         }
 
-        // Validate phone number before form submission
         function validateFormPhoneNumbers() {
             const addPhoneInput = document.getElementById('phone');
             const editPhoneInput = document.getElementById('edit_phone');
-            
             let isValid = true;
-            
+
             if (addPhoneInput && addPhoneInput.value) {
-                if (!validatePhoneField(addPhoneInput)) {
-                    isValid = false;
-                }
+                if (!validatePhoneField(addPhoneInput)) isValid = false;
             }
-            
             if (editPhoneInput && editPhoneInput.value) {
-                if (!validatePhoneField(editPhoneInput)) {
-                    isValid = false;
-                }
+                if (!validatePhoneField(editPhoneInput)) isValid = false;
             }
-            
             return isValid;
         }
 
-        // Load all bookings with pagination
+        // Load bookings
         function loadBookings(status = 'all', search = '', page = 1) {
             const tbody = document.getElementById('bookingsTableBody');
-            tbody.innerHTML = `
+            const cardsContainer = document.getElementById('bookingsCardsContainer');
+
+            const loadingRow = `
                 <tr>
                     <td colspan="6" class="text-center py-8 text-gray-500">
                         <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
                         <p>Loading bookings...</p>
                     </td>
-                </tr>
-            `;
+                </tr>`;
+
+            tbody.innerHTML = loadingRow;
+            cardsContainer.innerHTML = `<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-gray-500"></i></div>`;
 
             let url = `/admin/bookings?`;
             if (status !== 'all') url += `status=${status}&`;
@@ -278,36 +617,28 @@
                         allBookings = data.data;
                         totalBookings = data.total || data.data.length;
                         currentPage = page;
-                        
+
                         displayBookings(data.data);
+                        displayBookingCards(data.data);
                         updatePagination(data.total || data.data.length, page);
                         updateShowingText(data.data.length, page, data.total || data.data.length);
                     } else {
-                        tbody.innerHTML = `
-                            <tr>
-                                <td colspan="6" class="text-center py-8 text-red-500">
-                                    Error loading bookings
-                                </td>
-                            </tr>
-                        `;
+                        const errorMsg = `<tr><td colspan="6" class="text-center py-8 text-red-500">Error loading bookings</td></tr>`;
+                        tbody.innerHTML = errorMsg;
+                        cardsContainer.innerHTML = `<div class="text-center py-8 text-red-500">Error loading bookings</div>`;
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="6" class="text-center py-8 text-red-500">
-                                Error loading bookings
-                            </td>
-                        </tr>
-                    `;
+                    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-red-500">Error loading bookings</td></tr>`;
+                    cardsContainer.innerHTML = `<div class="text-center py-8 text-red-500">Error loading bookings</div>`;
                 });
         }
 
-        // Display bookings in table
+        // Display bookings in table (Desktop)
         function displayBookings(bookings) {
             const tbody = document.getElementById('bookingsTableBody');
-            
+
             if (bookings.length === 0) {
                 tbody.innerHTML = `
                     <tr>
@@ -315,13 +646,12 @@
                             <i class="fas fa-inbox text-4xl mb-2"></i>
                             <p>No bookings found</p>
                         </td>
-                    </tr>
-                `;
+                    </tr>`;
                 return;
             }
 
             tbody.innerHTML = bookings.map(booking => `
-                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                <tr class="border-b border-gray-100 table-row-hover">
                     <td class="py-4 px-4">
                         <div>
                             <p class="font-medium text-gray-900">${booking.guest_name}</p>
@@ -352,7 +682,7 @@
                         <p class="text-sm text-gray-700">${booking.units}</p>
                     </td>
                     <td class="py-4 px-4">
-                        <span class="px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(booking.booking_status)}">
+                        <span class="status-badge ${getStatusColor(booking.booking_status)}">
                             ${booking.booking_status.toUpperCase()}
                         </span>
                     </td>
@@ -373,143 +703,176 @@
             `).join('');
         }
 
-        // Update pagination controls - UPDATED DESIGN (same as units)
+        // Display bookings as cards (Mobile)
+        function displayBookingCards(bookings) {
+            const container = document.getElementById('bookingsCardsContainer');
+
+            if (bookings.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            container.innerHTML = bookings.map(booking => `
+                <div class="booking-card">
+                    <div class="card-header">
+                        <div>
+                            <h3 class="font-semibold text-gray-900 text-lg">${booking.guest_name}</h3>
+                            <p class="text-sm text-gray-500">${booking.email}</p>
+                            <p class="text-sm text-gray-500">${booking.phone}</p>
+                        </div>
+                        <span class="status-badge ${getStatusColor(booking.booking_status)}">
+                            ${booking.booking_status.toUpperCase()}
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-item">
+                            <span class="card-label">Booking Type</span>
+                            <span class="card-value">${booking.booking_type}</span>
+                        </div>
+                        <div class="card-item">
+                            <span class="card-label">Check-in</span>
+                            <span class="card-value">${booking.checkin_date}</span>
+                        </div>
+                        <div class="card-item">
+                            <span class="card-label">Check-out</span>
+                            <span class="card-value">${booking.checkout_date || 'N/A'}</span>
+                        </div>
+                        <div class="card-item">
+                            <span class="card-label">Guests</span>
+                            <span class="card-value">${booking.num_guests}</span>
+                        </div>
+                        <div class="card-item">
+                            <span class="card-label">Units</span>
+                            <span class="card-value">${booking.units}</span>
+                        </div>
+                        <div class="card-item">
+                            <span class="card-label">Total Price</span>
+                            <span class="card-value font-semibold text-blue-600">₱${parseFloat(booking.total_price).toFixed(2)}</span>
+                        </div>
+                        <div class="card-item">
+                            <span class="card-label">Amount Paid</span>
+                            <span class="card-value text-green-600">₱${parseFloat(booking.total_paid || 0).toFixed(2)}</span>
+                        </div>
+                        <div class="card-item">
+                            <span class="card-label">Refunded</span>
+                            <span class="card-value text-orange-600">₱${parseFloat(booking.total_refunded || 0).toFixed(2)}</span>
+                        </div>
+                        <div class="card-item">
+                            <span class="card-label">Net Paid</span>
+                            <span class="card-value font-semibold">₱${parseFloat(booking.net_paid || 0).toFixed(2)}</span>
+                        </div>
+                        <div class="card-item">
+                            <span class="card-label">Balance</span>
+                            <span class="card-value font-semibold text-red-600">₱${parseFloat(booking.remaining_balance || booking.total_price).toFixed(2)}</span>
+                        </div>
+                        ${booking.payment_status ? `
+                        <div class="card-item">
+                            <span class="card-label">Payment Status</span>
+                            <span class="card-value ${getPaymentStatusColor(booking.payment_status)} font-semibold">${booking.payment_status.toUpperCase()}</span>
+                        </div>` : ''}
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn-card-edit" onclick="editBooking(${booking.bookingID})">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn-card-payment" onclick="openPaymentModal(${booking.bookingID})">
+                            <i class="fas fa-credit-card"></i> Payment
+                        </button>
+                        <button class="btn-card-delete" onclick="deleteBooking(${booking.bookingID})">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Update pagination
         function updatePagination(total, currentPage) {
             const totalPages = Math.ceil(total / perPage);
             const pagination = document.getElementById('pagination');
-            
+
             if (totalPages <= 1) {
                 pagination.innerHTML = '';
                 return;
             }
 
-            let paginationHTML = '';
+            let html = '';
 
-            // Previous button
+            // Previous
             if (currentPage > 1) {
-                paginationHTML += `
-                    <button onclick="loadBookings(getCurrentStatus(), getCurrentSearch(), ${currentPage - 1})" 
-                            class="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                `;
+                html += `<button onclick="loadBookings(getCurrentStatus(), getCurrentSearch(), ${currentPage - 1})" 
+                    class="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">
+                    <i class="fas fa-chevron-left"></i></button>`;
             }
 
-            // Page numbers - show limited pages with ellipsis
-            const maxVisiblePages = 5;
-            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            const maxVisible = window.innerWidth < 640 ? 3 : 5;
+            let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+            let end = Math.min(totalPages, start + maxVisible - 1);
+            if (end - start + 1 < maxVisible) start = Math.max(1, end - maxVisible + 1);
 
-            // Adjust start page if we're at the end
-            if (endPage - startPage + 1 < maxVisiblePages) {
-                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            // First + ellipsis
+            if (start > 1) {
+                html += `<button onclick="loadBookings(getCurrentStatus(), getCurrentSearch(), 1)" 
+                    class="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">1</button>`;
+                if (start > 2) html += `<span class="px-3 py-2 text-sm text-gray-400">...</span>`;
             }
 
-            // First page and ellipsis
-            if (startPage > 1) {
-                paginationHTML += `
-                    <button onclick="loadBookings(getCurrentStatus(), getCurrentSearch(), 1)" 
-                            class="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">
-                        1
-                    </button>
-                `;
-                if (startPage > 2) {
-                    paginationHTML += `
-                        <span class="px-3 py-2 text-sm text-gray-400">...</span>
-                    `;
-                }
-            }
-
-            // Page numbers
-            for (let i = startPage; i <= endPage; i++) {
+            // Pages
+            for (let i = start; i <= end; i++) {
                 if (i === currentPage) {
-                    paginationHTML += `
-                        <button class="px-3 py-2 text-sm border border-blue-500 bg-blue-500 text-white rounded-lg transition">
-                            ${i}
-                        </button>
-                    `;
+                    html += `<button class="px-3 py-2 text-sm border border-blue-500 bg-blue-500 text-white rounded-lg transition">${i}</button>`;
                 } else {
-                    paginationHTML += `
-                        <button onclick="loadBookings(getCurrentStatus(), getCurrentSearch(), ${i})" 
-                                class="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">
-                            ${i}
-                        </button>
-                    `;
+                    html += `<button onclick="loadBookings(getCurrentStatus(), getCurrentSearch(), ${i})" 
+                        class="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">${i}</button>`;
                 }
             }
 
-            // Last page and ellipsis
-            if (endPage < totalPages) {
-                if (endPage < totalPages - 1) {
-                    paginationHTML += `
-                        <span class="px-3 py-2 text-sm text-gray-400">...</span>
-                    `;
-                }
-                paginationHTML += `
-                    <button onclick="loadBookings(getCurrentStatus(), getCurrentSearch(), ${totalPages})" 
-                            class="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">
-                        ${totalPages}
-                    </button>
-                `;
+            // Last + ellipsis
+            if (end < totalPages) {
+                if (end < totalPages - 1) html += `<span class="px-3 py-2 text-sm text-gray-400">...</span>`;
+                html += `<button onclick="loadBookings(getCurrentStatus(), getCurrentSearch(), ${totalPages})" 
+                    class="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">${totalPages}</button>`;
             }
 
-            // Next button
+            // Next
             if (currentPage < totalPages) {
-                paginationHTML += `
-                    <button onclick="loadBookings(getCurrentStatus(), getCurrentSearch(), ${currentPage + 1})" 
-                            class="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                `;
+                html += `<button onclick="loadBookings(getCurrentStatus(), getCurrentSearch(), ${currentPage + 1})" 
+                    class="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">
+                    <i class="fas fa-chevron-right"></i></button>`;
             }
 
-            pagination.innerHTML = paginationHTML;
+            pagination.innerHTML = html;
         }
 
         // Update showing text
         function updateShowingText(showing, currentPage, total) {
             const from = ((currentPage - 1) * perPage) + 1;
             const to = Math.min(from + showing - 1, total);
-            
-            document.getElementById('showingFrom').textContent = from;
+            document.getElementById('showingFrom').textContent = total === 0 ? 0 : from;
             document.getElementById('showingTo').textContent = to;
             document.getElementById('totalRecords').textContent = total;
         }
 
         // Get current filter values
-        function getCurrentStatus() {
-            return document.getElementById('statusFilter').value;
-        }
+        function getCurrentStatus() { return document.getElementById('statusFilter').value; }
+        function getCurrentSearch() { return document.getElementById('searchInput').value; }
 
-        function getCurrentSearch() {
-            return document.getElementById('searchInput').value;
-        }
-
-        // Get status color - UPDATED: Only pending and confirmed
+        // Status colors
         function getStatusColor(status) {
             switch(status.toLowerCase()) {
-                case 'confirmed':
-                    return 'bg-green-100 text-green-800';
-                case 'pending':
-                    return 'bg-yellow-100 text-yellow-800';
-                default:
-                    return 'bg-gray-100 text-gray-800';
+                case 'confirmed': return 'bg-green-100 text-green-800';
+                case 'pending':   return 'bg-yellow-100 text-yellow-800';
+                default:          return 'bg-gray-100 text-gray-800';
             }
         }
 
-        // Get payment status color
         function getPaymentStatusColor(status) {
             switch(status.toLowerCase()) {
-                case 'completed':
-                    return 'text-green-600';
-                case 'pending':
-                    return 'text-yellow-600';
-                case 'failed':
-                    return 'text-red-600';
-                case 'refunded':
-                    return 'text-blue-600';
-                default:
-                    return 'text-gray-600';
+                case 'completed': return 'text-green-600';
+                case 'pending':   return 'text-yellow-600';
+                case 'failed':    return 'text-red-600';
+                case 'refunded':  return 'text-blue-600';
+                default:          return 'text-gray-600';
             }
         }
 
@@ -519,9 +882,7 @@
 
             fetch(`/admin/bookings/${bookingId}`, {
                 method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken
-                }
+                headers: { 'X-CSRF-TOKEN': csrfToken }
             })
             .then(response => response.json())
             .then(data => {
@@ -540,41 +901,24 @@
 
         // Export to CSV
         function exportToCSV() {
-            const bookings = allBookings;
-            if (bookings.length === 0) {
-                alert('No data to export');
-                return;
-            }
+            if (allBookings.length === 0) { alert('No data to export'); return; }
 
-            const headers = ['Guest Name', 'Email', 'Phone', 'Booking Type', 'Check-in', 'Check-out', 'Guests', 'Units', 'Total Price', 'Amount Paid', 'Amount Refunded', 'Net Paid', 'Remaining Balance', 'Status', 'Payment Status', 'Special Requirements'];
-            const csvData = bookings.map(booking => [
-                `"${booking.guest_name}"`,
-                `"${booking.email}"`,
-                `"${booking.phone}"`,
-                `"${booking.booking_type}"`,
-                `"${booking.checkin_date}"`,
-                `"${booking.checkout_date || 'N/A'}"`,
-                `"${booking.num_guests}"`,
-                `"${booking.units}"`,
-                `"₱${parseFloat(booking.total_price).toFixed(2)}"`,
-                `"₱${parseFloat(booking.total_paid || 0).toFixed(2)}"`,
-                `"₱${parseFloat(booking.total_refunded || 0).toFixed(2)}"`,
-                `"₱${parseFloat(booking.net_paid || 0).toFixed(2)}"`,
-                `"₱${parseFloat(booking.remaining_balance || booking.total_price).toFixed(2)}"`,
-                `"${booking.booking_status}"`,
-                `"${booking.payment_status || 'No Payment'}"`,
-                `"${booking.special_requirements || 'N/A'}"`
+            const headers = ['Guest Name','Email','Phone','Booking Type','Check-in','Check-out','Guests','Units','Total Price','Amount Paid','Amount Refunded','Net Paid','Remaining Balance','Status','Payment Status','Special Requirements'];
+            const rows = allBookings.map(b => [
+                `"${b.guest_name}"`,`"${b.email}"`,`"${b.phone}"`,`"${b.booking_type}"`,
+                `"${b.checkin_date}"`,`"${b.checkout_date || 'N/A'}"`,`"${b.num_guests}"`,`"${b.units}"`,
+                `"₱${parseFloat(b.total_price).toFixed(2)}"`,
+                `"₱${parseFloat(b.total_paid || 0).toFixed(2)}"`,
+                `"₱${parseFloat(b.total_refunded || 0).toFixed(2)}"`,
+                `"₱${parseFloat(b.net_paid || 0).toFixed(2)}"`,
+                `"₱${parseFloat(b.remaining_balance || b.total_price).toFixed(2)}"`,
+                `"${b.booking_status}"`,`"${b.payment_status || 'No Payment'}"`,`"${b.special_requirements || 'N/A'}"`
             ]);
 
-            const csvContent = [
-                headers.join(','),
-                ...csvData.map(row => row.join(','))
-            ].join('\n');
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
+            link.setAttribute('href', URL.createObjectURL(blob));
             link.setAttribute('download', `active_reservations_${new Date().toISOString().split('T')[0]}.csv`);
             link.style.visibility = 'hidden';
             document.body.appendChild(link);
@@ -582,179 +926,109 @@
             document.body.removeChild(link);
         }
 
-        // Print table - UPDATED: Only show pending and confirmed
+        // Print table
         function printTable() {
-            const printWindow = window.open('', '_blank');
-            const bookings = allBookings;
-            
-            if (bookings.length === 0) {
-                alert('No data to print');
-                return;
-            }
+            if (allBookings.length === 0) { alert('No data to print'); return; }
 
+            const printWindow = window.open('', '_blank');
             const printContent = `
-                <!DOCTYPE html>
-                <html>
-                <head>
+                <!DOCTYPE html><html><head>
                     <title>Active Reservations Report - Villa Elena</title>
                     <style>
                         body { font-family: Arial, sans-serif; margin: 20px; }
                         h1 { color: #2d3748; text-align: center; margin-bottom: 20px; }
                         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 11px; }
                         th { background-color: #f8f9fa; font-weight: bold; }
                         .status-confirmed { background-color: #d1fae5; color: #065f46; }
                         .status-pending { background-color: #fef3c7; color: #92400e; }
                         .print-date { text-align: right; margin-bottom: 20px; color: #6b7280; }
                     </style>
-                </head>
-                <body>
+                </head><body>
                     <h1>Active Reservations Report - Villa Elena</h1>
                     <div class="print-date">Printed on: ${new Date().toLocaleString()}</div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Guest Name</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>Booking Type</th>
-                                <th>Check-in</th>
-                                <th>Check-out</th>
-                                <th>Guests</th>
-                                <th>Units</th>
-                                <th>Total Price</th>
-                                <th>Amount Paid</th>
-                                <th>Amount Refunded</th>
-                                <th>Net Paid</th>
-                                <th>Balance</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${bookings.map(booking => `
-                                <tr>
-                                    <td>${booking.guest_name}</td>
-                                    <td>${booking.email}</td>
-                                    <td>${booking.phone}</td>
-                                    <td>${booking.booking_type}</td>
-                                    <td>${booking.checkin_date}</td>
-                                    <td>${booking.checkout_date || 'N/A'}</td>
-                                    <td>${booking.num_guests}</td>
-                                    <td>${booking.units}</td>
-                                    <td>₱${parseFloat(booking.total_price).toFixed(2)}</td>
-                                    <td>₱${parseFloat(booking.total_paid || 0).toFixed(2)}</td>
-                                    <td>₱${parseFloat(booking.total_refunded || 0).toFixed(2)}</td>
-                                    <td>₱${parseFloat(booking.net_paid || 0).toFixed(2)}</td>
-                                    <td>₱${parseFloat(booking.remaining_balance || booking.total_price).toFixed(2)}</td>
-                                    <td><span class="status-${booking.booking_status}">${booking.booking_status.toUpperCase()}</span></td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                    <div style="margin-top: 20px; text-align: center; color: #6b7280;">
-                        Total Records: ${bookings.length}
-                    </div>
-                </body>
-                </html>
-            `;
+                    <table><thead><tr>
+                        <th>Guest Name</th><th>Email</th><th>Phone</th><th>Type</th>
+                        <th>Check-in</th><th>Check-out</th><th>Guests</th><th>Units</th>
+                        <th>Total</th><th>Paid</th><th>Refunded</th><th>Net Paid</th><th>Balance</th><th>Status</th>
+                    </tr></thead><tbody>
+                        ${allBookings.map(b => `<tr>
+                            <td>${b.guest_name}</td><td>${b.email}</td><td>${b.phone}</td>
+                            <td>${b.booking_type}</td><td>${b.checkin_date}</td><td>${b.checkout_date || 'N/A'}</td>
+                            <td>${b.num_guests}</td><td>${b.units}</td>
+                            <td>₱${parseFloat(b.total_price).toFixed(2)}</td>
+                            <td>₱${parseFloat(b.total_paid || 0).toFixed(2)}</td>
+                            <td>₱${parseFloat(b.total_refunded || 0).toFixed(2)}</td>
+                            <td>₱${parseFloat(b.net_paid || 0).toFixed(2)}</td>
+                            <td>₱${parseFloat(b.remaining_balance || b.total_price).toFixed(2)}</td>
+                            <td><span class="status-${b.booking_status}">${b.booking_status.toUpperCase()}</span></td>
+                        </tr>`).join('')}
+                    </tbody></table>
+                    <div style="margin-top:20px;text-align:center;color:#6b7280;">Total Records: ${allBookings.length}</div>
+                </body></html>`;
 
             printWindow.document.write(printContent);
             printWindow.document.close();
             printWindow.focus();
-            setTimeout(() => {
-                printWindow.print();
-                printWindow.close();
-            }, 500);
+            setTimeout(() => { printWindow.print(); printWindow.close(); }, 500);
         }
 
-        // Export to PDF - UPDATED: Only active reservations
+        // Export to PDF
         function exportToPDF() {
+            if (allBookings.length === 0) { alert('No data to export'); return; }
+
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            const bookings = allBookings;
-            
-            if (bookings.length === 0) {
-                alert('No data to export');
-                return;
-            }
 
-            // Add title
             doc.setFontSize(16);
             doc.setTextColor(40, 40, 40);
             doc.text('Active Reservations Report - Villa Elena', 14, 15);
-            
-            // Add date
             doc.setFontSize(10);
             doc.setTextColor(100, 100, 100);
             doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 22);
 
-            // Prepare table data
-            const tableData = bookings.map(booking => [
-                booking.guest_name,
-                booking.email,
-                booking.phone,
-                booking.booking_type,
-                booking.checkin_date,
-                booking.checkout_date || 'N/A',
-                booking.num_guests,
-                booking.units,
-                `₱${parseFloat(booking.total_price).toFixed(2)}`,
-                `₱${parseFloat(booking.total_paid || 0).toFixed(2)}`,
-                `₱${parseFloat(booking.total_refunded || 0).toFixed(2)}`,
-                `₱${parseFloat(booking.net_paid || 0).toFixed(2)}`,
-                `₱${parseFloat(booking.remaining_balance || booking.total_price).toFixed(2)}`,
-                booking.booking_status.toUpperCase()
+            const headers = ['Guest','Email','Phone','Type','Check-in','Check-out','Guests','Units','Total','Paid','Refunded','Net','Balance','Status'];
+            const rows = allBookings.map(b => [
+                b.guest_name, b.email, b.phone, b.booking_type,
+                b.checkin_date, b.checkout_date || 'N/A', b.num_guests, b.units,
+                `₱${parseFloat(b.total_price).toFixed(2)}`,
+                `₱${parseFloat(b.total_paid || 0).toFixed(2)}`,
+                `₱${parseFloat(b.total_refunded || 0).toFixed(2)}`,
+                `₱${parseFloat(b.net_paid || 0).toFixed(2)}`,
+                `₱${parseFloat(b.remaining_balance || b.total_price).toFixed(2)}`,
+                b.booking_status.toUpperCase()
             ]);
 
-            // Table headers
-            const headers = [
-                'Guest Name',
-                'Email', 
-                'Phone',
-                'Type',
-                'Check-in',
-                'Check-out',
-                'Guests',
-                'Units',
-                'Total',
-                'Paid',
-                'Refunded',
-                'Net Paid',
-                'Balance',
-                'Status'
-            ];
-
-            // AutoTable plugin
             doc.autoTable({
-                head: [headers],
-                body: tableData,
-                startY: 30,
-                styles: { fontSize: 8, cellPadding: 3 },
+                head: [headers], body: rows, startY: 30,
+                styles: { fontSize: 7, cellPadding: 2 },
                 headStyles: { fillColor: [59, 130, 246] },
                 alternateRowStyles: { fillColor: [249, 250, 251] }
             });
 
-            // Save PDF
             doc.save(`active_reservations_${new Date().toISOString().split('T')[0]}.pdf`);
         }
 
-        // Filter and search
+        // Filter and search listeners
         document.getElementById('statusFilter').addEventListener('change', function() {
-            const search = document.getElementById('searchInput').value;
-            loadBookings(this.value, search, 1);
+            loadBookings(this.value, document.getElementById('searchInput').value, 1);
         });
 
         document.getElementById('searchInput').addEventListener('input', function() {
-            const status = document.getElementById('statusFilter').value;
             clearTimeout(this.searchTimeout);
             this.searchTimeout = setTimeout(() => {
-                loadBookings(status, this.value, 1);
+                loadBookings(getCurrentStatus(), this.value, 1);
             }, 500);
         });
 
-        // Load bookings on page load
+        // Repaginate on resize
+        window.addEventListener('resize', () => {
+            if (totalBookings > 0) updatePagination(totalBookings, currentPage);
+        });
+
+        // Load on page load
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('=== PAGE LOADED ===');
+            console.log('=== RESERVATIONS PAGE LOADED ===');
             loadBookings('all', '', 1);
         });
     </script>
