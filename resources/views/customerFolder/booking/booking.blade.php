@@ -638,7 +638,21 @@
             daysCount = parseInt(cart.daysCount) || 1;
             numGuests = parseInt(cart.numGuests) || 1;
             
-            const bookingType = daysCount === 1 ? 'day-use' : 'overnight';
+            // Determine booking type correctly
+            // Same day (check-in = check-out) = day-use
+            // Different days (check-in < check-out) = overnight
+            const checkInDate = new Date(cart.checkInDate);
+            const checkOutDate = new Date(cart.checkOutDate);
+            const isSameDay = checkInDate.toDateString() === checkOutDate.toDateString();
+            const bookingType = isSameDay ? 'day-use' : 'overnight';
+            
+            console.log('📅 Booking Type Calculation:', {
+                checkInDate: cart.checkInDate,
+                checkOutDate: cart.checkOutDate,
+                isSameDay: isSameDay,
+                daysCount: daysCount,
+                determinedBookingType: bookingType
+            });
             
             const bookingTypeSelect = document.getElementById('booking_type');
             bookingTypeSelect.innerHTML = `
@@ -713,6 +727,10 @@
                         <div class="flex justify-between">
                             <span class="text-gray-600">Duration:</span>
                             <span class="font-semibold">${daysCount} day(s)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Type:</span>
+                            <span class="font-semibold">${bookingType === 'day-use' ? 'Day Use' : 'Overnight'}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Guests:</span>
