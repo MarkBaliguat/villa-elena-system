@@ -182,7 +182,7 @@
         <div class="booking-details" id="booking-info">
             <div style="text-align: center; padding: 2rem;">
                 <div class="loading"></div>
-                <p style="color: #6B7280; margin-top: 1rem;">Verifying your payment...</p>
+                <p style="color: #6B7280; margin-top: 1rem;">Verifying your payment and creating booking...</p>
             </div>
         </div>
         
@@ -199,14 +199,18 @@
     </div>
     
     <script>
-        // Get payment intent ID from URL
+        // ✅ UPDATED: Get payment intent ID from URL
         const urlParams = new URLSearchParams(window.location.search);
         const paymentIntentId = urlParams.get('payment_intent_id');
-        const bookingId = urlParams.get('booking_id');
         
-        if (paymentIntentId && bookingId) {
-            // Verify payment status
-            fetch(`/payment/gcash/verify?payment_intent_id=${paymentIntentId}&booking_id=${bookingId}`, {
+        console.log('✅ Payment Success Page Loaded');
+        console.log('Payment Intent ID:', paymentIntentId);
+        
+        if (paymentIntentId) {
+            // ✅ Call verify endpoint - This is where booking gets created in DB
+            console.log('🔍 Calling verification endpoint...');
+            
+            fetch(`/payment/gcash/verify?payment_intent_id=${paymentIntentId}`, {
                 headers: {
                     'Accept': 'application/json',
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
@@ -214,31 +218,30 @@
             })
             .then(response => response.json())
             .then(data => {
+                console.log('✅ Verification response:', data);
+                
                 if (data.success) {
-                    // Payment successful - show details
+                    // ✅ Payment verified and booking created successfully
+                    console.log('✅ Payment verified - Booking created');
                     displayBookingDetails(data.booking, data.payment);
-                    
-                    // Show success notification
                     showNotification('✅ Payment successful! Booking confirmed.', 'success');
                     
                 } else {
-                    // Payment failed - redirect to failed page
-                    showNotification('❌ Payment failed. Redirecting...', 'error');
+                    // ❌ Payment failed or verification error
+                    console.error('❌ Verification failed:', data.message);
+                    showNotification('❌ Payment verification failed. Redirecting...', 'error');
                     
                     setTimeout(() => {
-                        if (data.redirect_url) {
-                            window.location.href = data.redirect_url;
-                        } else {
-                            window.location.href = `/payment/gcash/failed?booking_id=${bookingId}`;
-                        }
+                        window.location.href = data.redirect_url || '/payment/gcash/failed';
                     }, 2000);
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                showNotification('⚠️ Error verifying payment. Please check your bookings.', 'error');
+                console.error('❌ Error during verification:', error);
+                showError('Error verifying payment. Please check your bookings.');
             });
         } else {
+            console.error('❌ No payment intent ID found');
             showError('Invalid payment information.');
         }
         

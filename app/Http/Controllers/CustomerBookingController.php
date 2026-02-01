@@ -61,10 +61,8 @@ class CustomerBookingController extends Controller
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function($booking) {
-                // Format data for frontend
                 $booking->formatted_created_at = $booking->created_at->format('Y-m-d h:i A');
                 
-                // ✅ FIX: Use cart dates if eventStartTime/eventEndTime are NULL
                 $eventStart = $booking->eventStartTime 
                     ? Carbon::parse($booking->eventStartTime)->format('Y-m-d')
                     : Carbon::parse($booking->cart->checkInDate)->format('Y-m-d');
@@ -76,10 +74,8 @@ class CustomerBookingController extends Controller
                 $booking->formatted_event_start = $eventStart;
                 $booking->formatted_event_end = $eventEnd;
                 
-                // Calculate total paid
                 $booking->total_paid = $booking->payments->where('paymentStatus', 'completed')->sum('amountPaid');
                 
-                // Get accommodations list
                 $booking->accommodations = $booking->cart->items->map(function($item) {
                     return [
                         'name' => $item->unit->unitName,
@@ -122,7 +118,6 @@ class CustomerBookingController extends Controller
             })
             ->findOrFail($id);
 
-        // ✅ FIX: Use cart dates if eventStartTime/eventEndTime are NULL
         $eventStart = $booking->eventStartTime 
             ? date('Y-m-d', strtotime($booking->eventStartTime))
             : Carbon::parse($booking->cart->checkInDate)->format('Y-m-d');
@@ -131,7 +126,6 @@ class CustomerBookingController extends Controller
             ? date('Y-m-d', strtotime($booking->eventEndTime))
             : Carbon::parse($booking->cart->checkOutDate)->format('Y-m-d');
 
-        // Format booking details
         $booking->formatted_details = [
             'created_at' => $booking->created_at->format('Y-m-d h:i A'),
             'event_start' => $eventStart,
@@ -167,7 +161,6 @@ class CustomerBookingController extends Controller
                 })
                 ->findOrFail($id);
 
-            // Only allow cancellation for pending or confirmed bookings
             if (!in_array($booking->bookingStatus, ['pending', 'confirmed'])) {
                 return response()->json([
                     'success' => false,
@@ -211,7 +204,6 @@ class CustomerBookingController extends Controller
         try {
             $userId = Auth::id();
             
-            // Get active cart
             $cart = Cart::with(['items' => function($query) {
                     $query->where('isBooked', false);
                 }, 'items.unit'])
@@ -230,7 +222,6 @@ class CustomerBookingController extends Controller
             $checkIn = Carbon::parse($cart->checkInDate)->startOfDay();
             $checkOut = Carbon::parse($cart->checkOutDate)->startOfDay();
             
-            // ✅ CRITICAL FIX: STRICT SPECIAL EVENT CHECK
             $specialEventConflict = $this->hasStrictSpecialEventConflict($checkIn, $checkOut);
             
             if ($specialEventConflict) {
@@ -244,7 +235,6 @@ class CustomerBookingController extends Controller
                 ], 400);
             }
             
-            // ✅ STEP 2: Check if any unit in cart is marked for special events only
             foreach ($cart->items as $item) {
                 $unit = $item->unit;
                 
@@ -263,14 +253,12 @@ class CustomerBookingController extends Controller
                 }
             }
             
-            // ✅ STEP 3: Check individual units availability
             $unavailableItems = [];
             $validationErrors = [];
             
             foreach ($cart->items as $item) {
                 $unit = $item->unit;
                 
-                // 1. Check if unit is blocked for the selected dates
                 if ($this->isUnitBlocked($unit, $checkIn, $checkOut)) {
                     $blockStart = $unit->blockStartDate ? Carbon::parse($unit->blockStartDate)->format('M d, Y') : null;
                     $blockEnd = $unit->blockEndDate ? Carbon::parse($unit->blockEndDate)->format('M d, Y') : null;
@@ -285,7 +273,6 @@ class CustomerBookingController extends Controller
                     continue;
                 }
                 
-                // 2. Check if unit is already booked for the selected dates
                 if ($this->isUnitAlreadyBooked($unit->unitID, $checkIn, $checkOut, $cart->cartID)) {
                     $unavailableItems[] = [
                         'cartItemID' => $item->cartItemID,
@@ -297,7 +284,6 @@ class CustomerBookingController extends Controller
                     continue;
                 }
                 
-                // 3. Check unit status
                 if ($unit->unitStatus !== 'available') {
                     $unavailableItems[] = [
                         'cartItemID' => $item->cartItemID,
@@ -320,7 +306,6 @@ class CustomerBookingController extends Controller
                 ], 400);
             }
 
-            // 4. Check if cart has mixed unit types
             $unitTypes = $cart->items->pluck('unit.unitType')->unique()->toArray();
             if (count($unitTypes) > 1 && in_array('room', $unitTypes) && in_array('cottage', $unitTypes)) {
                 return response()->json([
@@ -331,7 +316,6 @@ class CustomerBookingController extends Controller
                 ], 400);
             }
 
-            // 5. Check if cottage booking has active entrance fee
             $hasCottage = $cart->items->where('unit.unitType', 'cottage')->count() > 0;
             if ($hasCottage) {
                 $entranceFee = EntranceFee::where('isActive', true)->first();
@@ -345,7 +329,6 @@ class CustomerBookingController extends Controller
                 }
             }
 
-            // ✅ FINAL CHECK: Double-check everything before approval
             $finalSpecialEventCheck = $this->hasStrictSpecialEventConflict($checkIn, $checkOut);
             if ($finalSpecialEventCheck) {
                 return response()->json([
@@ -380,13 +363,12 @@ class CustomerBookingController extends Controller
     }
 
     /**
-     * ✅ FIXED: Store a new booking - CRITICAL FIX FOR GCASH CART ITEMS
+     * ✅ COMPLETELY REWRITTEN: Store booking - VALIDATION FIRST, NO DATABASE WRITES UNTIL PAYMENT CONFIRMED
      */
     public function store(Request $request)
     {
         Log::info('=== CUSTOMER BOOKING START ===');
         Log::info('Request Data:', $request->all());
-        Log::info('Authenticated User ID: ' . Auth::id());
         
         if (!Auth::check()) {
             Log::error('User not authenticated');
@@ -408,11 +390,11 @@ class CustomerBookingController extends Controller
         ]);
 
         try {
-            DB::beginTransaction();
-
             $userId = Auth::id();
             
-            // ✅ STEP 1: Find the ACTIVE cart with non-booked items
+            // ========== PHASE 1: CART RETRIEVAL & VALIDATION (NO DATABASE WRITES) ==========
+            Log::info('PHASE 1: Starting cart retrieval and validation...');
+            
             $cart = Cart::with(['items' => function($query) {
                 $query->where('isBooked', false);
             }, 'items.unit'])
@@ -420,7 +402,6 @@ class CustomerBookingController extends Controller
             ->where('is_active', true)
             ->first();
 
-            // If no active cart, try to find any cart with non-booked items
             if (!$cart) {
                 $cart = Cart::with(['items' => function($query) {
                     $query->where('isBooked', false);
@@ -433,42 +414,36 @@ class CustomerBookingController extends Controller
                 ->first();
             }
 
-            Log::info('Cart found:', ['cart' => $cart ? $cart->toArray() : null]);
-
             if (!$cart || $cart->items->isEmpty()) {
                 Log::error('No items in cart');
-                DB::rollBack();
                 return response()->json([
                     'success' => false,
-                    'message' => 'No items in cart or all items are already booked. Please add items to cart first.'
+                    'message' => 'No items in cart. Please add items to cart first.'
                 ], 400);
             }
 
-            // ========== ✅ STEP 2: RUN COMPREHENSIVE VALIDATION ==========
-            Log::info('Starting comprehensive validation...');
-            
             $checkIn = Carbon::parse($cart->checkInDate)->startOfDay();
             $checkOut = Carbon::parse($cart->checkOutDate)->startOfDay();
             
-            // ✅ CHECK 1: Special Event Conflict (STRICT)
+            // ========== VALIDATION 1: Special Event Conflict ==========
+            Log::info('VALIDATION 1: Checking special event conflicts...');
             $specialEventConflict = $this->hasStrictSpecialEventConflict($checkIn, $checkOut);
             
             if ($specialEventConflict) {
-                DB::rollBack();
-                Log::error('Special event conflict detected during booking');
+                Log::error('Special event conflict detected');
                 return response()->json([
                     'success' => false,
-                    'message' => 'Cannot book during special event period. There is a special event scheduled during your selected dates.',
+                    'message' => 'Cannot book during special event period.',
                     'has_special_event_conflict' => true
                 ], 400);
             }
             
-            // ✅ CHECK 2: Check if any unit is marked for special events only
+            // ========== VALIDATION 2: Special Event Units ==========
+            Log::info('VALIDATION 2: Checking for special event only units...');
             foreach ($cart->items as $item) {
                 $unit = $item->unit;
                 
                 if ($unit->for_special_events && $unit->unitStatus === 'blocked') {
-                    DB::rollBack();
                     Log::error('Special event unit conflict:', ['unit' => $unit->unitName]);
                     return response()->json([
                         'success' => false,
@@ -478,25 +453,24 @@ class CustomerBookingController extends Controller
                 }
             }
             
-            // ✅ CHECK 3: Individual unit availability
+            // ========== VALIDATION 3: Unit Availability ==========
+            Log::info('VALIDATION 3: Checking individual unit availability...');
             $unavailableItems = [];
             $validationErrors = [];
             
             foreach ($cart->items as $item) {
                 $unit = $item->unit;
                 
-                // 3a. Check if unit is blocked for the selected dates
                 if ($this->isUnitBlocked($unit, $checkIn, $checkOut)) {
                     $blockStart = $unit->blockStartDate ? Carbon::parse($unit->blockStartDate)->format('M d, Y') : null;
                     $blockEnd = $unit->blockEndDate ? Carbon::parse($unit->blockEndDate)->format('M d, Y') : null;
                     
                     $unavailableItems[] = $unit->unitName;
                     $validationErrors[] = "{$unit->unitName} is blocked from {$blockStart} to {$blockEnd}.";
-                    Log::warning("Unit blocked: {$unit->unitName} from {$blockStart} to {$blockEnd}");
+                    Log::warning("Unit blocked: {$unit->unitName}");
                     continue;
                 }
                 
-                // 3b. Check if unit is already booked for the selected dates
                 if ($this->isUnitAlreadyBooked($unit->unitID, $checkIn, $checkOut, $cart->cartID)) {
                     $unavailableItems[] = $unit->unitName;
                     $validationErrors[] = "{$unit->unitName} is already booked for the selected dates.";
@@ -504,180 +478,117 @@ class CustomerBookingController extends Controller
                     continue;
                 }
                 
-                // 3c. Check unit status
                 if ($unit->unitStatus !== 'available') {
                     $unavailableItems[] = $unit->unitName;
                     $validationErrors[] = "{$unit->unitName} is currently {$unit->unitStatus}.";
-                    Log::warning("Unit status not available: {$unit->unitName} - {$unit->unitStatus}");
+                    Log::warning("Unit status not available: {$unit->unitName}");
                     continue;
                 }
             }
 
             if (!empty($unavailableItems)) {
-                DB::rollBack();
                 Log::error('Unavailable items found:', $unavailableItems);
                 return response()->json([
                     'success' => false,
-                    'message' => 'Some items in your cart are no longer available',
+                    'message' => 'Some items are no longer available',
                     'unavailable_items' => $unavailableItems,
-                    'validation_errors' => $validationErrors,
-                    'has_availability_issues' => true
+                    'validation_errors' => $validationErrors
                 ], 400);
             }
 
-            // ✅ CHECK 4: Mixed unit types validation
+            // ========== VALIDATION 4: Mixed Unit Types ==========
+            Log::info('VALIDATION 4: Checking for mixed unit types...');
             $unitTypes = $cart->items->pluck('unit.unitType')->unique()->toArray();
             if (count($unitTypes) > 1 && in_array('room', $unitTypes) && in_array('cottage', $unitTypes)) {
-                DB::rollBack();
                 Log::error('Mixed unit types in cart');
                 return response()->json([
                     'success' => false,
-                    'message' => 'Cannot have both rooms and cottages in the same booking.',
-                    'has_mixed_items' => true
+                    'message' => 'Cannot have both rooms and cottages in the same booking.'
                 ], 400);
             }
 
-            // ✅ CHECK 5: Cottage booking requires active entrance fee
+            // ========== VALIDATION 5: Entrance Fee (for Cottages) ==========
+            Log::info('VALIDATION 5: Checking entrance fee requirement...');
             $hasCottages = $cart->items->contains(function($item) {
                 return $item->unit->unitType === 'cottage';
             });
             
-            Log::info('Has cottages in cart: ' . ($hasCottages ? 'YES' : 'NO'));
-            
+            $entranceFee = null;
             if ($hasCottages) {
                 $entranceFee = EntranceFee::where('isActive', true)->first();
                 
                 if (!$entranceFee) {
-                    DB::rollBack();
-                    Log::error('Cottages in cart but no active entrance fee');
+                    Log::error('No active entrance fee for cottage booking');
                     return response()->json([
                         'success' => false,
-                        'message' => 'Cottage booking cannot proceed without an active entrance fee.',
-                        'has_entrance_fee_issue' => true
+                        'message' => 'Cottage booking requires active entrance fee.'
                     ], 400);
                 }
             }
             
-            // ✅ CHECK 6: FINAL SPECIAL EVENT CONFLICT CHECK (Double-check)
+            // ========== VALIDATION 6: Final Special Event Check ==========
+            Log::info('VALIDATION 6: Final special event check...');
             $finalSpecialEventCheck = $this->hasStrictSpecialEventConflict($checkIn, $checkOut);
             if ($finalSpecialEventCheck) {
-                DB::rollBack();
                 Log::error('Final special event conflict detected');
                 return response()->json([
                     'success' => false,
-                    'message' => 'Cannot book during special event period.',
-                    'has_special_event_conflict' => true
+                    'message' => 'Cannot book during special event period.'
                 ], 400);
             }
             
-            Log::info('✅ All validation checks passed');
-            // ========== END VALIDATION ==========
-
-            // Get active entrance fee for cottage calculations
-            $entranceFee = EntranceFee::where('isActive', true)->first();
-            Log::info('Entrance fee:', ['entrance_fee' => $entranceFee ? $entranceFee->toArray() : null]);
-
-            // Calculate total price based on unit type
+            Log::info('✅ ALL VALIDATIONS PASSED - Proceeding to payment phase...');
+            
+            // ========== PHASE 2: CALCULATE PRICING (NO DATABASE WRITES) ==========
+            Log::info('PHASE 2: Calculating pricing...');
+            
             $subtotal = 0;
             $totalGuests = $cart->numGuests;
-            
-            // ✅ FIX: Ensure daysCount is at least 1
             $daysCount = max(1, $cart->daysCount);
-
-            Log::info('Calculation parameters:', [
-                'total_guests' => $totalGuests,
-                'days_count_raw' => $cart->daysCount,
-                'days_count_used' => $daysCount,
-                'has_active_entrance_fee' => $entranceFee ? true : false,
-                'entrance_fee_amount' => $entranceFee ? $entranceFee->amount : 'N/A'
-            ]);
 
             foreach ($cart->items as $item) {
                 $unit = $item->unit;
-                $guests = $totalGuests;
-
-                Log::info('Processing unit:', [
-                    'unit_id' => $unit->unitID,
-                    'unit_name' => $unit->unitName,
-                    'unit_type' => $unit->unitType,
-                    'unit_price' => $unit->unitRatePrice,
-                    'guests' => $guests,
-                    'days' => $daysCount
-                ]);
-
                 $itemSubtotal = 0;
 
                 if ($unit->unitType === 'room') {
-                    // ✅ ROOM CALCULATION
-                    if ($guests == 1) {
+                    if ($totalGuests == 1) {
                         $itemSubtotal = $unit->unitRatePrice * 2 * $daysCount;
-                        Log::info('Room calculation (1 guest): ' . $unit->unitRatePrice . ' * 2 * ' . $daysCount . ' = ' . $itemSubtotal);
                     } else {
-                        $itemSubtotal = $unit->unitRatePrice * $guests * $daysCount;
-                        Log::info('Room calculation (' . $guests . ' guests): ' . $unit->unitRatePrice . ' * ' . $guests . ' * ' . $daysCount . ' = ' . $itemSubtotal);
+                        $itemSubtotal = $unit->unitRatePrice * $totalGuests * $daysCount;
                     }
                 } elseif ($unit->unitType === 'cottage') {
-                    // ✅ COTTAGE CALCULATION
                     if ($entranceFee) {
-                        $entranceTotal = $entranceFee->amount * $guests;
-                        $cottageTotal = $unit->unitRatePrice;
-                        $itemSubtotal = $entranceTotal + $cottageTotal;
-                        Log::info('Cottage calculation: (' . $entranceFee->amount . ' * ' . $guests . ') + ' . $unit->unitRatePrice . ' = ' . $itemSubtotal);
+                        $entranceTotal = $entranceFee->amount * $totalGuests;
+                        $itemSubtotal = $entranceTotal + $unit->unitRatePrice;
                     } else {
-                        Log::warning('Cottage found but no entrance fee available for unit: ' . $unit->unitID);
                         $itemSubtotal = $unit->unitRatePrice;
                     }
                 } else {
                     $itemSubtotal = $unit->unitRatePrice * $daysCount;
-                    Log::info('Other unit calculation: ' . $unit->unitRatePrice . ' * ' . $daysCount . ' = ' . $itemSubtotal);
                 }
 
-                // Add to subtotal
                 $subtotal += $itemSubtotal;
-                Log::info('Item subtotal: ' . $itemSubtotal . ', Running subtotal: ' . $subtotal);
-
-                // Update cart item subtotal if different
-                if ($item->subtotalPrice != $itemSubtotal) {
-                    $item->update(['subtotalPrice' => $itemSubtotal]);
-                    Log::info('Updated cart item subtotalPrice to: ' . $itemSubtotal);
-                }
             }
 
-            // Ensure subtotal is not zero
             if ($subtotal <= 0) {
-                DB::rollBack();
-                Log::error('Calculated subtotal is zero or negative: ' . $subtotal);
+                Log::error('Invalid subtotal calculated: ' . $subtotal);
                 return response()->json([
                     'success' => false,
-                    'message' => 'Invalid booking calculation. Please ensure all items have valid prices.'
+                    'message' => 'Invalid booking calculation.'
                 ], 400);
             }
 
-            // Calculate total with tax and service fee
             $tax = $subtotal * 0.12;
             $serviceFee = $subtotal * 0.05;
             $totalWithTax = $subtotal + $tax + $serviceFee;
 
-            Log::info('Total calculation:', [
-                'subtotal' => $subtotal,
-                'tax_12%' => $tax,
-                'service_fee_5%' => $serviceFee,
-                'total_with_tax' => $totalWithTax
-            ]);
-
-            // Validate payment amount
+            // ========== VALIDATION 7: Payment Amount ==========
+            Log::info('VALIDATION 7: Validating payment amount...');
             $paymentAmount = floatval($request->payment_amount);
             $minPayment = $totalWithTax * 0.5;
             
-            Log::info('Payment validation:', [
-                'payment_amount' => $paymentAmount,
-                'min_payment' => $minPayment,
-                'total_with_tax' => $totalWithTax
-            ]);
-            
             if ($paymentAmount < $minPayment) {
-                DB::rollBack();
-                Log::error('Payment amount below minimum: ' . $paymentAmount . ' < ' . $minPayment);
+                Log::error('Payment below minimum: ' . $paymentAmount . ' < ' . $minPayment);
                 return response()->json([
                     'success' => false,
                     'message' => 'Minimum payment is ₱' . number_format($minPayment, 2) . ' (50% downpayment)'
@@ -685,79 +596,96 @@ class CustomerBookingController extends Controller
             }
             
             if ($paymentAmount > $totalWithTax) {
-                DB::rollBack();
-                Log::error('Payment amount exceeds total: ' . $paymentAmount . ' > ' . $totalWithTax);
+                Log::error('Payment exceeds total: ' . $paymentAmount . ' > ' . $totalWithTax);
                 return response()->json([
                     'success' => false,
                     'message' => 'Payment cannot exceed total amount of ₱' . number_format($totalWithTax, 2)
                 ], 400);
             }
 
-            // ========== ✅ STEP 3: DETERMINE BOOKING STATUS ==========
+            // ========== DETERMINE BOOKING & PAYMENT STATUS ==========
             $paymentType = 'downpayment';
             $remainingBalance = $totalWithTax - $paymentAmount;
             $bookingStatus = 'pending';
             $paymentStatus = 'pending';
             
             if ($paymentAmount >= $totalWithTax) {
-                // Full payment = Auto-confirm booking
                 $paymentType = 'full';
                 $remainingBalance = 0;
                 $bookingStatus = 'confirmed';
                 $paymentStatus = 'completed';
-                Log::info('✅ Full payment detected - Booking will be auto-confirmed');
-            } else {
-                // Downpayment = Pending booking
-                $bookingStatus = 'pending';
-                $paymentStatus = 'pending';
-                Log::info('⏳ Downpayment detected - Booking will be pending approval');
             }
 
-            Log::info('Payment details:', [
+            Log::info('Payment details calculated:', [
+                'subtotal' => $subtotal,
+                'tax' => $tax,
+                'service_fee' => $serviceFee,
+                'total' => $totalWithTax,
+                'payment_amount' => $paymentAmount,
                 'payment_type' => $paymentType,
-                'remaining_balance' => $remainingBalance,
-                'booking_status' => $bookingStatus,
-                'payment_status' => $paymentStatus
+                'booking_status' => $bookingStatus
             ]);
-            // =======================================================
 
-            // ========== ✅ CREATE BOOKING ==========
-            $bookingData = [
-                'cartID' => $cart->cartID,
-                'numGuests' => $totalGuests,
-                'totalPrice' => $totalWithTax,
-                'entranceFeeID' => $hasCottages && $entranceFee ? $entranceFee->entranceFeeID : null,
-                'bookingStatus' => $bookingStatus,
-                'bookingType' => $request->booking_type,
-                'eventType' => $request->event_type,
-                'specialRequirements' => $request->special_requirements,
-                'eventStartTime' => $cart->checkInDate,
-                'eventEndTime' => $cart->checkOutDate,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
+            // ========== PHASE 3: PAYMENT METHOD ROUTING ==========
+            Log::info('PHASE 3: Routing based on payment method: ' . $request->payment_method);
             
-            // ✅ CRITICAL FIX: For GCash, create booking pero wag pa i-mark ang items as booked
             if ($request->payment_method === 'gcash') {
-                $bookingData['gcash_payment_intent_id'] = 'pending_' . time() . '_' . uniqid();
-                $bookingData['bookingStatus'] = 'pending'; // Special status
-                Log::info('📝 Set temporary GCash booking with pending status');
+                // ✅ FOR GCASH: Return payment info WITHOUT creating booking yet
+                Log::info('✅ GCash payment selected - Returning payment parameters for frontend to initiate payment');
+                
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Ready for GCash payment',
+                    'payment_method' => 'gcash',
+                    'requires_payment_first' => true,
+                    'booking_data' => [
+                        'cart_id' => $cart->cartID,
+                        'num_guests' => $totalGuests,
+                        'total_price' => $totalWithTax,
+                        'entrance_fee_id' => $hasCottages && $entranceFee ? $entranceFee->entranceFeeID : null,
+                        'booking_type' => $request->booking_type,
+                        'event_type' => $request->event_type,
+                        'special_requirements' => $request->special_requirements,
+                        'event_start' => $cart->checkInDate,
+                        'event_end' => $cart->checkOutDate,
+                    ],
+                    'payment_data' => [
+                        'payment_amount' => $paymentAmount,
+                        'payment_type' => $paymentType,
+                        'remaining_balance' => $remainingBalance,
+                        'booking_status' => $bookingStatus,
+                        'payment_status' => $paymentStatus
+                    ]
+                ]);
             }
             
-            // Create booking
-            $booking = Booking::create($bookingData);
-
-            Log::info('Booking created:', [
-                'booking_id' => $booking->bookingID,
-                'status' => $booking->bookingStatus,
-                'gcash_payment_intent_id' => $booking->gcash_payment_intent_id ?? 'N/A'
-            ]);
-
-            // ========== ✅ CRITICAL FIX: DIFFERENT HANDLING FOR CASH VS GCASH ==========
-            $paymentReference = 'VLE' . time() . $booking->bookingID;
+            // ✅ FOR CASH: Proceed with database transaction
+            Log::info('✅ Cash payment selected - Proceeding with database transaction');
             
-            if ($request->payment_method === 'cash') {
-                // ✅ FOR CASH: Create payment, mark items as booked, commit transaction
+            DB::beginTransaction();
+            
+            try {
+                // Create booking
+                $booking = Booking::create([
+                    'cartID' => $cart->cartID,
+                    'numGuests' => $totalGuests,
+                    'totalPrice' => $totalWithTax,
+                    'entranceFeeID' => $hasCottages && $entranceFee ? $entranceFee->entranceFeeID : null,
+                    'bookingStatus' => $bookingStatus,
+                    'bookingType' => $request->booking_type,
+                    'eventType' => $request->event_type,
+                    'specialRequirements' => $request->special_requirements,
+                    'eventStartTime' => $cart->checkInDate,
+                    'eventEndTime' => $cart->checkOutDate,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                Log::info('Booking created:', ['booking_id' => $booking->bookingID]);
+
+                // Create payment record
+                $paymentReference = 'VLE' . time() . $booking->bookingID;
+                
                 $payment = Payment::create([
                     'bookingID' => $booking->bookingID,
                     'paymentReference' => $paymentReference,
@@ -771,79 +699,53 @@ class CustomerBookingController extends Controller
                     'updated_at' => now(),
                 ]);
 
-                Log::info('✅ Cash payment created:', [
-                    'payment_reference' => $paymentReference,
-                    'payment_status' => $paymentStatus,
-                    'amount' => $paymentAmount
-                ]);
+                Log::info('Payment record created:', ['payment_reference' => $paymentReference]);
                 
                 // Mark cart items as booked
                 $updatedItems = CartItem::where('cartID', $cart->cartID)
                     ->where('isBooked', false)
                     ->update(['isBooked' => true]);
                 
-                Log::info('✅ Marked cart items as booked for CASH payment. Updated items count: ' . $updatedItems);
+                Log::info('Cart items marked as booked:', ['count' => $updatedItems]);
                 
-                // Update cart timestamp and mark as inactive
+                // Update cart as inactive
                 $cart->update([
                     'updated_at' => now(),
                     'is_active' => false
                 ]);
                 
-                // ✅ COMMIT TRANSACTION FOR CASH
                 DB::commit();
                 
-                Log::info('=== CUSTOMER CASH BOOKING SUCCESS (COMMITTED) ===');
+                Log::info('=== CASH BOOKING COMPLETED SUCCESSFULLY ===');
                 
-                // Send booking confirmation email
+                // Send email
                 try {
                     Mail::to($request->email)->send(new BookingConfirmationEmail($booking->load('cart.user', 'cart.cartItems.unit')));
-                    Log::info("Booking confirmation email sent to {$request->email} for booking #{$booking->bookingID}");
+                    Log::info("Confirmation email sent to {$request->email}");
                 } catch (\Exception $e) {
-                    Log::error("Failed to send booking confirmation email: " . $e->getMessage());
+                    Log::error("Failed to send email: " . $e->getMessage());
                 }
                 
-            } else {
-                // ✅ FOR GCASH: COMMIT THE BOOKING (wag pa i-mark ang items as booked)
-                DB::commit();
-                
-                Log::info('=== GCASH BOOKING CREATED (PAYMENT PENDING) ===');
-                Log::info('⚠️ CART ITEMS NOT MARKED AS BOOKED YET - Will be marked after successful payment');
+                return response()->json([
+                    'success' => true,
+                    'message' => ($bookingStatus === 'confirmed' 
+                        ? 'Booking confirmed successfully!'
+                        : 'Booking submitted successfully!'),
+                    'booking_reference' => $paymentReference,
+                    'booking_id' => $booking->bookingID,
+                    'booking_status' => $bookingStatus,
+                    'payment_amount' => $paymentAmount,
+                    'is_confirmed' => $bookingStatus === 'confirmed'
+                ]);
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+                throw $e;
             }
 
-            return response()->json([
-                'success' => true,
-                'message' => ($request->payment_method === 'cash')
-                    ? ($bookingStatus === 'confirmed' 
-                        ? 'Booking confirmed successfully! Your reservation is now active.'
-                        : 'Booking submitted successfully! Your reservation is pending approval.')
-                    : 'Booking created! Please complete GCash payment.',
-                'booking_reference' => $paymentReference,
-                'booking_id' => $booking->bookingID,
-                'booking_status' => $bookingStatus,
-                'gcash_payment_intent_id' => $booking->gcash_payment_intent_id ?? null,
-                'payment_amount' => $paymentAmount,
-                'is_confirmed' => $bookingStatus === 'confirmed',
-                'items_marked_as_booked' => $request->payment_method === 'cash' ? $updatedItems : 0,
-                'calculation_breakdown' => [
-                    'subtotal' => $subtotal,
-                    'tax_12%' => $tax,
-                    'service_fee_5%' => $serviceFee,
-                    'total_amount' => $totalWithTax,
-                    'downpayment_paid' => $paymentAmount,
-                    'remaining_balance' => $remainingBalance,
-                    'total_guests' => $totalGuests,
-                    'days_count' => $daysCount,
-                    'booking_type' => $request->booking_type
-                ]
-            ]);
-
         } catch (\Exception $e) {
-            DB::rollBack();
-            
             Log::error('Booking Error: ' . $e->getMessage());
-            Log::error('Booking Trace: ' . $e->getTraceAsString());
-            Log::error('=== CUSTOMER BOOKING FAILED ===');
+            Log::error('Trace: ' . $e->getTraceAsString());
             
             return response()->json([
                 'success' => false,
@@ -853,21 +755,294 @@ class CustomerBookingController extends Controller
     }
 
     /**
+     * ✅ NEW: Process GCash payment AFTER validations passed
+     */
+    public function processGCashPayment(Request $request)
+    {
+        Log::info('=== GCASH PAYMENT PROCESSING START ===');
+        Log::info('Request Data:', $request->all());
+        
+        if (!Auth::check()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please login to complete payment'
+            ], 401);
+        }
+
+        try {
+            // ✅ STEP 1: Validate that booking data was passed from store() method
+            $bookingData = $request->booking_data;
+            $paymentData = $request->payment_data;
+            
+            if (!$bookingData || !$paymentData) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid payment request. Please restart booking process.'
+                ], 400);
+            }
+            
+            // ✅ STEP 2: Create PayMongo payment intent
+            $amount = floatval($paymentData['payment_amount']);
+            
+            $paymentIntent = $this->payMongoService->createPaymentIntent(
+                $amount,
+                "Villa Elena Booking"
+            );
+            
+            Log::info('Payment Intent Created', ['payment_intent_id' => $paymentIntent['data']['id']]);
+            
+            // ✅ STEP 3: Create payment method
+            $paymentMethod = $this->payMongoService->createPaymentMethod();
+            
+            Log::info('Payment Method Created', ['payment_method_id' => $paymentMethod['data']['id']]);
+            
+            // ✅ STEP 4: Store booking data and payment intent in session for later use
+            session([
+                'gcash_booking_data' => $bookingData,
+                'gcash_payment_data' => $paymentData,
+                'gcash_payment_intent_id' => $paymentIntent['data']['id']
+            ]);
+            
+            // ✅ STEP 5: Set up success/failed URLs with payment intent
+            $successUrl = route('customer.payment.success', [
+                'payment_intent_id' => $paymentIntent['data']['id']
+            ]);
+            
+            $failedUrl = route('customer.payment.failed');
+            
+            // ✅ STEP 6: Attach payment method
+            $attachedPayment = $this->payMongoService->attachPaymentMethod(
+                $paymentIntent['data']['id'],
+                $paymentMethod['data']['id'],
+                $successUrl
+            );
+            
+            Log::info('Payment Method Attached');
+            
+            // ✅ STEP 7: Get checkout URL
+            $checkoutUrl = $attachedPayment['data']['attributes']['next_action']['redirect']['url'] ?? null;
+            
+            if (!$checkoutUrl) {
+                throw new \Exception('Failed to get GCash checkout URL');
+            }
+            
+            return response()->json([
+                'success' => true,
+                'checkout_url' => $checkoutUrl,
+                'payment_intent_id' => $paymentIntent['data']['id']
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('GCash Payment Error: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to process GCash payment: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * ✅ COMPLETELY REWRITTEN: Verify and complete GCash payment
+     */
+    public function verifyGCashPayment(Request $request)
+    {
+        Log::info('=== GCASH PAYMENT VERIFICATION START ===');
+        Log::info('Request params:', $request->all());
+        
+        try {
+            $paymentIntentId = $request->query('payment_intent_id');
+            
+            if (!$paymentIntentId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid payment verification request'
+                ], 400);
+            }
+            
+            // ✅ STEP 1: Retrieve payment intent from PayMongo
+            $paymentIntent = $this->payMongoService->retrievePaymentIntent($paymentIntentId);
+            
+            $status = $paymentIntent['data']['attributes']['status'];
+            
+            Log::info('Payment Intent Status:', ['status' => $status]);
+            
+            // ✅ STEP 2: If payment failed, clean up and return error
+            if ($status !== 'succeeded') {
+                Log::warning('Payment failed or pending', ['status' => $status]);
+                
+                // Clear session data
+                session()->forget(['gcash_booking_data', 'gcash_payment_data', 'gcash_payment_intent_id']);
+                
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Payment was not successful.',
+                    'redirect_url' => route('customer.payment.failed'),
+                    'status' => $status
+                ], 400);
+            }
+            
+            // ✅ STEP 3: Payment succeeded - NOW create booking in database
+            Log::info('✅ Payment succeeded - Creating booking in database...');
+            
+            DB::beginTransaction();
+            
+            try {
+                // Retrieve booking data from session
+                $bookingData = session('gcash_booking_data');
+                $paymentData = session('gcash_payment_data');
+                
+                if (!$bookingData || !$paymentData) {
+                    throw new \Exception('Session data expired. Please restart booking.');
+                }
+                
+                // ✅ RE-VALIDATE before creating booking (safety check)
+                $cart = Cart::with(['items.unit'])->findOrFail($bookingData['cart_id']);
+                
+                $checkIn = Carbon::parse($bookingData['event_start'])->startOfDay();
+                $checkOut = Carbon::parse($bookingData['event_end'])->startOfDay();
+                
+                // Quick re-validation
+                if ($this->hasStrictSpecialEventConflict($checkIn, $checkOut)) {
+                    throw new \Exception('Date conflict detected. Please restart booking.');
+                }
+                
+                // ✅ CREATE BOOKING
+                $booking = Booking::create([
+                    'cartID' => $bookingData['cart_id'],
+                    'numGuests' => $bookingData['num_guests'],
+                    'totalPrice' => $bookingData['total_price'],
+                    'entranceFeeID' => $bookingData['entrance_fee_id'],
+                    'bookingStatus' => $paymentData['booking_status'],
+                    'bookingType' => $bookingData['booking_type'],
+                    'eventType' => $bookingData['event_type'],
+                    'specialRequirements' => $bookingData['special_requirements'],
+                    'eventStartTime' => $bookingData['event_start'],
+                    'eventEndTime' => $bookingData['event_end'],
+                    'gcash_payment_intent_id' => $paymentIntentId,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                Log::info('✅ Booking created:', ['booking_id' => $booking->bookingID]);
+
+                // ✅ CREATE PAYMENT RECORD
+                $amountPaid = $paymentIntent['data']['attributes']['amount'] / 100;
+                $paymentReference = 'GCASH-' . $paymentIntentId;
+                
+                $payment = Payment::create([
+                    'bookingID' => $booking->bookingID,
+                    'paymentReference' => $paymentReference,
+                    'paymentMethod' => 'gcash',
+                    'paymentType' => $paymentData['payment_type'],
+                    'amountPaid' => $amountPaid,
+                    'remainingBalance' => $paymentData['remaining_balance'],
+                    'paymentDate' => now(),
+                    'paymentStatus' => 'completed'
+                ]);
+                
+                Log::info('✅ Payment record created:', ['payment_reference' => $paymentReference]);
+                
+                // ✅ MARK CART ITEMS AS BOOKED
+                $updatedItems = CartItem::where('cartID', $cart->cartID)
+                    ->where('isBooked', false)
+                    ->update(['isBooked' => true]);
+                
+                Log::info('✅ Cart items marked as booked:', ['count' => $updatedItems]);
+                
+                // ✅ UPDATE CART AS INACTIVE
+                $cart->update([
+                    'updated_at' => now(),
+                    'is_active' => false
+                ]);
+                
+                // ✅ COMMIT TRANSACTION
+                DB::commit();
+                
+                // ✅ CLEAR SESSION
+                session()->forget(['gcash_booking_data', 'gcash_payment_data', 'gcash_payment_intent_id']);
+                
+                Log::info('=== GCASH BOOKING COMPLETED SUCCESSFULLY ===');
+                
+                // Send email
+                try {
+                    Mail::to($cart->user->email)->send(
+                        new BookingConfirmationEmail($booking->load('cart.user', 'cart.cartItems.unit'))
+                    );
+                    Log::info("Confirmation email sent");
+                } catch (\Exception $e) {
+                    Log::error("Failed to send email: " . $e->getMessage());
+                }
+                
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Payment verified successfully',
+                    'booking' => [
+                        'bookingID' => $booking->bookingID,
+                        'bookingStatus' => $booking->bookingStatus,
+                        'totalPrice' => $booking->totalPrice
+                    ],
+                    'payment' => [
+                        'paymentReference' => $payment->paymentReference,
+                        'amountPaid' => $payment->amountPaid,
+                        'paymentStatus' => $payment->paymentStatus
+                    ]
+                ]);
+                
+            } catch (\Exception $e) {
+                DB::rollBack();
+                Log::error('Error creating booking after payment: ' . $e->getMessage());
+                throw $e;
+            }
+                
+        } catch (\Exception $e) {
+            Log::error('GCash Verification Error: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error verifying payment: ' . $e->getMessage(),
+                'redirect_url' => route('customer.payment.failed')
+            ], 500);
+        }
+    }
+
+    /**
+     * ✅ Handle successful GCash payment (blade view)
+     */
+    public function gcashPaymentSuccess(Request $request)
+    {
+        Log::info('=== GCASH PAYMENT SUCCESS PAGE ===');
+        
+        $paymentIntentId = $request->query('payment_intent_id');
+        
+        return view('customerFolder.payment.gcash-success', [
+            'payment_intent_id' => $paymentIntentId
+        ]);
+    }
+
+    /**
+     * ✅ Show failed payment page
+     */
+    public function gcashPaymentFailed(Request $request)
+    {
+        Log::warning('=== GCASH PAYMENT FAILED PAGE ===');
+        
+        return view('customerFolder.payment.gcash-failed');
+    }
+
+    /**
      * Check for special event conflicts - STRICT VERSION
      */
     private function hasStrictSpecialEventConflict($checkIn, $checkOut)
     {
-        // Convert to string dates for database comparison
         $checkInDate = $checkIn->format('Y-m-d');
         $checkOutDate = $checkOut->format('Y-m-d');
 
-        // ✅ STRICT CHECK: ANY special event that overlaps with selected dates
         $hasConflict = DB::table('bookings')
             ->join('carts', 'bookings.cartID', '=', 'carts.cartID')
             ->where('bookings.bookingType', 'special-event')
             ->whereIn('bookings.bookingStatus', ['pending', 'confirmed', 'approved'])
             ->where(function($query) use ($checkInDate, $checkOutDate) {
-                // Check if special event date is within the selected date range
                 $query->whereDate('carts.checkInDate', '>=', $checkInDate)
                       ->whereDate('carts.checkInDate', '<=', $checkOutDate);
             })
@@ -881,12 +1056,10 @@ class CustomerBookingController extends Controller
      */
     private function isUnitBlocked($unit, $checkIn, $checkOut)
     {
-        // Check if unit has block dates that overlap with selected dates
         if ($unit->blockStartDate && $unit->blockEndDate) {
             $blockStart = Carbon::parse($unit->blockStartDate)->startOfDay();
             $blockEnd = Carbon::parse($unit->blockEndDate)->startOfDay();
             
-            // Check for date overlap
             $hasOverlap = (
                 ($checkIn->between($blockStart, $blockEnd, true)) ||
                 ($checkOut->between($blockStart, $blockEnd, true)) ||
@@ -906,7 +1079,6 @@ class CustomerBookingController extends Controller
      */
     private function isUnitAlreadyBooked($unitId, $checkIn, $checkOut, $excludeCartId = null)
     {
-        // Get all NORMAL bookings (not special events) that include this unit
         $existingBookings = DB::table('bookings')
             ->join('carts', 'bookings.cartID', '=', 'carts.cartID')
             ->join('cart_items', 'carts.cartID', '=', 'cart_items.cartID')
@@ -924,7 +1096,6 @@ class CustomerBookingController extends Controller
             $existingCheckIn = Carbon::parse($booking->checkInDate)->startOfDay();
             $existingCheckOut = Carbon::parse($booking->checkOutDate)->startOfDay();
             
-            // Check for date overlap
             $hasOverlap = (
                 ($checkIn->between($existingCheckIn, $existingCheckOut, true)) ||
                 ($checkOut->between($existingCheckIn, $existingCheckOut, true)) ||
@@ -940,48 +1111,7 @@ class CustomerBookingController extends Controller
         
         return false;
     }
-    
-    /**
-     * Clean up abandoned carts (carts with no bookings after 24 hours)
-     * This can be run as a scheduled task (cron job)
-     */
-    public function cleanupAbandonedCarts()
-    {
-        try {
-            $twentyFourHoursAgo = Carbon::now()->subHours(24);
-            
-            // Find carts that have no bookings and were created more than 24 hours ago
-            $abandonedCarts = Cart::whereDoesntHave('booking')
-                ->where('created_at', '<', $twentyFourHoursAgo)
-                ->get();
-            
-            $deletedCount = 0;
-            
-            foreach ($abandonedCarts as $cart) {
-                // Delete cart items first
-                CartItem::where('cartID', $cart->cartID)->delete();
-                // Then delete cart
-                $cart->delete();
-                $deletedCount++;
-            }
-            
-            Log::info('Cleaned up ' . $deletedCount . ' abandoned carts');
-            
-            return response()->json([
-                'success' => true,
-                'message' => 'Cleaned up ' . $deletedCount . ' abandoned carts',
-                'deleted_count' => $deletedCount
-            ]);
-            
-        } catch (\Exception $e) {
-            Log::error('Error cleaning up abandoned carts: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Error cleaning up abandoned carts: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-    
+
     /**
      * Get booking summary for a specific cart
      */
@@ -997,13 +1127,11 @@ class CustomerBookingController extends Controller
         try {
             $userId = Auth::id();
             
-            // Verify cart belongs to user
             $cart = Cart::with(['items.unit', 'booking'])
                 ->where('cartID', $cartId)
                 ->where('user_id', $userId)
                 ->firstOrFail();
             
-            // Check if cart has booking
             if ($cart->booking) {
                 $booking = $cart->booking;
                 
@@ -1029,445 +1157,13 @@ class CustomerBookingController extends Controller
             return response()->json([
                 'success' => true,
                 'has_booking' => false,
-                'message' => 'No booking found for this cart',
-                'cart' => [
-                    'id' => $cart->cartID,
-                    'check_in' => $cart->checkInDate,
-                    'check_out' => $cart->checkOutDate,
-                    'guests' => $cart->numGuests,
-                    'items' => $cart->items->map(function($item) {
-                        return [
-                            'id' => $item->cartItemID,
-                            'unit_name' => $item->unit->unitName,
-                            'unit_type' => $item->unit->unitType,
-                            'is_booked' => $item->isBooked,
-                            'subtotal' => $item->subtotalPrice
-                        ];
-                    })
-                ]
+                'message' => 'No booking found for this cart'
             ]);
             
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error getting booking summary: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * ✅ FIXED: Process GCash payment via PayMongo
-     */
-    public function processGCashPayment(Request $request)
-    {
-        Log::info('=== GCASH PAYMENT PROCESSING START ===');
-        Log::info('Request Data:', $request->all());
-        
-        if (!Auth::check()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Please login to complete payment'
-            ], 401);
-        }
-
-        try {
-            $bookingId = $request->booking_id;
-            $amount = floatval($request->amount);
-            
-            // Find the booking
-            $booking = Booking::with(['cart.user'])->findOrFail($bookingId);
-            
-            // Verify booking belongs to user
-            if ($booking->cart->user_id !== Auth::id()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Unauthorized access to booking'
-                ], 403);
-            }
-            
-            // Create PayMongo Payment Intent
-            $paymentIntent = $this->payMongoService->createPaymentIntent(
-                $amount,
-                "Villa Elena Booking #{$booking->bookingID}"
-            );
-            
-            Log::info('Payment Intent Created', ['payment_intent' => $paymentIntent]);
-            
-            // Create Payment Method
-            $paymentMethod = $this->payMongoService->createPaymentMethod();
-            
-            Log::info('Payment Method Created', ['payment_method' => $paymentMethod]);
-            
-            // ✅ FIX: Add booking_id and payment_intent_id to success URL
-            $successUrl = route('customer.payment.success', [
-                'booking_id' => $bookingId,
-                'payment_intent_id' => $paymentIntent['data']['id']
-            ]);
-            
-            // ✅ FIX: Add booking_id to failed URL
-            $failedUrl = route('customer.payment.failed', [
-                'booking_id' => $bookingId
-            ]);
-            
-            // Attach Payment Method to Payment Intent
-            $attachedPayment = $this->payMongoService->attachPaymentMethod(
-                $paymentIntent['data']['id'],
-                $paymentMethod['data']['id'],
-                $successUrl
-            );
-            
-            Log::info('Payment Attached', ['attached_payment' => $attachedPayment]);
-            
-            // Store payment intent ID in booking for later verification
-            $booking->update([
-                'gcash_payment_intent_id' => $paymentIntent['data']['id']
-            ]);
-
-            // ✅ CRITICAL: Log that payment intent was saved
-            Log::info('✅ Payment intent ID saved to booking', [
-                'booking_id' => $bookingId,
-                'payment_intent_id' => $paymentIntent['data']['id']
-            ]);
-            
-            // Get checkout URL
-            $checkoutUrl = $attachedPayment['data']['attributes']['next_action']['redirect']['url'] ?? null;
-            
-            if (!$checkoutUrl) {
-                throw new \Exception('Failed to get GCash checkout URL');
-            }
-            
-            return response()->json([
-                'success' => true,
-                'checkout_url' => $checkoutUrl,
-                'payment_intent_id' => $paymentIntent['data']['id'],
-                'success_url' => $successUrl,
-                'failed_url' => $failedUrl
-            ]);
-            
-        } catch (\Exception $e) {
-            Log::error('GCash Payment Error: ' . $e->getMessage());
-            Log::error('Trace: ' . $e->getTraceAsString());
-            
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to process GCash payment: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * ✅ COMPLETELY FIXED: Verify GCash payment - CREATE FAILED PAYMENT RECORD WITH STATUS 'failed'
-     */
-    public function verifyGCashPayment(Request $request)
-    {
-        Log::info('=== GCASH PAYMENT VERIFICATION START ===');
-        Log::info('Request params:', $request->all());
-        
-        try {
-            $paymentIntentId = $request->query('payment_intent_id');
-            $bookingId = $request->query('booking_id');
-            
-            if (!$paymentIntentId || !$bookingId) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid payment verification request'
-                ], 400);
-            }
-            
-            // ✅ STEP 1: Retrieve payment intent from PayMongo
-            $paymentIntent = $this->payMongoService->retrievePaymentIntent($paymentIntentId);
-            
-            Log::info('Payment Intent Retrieved', ['status' => $paymentIntent['data']['attributes']['status']]);
-            
-            // ✅ STEP 2: Check payment status
-            $status = $paymentIntent['data']['attributes']['status'];
-            
-            if ($status === 'succeeded') {
-                // ✅ PAYMENT SUCCESSFUL - Process everything in one transaction
-                
-                // Find the booking (created in store() method)
-                $booking = Booking::with(['cart', 'payments'])->find($bookingId);
-                
-                if (!$booking) {
-                    Log::error('Booking not found for successful payment', ['booking_id' => $bookingId]);
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Booking not found'
-                    ], 404);
-                }
-                
-                // Start transaction
-                DB::beginTransaction();
-                
-                try {
-                    // Get payment amount
-                    $amountPaid = $paymentIntent['data']['attributes']['amount'] / 100;
-                    
-                    // Create payment record
-                    $paymentType = ($amountPaid >= $booking->totalPrice) ? 'full' : 'downpayment';
-                    $remainingBalance = max(0, $booking->totalPrice - $amountPaid);
-                    
-                    $payment = Payment::create([
-                        'bookingID' => $booking->bookingID,
-                        'paymentReference' => 'GCASH-' . $paymentIntentId,
-                        'paymentMethod' => 'gcash',
-                        'paymentType' => $paymentType,
-                        'amountPaid' => $amountPaid,
-                        'remainingBalance' => $remainingBalance,
-                        'paymentDate' => now(),
-                        'paymentStatus' => 'completed'
-                    ]);
-                    
-                    // Update booking status
-                    $bookingStatus = $paymentType === 'full' ? 'confirmed' : 'pending';
-                    
-                    $booking->update([
-                        'bookingStatus' => $bookingStatus,
-                        'gcash_payment_intent_id' => $paymentIntentId
-                    ]);
-                    
-                    // ✅ MARK CART ITEMS AS BOOKED (NOW LANG AFTER SUCCESSFUL PAYMENT)
-                    $cart = $booking->cart;
-                    $updatedItems = CartItem::where('cartID', $cart->cartID)
-                        ->where('isBooked', false)
-                        ->update(['isBooked' => true]);
-                    
-                    Log::info('✅ Cart items marked as booked after successful payment', [
-                        'items_updated' => $updatedItems
-                    ]);
-                    
-                    // Update cart as inactive
-                    $cart->update([
-                        'updated_at' => now(),
-                        'is_active' => false
-                    ]);
-                    
-                    // Send email
-                    try {
-                        Mail::to($booking->cart->user->email)->send(
-                            new BookingConfirmationEmail($booking->load('cart.user', 'cart.cartItems.unit'))
-                        );
-                        Log::info("Booking confirmation email sent for booking #{$bookingId}");
-                    } catch (\Exception $e) {
-                        Log::error("Failed to send booking confirmation email: " . $e->getMessage());
-                    }
-                    
-                    DB::commit();
-                    
-                    Log::info('✅ GCash payment completed successfully', [
-                        'booking_id' => $bookingId,
-                        'amount_paid' => $amountPaid,
-                        'booking_status' => $bookingStatus
-                    ]);
-                    
-                    return response()->json([
-                        'success' => true,
-                        'message' => 'Payment verified successfully',
-                        'booking' => [
-                            'bookingID' => $booking->bookingID,
-                            'bookingStatus' => $booking->bookingStatus,
-                            'totalPrice' => $booking->totalPrice
-                        ],
-                        'payment' => [
-                            'paymentReference' => $payment->paymentReference,
-                            'amountPaid' => $payment->amountPaid,
-                            'paymentStatus' => $payment->paymentStatus,
-                            'paymentType' => $payment->paymentType
-                        ]
-                    ]);
-                    
-                } catch (\Exception $e) {
-                    DB::rollBack();
-                    throw $e;
-                }
-            }
-            
-            // ✅ PAYMENT FAILED - CREATE FAILED PAYMENT RECORD WITH STATUS 'failed', THEN DELETE
-            Log::warning('GCash payment failed - Creating failed payment record and deleting booking', [
-                'status' => $status,
-                'payment_intent_id' => $paymentIntentId,
-                'booking_id' => $bookingId
-            ]);
-            
-            // Start transaction to handle failed payment
-            DB::beginTransaction();
-            try {
-                // Find the booking
-                $booking = Booking::with('cart')->find($bookingId);
-                
-                if ($booking) {
-                    // ✅ STEP 1: Create a FAILED payment record for tracking/history
-                    $failedPayment = Payment::create([
-                        'bookingID' => $booking->bookingID,
-                        'paymentReference' => 'GCASH-FAILED-' . $paymentIntentId,
-                        'paymentMethod' => 'gcash',
-                        'paymentType' => 'downpayment',
-                        'amountPaid' => 0,
-                        'remainingBalance' => $booking->totalPrice,
-                        'paymentDate' => now(),
-                        'paymentStatus' => 'failed', // ✅ THIS IS THE KEY - Set status to 'failed'
-                        'created_at' => now(),
-                        'updated_at' => now()
-                    ]);
-                    
-                    Log::info('✅ Failed payment record created', [
-                        'payment_id' => $failedPayment->paymentID,
-                        'payment_reference' => $failedPayment->paymentReference,
-                        'payment_status' => 'failed'
-                    ]);
-                    
-                    // ✅ STEP 2: Restore cart items if cart exists
-                    $cart = $booking->cart;
-                    if ($cart) {
-                        // Unmark cart items as booked (just in case)
-                        CartItem::where('cartID', $cart->cartID)
-                            ->update(['isBooked' => false]);
-                        
-                        // Make cart active again so user can retry
-                        $cart->update([
-                            'is_active' => true,
-                            'updated_at' => now()
-                        ]);
-                        
-                        Log::info('✅ Cart restored to active state', ['cart_id' => $cart->cartID]);
-                    }
-                    
-                    // ✅ STEP 3: Update booking status to 'cancelled' with reason
-                    $booking->update([
-                        'bookingStatus' => 'cancelled',
-                        'cancelledAt' => now(),
-                        'cancellationReason' => 'GCash payment failed - Status: ' . $status
-                    ]);
-                    
-                    Log::info('✅ Booking marked as cancelled due to failed payment', [
-                        'booking_id' => $bookingId,
-                        'cancellation_reason' => 'GCash payment failed - Status: ' . $status
-                    ]);
-                    
-                    // ✅ STEP 4: Delete the failed payment record (cleanup - optional)
-                    // NOTE: You can keep this for history or delete it for cleanup
-                    // Comment out the next line if you want to keep the failed payment record for history
-                    $failedPayment->delete();
-                    
-                    // ✅ STEP 5: Delete the booking (final cleanup)
-                    $booking->delete();
-                    
-                    Log::info('✅ Booking deleted from database after failed payment', [
-                        'booking_id' => $bookingId
-                    ]);
-                }
-                
-                DB::commit();
-                
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Payment was not successful. Booking has been cancelled.',
-                    'redirect_url' => route('customer.payment.failed', ['booking_id' => $bookingId]),
-                    'status' => $status,
-                    'payment_status' => 'failed', // ✅ Return failed status
-                    'booking_deleted' => true
-                ], 400);
-                
-            } catch (\Exception $e) {
-                DB::rollBack();
-                Log::error('Error handling failed payment: ' . $e->getMessage());
-                throw $e;
-            }
-                
-        } catch (\Exception $e) {
-            Log::error('GCash Verification Error: ' . $e->getMessage());
-            
-            return response()->json([
-                'success' => false,
-                'message' => 'Error verifying payment: ' . $e->getMessage(),
-                'redirect_url' => route('customer.payment.failed')
-            ], 500);
-        }
-    }
-
-    /**
-     * ✅ FIXED: Handle successful GCash payment (blade view)
-     */
-    public function gcashPaymentSuccess(Request $request)
-    {
-        Log::info('=== GCASH PAYMENT SUCCESS PAGE ===');
-        Log::info('Request params:', $request->all());
-        
-        // Pass parameters to view for debugging
-        $paymentIntentId = $request->query('payment_intent_id');
-        $bookingId = $request->query('booking_id');
-        
-        Log::info('Success page loaded with:', [
-            'payment_intent_id' => $paymentIntentId,
-            'booking_id' => $bookingId
-        ]);
-        
-        // Just show the success page
-        // Verification will be done via AJAX from the page
-        return view('customerFolder.payment.gcash-success', [
-            'payment_intent_id' => $paymentIntentId,
-            'booking_id' => $bookingId
-        ]);
-    }
-
-    /**
-     * ✅ FIXED: Show failed payment page
-     */
-    public function gcashPaymentFailed(Request $request)
-    {
-        Log::warning('=== GCASH PAYMENT FAILED PAGE ===');
-        Log::info('Request params:', $request->all());
-        
-        $bookingId = $request->query('booking_id') ?? $request->booking_id;
-        
-        // Note: The booking should have already been deleted in verifyGCashPayment()
-        // This page just informs the user
-        
-        return view('customerFolder.payment.gcash-failed', [
-            'booking_id' => $bookingId
-        ]);
-    }
-        
-    /**
-     * ✅ NEW METHOD: Debug endpoint to check gcash_payment_intent_id
-     */
-    public function debugGCashIntent(Request $request)
-    {
-        $bookingId = $request->query('booking_id');
-        
-        if (!$bookingId) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Booking ID required'
-            ], 400);
-        }
-        
-        try {
-            $booking = Booking::findOrFail($bookingId);
-            
-            return response()->json([
-                'success' => true,
-                'booking' => [
-                    'id' => $booking->bookingID,
-                    'gcash_payment_intent_id' => $booking->gcash_payment_intent_id,
-                    'bookingStatus' => $booking->bookingStatus,
-                    'paymentStatus' => $booking->paymentStatus,
-                    'totalPrice' => $booking->totalPrice
-                ],
-                'payments' => $booking->payments->map(function($payment) {
-                    return [
-                        'paymentReference' => $payment->paymentReference,
-                        'paymentMethod' => $payment->paymentMethod,
-                        'amountPaid' => $payment->amountPaid,
-                        'paymentStatus' => $payment->paymentStatus
-                    ];
-                })
-            ]);
-            
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error: ' . $e->getMessage()
             ], 500);
         }
     }

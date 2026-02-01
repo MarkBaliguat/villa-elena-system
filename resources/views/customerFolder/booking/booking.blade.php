@@ -592,422 +592,459 @@
 
     @include('customerFolder.partials.footer')
 
-    <script>
-        let bookingTotal = 0;
-        let selectedGCashAmount = null;
-        let selectedCashAmount = null; // ✅ NEW: For cash payment selection
-        let currentBookingId = null;
-        let daysCount = 1;
-        let numGuests = 1;
-        let entranceFeeAmount = 0;
-        let hasActiveEntranceFee = false;
+// ✅ UPDATED JAVASCRIPT FOR booking.blade.php
+// This handles the new two-phase payment flow:
+// Phase 1: Validation and calculation (no DB writes)
+// Phase 2: Payment processing (for GCash) OR direct DB write (for Cash)
 
-        document.addEventListener('DOMContentLoaded', function() {
-            Promise.all([
-                loadEntranceFee(),
-                loadBookingSummary()
-            ]).then(() => {
-                prefillUserInfo();
-            });
+<script>
+    let bookingTotal = 0;
+    let selectedGCashAmount = null;
+    let selectedCashAmount = null;
+    let daysCount = 1;
+    let numGuests = 1;
+    let entranceFeeAmount = 0;
+    let hasActiveEntranceFee = false;
+    
+    // ✅ NEW: Store validated booking data from backend
+    let validatedBookingData = null;
+    let validatedPaymentData = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        Promise.all([
+            loadEntranceFee(),
+            loadBookingSummary()
+        ]).then(() => {
+            prefillUserInfo();
         });
+    });
 
-        async function loadEntranceFee() {
-            try {
-                const response = await fetch('/api/entrance-fee', {
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    }
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.success && data.entrance_fee) {
-                        entranceFeeAmount = parseFloat(data.entrance_fee.amount);
-                        hasActiveEntranceFee = true;
-                    }
-                }
-            } catch (error) {
-                console.error('Error loading entrance fee:', error);
-            }
-        }
-
-        function loadBookingSummary() {
-            const summaryContainer = document.getElementById('booking-summary');
-            const loading = document.getElementById('summary-loading');
-            
-            fetch('/api/cart/items')
-                .then(response => response.json())
-                .then(data => {
-                    if (loading) {
-                        loading.style.display = 'none';
-                    }
-                    
-                    if (data.success && data.cart && data.items.length > 0) {
-                        renderBookingSummary(data.cart, data.items, summaryContainer);
-                    } else {
-                        summaryContainer.innerHTML = `
-                            <div class="alert alert-error">
-                                <i class="fas fa-exclamation-triangle mr-2"></i>
-                                <strong>No items in cart.</strong> Please add accommodations to your cart first.
-                            </div>
-                        `;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    if (loading) loading.style.display = 'none';
-                    summaryContainer.innerHTML = `<div class="alert alert-error">Error loading summary</div>`;
-                });
-        }
-
-        function renderBookingSummary(cart, items, container) {
-            daysCount = parseInt(cart.daysCount) || 1;
-            numGuests = parseInt(cart.numGuests) || 1;
-            
-            // Determine booking type correctly
-            const checkInDate = new Date(cart.checkInDate);
-            const checkOutDate = new Date(cart.checkOutDate);
-            const isSameDay = checkInDate.toDateString() === checkOutDate.toDateString();
-            const bookingType = isSameDay ? 'day-use' : 'overnight';
-            
-            const bookingTypeSelect = document.getElementById('booking_type');
-            bookingTypeSelect.innerHTML = `
-                <option value="day-use" ${bookingType === 'day-use' ? 'selected' : ''}>Day Use</option>
-                <option value="overnight" ${bookingType === 'overnight' ? 'selected' : ''}>Overnight</option>
-            `;
-            
-            let subtotal = 0;
-            
-            const itemsHTML = items.map(item => {
-                const unit = item.unit;
-                const unitPrice = parseFloat(unit.unitRatePrice);
-                let itemTotal = 0;
-                let calculation = '';
-                
-                if (unit.unitType === 'room') {
-                    if (numGuests === 1) {
-                        itemTotal = unitPrice * 2 * daysCount;
-                        calculation = `₱${unitPrice.toFixed(2)} × 2 × ${daysCount} day(s)`;
-                    } else {
-                        itemTotal = unitPrice * numGuests * daysCount;
-                        calculation = `₱${unitPrice.toFixed(2)} × ${numGuests} × ${daysCount} day(s)`;
-                    }
-                } else if (unit.unitType === 'cottage') {
-                    if (hasActiveEntranceFee) {
-                        const entranceTotal = entranceFeeAmount * numGuests;
-                        itemTotal = entranceTotal + unitPrice;
-                        calculation = `(₱${entranceFeeAmount.toFixed(2)} × ${numGuests}) + ₱${unitPrice.toFixed(2)}`;
-                    } else {
-                        itemTotal = unitPrice;
-                        calculation = `Cottage Price Only`;
-                    }
-                }
-                
-                subtotal += itemTotal;
-                
-                return `
-                    <div class="summary-item">
-                        <div class="item-details">
-                            <h4 class="font-semibold text-lg text-gray-800">${unit.unitName}</h4>
-                            <span class="type-badge ${unit.unitType}">
-                                <i class="fas fa-${unit.unitType === 'room' ? 'bed' : 'home'}"></i>
-                                ${unit.unitType}
-                            </span>
-                            <p class="text-sm text-gray-600 mt-2">${calculation}</p>
-                        </div>
-                        <div class="item-price">
-                            <p class="text-xl font-bold text-blue-600">₱${itemTotal.toFixed(2)}</p>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            // ✅ CALCULATE TOTAL WITH TAX AND SERVICE FEE (with proper rounding)
-            const tax = Math.round(subtotal * 0.12 * 100) / 100;
-            const serviceFee = Math.round(subtotal * 0.05 * 100) / 100;
-            const total = Math.round((subtotal + tax + serviceFee) * 100) / 100;
-            
-            bookingTotal = total;
-            
-            console.log('✅ Booking Total Calculation:', {
-                subtotal: subtotal,
-                tax: tax,
-                serviceFee: serviceFee,
-                total: total
-            });
-            
-            const summaryHTML = `
-                <div class="mb-6">
-                    <h3 class="font-semibold text-lg mb-4">Booking Details</h3>
-                    <div class="space-y-3 text-sm bg-gray-50 p-4 rounded-lg">
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Check-in:</span>
-                            <span class="font-semibold">${cart.checkInDate}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Check-out:</span>
-                            <span class="font-semibold">${cart.checkOutDate}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Duration:</span>
-                            <span class="font-semibold">${daysCount} day(s)</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Type:</span>
-                            <span class="font-semibold">${bookingType === 'day-use' ? 'Day Use' : 'Overnight'}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Guests:</span>
-                            <span class="font-semibold">${numGuests}</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="mb-6">
-                    <h3 class="font-semibold text-lg mb-4">Accommodations</h3>
-                    ${itemsHTML}
-                </div>
-                
-                <div class="border-t pt-4">
-                    <div class="flex justify-between mb-2 text-gray-700">
-                        <span>Subtotal:</span>
-                        <span class="font-semibold">₱${subtotal.toFixed(2)}</span>
-                    </div>
-                    <div class="flex justify-between mb-2 text-gray-600 text-sm">
-                        <span>Tax (12%):</span>
-                        <span class="font-semibold">₱${tax.toFixed(2)}</span>
-                    </div>
-                    <div class="flex justify-between mb-4 text-gray-600 text-sm">
-                        <span>Service Fee (5%):</span>
-                        <span class="font-semibold">₱${serviceFee.toFixed(2)}</span>
-                    </div>
-                    
-                    <div class="total-price-box">
-                        <div class="flex justify-between items-center">
-                            <span class="text-lg font-bold text-gray-800">TOTAL AMOUNT:</span>
-                            <span class="price-amount">₱${total.toFixed(2)}</span>
-                        </div>
-                        <p class="text-xs text-gray-600 mt-2 text-right">Inclusive of all taxes and fees</p>
-                    </div>
-                </div>
-            `;
-            
-            container.innerHTML = summaryHTML;
-            updatePaymentAmounts();
-        }
-
-        function updatePaymentAmounts() {
-            const total = bookingTotal;
-            const downpayment = Math.round(total * 0.5 * 100) / 100; // ✅ Round to 2 decimals
-            
-            console.log('✅ Payment Amounts:', {
-                total: total,
-                downpayment: downpayment
-            });
-            
-            document.getElementById('total-amount-display').textContent = '₱' + total.toFixed(2);
-            document.getElementById('min-payment-display').textContent = '₱' + downpayment.toFixed(2);
-            document.getElementById('downpayment-amount').textContent = '₱' + downpayment.toFixed(2);
-            document.getElementById('full-amount').textContent = '₱' + total.toFixed(2);
-            
-            // ✅ Update cash payment amounts too
-            document.getElementById('cash-downpayment-amount').textContent = '₱' + downpayment.toFixed(2);
-            document.getElementById('cash-full-amount').textContent = '₱' + total.toFixed(2);
-        }
-
-        function prefillUserInfo() {
-            const user = {
-                name: '{{ Auth::user()->name ?? "" }}',
-                email: '{{ Auth::user()->email ?? "" }}',
-                phone: '{{ Auth::user()->phoneNumber ?? "" }}'
-            };
-            
-            if (user.name && user.name.trim() !== '') {
-                document.querySelector('input[name="full_name"]').value = user.name.trim();
-            }
-            if (user.email) {
-                document.querySelector('input[name="email"]').value = user.email;
-            }
-            if (user.phone) {
-                document.querySelector('input[name="phone"]').value = user.phone;
-            }
-        }
-
-        // Payment method change handler
-        document.getElementById('payment_method').addEventListener('change', function() {
-            const paymentMethod = this.value;
-            const cashSection = document.getElementById('cash-payment-section');
-            const gcashSection = document.getElementById('gcash-payment-section');
-            const amountInfo = document.getElementById('payment-amount-info');
-            
-            cashSection.style.display = 'none';
-            gcashSection.style.display = 'none';
-            amountInfo.style.display = 'none';
-            
-            // Reset selections
-            selectedCashAmount = null;
-            selectedGCashAmount = null;
-            
-            if (paymentMethod === 'cash') {
-                cashSection.style.display = 'block';
-                amountInfo.style.display = 'block';
-            } else if (paymentMethod === 'gcash') {
-                gcashSection.style.display = 'block';
-                amountInfo.style.display = 'block';
-            }
-        });
-
-        // ✅ NEW: Cash payment amount selection
-        function selectCashPaymentAmount(type) {
-            const downpaymentBtn = document.getElementById('cash-downpayment-btn');
-            const fullPaymentBtn = document.getElementById('cash-full-payment-btn');
-            const cashBtn = document.getElementById('cash-booking-btn');
-            
-            downpaymentBtn.classList.remove('selected');
-            fullPaymentBtn.classList.remove('selected');
-            
-            if (type === 'downpayment') {
-                downpaymentBtn.classList.add('selected');
-                selectedCashAmount = Math.round(bookingTotal * 0.5 * 100) / 100;
-            } else {
-                fullPaymentBtn.classList.add('selected');
-                selectedCashAmount = bookingTotal;
-            }
-            
-            console.log('✅ Selected Cash Amount:', selectedCashAmount);
-            
-            cashBtn.disabled = false;
-        }
-
-        function selectPaymentAmount(type) {
-            const downpaymentBtn = document.getElementById('downpayment-btn');
-            const fullPaymentBtn = document.getElementById('full-payment-btn');
-            const gcashBtn = document.getElementById('gcash-booking-btn');
-            
-            downpaymentBtn.classList.remove('selected');
-            fullPaymentBtn.classList.remove('selected');
-            
-            if (type === 'downpayment') {
-                downpaymentBtn.classList.add('selected');
-                selectedGCashAmount = Math.round(bookingTotal * 0.5 * 100) / 100;
-            } else {
-                fullPaymentBtn.classList.add('selected');
-                selectedGCashAmount = bookingTotal;
-            }
-            
-            console.log('✅ Selected GCash Amount:', selectedGCashAmount);
-            
-            gcashBtn.disabled = false;
-        }
-
-        function validateForm() {
-            const form = document.getElementById('bookingForm');
-            const requiredFields = form.querySelectorAll('[required]');
-            let isValid = true;
-
-            requiredFields.forEach(field => {
-                if (!field.value) {
-                    isValid = false;
-                    field.style.borderColor = '#dc2626';
-                } else {
-                    field.style.borderColor = '';
+    async function loadEntranceFee() {
+        try {
+            const response = await fetch('/api/entrance-fee', {
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 }
             });
-
-            const paymentMethod = document.getElementById('payment_method');
-            if (!paymentMethod.value) {
-                isValid = false;
-                paymentMethod.style.borderColor = '#dc2626';
-            }
-
-            if (!isValid) {
-                alert('Please fill in all required fields');
-            }
-
-            return isValid;
-        }
-
-        function showAlert(type, message) {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type} fixed top-20 right-4 z-50 max-w-md`;
-            alertDiv.innerHTML = `
-                <div class="flex items-start">
-                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} text-xl mr-3 mt-1"></i>
-                    <div>
-                        <p class="font-semibold">${type === 'success' ? 'Success!' : 'Error!'}</p>
-                        <p class="text-sm">${message}</p>
-                    </div>
-                </div>
-            `;
             
-            document.body.appendChild(alertDiv);
-            
-            setTimeout(() => {
-                alertDiv.remove();
-            }, 5000);
-        }
-
-        async function validateCartBeforeSubmit() {
-            try {
-                const response = await fetch('/api/cart/pre-validate', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
+            if (response.ok) {
                 const data = await response.json();
-                
-                if (!data.success) {
-                    if (data.validation_errors) {
-                        showAlert('error', data.validation_errors.join('\n'));
-                    } else {
-                        showAlert('error', data.message || 'Cart validation failed.');
-                    }
-                    return false;
+                if (data.success && data.entrance_fee) {
+                    entranceFeeAmount = parseFloat(data.entrance_fee.amount);
+                    hasActiveEntranceFee = true;
+                }
+            }
+        } catch (error) {
+            console.error('Error loading entrance fee:', error);
+        }
+    }
+
+    function loadBookingSummary() {
+        const summaryContainer = document.getElementById('booking-summary');
+        const loading = document.getElementById('summary-loading');
+        
+        fetch('/api/cart/items')
+            .then(response => response.json())
+            .then(data => {
+                if (loading) {
+                    loading.style.display = 'none';
                 }
                 
-                return true;
-            } catch (error) {
-                console.error('Validation error:', error);
-                showAlert('error', 'Error validating cart. Please try again.');
+                if (data.success && data.cart && data.items.length > 0) {
+                    renderBookingSummary(data.cart, data.items, summaryContainer);
+                } else {
+                    summaryContainer.innerHTML = `
+                        <div class="alert alert-error">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            <strong>No items in cart.</strong> Please add accommodations to your cart first.
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                if (loading) loading.style.display = 'none';
+                summaryContainer.innerHTML = `<div class="alert alert-error">Error loading summary</div>`;
+            });
+    }
+
+    function renderBookingSummary(cart, items, container) {
+        daysCount = parseInt(cart.daysCount) || 1;
+        numGuests = parseInt(cart.numGuests) || 1;
+        
+        const checkInDate = new Date(cart.checkInDate);
+        const checkOutDate = new Date(cart.checkOutDate);
+        const isSameDay = checkInDate.toDateString() === checkOutDate.toDateString();
+        const bookingType = isSameDay ? 'day-use' : 'overnight';
+        
+        const bookingTypeSelect = document.getElementById('booking_type');
+        bookingTypeSelect.innerHTML = `
+            <option value="day-use" ${bookingType === 'day-use' ? 'selected' : ''}>Day Use</option>
+            <option value="overnight" ${bookingType === 'overnight' ? 'selected' : ''}>Overnight</option>
+        `;
+        
+        let subtotal = 0;
+        
+        const itemsHTML = items.map(item => {
+            const unit = item.unit;
+            const unitPrice = parseFloat(unit.unitRatePrice);
+            let itemTotal = 0;
+            let calculation = '';
+            
+            if (unit.unitType === 'room') {
+                if (numGuests === 1) {
+                    itemTotal = unitPrice * 2 * daysCount;
+                    calculation = `₱${unitPrice.toFixed(2)} × 2 × ${daysCount} day(s)`;
+                } else {
+                    itemTotal = unitPrice * numGuests * daysCount;
+                    calculation = `₱${unitPrice.toFixed(2)} × ${numGuests} × ${daysCount} day(s)`;
+                }
+            } else if (unit.unitType === 'cottage') {
+                if (hasActiveEntranceFee) {
+                    const entranceTotal = entranceFeeAmount * numGuests;
+                    itemTotal = entranceTotal + unitPrice;
+                    calculation = `(₱${entranceFeeAmount.toFixed(2)} × ${numGuests}) + ₱${unitPrice.toFixed(2)}`;
+                } else {
+                    itemTotal = unitPrice;
+                    calculation = `Cottage Price Only`;
+                }
+            }
+            
+            subtotal += itemTotal;
+            
+            return `
+                <div class="summary-item">
+                    <div class="item-details">
+                        <h4 class="font-semibold text-lg text-gray-800">${unit.unitName}</h4>
+                        <span class="type-badge ${unit.unitType}">
+                            <i class="fas fa-${unit.unitType === 'room' ? 'bed' : 'home'}"></i>
+                            ${unit.unitType}
+                        </span>
+                        <p class="text-sm text-gray-600 mt-2">${calculation}</p>
+                    </div>
+                    <div class="item-price">
+                        <p class="text-xl font-bold text-blue-600">₱${itemTotal.toFixed(2)}</p>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        const tax = Math.round(subtotal * 0.12 * 100) / 100;
+        const serviceFee = Math.round(subtotal * 0.05 * 100) / 100;
+        const total = Math.round((subtotal + tax + serviceFee) * 100) / 100;
+        
+        bookingTotal = total;
+        
+        const summaryHTML = `
+            <div class="mb-6">
+                <h3 class="font-semibold text-lg mb-4">Booking Details</h3>
+                <div class="space-y-3 text-sm bg-gray-50 p-4 rounded-lg">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Check-in:</span>
+                        <span class="font-semibold">${cart.checkInDate}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Check-out:</span>
+                        <span class="font-semibold">${cart.checkOutDate}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Duration:</span>
+                        <span class="font-semibold">${daysCount} day(s)</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Type:</span>
+                        <span class="font-semibold">${bookingType === 'day-use' ? 'Day Use' : 'Overnight'}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Guests:</span>
+                        <span class="font-semibold">${numGuests}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <h3 class="font-semibold text-lg mb-4">Accommodations</h3>
+                ${itemsHTML}
+            </div>
+            
+            <div class="border-t pt-4">
+                <div class="flex justify-between mb-2 text-gray-700">
+                    <span>Subtotal:</span>
+                    <span class="font-semibold">₱${subtotal.toFixed(2)}</span>
+                </div>
+                <div class="flex justify-between mb-2 text-gray-600 text-sm">
+                    <span>Tax (12%):</span>
+                    <span class="font-semibold">₱${tax.toFixed(2)}</span>
+                </div>
+                <div class="flex justify-between mb-4 text-gray-600 text-sm">
+                    <span>Service Fee (5%):</span>
+                    <span class="font-semibold">₱${serviceFee.toFixed(2)}</span>
+                </div>
+                
+                <div class="total-price-box">
+                    <div class="flex justify-between items-center">
+                        <span class="text-lg font-bold text-gray-800">TOTAL AMOUNT:</span>
+                        <span class="price-amount">₱${total.toFixed(2)}</span>
+                    </div>
+                    <p class="text-xs text-gray-600 mt-2 text-right">Inclusive of all taxes and fees</p>
+                </div>
+            </div>
+        `;
+        
+        container.innerHTML = summaryHTML;
+        updatePaymentAmounts();
+    }
+
+    function updatePaymentAmounts() {
+        const total = bookingTotal;
+        const downpayment = Math.round(total * 0.5 * 100) / 100;
+        
+        document.getElementById('total-amount-display').textContent = '₱' + total.toFixed(2);
+        document.getElementById('min-payment-display').textContent = '₱' + downpayment.toFixed(2);
+        document.getElementById('downpayment-amount').textContent = '₱' + downpayment.toFixed(2);
+        document.getElementById('full-amount').textContent = '₱' + total.toFixed(2);
+        document.getElementById('cash-downpayment-amount').textContent = '₱' + downpayment.toFixed(2);
+        document.getElementById('cash-full-amount').textContent = '₱' + total.toFixed(2);
+    }
+
+    function prefillUserInfo() {
+        const user = {
+            name: '{{ Auth::user()->name ?? "" }}',
+            email: '{{ Auth::user()->email ?? "" }}',
+            phone: '{{ Auth::user()->phoneNumber ?? "" }}'
+        };
+        
+        if (user.name && user.name.trim() !== '') {
+            document.querySelector('input[name="full_name"]').value = user.name.trim();
+        }
+        if (user.email) {
+            document.querySelector('input[name="email"]').value = user.email;
+        }
+        if (user.phone) {
+            document.querySelector('input[name="phone"]').value = user.phone;
+        }
+    }
+
+    // Payment method change handler
+    document.getElementById('payment_method').addEventListener('change', function() {
+        const paymentMethod = this.value;
+        const cashSection = document.getElementById('cash-payment-section');
+        const gcashSection = document.getElementById('gcash-payment-section');
+        const amountInfo = document.getElementById('payment-amount-info');
+        
+        cashSection.style.display = 'none';
+        gcashSection.style.display = 'none';
+        amountInfo.style.display = 'none';
+        
+        selectedCashAmount = null;
+        selectedGCashAmount = null;
+        
+        if (paymentMethod === 'cash') {
+            cashSection.style.display = 'block';
+            amountInfo.style.display = 'block';
+        } else if (paymentMethod === 'gcash') {
+            gcashSection.style.display = 'block';
+            amountInfo.style.display = 'block';
+        }
+    });
+
+    function selectCashPaymentAmount(type) {
+        const downpaymentBtn = document.getElementById('cash-downpayment-btn');
+        const fullPaymentBtn = document.getElementById('cash-full-payment-btn');
+        const cashBtn = document.getElementById('cash-booking-btn');
+        
+        downpaymentBtn.classList.remove('selected');
+        fullPaymentBtn.classList.remove('selected');
+        
+        if (type === 'downpayment') {
+            downpaymentBtn.classList.add('selected');
+            selectedCashAmount = Math.round(bookingTotal * 0.5 * 100) / 100;
+        } else {
+            fullPaymentBtn.classList.add('selected');
+            selectedCashAmount = bookingTotal;
+        }
+        
+        cashBtn.disabled = false;
+    }
+
+    function selectPaymentAmount(type) {
+        const downpaymentBtn = document.getElementById('downpayment-btn');
+        const fullPaymentBtn = document.getElementById('full-payment-btn');
+        const gcashBtn = document.getElementById('gcash-booking-btn');
+        
+        downpaymentBtn.classList.remove('selected');
+        fullPaymentBtn.classList.remove('selected');
+        
+        if (type === 'downpayment') {
+            downpaymentBtn.classList.add('selected');
+            selectedGCashAmount = Math.round(bookingTotal * 0.5 * 100) / 100;
+        } else {
+            fullPaymentBtn.classList.add('selected');
+            selectedGCashAmount = bookingTotal;
+        }
+        
+        gcashBtn.disabled = false;
+    }
+
+    function validateForm() {
+        const form = document.getElementById('bookingForm');
+        const requiredFields = form.querySelectorAll('[required]');
+        let isValid = true;
+
+        requiredFields.forEach(field => {
+            if (!field.value) {
+                isValid = false;
+                field.style.borderColor = '#dc2626';
+            } else {
+                field.style.borderColor = '';
+            }
+        });
+
+        const paymentMethod = document.getElementById('payment_method');
+        if (!paymentMethod.value) {
+            isValid = false;
+            paymentMethod.style.borderColor = '#dc2626';
+        }
+
+        if (!isValid) {
+            alert('Please fill in all required fields');
+        }
+
+        return isValid;
+    }
+
+    function showAlert(type, message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} fixed top-20 right-4 z-50 max-w-md`;
+        alertDiv.innerHTML = `
+            <div class="flex items-start">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} text-xl mr-3 mt-1"></i>
+                <div>
+                    <p class="font-semibold">${type === 'success' ? 'Success!' : 'Error!'}</p>
+                    <p class="text-sm">${message}</p>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(alertDiv);
+        
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 5000);
+    }
+
+    async function validateCartBeforeSubmit() {
+        try {
+            const response = await fetch('/api/cart/pre-validate', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (!data.success) {
+                if (data.validation_errors) {
+                    showAlert('error', data.validation_errors.join('\n'));
+                } else {
+                    showAlert('error', data.message || 'Cart validation failed.');
+                }
                 return false;
             }
+            
+            return true;
+        } catch (error) {
+            console.error('Validation error:', error);
+            showAlert('error', 'Error validating cart. Please try again.');
+            return false;
         }
+    }
 
-        async function submitCashBooking() {
-            // ✅ CHECK: Must select payment type first
-            if (!selectedCashAmount) {
-                showAlert('error', 'Please select payment type (Downpayment or Full Payment)');
-                return;
+    // ✅ UPDATED: Cash booking submission
+    async function submitCashBooking() {
+        if (!selectedCashAmount) {
+            showAlert('error', 'Please select payment type (Downpayment or Full Payment)');
+            return;
+        }
+        
+        if (!validateForm()) return;
+        
+        const isValid = await validateCartBeforeSubmit();
+        if (!isValid) return;
+        
+        const cashBtn = document.getElementById('cash-booking-btn');
+        const originalText = cashBtn.innerHTML;
+        
+        cashBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+        cashBtn.disabled = true;
+        
+        const form = document.getElementById('bookingForm');
+        const formData = new FormData(form);
+        
+        formData.set('payment_amount', selectedCashAmount.toFixed(2));
+        formData.set('payment_method', 'cash');
+        
+        const bookingTypeSelect = document.getElementById('booking_type');
+        if (bookingTypeSelect.disabled && bookingTypeSelect.value) {
+            formData.append('booking_type', bookingTypeSelect.value);
+        }
+        
+        formData.append('event_type', 'normal-booking');
+        
+        try {
+            const response = await fetch('/api/customer-bookings', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                },
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                showSuccessMessage(data);
+            } else {
+                throw new Error(data.message || 'Booking failed');
             }
-            
-            if (!validateForm()) return;
-            
-            const isValid = await validateCartBeforeSubmit();
-            if (!isValid) return;
-            
-            const cashBtn = document.getElementById('cash-booking-btn');
-            const originalText = cashBtn.innerHTML;
-            
-            cashBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
-            cashBtn.disabled = true;
-            
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert('error', 'Failed to complete booking: ' + error.message);
+            cashBtn.innerHTML = originalText;
+            cashBtn.disabled = false;
+        }
+    }
+
+    // ✅ COMPLETELY REWRITTEN: GCash booking submission (TWO-PHASE)
+    async function submitGCashBooking() {
+        if (!selectedGCashAmount) {
+            showAlert('error', 'Please select payment amount (Downpayment or Full Payment)');
+            return;
+        }
+        
+        if (!validateForm()) return;
+        
+        const isValid = await validateCartBeforeSubmit();
+        if (!isValid) return;
+        
+        const gcashBtn = document.getElementById('gcash-booking-btn');
+        const originalText = gcashBtn.innerHTML;
+        
+        gcashBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Validating booking...';
+        gcashBtn.disabled = true;
+        
+        try {
             const form = document.getElementById('bookingForm');
             const formData = new FormData(form);
             
-            // ✅ SEND EXACT SELECTED AMOUNT
-            formData.set('payment_amount', selectedCashAmount.toFixed(2));
-            formData.set('payment_method', 'cash');
-            
-            console.log('✅ Submitting Cash Booking:', {
-                payment_amount: selectedCashAmount,
-                booking_total: bookingTotal
-            });
+            formData.set('payment_amount', selectedGCashAmount.toFixed(2));
+            formData.set('payment_method', 'gcash');
             
             const bookingTypeSelect = document.getElementById('booking_type');
             if (bookingTypeSelect.disabled && bookingTypeSelect.value) {
@@ -1016,162 +1053,107 @@
             
             formData.append('event_type', 'normal-booking');
             
-            try {
-                const response = await fetch('/api/customer-bookings', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json'
-                    },
-                    body: formData
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    showSuccessMessage(data);
-                } else {
-                    throw new Error(data.message || 'Booking failed');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showAlert('error', 'Failed to complete booking: ' + error.message);
-                cashBtn.innerHTML = originalText;
-                cashBtn.disabled = false;
+            // ✅ PHASE 1: Submit to backend for validation (NO DB WRITES YET)
+            console.log('PHASE 1: Submitting for validation...');
+            
+            const validationResponse = await fetch('/api/customer-bookings', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                },
+                body: formData
+            });
+            
+            const validationData = await validationResponse.json();
+            
+            if (!validationData.success || !validationData.requires_payment_first) {
+                throw new Error(validationData.message || 'Validation failed');
             }
+            
+            console.log('✅ Validation passed - Booking data received:', validationData);
+            
+            // ✅ PHASE 2: Process GCash payment
+            gcashBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing payment...';
+            
+            console.log('PHASE 2: Processing GCash payment...');
+            
+            const paymentResponse = await fetch('/gcash/process-payment', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    booking_data: validationData.booking_data,
+                    payment_data: validationData.payment_data
+                })
+            });
+            
+            const paymentData = await paymentResponse.json();
+            
+            if (paymentData.success && paymentData.checkout_url) {
+                console.log('✅ Payment intent created - Redirecting to GCash...');
+                window.location.href = paymentData.checkout_url;
+            } else {
+                throw new Error(paymentData.message || 'Failed to process GCash payment');
+            }
+            
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert('error', 'Failed to process GCash payment: ' + error.message);
+            gcashBtn.innerHTML = originalText;
+            gcashBtn.disabled = false;
         }
+    }
 
-        async function submitGCashBooking() {
-            if (!selectedGCashAmount) {
-                showAlert('error', 'Please select payment amount (Downpayment or Full Payment)');
-                return;
-            }
-            
-            if (!validateForm()) return;
-            
-            const isValid = await validateCartBeforeSubmit();
-            if (!isValid) return;
-            
-            const gcashBtn = document.getElementById('gcash-booking-btn');
-            const originalText = gcashBtn.innerHTML;
-            
-            gcashBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating booking...';
-            gcashBtn.disabled = true;
-            
-            try {
-                const form = document.getElementById('bookingForm');
-                const formData = new FormData(form);
-                
-                // ✅ SEND EXACT SELECTED AMOUNT
-                formData.set('payment_amount', selectedGCashAmount.toFixed(2));
-                formData.set('payment_method', 'gcash');
-                
-                console.log('✅ Submitting GCash Booking:', {
-                    payment_amount: selectedGCashAmount,
-                    booking_total: bookingTotal
-                });
-                
-                const bookingTypeSelect = document.getElementById('booking_type');
-                if (bookingTypeSelect.disabled && bookingTypeSelect.value) {
-                    formData.append('booking_type', bookingTypeSelect.value);
-                }
-                
-                formData.append('event_type', 'normal-booking');
-                
-                const bookingResponse = await fetch('/api/customer-bookings', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json'
-                    },
-                    body: formData
-                });
-                
-                const bookingData = await bookingResponse.json();
-                
-                if (!bookingData.success) {
-                    throw new Error(bookingData.message || 'Failed to create booking');
-                }
-                
-                currentBookingId = bookingData.booking_id;
-                
-                gcashBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Redirecting to GCash...';
-                
-                const paymentResponse = await fetch('/gcash/process-payment', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        booking_id: currentBookingId,
-                        amount: selectedGCashAmount
-                    })
-                });
-                
-                const paymentData = await paymentResponse.json();
-                
-                if (paymentData.success && paymentData.checkout_url) {
-                    window.location.href = paymentData.checkout_url;
-                } else {
-                    throw new Error(paymentData.message || 'Failed to process GCash payment');
-                }
-                
-            } catch (error) {
-                console.error('Error:', error);
-                showAlert('error', 'Failed to process GCash payment: ' + error.message);
-                gcashBtn.innerHTML = originalText;
-                gcashBtn.disabled = false;
-            }
-        }
-
-        function showSuccessMessage(data) {
-            const bookingForm = document.getElementById('bookingForm');
-            bookingForm.innerHTML = `
-                <div class="alert alert-success">
-                    <div class="flex items-start">
-                        <i class="fas fa-check-circle text-2xl mr-3 mt-1"></i>
-                        <div>
-                            <h4 class="font-semibold text-xl mb-2">Booking Successful!</h4>
-                            <p class="mb-3">${data.message}</p>
-                            <div class="bg-white p-4 rounded-lg border border-green-200 mt-3">
-                                <p class="mb-1"><strong>Booking Reference:</strong> ${data.booking_reference}</p>
-                                <p class="mb-1"><strong>Booking ID:</strong> ${data.booking_id}</p>
-                                <p class="mb-1"><strong>Status:</strong> ${data.booking_status}</p>
-                            </div>
+    function showSuccessMessage(data) {
+        const bookingForm = document.getElementById('bookingForm');
+        bookingForm.innerHTML = `
+            <div class="alert alert-success">
+                <div class="flex items-start">
+                    <i class="fas fa-check-circle text-2xl mr-3 mt-1"></i>
+                    <div>
+                        <h4 class="font-semibold text-xl mb-2">Booking Successful!</h4>
+                        <p class="mb-3">${data.message}</p>
+                        <div class="bg-white p-4 rounded-lg border border-green-200 mt-3">
+                            <p class="mb-1"><strong>Booking Reference:</strong> ${data.booking_reference}</p>
+                            <p class="mb-1"><strong>Booking ID:</strong> ${data.booking_id}</p>
+                            <p class="mb-1"><strong>Status:</strong> ${data.booking_status}</p>
                         </div>
                     </div>
                 </div>
-                <div class="text-center mt-6">
-                    <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                        <a href="/" class="action-btn btn-success" style="max-width: 200px;">
-                            <i class="fas fa-home mr-2"></i>Back to Home
-                        </a>
-                        <a href="/my-bookings" class="action-btn btn-success" style="max-width: 200px;">
-                            <i class="fas fa-calendar-alt mr-2"></i>View Bookings
-                        </a>
-                    </div>
+            </div>
+            <div class="text-center mt-6">
+                <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                    <a href="/" class="action-btn btn-success" style="max-width: 200px;">
+                        <i class="fas fa-home mr-2"></i>Back to Home
+                    </a>
+                    <a href="/my-bookings" class="action-btn btn-success" style="max-width: 200px;">
+                        <i class="fas fa-calendar-alt mr-2"></i>View Bookings
+                    </a>
                 </div>
-            `;
-        }
+            </div>
+        `;
+    }
 
-        function cancelBooking() {
-            if (confirm('Are you sure you want to cancel this booking?')) {
-                fetch('/api/cart/clear', {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        window.location.href = "{{ route('home') }}";
-                    }
-                });
-            }
+    function cancelBooking() {
+        if (confirm('Are you sure you want to cancel this booking?')) {
+            fetch('/api/cart/clear', {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = "{{ route('home') }}";
+                }
+            });
         }
-    </script>
+    }
+</script>
 </body>
 </html>

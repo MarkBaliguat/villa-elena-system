@@ -40,25 +40,17 @@ Route::get('/about', function () {
     return view('customerFolder.about.about');
 })->name('about');
 
-// ========== ✅ GCASH PAYMENT ROUTES ==========
+// ========== ✅ GCASH PAYMENT ROUTES (UPDATED) ==========
 Route::middleware(['auth'])->group(function () {
-    // Process payment (create PayMongo intent)
     Route::post('/gcash/process-payment', [CustomerBookingController::class, 'processGCashPayment'])
         ->name('customer.payment.process');
-    
-    // ✅ SUCCESS ROUTE - Shows the success page (gcash-success.blade.php)
     Route::get('/payment/gcash/success', [CustomerBookingController::class, 'gcashPaymentSuccess'])
         ->name('customer.payment.success');
-    
-    // ✅ VERIFICATION ROUTE - Called via AJAX from success page
     Route::get('/payment/gcash/verify', [CustomerBookingController::class, 'verifyGCashPayment'])
         ->name('customer.payment.verify');
-    
-    // ✅ FAILED ROUTE - Shows the failed page (gcash-failed.blade.php)
-    Route::get('/payment/gcash/failed/{booking_id?}', [CustomerBookingController::class, 'gcashPaymentFailed'])
+    Route::get('/payment/gcash/failed', [CustomerBookingController::class, 'gcashPaymentFailed'])
         ->name('customer.payment.failed');
 });
-// ========== END GCASH PAYMENT ROUTES ==========
 
 
 // ========== CART ROUTES USING CART CONTROLLER ==========
