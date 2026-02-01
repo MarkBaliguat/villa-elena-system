@@ -55,7 +55,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('customer.payment.verify');
     
     // ✅ FAILED ROUTE - Shows the failed page (gcash-failed.blade.php)
-    Route::get('/payment/gcash/failed', [CustomerBookingController::class, 'gcashPaymentFailed'])
+    Route::get('/payment/gcash/failed/{booking_id?}', [CustomerBookingController::class, 'gcashPaymentFailed'])
         ->name('customer.payment.failed');
 });
 // ========== END GCASH PAYMENT ROUTES ==========

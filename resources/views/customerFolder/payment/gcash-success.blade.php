@@ -215,14 +215,28 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    // Payment successful - show details
                     displayBookingDetails(data.booking, data.payment);
+                    
+                    // Show success notification
+                    showNotification('✅ Payment successful! Booking confirmed.', 'success');
+                    
                 } else {
-                    showError(data.message);
+                    // Payment failed - redirect to failed page
+                    showNotification('❌ Payment failed. Redirecting...', 'error');
+                    
+                    setTimeout(() => {
+                        if (data.redirect_url) {
+                            window.location.href = data.redirect_url;
+                        } else {
+                            window.location.href = `/payment/gcash/failed?booking_id=${bookingId}`;
+                        }
+                    }, 2000);
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                showError('Failed to verify payment. Please check your bookings.');
+                showNotification('⚠️ Error verifying payment. Please check your bookings.', 'error');
             });
         } else {
             showError('Invalid payment information.');
@@ -268,6 +282,35 @@
                     <p style="color: #EF4444; font-weight: 600;">${message}</p>
                 </div>
             `;
+        }
+        
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 1rem 2rem;
+                border-radius: 10px;
+                color: white;
+                font-weight: 600;
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+            `;
+            
+            if (type === 'success') {
+                notification.style.backgroundColor = '#10b981';
+                notification.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+            } else {
+                notification.style.backgroundColor = '#EF4444';
+                notification.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
+            }
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
         }
     </script>
 </body>

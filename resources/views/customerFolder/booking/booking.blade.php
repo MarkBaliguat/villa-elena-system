@@ -361,18 +361,18 @@
             border-color: rgba(34, 197, 94, 0.2);
         }
 
-        .total-price {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: var(--text-dark);
-            text-align: right;
-            padding-top: 1.5rem;
-            border-top: 2px dashed #e5e7eb;
+        .total-price-box {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 165, 0, 0.15));
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-top: 1rem;
+            border: 2px solid rgba(255, 215, 0, 0.3);
         }
 
-        .total-price .price-amount {
+        .total-price-box .price-amount {
             color: #059669;
             font-size: 2rem;
+            font-weight: 700;
         }
 
         @media (max-width: 768px) {
@@ -490,7 +490,34 @@
                                     <i class="fas fa-info-circle mr-2"></i>
                                     <strong>Cash Payment:</strong> Please prepare the payment upon arrival or at the resort.
                                 </div>
-                                <button type="button" onclick="submitCashBooking()" class="action-btn btn-success" id="cash-booking-btn">
+                                
+                                <!-- ✅ NEW: Cash payment type selection -->
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i class="fas fa-money-bill-wave"></i>
+                                        Select Payment Type
+                                    </label>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <button type="button" onclick="selectCashPaymentAmount('downpayment')" 
+                                                class="payment-option-btn" id="cash-downpayment-btn">
+                                            <i class="fas fa-percent"></i>
+                                            <div class="mt-2">
+                                                <div class="text-sm text-gray-600">Downpayment (50%)</div>
+                                                <div class="text-xl font-bold" id="cash-downpayment-amount">₱0.00</div>
+                                            </div>
+                                        </button>
+                                        <button type="button" onclick="selectCashPaymentAmount('full')" 
+                                                class="payment-option-btn" id="cash-full-payment-btn">
+                                            <i class="fas fa-check-circle"></i>
+                                            <div class="mt-2">
+                                                <div class="text-sm text-gray-600">Full Payment</div>
+                                                <div class="text-xl font-bold" id="cash-full-amount">₱0.00</div>
+                                            </div>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <button type="button" onclick="submitCashBooking()" class="action-btn btn-success" id="cash-booking-btn" disabled>
                                     <i class="fas fa-money-bill-wave"></i>
                                     Complete Booking (Cash Payment)
                                 </button>
@@ -568,6 +595,7 @@
     <script>
         let bookingTotal = 0;
         let selectedGCashAmount = null;
+        let selectedCashAmount = null; // ✅ NEW: For cash payment selection
         let currentBookingId = null;
         let daysCount = 1;
         let numGuests = 1;
@@ -639,20 +667,10 @@
             numGuests = parseInt(cart.numGuests) || 1;
             
             // Determine booking type correctly
-            // Same day (check-in = check-out) = day-use
-            // Different days (check-in < check-out) = overnight
             const checkInDate = new Date(cart.checkInDate);
             const checkOutDate = new Date(cart.checkOutDate);
             const isSameDay = checkInDate.toDateString() === checkOutDate.toDateString();
             const bookingType = isSameDay ? 'day-use' : 'overnight';
-            
-            console.log('📅 Booking Type Calculation:', {
-                checkInDate: cart.checkInDate,
-                checkOutDate: cart.checkOutDate,
-                isSameDay: isSameDay,
-                daysCount: daysCount,
-                determinedBookingType: bookingType
-            });
             
             const bookingTypeSelect = document.getElementById('booking_type');
             bookingTypeSelect.innerHTML = `
@@ -706,11 +724,19 @@
                 `;
             }).join('');
 
-            const tax = subtotal * 0.12;
-            const serviceFee = subtotal * 0.05;
-            const total = subtotal + tax + serviceFee;
+            // ✅ CALCULATE TOTAL WITH TAX AND SERVICE FEE (with proper rounding)
+            const tax = Math.round(subtotal * 0.12 * 100) / 100;
+            const serviceFee = Math.round(subtotal * 0.05 * 100) / 100;
+            const total = Math.round((subtotal + tax + serviceFee) * 100) / 100;
             
             bookingTotal = total;
+            
+            console.log('✅ Booking Total Calculation:', {
+                subtotal: subtotal,
+                tax: tax,
+                serviceFee: serviceFee,
+                total: total
+            });
             
             const summaryHTML = `
                 <div class="mb-6">
@@ -745,21 +771,25 @@
                 </div>
                 
                 <div class="border-t pt-4">
-                    <div class="flex justify-between mb-2">
+                    <div class="flex justify-between mb-2 text-gray-700">
                         <span>Subtotal:</span>
                         <span class="font-semibold">₱${subtotal.toFixed(2)}</span>
                     </div>
-                    <div class="flex justify-between mb-2">
+                    <div class="flex justify-between mb-2 text-gray-600 text-sm">
                         <span>Tax (12%):</span>
                         <span class="font-semibold">₱${tax.toFixed(2)}</span>
                     </div>
-                    <div class="flex justify-between mb-2">
+                    <div class="flex justify-between mb-4 text-gray-600 text-sm">
                         <span>Service Fee (5%):</span>
                         <span class="font-semibold">₱${serviceFee.toFixed(2)}</span>
                     </div>
-                    <div class="total-price">
-                        <span>Total Amount:</span>
-                        <span class="price-amount">₱${total.toFixed(2)}</span>
+                    
+                    <div class="total-price-box">
+                        <div class="flex justify-between items-center">
+                            <span class="text-lg font-bold text-gray-800">TOTAL AMOUNT:</span>
+                            <span class="price-amount">₱${total.toFixed(2)}</span>
+                        </div>
+                        <p class="text-xs text-gray-600 mt-2 text-right">Inclusive of all taxes and fees</p>
                     </div>
                 </div>
             `;
@@ -770,12 +800,21 @@
 
         function updatePaymentAmounts() {
             const total = bookingTotal;
-            const downpayment = total * 0.5;
+            const downpayment = Math.round(total * 0.5 * 100) / 100; // ✅ Round to 2 decimals
+            
+            console.log('✅ Payment Amounts:', {
+                total: total,
+                downpayment: downpayment
+            });
             
             document.getElementById('total-amount-display').textContent = '₱' + total.toFixed(2);
             document.getElementById('min-payment-display').textContent = '₱' + downpayment.toFixed(2);
             document.getElementById('downpayment-amount').textContent = '₱' + downpayment.toFixed(2);
             document.getElementById('full-amount').textContent = '₱' + total.toFixed(2);
+            
+            // ✅ Update cash payment amounts too
+            document.getElementById('cash-downpayment-amount').textContent = '₱' + downpayment.toFixed(2);
+            document.getElementById('cash-full-amount').textContent = '₱' + total.toFixed(2);
         }
 
         function prefillUserInfo() {
@@ -807,6 +846,10 @@
             gcashSection.style.display = 'none';
             amountInfo.style.display = 'none';
             
+            // Reset selections
+            selectedCashAmount = null;
+            selectedGCashAmount = null;
+            
             if (paymentMethod === 'cash') {
                 cashSection.style.display = 'block';
                 amountInfo.style.display = 'block';
@@ -815,6 +858,28 @@
                 amountInfo.style.display = 'block';
             }
         });
+
+        // ✅ NEW: Cash payment amount selection
+        function selectCashPaymentAmount(type) {
+            const downpaymentBtn = document.getElementById('cash-downpayment-btn');
+            const fullPaymentBtn = document.getElementById('cash-full-payment-btn');
+            const cashBtn = document.getElementById('cash-booking-btn');
+            
+            downpaymentBtn.classList.remove('selected');
+            fullPaymentBtn.classList.remove('selected');
+            
+            if (type === 'downpayment') {
+                downpaymentBtn.classList.add('selected');
+                selectedCashAmount = Math.round(bookingTotal * 0.5 * 100) / 100;
+            } else {
+                fullPaymentBtn.classList.add('selected');
+                selectedCashAmount = bookingTotal;
+            }
+            
+            console.log('✅ Selected Cash Amount:', selectedCashAmount);
+            
+            cashBtn.disabled = false;
+        }
 
         function selectPaymentAmount(type) {
             const downpaymentBtn = document.getElementById('downpayment-btn');
@@ -826,11 +891,13 @@
             
             if (type === 'downpayment') {
                 downpaymentBtn.classList.add('selected');
-                selectedGCashAmount = bookingTotal * 0.5;
+                selectedGCashAmount = Math.round(bookingTotal * 0.5 * 100) / 100;
             } else {
                 fullPaymentBtn.classList.add('selected');
                 selectedGCashAmount = bookingTotal;
             }
+            
+            console.log('✅ Selected GCash Amount:', selectedGCashAmount);
             
             gcashBtn.disabled = false;
         }
@@ -913,6 +980,12 @@
         }
 
         async function submitCashBooking() {
+            // ✅ CHECK: Must select payment type first
+            if (!selectedCashAmount) {
+                showAlert('error', 'Please select payment type (Downpayment or Full Payment)');
+                return;
+            }
+            
             if (!validateForm()) return;
             
             const isValid = await validateCartBeforeSubmit();
@@ -927,8 +1000,14 @@
             const form = document.getElementById('bookingForm');
             const formData = new FormData(form);
             
-            formData.set('payment_amount', bookingTotal.toFixed(2));
+            // ✅ SEND EXACT SELECTED AMOUNT
+            formData.set('payment_amount', selectedCashAmount.toFixed(2));
             formData.set('payment_method', 'cash');
+            
+            console.log('✅ Submitting Cash Booking:', {
+                payment_amount: selectedCashAmount,
+                booking_total: bookingTotal
+            });
             
             const bookingTypeSelect = document.getElementById('booking_type');
             if (bookingTypeSelect.disabled && bookingTypeSelect.value) {
@@ -980,12 +1059,17 @@
             gcashBtn.disabled = true;
             
             try {
-                // Step 1: Create booking
                 const form = document.getElementById('bookingForm');
                 const formData = new FormData(form);
                 
+                // ✅ SEND EXACT SELECTED AMOUNT
                 formData.set('payment_amount', selectedGCashAmount.toFixed(2));
                 formData.set('payment_method', 'gcash');
+                
+                console.log('✅ Submitting GCash Booking:', {
+                    payment_amount: selectedGCashAmount,
+                    booking_total: bookingTotal
+                });
                 
                 const bookingTypeSelect = document.getElementById('booking_type');
                 if (bookingTypeSelect.disabled && bookingTypeSelect.value) {
@@ -1011,7 +1095,6 @@
                 
                 currentBookingId = bookingData.booking_id;
                 
-                // Step 2: Process GCash payment
                 gcashBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Redirecting to GCash...';
                 
                 const paymentResponse = await fetch('/gcash/process-payment', {

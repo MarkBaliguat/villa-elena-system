@@ -380,7 +380,7 @@ class CustomerBookingController extends Controller
     }
 
     /**
-     * Store a new booking from customer - WITH COMPREHENSIVE VALIDATION
+     * ✅ FIXED: Store a new booking - CRITICAL FIX FOR GCASH CART ITEMS
      */
     public function store(Request $request)
     {
@@ -721,7 +721,7 @@ class CustomerBookingController extends Controller
             ]);
             // =======================================================
 
-            // ========== ✅ FIX 1: ADD GCASH_PAYMENT_INTENT_ID WHEN GCASH PAYMENT ==========
+            // ========== ✅ CREATE BOOKING ==========
             $bookingData = [
                 'cartID' => $cart->cartID,
                 'numGuests' => $totalGuests,
@@ -737,10 +737,11 @@ class CustomerBookingController extends Controller
                 'updated_at' => now(),
             ];
             
-            // Add temporary intent ID for GCash payments
+            // ✅ CRITICAL FIX: For GCash, create booking pero wag pa i-mark ang items as booked
             if ($request->payment_method === 'gcash') {
                 $bookingData['gcash_payment_intent_id'] = 'pending_' . time() . '_' . uniqid();
-                Log::info('📝 Set temporary GCash payment intent ID: ' . $bookingData['gcash_payment_intent_id']);
+                $bookingData['bookingStatus'] = 'pending'; // Special status
+                Log::info('📝 Set temporary GCash booking with pending status');
             }
             
             // Create booking
@@ -748,74 +749,82 @@ class CustomerBookingController extends Controller
 
             Log::info('Booking created:', [
                 'booking_id' => $booking->bookingID,
-                'status' => $bookingStatus,
+                'status' => $booking->bookingStatus,
                 'gcash_payment_intent_id' => $booking->gcash_payment_intent_id ?? 'N/A'
             ]);
 
-            // Create payment record
+            // ========== ✅ CRITICAL FIX: DIFFERENT HANDLING FOR CASH VS GCASH ==========
             $paymentReference = 'VLE' . time() . $booking->bookingID;
-            $payment = Payment::create([
-                'bookingID' => $booking->bookingID,
-                'paymentReference' => $paymentReference,
-                'paymentMethod' => $request->payment_method,
-                'paymentType' => $paymentType,
-                'amountPaid' => $paymentAmount,
-                'remainingBalance' => $remainingBalance,
-                'paymentDate' => now(),
-                'paymentStatus' => $paymentStatus,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            Log::info('Payment created:', [
-                'payment_reference' => $paymentReference,
-                'payment_status' => $paymentStatus,
-                'payment_method' => $request->payment_method
-            ]);
-
-            // ========== ✅ STEP 4: MARK CART ITEMS AS BOOKED ==========
-            $updatedItems = CartItem::where('cartID', $cart->cartID)
-                ->where('isBooked', false)
-                ->update(['isBooked' => true]);
             
-            Log::info('✅ Marked cart items as booked. Updated items count: ' . $updatedItems);
-            
-            // Update cart timestamp and mark as inactive
-            $cart->update([
-                'updated_at' => now(),
-                'is_active' => false
-            ]);
-            
-            Log::info('Cart marked as inactive for future bookings');
-            // ===========================================================
+            if ($request->payment_method === 'cash') {
+                // ✅ FOR CASH: Create payment, mark items as booked, commit transaction
+                $payment = Payment::create([
+                    'bookingID' => $booking->bookingID,
+                    'paymentReference' => $paymentReference,
+                    'paymentMethod' => 'cash',
+                    'paymentType' => $paymentType,
+                    'amountPaid' => $paymentAmount,
+                    'remainingBalance' => $remainingBalance,
+                    'paymentDate' => now(),
+                    'paymentStatus' => $paymentStatus,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
 
-            DB::commit();
-
-            Log::info('=== CUSTOMER BOOKING SUCCESS ===');
-
-            // Send booking confirmation email
-            try {
-                Mail::to($request->email)->send(new BookingConfirmationEmail($booking->load('cart.user', 'cart.cartItems.unit')));
-                Log::info("Booking confirmation email sent to {$request->email} for booking #{$booking->bookingID}");
-            } catch (\Exception $e) {
-                Log::error("Failed to send booking confirmation email: " . $e->getMessage());
+                Log::info('✅ Cash payment created:', [
+                    'payment_reference' => $paymentReference,
+                    'payment_status' => $paymentStatus,
+                    'amount' => $paymentAmount
+                ]);
+                
+                // Mark cart items as booked
+                $updatedItems = CartItem::where('cartID', $cart->cartID)
+                    ->where('isBooked', false)
+                    ->update(['isBooked' => true]);
+                
+                Log::info('✅ Marked cart items as booked for CASH payment. Updated items count: ' . $updatedItems);
+                
+                // Update cart timestamp and mark as inactive
+                $cart->update([
+                    'updated_at' => now(),
+                    'is_active' => false
+                ]);
+                
+                // ✅ COMMIT TRANSACTION FOR CASH
+                DB::commit();
+                
+                Log::info('=== CUSTOMER CASH BOOKING SUCCESS (COMMITTED) ===');
+                
+                // Send booking confirmation email
+                try {
+                    Mail::to($request->email)->send(new BookingConfirmationEmail($booking->load('cart.user', 'cart.cartItems.unit')));
+                    Log::info("Booking confirmation email sent to {$request->email} for booking #{$booking->bookingID}");
+                } catch (\Exception $e) {
+                    Log::error("Failed to send booking confirmation email: " . $e->getMessage());
+                }
+                
+            } else {
+                // ✅ FOR GCASH: COMMIT THE BOOKING (wag pa i-mark ang items as booked)
+                DB::commit();
+                
+                Log::info('=== GCASH BOOKING CREATED (PAYMENT PENDING) ===');
+                Log::info('⚠️ CART ITEMS NOT MARKED AS BOOKED YET - Will be marked after successful payment');
             }
 
             return response()->json([
-               'success' => true,
+                'success' => true,
                 'message' => ($request->payment_method === 'cash')
                     ? ($bookingStatus === 'confirmed' 
                         ? 'Booking confirmed successfully! Your reservation is now active.'
                         : 'Booking submitted successfully! Your reservation is pending approval.')
-                        : 'Booking created! Please complete GCash payment.',
+                    : 'Booking created! Please complete GCash payment.',
                 'booking_reference' => $paymentReference,
                 'booking_id' => $booking->bookingID,
                 'booking_status' => $bookingStatus,
-                // ✅ FIX 2: RETURN GCASH_PAYMENT_INTENT_ID IN RESPONSE
                 'gcash_payment_intent_id' => $booking->gcash_payment_intent_id ?? null,
                 'payment_amount' => $paymentAmount,
                 'is_confirmed' => $bookingStatus === 'confirmed',
-                'items_marked_as_booked' => $updatedItems,
+                'items_marked_as_booked' => $request->payment_method === 'cash' ? $updatedItems : 0,
                 'calculation_breakdown' => [
                     'subtotal' => $subtotal,
                     'tax_12%' => $tax,
@@ -1147,8 +1156,7 @@ class CustomerBookingController extends Controller
     }
 
     /**
-     * ✅ UPDATED METHOD: Verify GCash payment (called by success page via AJAX)
-     * WITH FIX FOR INTENT MISMATCH
+     * ✅ COMPLETELY FIXED: Verify GCash payment - CREATE FAILED PAYMENT RECORD WITH STATUS 'failed'
      */
     public function verifyGCashPayment(Request $request)
     {
@@ -1166,59 +1174,42 @@ class CustomerBookingController extends Controller
                 ], 400);
             }
             
-            // Retrieve payment intent from PayMongo
+            // ✅ STEP 1: Retrieve payment intent from PayMongo
             $paymentIntent = $this->payMongoService->retrievePaymentIntent($paymentIntentId);
             
-            Log::info('Payment Intent Retrieved', ['payment_intent' => $paymentIntent]);
+            Log::info('Payment Intent Retrieved', ['status' => $paymentIntent['data']['attributes']['status']]);
             
-            // Find booking
-            $booking = Booking::with(['cart', 'payments'])->findOrFail($bookingId);
-            
-            // ✅ FIX 3: AUTO-UPDATE GCASH_PAYMENT_INTENT_ID IF EMPTY OR TEMPORARY
-            if (empty($booking->gcash_payment_intent_id) || 
-                strpos($booking->gcash_payment_intent_id, 'pending_') === 0) {
-                
-                $booking->update(['gcash_payment_intent_id' => $paymentIntentId]);
-                Log::info('✅ Auto-updated gcash_payment_intent_id', [
-                    'booking_id' => $bookingId,
-                    'old_intent_id' => $booking->gcash_payment_intent_id,
-                    'new_intent_id' => $paymentIntentId
-                ]);
-            }
-            
-            // Verify payment intent matches
-            if ($booking->gcash_payment_intent_id !== $paymentIntentId) {
-                Log::warning('Payment intent mismatch', [
-                    'stored' => $booking->gcash_payment_intent_id,
-                    'received' => $paymentIntentId
-                ]);
-                
-                // ✅ TEMPORARY FIX FOR TESTING: Update anyway
-                $booking->update(['gcash_payment_intent_id' => $paymentIntentId]);
-                Log::info('⚠️ Override: Updated mismatched intent ID for testing');
-            }
-            
-            // Check payment status
+            // ✅ STEP 2: Check payment status
             $status = $paymentIntent['data']['attributes']['status'];
             
             if ($status === 'succeeded') {
-                // Get payment amount (convert from centavos to pesos)
-                $amountPaid = $paymentIntent['data']['attributes']['amount'] / 100;
+                // ✅ PAYMENT SUCCESSFUL - Process everything in one transaction
                 
-                // Check if payment already recorded
-                $paymentReference = 'GCASH-' . $paymentIntentId;
-                $existingPayment = Payment::where('bookingID', $bookingId)
-                    ->where('paymentReference', $paymentReference)
-                    ->first();
+                // Find the booking (created in store() method)
+                $booking = Booking::with(['cart', 'payments'])->find($bookingId);
                 
-                if (!$existingPayment) {
+                if (!$booking) {
+                    Log::error('Booking not found for successful payment', ['booking_id' => $bookingId]);
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Booking not found'
+                    ], 404);
+                }
+                
+                // Start transaction
+                DB::beginTransaction();
+                
+                try {
+                    // Get payment amount
+                    $amountPaid = $paymentIntent['data']['attributes']['amount'] / 100;
+                    
                     // Create payment record
                     $paymentType = ($amountPaid >= $booking->totalPrice) ? 'full' : 'downpayment';
                     $remainingBalance = max(0, $booking->totalPrice - $amountPaid);
                     
                     $payment = Payment::create([
                         'bookingID' => $booking->bookingID,
-                        'paymentReference' => $paymentReference,
+                        'paymentReference' => 'GCASH-' . $paymentIntentId,
                         'paymentMethod' => 'gcash',
                         'paymentType' => $paymentType,
                         'amountPaid' => $amountPaid,
@@ -1232,54 +1223,164 @@ class CustomerBookingController extends Controller
                     
                     $booking->update([
                         'bookingStatus' => $bookingStatus,
-                        'paymentStatus' => $paymentType === 'full' ? 'paid' : 'partial'
-                    ]);
-                    
-                    Log::info('✅ GCash payment recorded successfully', [
-                        'booking_id' => $bookingId,
-                        'amount_paid' => $amountPaid,
-                        'payment_type' => $paymentType,
-                        'booking_status' => $bookingStatus,
                         'gcash_payment_intent_id' => $paymentIntentId
                     ]);
-                } else {
-                    $payment = $existingPayment;
-                    Log::info('Payment already recorded, returning existing payment');
+                    
+                    // ✅ MARK CART ITEMS AS BOOKED (NOW LANG AFTER SUCCESSFUL PAYMENT)
+                    $cart = $booking->cart;
+                    $updatedItems = CartItem::where('cartID', $cart->cartID)
+                        ->where('isBooked', false)
+                        ->update(['isBooked' => true]);
+                    
+                    Log::info('✅ Cart items marked as booked after successful payment', [
+                        'items_updated' => $updatedItems
+                    ]);
+                    
+                    // Update cart as inactive
+                    $cart->update([
+                        'updated_at' => now(),
+                        'is_active' => false
+                    ]);
+                    
+                    // Send email
+                    try {
+                        Mail::to($booking->cart->user->email)->send(
+                            new BookingConfirmationEmail($booking->load('cart.user', 'cart.cartItems.unit'))
+                        );
+                        Log::info("Booking confirmation email sent for booking #{$bookingId}");
+                    } catch (\Exception $e) {
+                        Log::error("Failed to send booking confirmation email: " . $e->getMessage());
+                    }
+                    
+                    DB::commit();
+                    
+                    Log::info('✅ GCash payment completed successfully', [
+                        'booking_id' => $bookingId,
+                        'amount_paid' => $amountPaid,
+                        'booking_status' => $bookingStatus
+                    ]);
+                    
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Payment verified successfully',
+                        'booking' => [
+                            'bookingID' => $booking->bookingID,
+                            'bookingStatus' => $booking->bookingStatus,
+                            'totalPrice' => $booking->totalPrice
+                        ],
+                        'payment' => [
+                            'paymentReference' => $payment->paymentReference,
+                            'amountPaid' => $payment->amountPaid,
+                            'paymentStatus' => $payment->paymentStatus,
+                            'paymentType' => $payment->paymentType
+                        ]
+                    ]);
+                    
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    throw $e;
                 }
-                
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Payment verified successfully',
-                    'booking' => [
-                        'bookingID' => $booking->bookingID,
-                        'bookingStatus' => $booking->bookingStatus,
-                        'totalPrice' => $booking->totalPrice,
-                        'gcash_payment_intent_id' => $booking->gcash_payment_intent_id
-                    ],
-                    'payment' => [
-                        'paymentReference' => $payment->paymentReference,
-                        'amountPaid' => $payment->amountPaid,
-                        'paymentStatus' => $payment->paymentStatus,
-                        'paymentType' => $payment->paymentType
-                    ]
-                ]);
             }
             
-            // Payment not successful
-            Log::warning('Payment verification failed - Status: ' . $status);
-            return response()->json([
-                'success' => false,
-                'message' => 'Payment was not successful',
-                'status' => $status
-            ], 400);
+            // ✅ PAYMENT FAILED - CREATE FAILED PAYMENT RECORD WITH STATUS 'failed', THEN DELETE
+            Log::warning('GCash payment failed - Creating failed payment record and deleting booking', [
+                'status' => $status,
+                'payment_intent_id' => $paymentIntentId,
+                'booking_id' => $bookingId
+            ]);
+            
+            // Start transaction to handle failed payment
+            DB::beginTransaction();
+            try {
+                // Find the booking
+                $booking = Booking::with('cart')->find($bookingId);
+                
+                if ($booking) {
+                    // ✅ STEP 1: Create a FAILED payment record for tracking/history
+                    $failedPayment = Payment::create([
+                        'bookingID' => $booking->bookingID,
+                        'paymentReference' => 'GCASH-FAILED-' . $paymentIntentId,
+                        'paymentMethod' => 'gcash',
+                        'paymentType' => 'downpayment',
+                        'amountPaid' => 0,
+                        'remainingBalance' => $booking->totalPrice,
+                        'paymentDate' => now(),
+                        'paymentStatus' => 'failed', // ✅ THIS IS THE KEY - Set status to 'failed'
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+                    
+                    Log::info('✅ Failed payment record created', [
+                        'payment_id' => $failedPayment->paymentID,
+                        'payment_reference' => $failedPayment->paymentReference,
+                        'payment_status' => 'failed'
+                    ]);
+                    
+                    // ✅ STEP 2: Restore cart items if cart exists
+                    $cart = $booking->cart;
+                    if ($cart) {
+                        // Unmark cart items as booked (just in case)
+                        CartItem::where('cartID', $cart->cartID)
+                            ->update(['isBooked' => false]);
+                        
+                        // Make cart active again so user can retry
+                        $cart->update([
+                            'is_active' => true,
+                            'updated_at' => now()
+                        ]);
+                        
+                        Log::info('✅ Cart restored to active state', ['cart_id' => $cart->cartID]);
+                    }
+                    
+                    // ✅ STEP 3: Update booking status to 'cancelled' with reason
+                    $booking->update([
+                        'bookingStatus' => 'cancelled',
+                        'cancelledAt' => now(),
+                        'cancellationReason' => 'GCash payment failed - Status: ' . $status
+                    ]);
+                    
+                    Log::info('✅ Booking marked as cancelled due to failed payment', [
+                        'booking_id' => $bookingId,
+                        'cancellation_reason' => 'GCash payment failed - Status: ' . $status
+                    ]);
+                    
+                    // ✅ STEP 4: Delete the failed payment record (cleanup - optional)
+                    // NOTE: You can keep this for history or delete it for cleanup
+                    // Comment out the next line if you want to keep the failed payment record for history
+                    $failedPayment->delete();
+                    
+                    // ✅ STEP 5: Delete the booking (final cleanup)
+                    $booking->delete();
+                    
+                    Log::info('✅ Booking deleted from database after failed payment', [
+                        'booking_id' => $bookingId
+                    ]);
+                }
+                
+                DB::commit();
+                
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Payment was not successful. Booking has been cancelled.',
+                    'redirect_url' => route('customer.payment.failed', ['booking_id' => $bookingId]),
+                    'status' => $status,
+                    'payment_status' => 'failed', // ✅ Return failed status
+                    'booking_deleted' => true
+                ], 400);
+                
+            } catch (\Exception $e) {
+                DB::rollBack();
+                Log::error('Error handling failed payment: ' . $e->getMessage());
+                throw $e;
+            }
                 
         } catch (\Exception $e) {
             Log::error('GCash Verification Error: ' . $e->getMessage());
-            Log::error('Trace: ' . $e->getTraceAsString());
             
             return response()->json([
                 'success' => false,
-                'message' => 'Error verifying payment: ' . $e->getMessage()
+                'message' => 'Error verifying payment: ' . $e->getMessage(),
+                'redirect_url' => route('customer.payment.failed')
             ], 500);
         }
     }
@@ -1310,16 +1411,23 @@ class CustomerBookingController extends Controller
     }
 
     /**
-     * ✅ FIXED: Handle failed GCash payment (blade view)
+     * ✅ FIXED: Show failed payment page
      */
     public function gcashPaymentFailed(Request $request)
     {
         Log::warning('=== GCASH PAYMENT FAILED PAGE ===');
         Log::info('Request params:', $request->all());
         
-        return view('customerFolder.payment.gcash-failed');
+        $bookingId = $request->query('booking_id') ?? $request->booking_id;
+        
+        // Note: The booking should have already been deleted in verifyGCashPayment()
+        // This page just informs the user
+        
+        return view('customerFolder.payment.gcash-failed', [
+            'booking_id' => $bookingId
+        ]);
     }
-    
+        
     /**
      * ✅ NEW METHOD: Debug endpoint to check gcash_payment_intent_id
      */
