@@ -41,7 +41,10 @@ class RoomController extends Controller
         if (!$checkIn || !$checkOut) {
             $rooms = Unit::where('unitType', 'room')
                 ->where('unitStatus', 'available')
-                ->get();
+                ->get()
+                ->map(function($room) {
+                    return $this->formatRoomData($room);
+                });
 
             return response()->json([
                 'success' => true,
@@ -104,6 +107,9 @@ class RoomController extends Controller
             ->filter(function($room) use ($checkIn, $checkOut) {
                 // Check for booking conflicts (normal bookings)
                 return !$this->checkBookingConflict($room->unitID, $checkIn, $checkOut);
+            })
+            ->map(function($room) {
+                return $this->formatRoomData($room);
             });
 
         return response()->json([
@@ -117,6 +123,25 @@ class RoomController extends Controller
             ],
             'message' => $availableRooms->count() > 0 ? 'Available rooms found.' : 'No rooms available for the selected dates.'
         ]);
+    }
+
+    /**
+     * Format room data with virtual tour URL
+     */
+    private function formatRoomData($room)
+    {
+        $roomData = $room->toArray();
+        
+        // Add virtual tour URL if panorama is set
+        if ($room->virtualTourPanorama) {
+            $roomData['virtual_tour_url'] = url('/virtual-tour?panorama=' . $room->virtualTourPanorama);
+            $roomData['has_virtual_tour'] = true;
+        } else {
+            $roomData['virtual_tour_url'] = null;
+            $roomData['has_virtual_tour'] = false;
+        }
+        
+        return $roomData;
     }
 
     /**
@@ -393,7 +418,10 @@ class RoomController extends Controller
     {
         $rooms = Unit::where('unitType', 'room')
             ->where('unitStatus', 'available')
-            ->get();
+            ->get()
+            ->map(function($room) {
+                return $this->formatRoomData($room);
+            });
 
         return response()->json([
             'success' => true,

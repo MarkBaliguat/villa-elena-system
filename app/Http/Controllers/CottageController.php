@@ -15,6 +15,25 @@ use Carbon\Carbon;
 class CottageController extends Controller
 {
     /**
+     * Format cottage data with virtual tour URL
+     */
+    private function formatCottageData($cottage)
+    {
+        $cottageData = $cottage->toArray();
+        
+        // Add virtual tour URL if panorama is set
+        if ($cottage->virtualTourPanorama) {
+            $cottageData['virtual_tour_url'] = url('/virtual-tour?panorama=' . $cottage->virtualTourPanorama);
+            $cottageData['has_virtual_tour'] = true;
+        } else {
+            $cottageData['virtual_tour_url'] = null;
+            $cottageData['has_virtual_tour'] = false;
+        }
+        
+        return $cottageData;
+    }
+
+    /**
      * Display available cottages based on dates and guest count
      */
     public function getAvailableCottages(Request $request)
@@ -42,7 +61,10 @@ class CottageController extends Controller
         if (!$checkIn || !$checkOut) {
             $cottages = Unit::where('unitType', 'cottage')
                 ->where('unitStatus', 'available')
-                ->get();
+                ->get()
+                ->map(function($cottage) {
+                    return $this->formatCottageData($cottage);
+                });
 
             return response()->json([
                 'success' => true,
@@ -101,6 +123,9 @@ class CottageController extends Controller
             ->filter(function($cottage) use ($checkIn, $checkOut) {
                 // Check for booking conflicts
                 return !$this->checkBookingConflict($cottage->unitID, $checkIn, $checkOut);
+            })
+            ->map(function($cottage) {
+                return $this->formatCottageData($cottage);
             });
 
         return response()->json([
@@ -434,7 +459,10 @@ class CottageController extends Controller
         
         $cottages = Unit::where('unitType', 'cottage')
             ->where('unitStatus', 'available')
-            ->get();
+            ->get()
+            ->map(function($cottage) {
+                return $this->formatCottageData($cottage);
+            });
 
         return response()->json([
             'success' => true,

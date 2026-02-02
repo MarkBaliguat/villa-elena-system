@@ -49,8 +49,93 @@
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Unit Price </label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Unit Price</label>
                     <input type="number" name="unitRatePrice" required step="0.01" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                {{-- Virtual Tour Panorama Field --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-street-view mr-1"></i>Virtual Tour Panorama
+                    </label>
+                    <select name="virtualTourPanorama" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">No Virtual Tour</option>
+                        <optgroup label="Main Resort Areas">
+                            <option value="4centro.jpg">Centro - Main Plaza</option>
+                            <option value="1lobbyandfountain.jpg">Lobby & Fountain Entrance</option>
+                            <option value="2joypavillionandevelyncottage.jpg">Joy Pavilion Area</option>
+                        </optgroup>
+                        <optgroup label="Swimming Pools">
+                            <option value="5frontpool.jpg">Main Front Pool</option>
+                            <option value="8poolviewsadaan~2.jpg">Pool View Sadaan</option>
+                            <option value="14backpool.jpg">Back Pool Relaxation</option>
+                            <option value="15backpoolview.jpg">Back Pool View</option>
+                            <option value="17poolviewsadaanan.jpg">Pool View Sadaanan</option>
+                        </optgroup>
+                        <optgroup label="Accommodations - Cottages">
+                            <option value="3tonicottageandihawan.jpg">Toni Cottage</option>
+                            <option value="6arcelicottageandhardin.jpg">Arceli Cottage</option>
+                            <option value="9estercottage.jpg">Ester Cottage</option>
+                            <option value="16backminicottages.jpg">Back Mini Cottages</option>
+                            <option value="villaelenafront.jpg">Villa Elena Front</option>
+                            <option value="villaelenaparking.jpg">Villa Elena Parking</option>
+                        </optgroup>
+                        <optgroup label="Nature & Gardens">
+                            <option value="7hardin.jpg">Hardin - Garden Area</option>
+                            <option value="11backresortandcr.jpg">Back Resort Nature Trail</option>
+                            <option value="13backside.jpg">Backside Scenic View</option>
+                            <option value="22papaya.jpg">Papaya Garden</option>
+                        </optgroup>
+                        <optgroup label="Sunflower House - Ground Floor">
+                            <option value="10sunflowerhouse.jpg">Sunflower House</option>
+                            <option value="12sunflowerhouseandwellnesscenter.jpg">Sunflower Wellness Center</option>
+                            <option value="33sunflowerhousesala.jpg">Sunflower House Sala</option>
+                            <option value="34sunflowerhousecenter.jpg">Sunflower House Center</option>
+                            <option value="35sunflowerhousekusina.jpg">Sunflower House Kitchen</option>
+                            <option value="36sunflowerhousefunctionhall.jpg">Sunflower House Function Hall</option>
+                            <option value="51wellnesscenter.jpg">Wellness Center</option>
+                        </optgroup>
+                        <optgroup label="Sunflower House - Ground Floor Rooms">
+                            <option value="37sunflowerhouseroom1ulit.jpg">Sunflower House Room 1</option>
+                            <option value="38sunflowerhouselobbypapuntangroom2.jpg">Sunflower House Lobby</option>
+                            <option value="39sunflowerhouseroom2.jpg">Sunflower House Room 2</option>
+                            <option value="40sunflowerhouseroom3.jpg">Sunflower House Room 3</option>
+                            <option value="41sunflowerhouseroom4ulit.jpg">Sunflower House Room 4</option>
+                            <option value="42sunflowerhouseroom5.jpg">Sunflower House Room 5</option>
+                        </optgroup>
+                        <optgroup label="Sunflower House - 2nd Floor">
+                            <option value="43sunflowerhouselobby2ndfloor.jpg">Sunflower House 2nd Floor Lobby</option>
+                            <option value="44sunflowerhouseroom6.jpg">Sunflower House Room 6</option>
+                            <option value="45sunflowerhouseroom7.jpg">Sunflower House Room 7</option>
+                            <option value="46sunflowerhouseroom8siguro.jpg">Sunflower House Room 8</option>
+                            <option value="47sunflowerhouseroom9siguro.jpg">Sunflower House Room 9</option>
+                            <option value="48sunflowerhouselobby2ndfloorpart2retake.jpg">Sunflower House 2nd Floor Part 2</option>
+                            <option value="49sunflowerhouseroom11ulit.jpg">Sunflower House Room 11</option>
+                            <option value="50sunflowerhousebalconyview.jpg">Sunflower House Balcony View</option>
+                            <option value="52room10.jpg">Room 10</option>
+                        </optgroup>
+                        <optgroup label="Agri-Tourism Farm">
+                            <option value="18farmentrance.jpg">Farm Entrance</option>
+                            <option value="19farmentranceotherside.jpg">Farm Entrance Other Side</option>
+                            <option value="20entranceandjoybridge.jpg">Joy Bridge Entrance</option>
+                            <option value="20othersidepajoybridge.jpg">Joy Bridge Other Side</option>
+                            <option value="21bridge.jpg">Bridge</option>
+                            <option value="21bridgeatsunflowerfarmentrance.jpg">Bridge at Sunflower Farm</option>
+                            <option value="23entrancesasunflower.jpg">Sunflower Farm Entrance</option>
+                            <option value="24sunflowerfarmcenter.jpg">Farm Center</option>
+                            <option value="25sunflowertocampsite.jpg">Sunflower to Campsite</option>
+                            <option value="26papuntangduloatcampsite.jpg">To Duloat Campsite</option>
+                        </optgroup>
+                        <optgroup label="Campsite">
+                            <option value="27duloatcampsiteentrance.jpg">Campsite Area</option>
+                            <option value="28campsite1.jpg">Campsite 1</option>
+                            <option value="29campsite2.jpg">Campsite 2</option>
+                            <option value="30campsite3.jpg">Campsite 3</option>
+                            <option value="31campsite4.jpg">Campsite 4</option>
+                            <option value="32pavillion2.jpg">Pavilion 2</option>
+                        </optgroup>
+                    </select>
+                    <p class="text-xs text-gray-500 mt-1">Select which panorama to show for this unit's virtual tour</p>
                 </div>
 
                 {{-- Image Upload Section --}}
@@ -211,6 +296,7 @@ function populateFormFields(unit) {
     document.querySelector('input[name="blockStartDate"]').value = unit.blockStartDate || '';
     document.querySelector('input[name="blockEndDate"]').value = unit.blockEndDate || '';
     document.querySelector('textarea[name="blockReason"]').value = unit.blockReason || '';
+    document.querySelector('select[name="virtualTourPanorama"]').value = unit.virtualTourPanorama || '';
 }
 
 /**
@@ -471,28 +557,23 @@ function closeModal() {
  */
 function handleFormSubmit(event) {
     showSubmitLoading();
-    // Note: The form will submit normally, and the page will reload
-    // The loading state will be visible until the page reloads
 }
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
     setupImagePreview();
     
-    // Add form submit handler
     const unitForm = document.getElementById('unitForm');
     if (unitForm) {
         unitForm.addEventListener('submit', handleFormSubmit);
     }
     
-    // Close modal when clicking outside
     document.getElementById('unitModal')?.addEventListener('click', function(e) {
         if (e.target === this) {
             closeModal();
         }
     });
     
-    // Listen for status changes
     const statusSelect = document.querySelector('#unitModal select[name="unitStatus"]');
     if (statusSelect) {
         statusSelect.addEventListener('change', function() {
@@ -500,7 +581,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Handle ESC key to close modal
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             const unitModal = document.getElementById('unitModal');

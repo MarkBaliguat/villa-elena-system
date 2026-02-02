@@ -57,6 +57,7 @@ class UnitsController extends Controller
             'blockEndDate' => 'nullable|date|after_or_equal:blockStartDate',
             'blockReason' => 'nullable|string',
             'for_special_events' => 'sometimes|boolean',
+            'virtualTourPanorama' => 'nullable|string|max:255',
         ]);
 
         $imagePaths = [];
@@ -124,6 +125,7 @@ class UnitsController extends Controller
             'blockEndDate' => 'nullable|date|after_or_equal:blockStartDate',
             'blockReason' => 'nullable|string',
             'for_special_events' => 'sometimes|boolean',
+            'virtualTourPanorama' => 'nullable|string|max:255',
         ]);
 
         $imagePaths = $unit->images ?? [];
@@ -147,6 +149,7 @@ class UnitsController extends Controller
             'description' => $request->description,
             'capacity' => $request->capacity,
             'images' => $imagePaths,
+            'virtualTourPanorama' => $request->virtualTourPanorama,
             'unitRatePrice' => $request->unitRatePrice,
             'unitStatus' => $request->unitStatus,
             'blockStartDate' => $blockStartDate,

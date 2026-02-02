@@ -15,6 +15,7 @@ return new class extends Migration
             $table->text('description');
             $table->integer('capacity');
             $table->json('images')->nullable();
+            $table->string('virtualTourPanorama')->nullable();
             $table->decimal('unitRatePrice', 10, 2);
             $table->enum('unitStatus', ['available', 'maintenance', 'blocked'])->default('available');
             $table->date('blockStartDate')->nullable();

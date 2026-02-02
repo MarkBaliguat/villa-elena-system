@@ -548,6 +548,21 @@
             border-color: var(--secondary-yellow);
         }
 
+        /* Disabled Virtual Tour Button Styling */
+        .btn-virtual-tour.virtual-tour-disabled {
+            background: linear-gradient(135deg, #F3F4F6, #E5E7EB);
+            color: #9CA3AF;
+            border: 2px solid #E5E7EB;
+            cursor: pointer;
+            opacity: 0.7;
+        }
+
+        .btn-virtual-tour.virtual-tour-disabled:hover {
+            background: linear-gradient(135deg, #E5E7EB, #D1D5DB);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
         .btn-cart {
             background: linear-gradient(135deg, var(--primary-yellow), var(--secondary-yellow));
             color: var(--primary-black);
@@ -1197,11 +1212,9 @@
                     return;
                 }
                 
-                // Convert to Date objects for comparison
                 const checkInDate = new Date(checkIn);
                 const checkOutDate = new Date(checkOut);
                 
-                // Check if check-out is before check-in
                 if (checkOutDate < checkInDate) {
                     showNotification('Check-out date cannot be before check-in date', 'error');
                     return;
@@ -1221,25 +1234,18 @@
                 if (e.key === 'ArrowUp') {
                     e.preventDefault();
                     let value = parseInt(this.value);
-                    if (value < 20) {
-                        this.value = value + 1;
-                    }
+                    if (value < 20) this.value = value + 1;
                 } else if (e.key === 'ArrowDown') {
                     e.preventDefault();
                     let value = parseInt(this.value);
-                    if (value > 1) {
-                        this.value = value - 1;
-                    }
+                    if (value > 1) this.value = value - 1;
                 }
             });
             
             guestNumberInput.addEventListener('input', function() {
                 let value = parseInt(this.value);
-                if (isNaN(value) || value < 1) {
-                    value = 1;
-                } else if (value > 20) {
-                    value = 20;
-                }
+                if (isNaN(value) || value < 1) value = 1;
+                else if (value > 20) value = 20;
                 this.value = value;
             });
             
@@ -1248,13 +1254,9 @@
                 let value = parseInt(this.value);
                 
                 if (e.deltaY < 0) {
-                    if (value < 20) {
-                        this.value = value + 1;
-                    }
+                    if (value < 20) this.value = value + 1;
                 } else {
-                    if (value > 1) {
-                        this.value = value - 1;
-                    }
+                    if (value > 1) this.value = value - 1;
                 }
             });
 
@@ -1265,7 +1267,6 @@
                 
                 if (checkIn) {
                     document.getElementById('check_out').min = checkIn;
-                    
                     if (checkOut && checkOut < checkIn) {
                         document.getElementById('check_out').value = checkIn;
                     }
@@ -1296,13 +1297,29 @@
 
             // Close zoom modal on ESC key
             document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    closeZoomModal();
+                if (e.key === 'Escape') closeZoomModal();
+            });
+
+            // Event delegation para sa virtual tour buttons (ACTIVE)
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.virtual-tour-btn')) {
+                    e.preventDefault();
+                    const button = e.target.closest('.virtual-tour-btn');
+                    const tourUrl = button.dataset.tourUrl;
+                    openVirtualTour(tourUrl);
+                }
+            });
+
+            // Event delegation para sa disabled virtual tour buttons (CLICKABLE with notification)
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.virtual-tour-disabled')) {
+                    e.preventDefault();
+                    showNotification('Virtual tour is not available for this room yet. Please check back later!', 'info', 4000);
                 }
             });
         });
 
-        // Image Gallery Functions
+        // ==================== IMAGE GALLERY FUNCTIONS ====================
         function createImageGallery(images, unitId) {
             if (!images || images.length === 0) {
                 return `
@@ -1320,7 +1337,6 @@
                     <img src="${mainImageUrl}" alt="Unit image" class="gallery-main-image" onclick="openZoomModal(${unitId}, 0)">
             `;
 
-            // Add navigation arrows if more than 1 image
             if (images.length > 1) {
                 html += `
                     <button class="gallery-nav prev" onclick="changeGalleryImage(${unitId}, -1)">
@@ -1331,7 +1347,6 @@
                     </button>
                 `;
 
-                // Add thumbnails
                 html += '<div class="gallery-thumbnails">';
                 images.forEach((img, index) => {
                     html += `
@@ -1352,16 +1367,12 @@
             const gallery = document.querySelector(`[data-unit-id="${unitId}"]`);
             if (!gallery) return;
 
-            const mainImage = gallery.querySelector('.gallery-main-image');
             const thumbnails = gallery.querySelectorAll('.thumbnail');
-            
             if (thumbnails.length === 0) return;
 
             let currentIndex = -1;
             thumbnails.forEach((thumb, index) => {
-                if (thumb.classList.contains('active')) {
-                    currentIndex = index;
-                }
+                if (thumb.classList.contains('active')) currentIndex = index;
             });
 
             let newIndex = currentIndex + direction;
@@ -1380,16 +1391,14 @@
 
             if (index < 0 || index >= thumbnails.length) return;
 
-            // Update main image
             mainImage.src = thumbnails[index].src;
             mainImage.onclick = () => openZoomModal(unitId, index);
 
-            // Update active thumbnail
             thumbnails.forEach(thumb => thumb.classList.remove('active'));
             thumbnails[index].classList.add('active');
         }
 
-        // Zoom Modal Functions
+        // ==================== ZOOM MODAL FUNCTIONS ====================
         function openZoomModal(unitId, startIndex = 0) {
             const gallery = document.querySelector(`[data-unit-id="${unitId}"]`);
             if (!gallery) return;
@@ -1399,9 +1408,7 @@
             
             if (currentZoomImages.length === 0) {
                 const mainImage = gallery.querySelector('.gallery-main-image');
-                if (mainImage) {
-                    currentZoomImages = [mainImage.src];
-                }
+                if (mainImage) currentZoomImages = [mainImage.src];
             }
 
             currentZoomIndex = startIndex;
@@ -1421,12 +1428,8 @@
         function changeZoomImage(direction) {
             currentZoomIndex += direction;
             
-            if (currentZoomIndex < 0) {
-                currentZoomIndex = currentZoomImages.length - 1;
-            }
-            if (currentZoomIndex >= currentZoomImages.length) {
-                currentZoomIndex = 0;
-            }
+            if (currentZoomIndex < 0) currentZoomIndex = currentZoomImages.length - 1;
+            if (currentZoomIndex >= currentZoomImages.length) currentZoomIndex = 0;
 
             updateZoomModal();
         }
@@ -1441,15 +1444,10 @@
             }
         }
 
-        // Function to load cart count
+        // ==================== CART FUNCTIONS ====================
         function loadCartCount() {
             fetch('/api/cart/items')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
                     if (data.success && data.cart && data.items.length > 0) {
                         cartItemCount = data.items.length;
@@ -1459,38 +1457,25 @@
                         updateCartBadge(0);
                     }
                 })
-                .catch(error => {
-                    console.error('Error loading cart count:', error);
-                });
+                .catch(error => console.error('Error loading cart count:', error));
         }
 
-        // Function to load cart items for date validation
         function loadCartItemsForValidation() {
             fetch('/api/cart/items')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
                     if (data.success && data.cart && data.items.length > 0) {
                         cartItems = data.items;
                         cartDates.checkIn = data.cart.checkInDate;
                         cartDates.checkOut = data.cart.checkOutDate;
                         
-                        // Update current dates from cart
                         currentCheckIn = cartDates.checkIn;
                         currentCheckOut = cartDates.checkOut;
                         
-                        // Update date inputs to match cart
                         document.getElementById('check_in').value = currentCheckIn;
                         document.getElementById('check_out').value = currentCheckOut;
-                        
-                        // Set min dates
                         document.getElementById('check_out').min = currentCheckIn;
                         
-                        // Show notification about existing cart items
                         if (data.items.length > 0) {
                             showNotification(
                                 `You have ${data.items.length} item(s) in your cart. New items must use the same dates (${currentCheckIn} to ${currentCheckOut}).`, 
@@ -1510,14 +1495,12 @@
                 });
         }
 
-        // Function to update cart badge in navbar
         function updateCartBadge(count) {
             const navbarCartBadge = document.getElementById('navbar-cart-badge');
             if (navbarCartBadge) {
                 if (count > 0) {
                     navbarCartBadge.textContent = count;
                     navbarCartBadge.style.display = 'flex';
-                    // Add animation
                     navbarCartBadge.style.animation = 'badgePop 0.3s ease';
                 } else {
                     navbarCartBadge.style.display = 'none';
@@ -1525,58 +1508,44 @@
             }
         }
 
-        // Function to load units based on type
+        // ==================== LOAD UNITS ====================
         function loadUnits(type) {
             const container = document.getElementById(`${type}-container`);
             const loading = document.getElementById(`${type}-loading`);
             
-            // Show loading and clear container
             if (container) {
                 container.innerHTML = '';
                 container.style.display = 'none';
             }
-            if (loading) {
-                loading.style.display = 'flex';
-            }
+            if (loading) loading.style.display = 'flex';
             
-            // Build query parameters
             const params = new URLSearchParams();
-            
             if (currentCheckIn) params.append('check_in', currentCheckIn);
             if (currentCheckOut) params.append('check_out', currentCheckOut);
             if (currentGuests) params.append('guests', currentGuests);
             
             fetch(`/api/available-rooms?${params}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
-                    if (loading) {
-                        loading.style.display = 'none';
-                    }
+                    if (loading) loading.style.display = 'none';
                     
                     if (data.success) {
                         renderUnits(data.rooms, container, type);
                     } else {
-                        renderEmptyState(container, 'No rooms available for the selected dates. Please try different dates.');
+                        renderEmptyState(container, 'No rooms available for the selected dates.');
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    if (loading) {
-                        loading.style.display = 'none';
-                    }
+                    if (loading) loading.style.display = 'none';
                     renderEmptyState(container, 'Error loading rooms. Please try again.');
                 });
         }
 
-        // Render function with horizontal layout and image gallery
+        // ==================== RENDER UNITS ====================
         function renderUnits(units, container, type) {
             if (!units || units.length === 0) {
-                renderEmptyState(container, 'No ' + type + ' available for the selected dates. Please try different dates.');
+                renderEmptyState(container, 'No ' + type + ' available for the selected dates.');
                 return;
             }
             
@@ -1591,9 +1560,7 @@
                         const parsedImages = typeof unit.images === 'string' ? JSON.parse(unit.images) : unit.images;
                         if (Array.isArray(parsedImages)) {
                             images = parsedImages.map(img => {
-                                if (!img.startsWith('http')) {
-                                    return `/storage/${img}`;
-                                }
+                                if (!img.startsWith('http')) return `/storage/${img}`;
                                 return img;
                             }).filter(img => img);
                         }
@@ -1604,6 +1571,27 @@
                 
                 const card = document.createElement('div');
                 card.className = 'accommodation-card fade-in';
+                
+                // Virtual tour button - UPDATED with clickable disabled state
+                let virtualTourButton = '';
+                if (unit.has_virtual_tour && unit.virtual_tour_url) {
+                    virtualTourButton = `
+                        <button data-tour-url="${escapeHtml(unit.virtual_tour_url)}" 
+                                class="action-btn btn-virtual-tour virtual-tour-btn">
+                            <i class="fas fa-vr-cardboard"></i>
+                            View Virtual Tour
+                        </button>
+                    `;
+                } else {
+                    // NO disabled attribute - clickable with notification
+                    virtualTourButton = `
+                        <button class="action-btn btn-virtual-tour virtual-tour-disabled">
+                            <i class="fas fa-vr-cardboard"></i>
+                            No Virtual Tour Available
+                        </button>
+                    `;
+                }
+                
                 card.innerHTML = `
                     <div class="card-image-container">
                         ${createImageGallery(images, unit.unitID)}
@@ -1614,8 +1602,8 @@
                     </div>
                     <div class="card-content">
                         <div class="card-header">
-                            <h3 class="card-title">${unit.unitName}</h3>
-                            <p class="card-description">${unit.description || 'Experience comfort and luxury in this beautifully designed accommodation.'}</p>
+                            <h3 class="card-title">${escapeHtml(unit.unitName)}</h3>
+                            <p class="card-description">${escapeHtml(unit.description || 'Experience comfort and luxury.')}</p>
                         </div>
                         
                         <div class="card-features">
@@ -1627,6 +1615,7 @@
                                 <i class="fas fa-home"></i>
                                 ${unit.unitType}
                             </span>
+                            ${unit.has_virtual_tour ? '<span class="feature-tag"><i class="fas fa-vr-cardboard"></i> Virtual Tour Available</span>' : ''}
                         </div>
                         
                         <div class="card-price-section">
@@ -1637,10 +1626,7 @@
                         </div>
                         
                         <div class="card-actions">
-                            <button onclick="openVirtualTour(${unit.unitID})" class="action-btn btn-virtual-tour">
-                                <i class="fas fa-vr-cardboard"></i>
-                                View in Virtual Tour
-                            </button>
+                            ${virtualTourButton}
                             <button onclick="addToCart(${unit.unitID}, this)" class="action-btn btn-cart">
                                 <i class="fas fa-cart-plus"></i>
                                 Add to Cart
@@ -1656,7 +1642,35 @@
             });
         }
 
-        // Render empty state
+        // ==================== VIRTUAL TOUR FUNCTION ====================
+        function openVirtualTour(virtualTourUrl) {
+            console.log('Opening virtual tour:', virtualTourUrl); // Debug log
+            
+            if (!virtualTourUrl || virtualTourUrl === 'null' || virtualTourUrl === 'undefined') {
+                showNotification('Virtual tour not available for this room', 'info');
+                return;
+            }
+            
+            // Open in new tab
+            const newWindow = window.open(virtualTourUrl, '_blank');
+            
+            if (newWindow) {
+                newWindow.focus();
+                showNotification('Opening virtual tour in new tab...', 'success', 2000);
+            } else {
+                showNotification('Please allow popups to view the virtual tour', 'warning');
+            }
+        }
+
+        // Helper function to escape HTML
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ==================== OTHER FUNCTIONS ====================
         function renderEmptyState(container, message) {
             container.style.display = 'block';
             container.innerHTML = `
@@ -1674,11 +1688,7 @@
             `;
         }
 
-        // Reset search function
         function resetSearch() {
-            const tomorrow = new Date();
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            
             document.getElementById('check_in').value = '';
             document.getElementById('check_out').value = '';
             document.getElementById('guest-number').value = 1;
@@ -1690,14 +1700,6 @@
             loadUnits('rooms');
         }
 
-        // Virtual Tour function (placeholder)
-        function openVirtualTour(unitId) {
-            showNotification('Virtual tour feature coming soon!', 'info');
-            // TODO: Implement virtual tour route
-            // window.location.href = `/virtual-tour/${unitId}`;
-        }
-
-        // Add to Cart function
         function addToCart(unitId, button) {
             const checkIn = document.getElementById('check_in').value;
             const checkOut = document.getElementById('check_out').value;
@@ -1708,7 +1710,6 @@
                 return;
             }
             
-            // Convert to Date objects for validation
             const checkInDate = new Date(checkIn);
             const checkOutDate = new Date(checkOut);
             
@@ -1717,14 +1718,10 @@
                 return;
             }
             
-            // Validate dates match existing cart (if any)
             if (cartItems.length > 0) {
-                const selectedCheckIn = checkIn;
-                const selectedCheckOut = checkOut;
-                
-                if (selectedCheckIn !== cartDates.checkIn || selectedCheckOut !== cartDates.checkOut) {
+                if (checkIn !== cartDates.checkIn || checkOut !== cartDates.checkOut) {
                     showNotification(
-                        `All items in cart must have the same check-in and check-out dates. You already have items with dates ${cartDates.checkIn} to ${cartDates.checkOut}.`, 
+                        `All items must have the same dates. Current cart: ${cartDates.checkIn} to ${cartDates.checkOut}.`, 
                         'error', 
                         6000
                     );
@@ -1733,8 +1730,6 @@
             }
             
             const originalContent = button.innerHTML;
-            
-            // Show loading on button
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
             button.disabled = true;
             
@@ -1757,20 +1752,14 @@
                     if (data.login_required) {
                         window.location.href = '/login';
                     } else {
-                        // Update cart counter
                         cartItemCount = data.cart_count;
                         updateCartBadge(cartItemCount);
-                        
-                        // Update cart items for validation
                         cartItems = data.items || [];
                         cartDates.checkIn = checkIn;
                         cartDates.checkOut = checkOut;
-                        
-                        // Update current dates
                         currentCheckIn = checkIn;
                         currentCheckOut = checkOut;
                         
-                        // Show success message
                         const days = data.calculation?.days || 1;
                         const effectiveGuests = data.calculation?.effective_guests || guests;
                         
@@ -1783,7 +1772,6 @@
                         
                         showNotification(message, 'success');
                         
-                        // Update button to show success
                         button.innerHTML = '<i class="fas fa-check"></i> Added!';
                         setTimeout(() => {
                             button.innerHTML = originalContent;
@@ -1798,13 +1786,12 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                showNotification('Failed to add room to cart. Please try again.', 'error');
+                showNotification('Failed to add room to cart.', 'error');
                 button.innerHTML = originalContent;
                 button.disabled = false;
             });
         }
 
-        // Book Now function
         function bookNow(unitId, button) {
             const checkIn = document.getElementById('check_in').value;
             const checkOut = document.getElementById('check_out').value;
@@ -1815,7 +1802,6 @@
                 return;
             }
             
-            // Convert to Date objects for validation
             const checkInDate = new Date(checkIn);
             const checkOutDate = new Date(checkOut);
             
@@ -1824,14 +1810,10 @@
                 return;
             }
             
-            // Validate dates match existing cart (if any)
             if (cartItems.length > 0) {
-                const selectedCheckIn = checkIn;
-                const selectedCheckOut = checkOut;
-                
-                if (selectedCheckIn !== cartDates.checkIn || selectedCheckOut !== cartDates.checkOut) {
+                if (checkIn !== cartDates.checkIn || checkOut !== cartDates.checkOut) {
                     showNotification(
-                        `All items in cart must have the same check-in and check-out dates. You already have items with dates ${cartDates.checkIn} to ${cartDates.checkOut}.`, 
+                        `All items must have the same dates. Current cart: ${cartDates.checkIn} to ${cartDates.checkOut}.`, 
                         'error', 
                         6000
                     );
@@ -1839,10 +1821,7 @@
                 }
             }
             
-            // First add to cart, then redirect to booking page
             const originalContent = button.innerHTML;
-            
-            // Show loading on button
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
             button.disabled = true;
             
@@ -1865,11 +1844,8 @@
                     if (data.login_required) {
                         window.location.href = '/login';
                     } else {
-                        // Update cart counter
                         cartItemCount = data.cart_count;
                         updateCartBadge(cartItemCount);
-                        
-                        // Redirect to booking page
                         window.location.href = "{{ route('booking.page') }}";
                     }
                 } else {
@@ -1880,13 +1856,12 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                showNotification('Failed to book room. Please try again.', 'error');
+                showNotification('Failed to book room.', 'error');
                 button.innerHTML = originalContent;
                 button.disabled = false;
             });
         }
 
-        // Notification system
         function showNotification(message, type = 'info', duration = 3000) {
             const container = document.getElementById('notification-container');
             const id = 'notification-' + Date.now();
@@ -1913,32 +1888,19 @@
             
             container.appendChild(notification);
             
-            // Trigger animation
-            setTimeout(() => {
-                notification.classList.add('show');
-            }, 10);
+            setTimeout(() => notification.classList.add('show'), 10);
             
-            // Auto remove after duration
-            const autoRemove = setTimeout(() => {
-                closeNotification(id);
-            }, duration);
-            
-            // Store timer ID for manual close
+            const autoRemove = setTimeout(() => closeNotification(id), duration);
             notification.dataset.timer = autoRemove;
         }
 
         function closeNotification(id) {
             const notification = document.getElementById(id);
             if (notification) {
-                // Clear auto-remove timer
                 clearTimeout(notification.dataset.timer);
-                
-                // Remove show class and then remove element
                 notification.classList.remove('show');
                 setTimeout(() => {
-                    if (notification.parentElement) {
-                        notification.remove();
-                    }
+                    if (notification.parentElement) notification.remove();
                 }, 500);
             }
         }

@@ -26,6 +26,7 @@ class Unit extends Model
         'blockEndDate',
         'blockReason',
         'for_special_events',
+        'virtualTourPanorama',
     ];
 
     protected $casts = [
@@ -86,6 +87,22 @@ class Unit extends Model
         return $urls;
     }
 
+      public function getVirtualTourUrlAttribute()
+    {
+        if (!$this->virtualTourPanorama) {
+            return null;
+        }
+        
+        return url('/virtual-tour?panorama=' . $this->virtualTourPanorama);
+    }
+
+    /**
+     * Check if unit has virtual tour
+     */
+    public function hasVirtualTour()
+    {
+        return !empty($this->virtualTourPanorama);
+    }
     
     // Relationships
     public function cartItems()
