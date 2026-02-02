@@ -1574,6 +1574,7 @@ let selectedAmount = 0;
 let daysCount = 1;
 let numGuests = 1;
 let entranceFeeAmount = 0;
+let totalEntranceFees = 0;
 let hasActiveEntranceFee = false;
 let hasRoom = false;
 let hasCottage = false;
@@ -1603,6 +1604,7 @@ async function loadEntranceFee() {
             if (d.success && d.entrance_fee) {
                 entranceFeeAmount = parseFloat(d.entrance_fee.amount);
                 hasActiveEntranceFee = true;
+                console.log('Entrance fee loaded:', entranceFeeAmount);
             }
         }
     } catch (e) { console.error('Entrance fee error:', e); }
@@ -1625,7 +1627,7 @@ function loadBookingSummary() {
         .catch(e => console.error('Cart error:', e));
 }
 
-// ─── COMPUTE TOTALS ───
+// ─── COMPUTE TOTALS (REMOVED TAX & SERVICE CHARGE) ───
 function computeTotals() {
     daysCount = parseInt(cartData.daysCount) || 1;
     numGuests = parseInt(cartData.numGuests) || 1;
@@ -1635,7 +1637,9 @@ function computeTotals() {
     const isSameDay = checkIn.toDateString() === checkOut.toDateString();
     document.getElementById('h-booking-type').value = isSameDay ? 'day-use' : 'overnight';
 
-    let subtotal = 0;
+    let roomSubtotal = 0;
+    let cottageSubtotal = 0;
+    totalEntranceFees = 0;
     hasRoom = false;
     hasCottage = false;
 
@@ -1646,28 +1650,40 @@ function computeTotals() {
         if (unit.unitType === 'room') {
             hasRoom = true;
             const mult = numGuests === 1 ? 2 : numGuests;
-            item._total = price * mult * daysCount;
-            item._calc  = `₱${price.toFixed(2)} × ${mult} × ${daysCount} day(s)`;
+            const roomTotal = price * mult * daysCount;
+            roomSubtotal += roomTotal;
+            item._total = roomTotal;
+            item._calc  = `₱${price.toFixed(2)} × ${mult} guest${mult > 1 ? 's' : ''} × ${daysCount} day${daysCount > 1 ? 's' : ''}`;
         } else if (unit.unitType === 'cottage') {
             hasCottage = true;
+            cottageSubtotal += price;
+            
             if (hasActiveEntranceFee) {
-                item._total = (entranceFeeAmount * numGuests) + price;
-                item._calc  = `(₱${entranceFeeAmount.toFixed(2)} × ${numGuests} guests) + ₱${price.toFixed(2)}`;
+                const entranceFeeForThisCottage = entranceFeeAmount * numGuests;
+                totalEntranceFees += entranceFeeForThisCottage;
+                item._total = price + entranceFeeForThisCottage;
+                item._calc  = `Cottage: ₱${price.toFixed(2)} + Entrance fees: ₱${entranceFeeForThisCottage.toFixed(2)} (₱${entranceFeeAmount.toFixed(2)} × ${numGuests})`;
             } else {
                 item._total = price;
                 item._calc  = 'Cottage price only';
             }
         }
-        subtotal += item._total;
     });
 
-    const tax     = Math.round(subtotal * 0.12 * 100) / 100;
-    const service = Math.round(subtotal * 0.05 * 100) / 100;
-    bookingTotal  = Math.round((subtotal + tax + service) * 100) / 100;
+    // NO TAX OR SERVICE CHARGE - Direct total
+    bookingTotal = roomSubtotal + cottageSubtotal + totalEntranceFees;
 
-    cartData._subtotal = subtotal;
-    cartData._tax      = tax;
-    cartData._service  = service;
+    cartData._roomSubtotal = roomSubtotal;
+    cartData._cottageSubtotal = cottageSubtotal;
+    cartData._entranceFees = totalEntranceFees;
+    cartData._subtotal = roomSubtotal + cottageSubtotal + totalEntranceFees;
+
+    console.log('Totals computed:', {
+        room: roomSubtotal,
+        cottage: cottageSubtotal,
+        entrance: totalEntranceFees,
+        total: bookingTotal
+    });
 
     updateAmountChips();
 }
@@ -1787,7 +1803,7 @@ function goToStep3() {
     goToStep(3);
 }
 
-// ─── RENDER SUMMARY ───
+// ─── RENDER SUMMARY (WITH ENTRANCE FEE BREAKDOWN, NO TAX/SERVICE) ───
 function renderSummary() {
     const d = cartData;
     const checkIn  = new Date(d.checkInDate);
@@ -1812,6 +1828,21 @@ function renderSummary() {
 
     const payLabel = selectedAmountType === 'downpayment' ? 'Downpayment (50%)' : 'Full Payment';
 
+    // Build pricing rows WITH entrance fee breakdown
+    let pricingRows = '';
+    
+    if (d._roomSubtotal > 0) {
+        pricingRows += `<div class="s-row"><span class="s-label">Rooms Subtotal</span><span class="s-value">₱${d._roomSubtotal.toFixed(2)}</span></div>`;
+    }
+    
+    if (d._cottageSubtotal > 0) {
+        pricingRows += `<div class="s-row"><span class="s-label">Cottages Subtotal</span><span class="s-value">₱${d._cottageSubtotal.toFixed(2)}</span></div>`;
+    }
+    
+    if (d._entranceFees > 0) {
+        pricingRows += `<div class="s-row"><span class="s-label">Entrance Fees (${numGuests} guest${numGuests > 1 ? 's' : ''})</span><span class="s-value">₱${d._entranceFees.toFixed(2)}</span></div>`;
+    }
+
     document.getElementById('summary-body').innerHTML = `
         <div class="summary-block">
             <div class="section-label">Stay Details</div>
@@ -1830,9 +1861,7 @@ function renderSummary() {
 
         <div class="summary-block">
             <div class="section-label">Pricing</div>
-            <div class="s-row"><span class="s-label">Subtotal</span><span class="s-value">₱${d._subtotal.toFixed(2)}</span></div>
-            <div class="s-row"><span class="s-label">Tax (12%)</span><span class="s-value">₱${d._tax.toFixed(2)}</span></div>
-            <div class="s-row"><span class="s-label">Service Fee (5%)</span><span class="s-value">₱${d._service.toFixed(2)}</span></div>
+            ${pricingRows}
             <div class="total-price-box">
                 <span class="t-label">Total Amount</span>
                 <span class="t-amount">₱${bookingTotal.toFixed(2)}</span>

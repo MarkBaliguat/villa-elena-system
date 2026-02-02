@@ -363,7 +363,8 @@ class CustomerBookingController extends Controller
     }
 
     /**
-     * ✅ COMPLETELY REWRITTEN: Store booking - VALIDATION FIRST, NO DATABASE WRITES UNTIL PAYMENT CONFIRMED
+     * ✅ Store booking - VALIDATION FIRST, NO DATABASE WRITES UNTIL PAYMENT CONFIRMED
+     * ✅ UPDATED: Removed tax and service fee calculations
      */
     public function store(Request $request)
     {
@@ -539,7 +540,7 @@ class CustomerBookingController extends Controller
             
             Log::info('✅ ALL VALIDATIONS PASSED - Proceeding to payment phase...');
             
-            // ========== PHASE 2: CALCULATE PRICING (NO DATABASE WRITES) ==========
+            // ========== PHASE 2: CALCULATE PRICING (NO TAX OR SERVICE FEE) ==========
             Log::info('PHASE 2: Calculating pricing...');
             
             $subtotal = 0;
@@ -551,12 +552,14 @@ class CustomerBookingController extends Controller
                 $itemSubtotal = 0;
 
                 if ($unit->unitType === 'room') {
+                    // For rooms: multiply by guests (minimum 2) and days
                     if ($totalGuests == 1) {
                         $itemSubtotal = $unit->unitRatePrice * 2 * $daysCount;
                     } else {
                         $itemSubtotal = $unit->unitRatePrice * $totalGuests * $daysCount;
                     }
                 } elseif ($unit->unitType === 'cottage') {
+                    // For cottages: entrance fee per guest + cottage price
                     if ($entranceFee) {
                         $entranceTotal = $entranceFee->amount * $totalGuests;
                         $itemSubtotal = $entranceTotal + $unit->unitRatePrice;
@@ -578,14 +581,19 @@ class CustomerBookingController extends Controller
                 ], 400);
             }
 
-            $tax = $subtotal * 0.12;
-            $serviceFee = $subtotal * 0.05;
-            $totalWithTax = $subtotal + $tax + $serviceFee;
+            // ✅ REMOVED: Tax and service fee calculations
+            // Total is now just the subtotal
+            $totalPrice = $subtotal;
+
+            Log::info('Price calculation (no tax/service fee):', [
+                'subtotal' => $subtotal,
+                'total' => $totalPrice
+            ]);
 
             // ========== VALIDATION 7: Payment Amount ==========
             Log::info('VALIDATION 7: Validating payment amount...');
             $paymentAmount = floatval($request->payment_amount);
-            $minPayment = $totalWithTax * 0.5;
+            $minPayment = $totalPrice * 0.5;
             
             if ($paymentAmount < $minPayment) {
                 Log::error('Payment below minimum: ' . $paymentAmount . ' < ' . $minPayment);
@@ -595,21 +603,21 @@ class CustomerBookingController extends Controller
                 ], 400);
             }
             
-            if ($paymentAmount > $totalWithTax) {
-                Log::error('Payment exceeds total: ' . $paymentAmount . ' > ' . $totalWithTax);
+            if ($paymentAmount > $totalPrice) {
+                Log::error('Payment exceeds total: ' . $paymentAmount . ' > ' . $totalPrice);
                 return response()->json([
                     'success' => false,
-                    'message' => 'Payment cannot exceed total amount of ₱' . number_format($totalWithTax, 2)
+                    'message' => 'Payment cannot exceed total amount of ₱' . number_format($totalPrice, 2)
                 ], 400);
             }
 
             // ========== DETERMINE BOOKING & PAYMENT STATUS ==========
             $paymentType = 'downpayment';
-            $remainingBalance = $totalWithTax - $paymentAmount;
+            $remainingBalance = $totalPrice - $paymentAmount;
             $bookingStatus = 'pending';
             $paymentStatus = 'pending';
             
-            if ($paymentAmount >= $totalWithTax) {
+            if ($paymentAmount >= $totalPrice) {
                 $paymentType = 'full';
                 $remainingBalance = 0;
                 $bookingStatus = 'confirmed';
@@ -618,9 +626,7 @@ class CustomerBookingController extends Controller
 
             Log::info('Payment details calculated:', [
                 'subtotal' => $subtotal,
-                'tax' => $tax,
-                'service_fee' => $serviceFee,
-                'total' => $totalWithTax,
+                'total' => $totalPrice,
                 'payment_amount' => $paymentAmount,
                 'payment_type' => $paymentType,
                 'booking_status' => $bookingStatus
@@ -641,7 +647,7 @@ class CustomerBookingController extends Controller
                     'booking_data' => [
                         'cart_id' => $cart->cartID,
                         'num_guests' => $totalGuests,
-                        'total_price' => $totalWithTax,
+                        'total_price' => $totalPrice,
                         'entrance_fee_id' => $hasCottages && $entranceFee ? $entranceFee->entranceFeeID : null,
                         'booking_type' => $request->booking_type,
                         'event_type' => $request->event_type,
@@ -669,7 +675,7 @@ class CustomerBookingController extends Controller
                 $booking = Booking::create([
                     'cartID' => $cart->cartID,
                     'numGuests' => $totalGuests,
-                    'totalPrice' => $totalWithTax,
+                    'totalPrice' => $totalPrice,
                     'entranceFeeID' => $hasCottages && $entranceFee ? $entranceFee->entranceFeeID : null,
                     'bookingStatus' => $bookingStatus,
                     'bookingType' => $request->booking_type,
@@ -755,7 +761,7 @@ class CustomerBookingController extends Controller
     }
 
     /**
-     * ✅ NEW: Process GCash payment AFTER validations passed
+     * ✅ Process GCash payment AFTER validations passed
      */
     public function processGCashPayment(Request $request)
     {
@@ -843,7 +849,7 @@ class CustomerBookingController extends Controller
     }
 
     /**
-     * ✅ COMPLETELY REWRITTEN: Verify and complete GCash payment
+     * ✅ Verify and complete GCash payment
      */
     public function verifyGCashPayment(Request $request)
     {
@@ -917,8 +923,8 @@ class CustomerBookingController extends Controller
                     'bookingType' => $bookingData['booking_type'],
                     'eventType' => $bookingData['event_type'],
                     'specialRequirements' => $bookingData['special_requirements'],
-                    'eventStartTime' => $bookingData['event_start'],
-                    'eventEndTime' => $bookingData['event_end'],
+                    // 'eventStartTime' => $bookingData['event_start'],
+                    // 'eventEndTime' => $bookingData['event_end'],
                     'gcash_payment_intent_id' => $paymentIntentId,
                     'created_at' => now(),
                     'updated_at' => now(),

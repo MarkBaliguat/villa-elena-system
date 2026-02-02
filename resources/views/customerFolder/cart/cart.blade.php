@@ -413,7 +413,7 @@
             display: flex;
             flex-direction: column;
             gap: 0.9rem;
-            padding: 2rem 4.5rem 2rem 2rem; /* Extra right padding for delete button */
+            padding: 2rem 4.5rem 2rem 2rem;
             flex: 1;
             min-width: 0;
         }
@@ -1194,6 +1194,13 @@ function loadCartItems() {
             cartUnitType   = data.cart_type;
             entranceFeeAmount     = parseFloat(data.entrance_fee) || 0;
             hasActiveEntranceFee  = data.has_active_entrance_fee || false;
+            
+            console.log('Cart loaded:', {
+                entranceFee: entranceFeeAmount,
+                hasActive: hasActiveEntranceFee,
+                cartType: cartUnitType
+            });
+            
             renderCart(data.cart, data.items, container);
         } else {
             showEmpty(container);
@@ -1229,7 +1236,7 @@ function showError(container, err) {
 }
 
 /* ═══════════════════════════════
-   RENDER CART
+   RENDER CART - FIXED ENTRANCE FEE CALCULATION
 ═══════════════════════════════ */
 function renderCart(cart, items, container) {
     const days     = cart.daysCount > 0 ? cart.daysCount : 1;
@@ -1237,7 +1244,10 @@ function renderCart(cart, items, container) {
     const checkIn  = cart.checkInDate;
     const checkOut = cart.checkOutDate;
 
-    let totalRoom = 0, totalCottage = 0;
+    let totalRoom = 0;
+    let totalCottage = 0;
+    let totalEntranceFee = 0;
+    
     const hasCottageInCart = cartUnitType === 'cottage' || cartUnitType === 'mixed';
     const canProceed = !(hasCottageInCart && !hasActiveEntranceFee) && cartUnitType !== 'mixed';
 
@@ -1247,16 +1257,32 @@ function renderCart(cart, items, container) {
         const rate = parseFloat(unit.unitRatePrice);
         const type = unit.unitType;
         let total  = 0;
-        let calc   = item.calculation || '';
+        let calc   = '';
         let priceColor = 'blue';
 
         if (type === 'room') {
-            total = item.calculatedSubtotal || (rate * guests * days);
+            // Room calculation: rate × guests × days (minimum 2 guests)
+            const guestCount = guests === 1 ? 2 : guests;
+            total = rate * guestCount * days;
             totalRoom += total;
-        } else {
-            total = item.calculatedSubtotal || rate;
-            totalCottage += total;
-            priceColor = hasActiveEntranceFee ? 'green' : 'red';
+            calc = `<strong>Calculation:</strong> ₱${rate.toFixed(2)} × ${guestCount} guest${guestCount > 1 ? 's' : ''} × ${days} day${days > 1 ? 's' : ''} = ₱${total.toFixed(2)}`;
+            priceColor = 'blue';
+        } else if (type === 'cottage') {
+            if (hasActiveEntranceFee) {
+                // Cottage WITH entrance fee: (entrance fee × guests) + cottage rate
+                const entranceFeeForItem = entranceFeeAmount * guests;
+                total = entranceFeeForItem + rate;
+                totalEntranceFee += entranceFeeForItem;
+                totalCottage += rate; // Only cottage base rate goes to cottage subtotal
+                calc = `<strong>Calculation:</strong> (₱${entranceFeeAmount.toFixed(2)} entrance fee × ${guests} guest${guests > 1 ? 's' : ''}) + ₱${rate.toFixed(2)} cottage rate = ₱${total.toFixed(2)}`;
+                priceColor = 'green';
+            } else {
+                // Cottage WITHOUT entrance fee (unavailable)
+                total = rate;
+                totalCottage += rate;
+                calc = `<strong>Cannot proceed:</strong> Active entrance fee required for cottage bookings.`;
+                priceColor = 'red';
+            }
         }
 
         const isUnavailable = (type === 'cottage' && !hasActiveEntranceFee);
@@ -1361,7 +1387,7 @@ function renderCart(cart, items, container) {
         </div>`;
     }
 
-    // ─── Price breakdown rows ───
+    // ─── Price breakdown rows WITH ENTRANCE FEE ───
     let breakdownRows = '';
     if (totalRoom > 0) {
         breakdownRows += `
@@ -1373,11 +1399,19 @@ function renderCart(cart, items, container) {
     if (totalCottage > 0) {
         breakdownRows += `
         <div class="breakdown-row">
-            <span><i class="fas fa-home row-icon"></i> Cottages Subtotal</span>
+            <span><i class="fas fa-home row-icon"></i> Cottages Base Price</span>
             <span>₱${totalCottage.toFixed(2)}</span>
         </div>`;
     }
-    const grandTotal = totalRoom + totalCottage;
+    if (totalEntranceFee > 0) {
+        breakdownRows += `
+        <div class="breakdown-row">
+            <span><i class="fas fa-ticket-alt row-icon"></i> Entrance Fees (${guests} guest${guests>1?'s':''})</span>
+            <span>₱${totalEntranceFee.toFixed(2)}</span>
+        </div>`;
+    }
+    
+    const grandTotal = totalRoom + totalCottage + totalEntranceFee;
 
     // ─── Checkout button ───
     let checkoutBtn = '';
