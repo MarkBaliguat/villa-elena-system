@@ -327,7 +327,7 @@
         .card-image {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
             transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -1189,9 +1189,6 @@
                                 <p>No image available</p>
                             </div>`
                         }
-                        <div class="card-badge">
-                            Available
-                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="card-title">${unit.unitName}</h3>

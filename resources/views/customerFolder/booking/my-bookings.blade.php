@@ -10,1445 +10,1040 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;500;600;700&display=swap');
-        
+
+        /* ═══════════════════════════════
+           VARIABLES — ONE PALETTE
+        ═══════════════════════════════ */
         :root {
-            --primary-black: #000000;
-            --primary-yellow: #FFD700;
-            --secondary-yellow: #FFA500;
-            --light-bg: #FFFBF0;
-            --card-bg: #FFFFFF;
-            --text-dark: #1F2937;
-            --text-medium: #6B7280;
-            --text-light: #9CA3AF;
-            --border-color: #E5E7EB;
-            --shadow-light: rgba(0, 0, 0, 0.05);
-            --shadow-medium: rgba(0, 0, 0, 0.1);
+            --cream:      #FDF8F0;
+            --cream-dark: #F5EDE0;
+            --sunflower:  #E8A825;
+            --sun-light:  #F0C660;
+            --sun-dark:   #C88A1A;
+            --text:       #3D3226;
+            --text-soft:  #7A6E5E;
+            --text-faint: #A89A87;
+            --border:     #E8DDD0;
+            --white:      #FFFFFF;
+            --red:        #D9534F;
+            --red-light:  #F2D5D4;
+            --green:      #3A9D6E;
+            --green-light:#E6F5EE;
+            --blue:       #5B8DB8;
+            --blue-light: #E4EEF6;
+            --purple:     #8B6EB5;
+            --purple-light:#EDE8F5;
         }
-        ::-webkit-scrollbar {
-            width: 12px;
-            background-color: #F1F1F1;
-        }
-        ::-webkit-scrollbar-thumb {
-            background-color: #FFD700; 
-            border-radius: 6px;
-        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: var(--light-bg);
-            color: var(--text-dark);
+            background: var(--cream);
+            color: var(--text);
+            min-height: 100vh;
         }
-        
-        .cursive-font {
-            font-family: 'Dancing Script', cursive;
+
+        .cursive-font { font-family: 'Dancing Script', cursive; }
+
+        /* ─── ANIMATIONS ─── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
-        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .anim-fade-up { animation: fadeUp 0.4s ease both; }
+
+        /* ═══════════════════════════════
+           LAYOUT
+        ═══════════════════════════════ */
         .main-content {
             margin-top: 80px;
-            min-height: calc(100vh - 300px);
+            min-height: calc(100vh - 80px);
+            padding: 2.5rem 1rem 4rem;
         }
 
-        /* Container */
         .bookings-container {
-            max-width: 1200px;
+            max-width: 900px;
             margin: 0 auto;
-            padding: 2rem 1rem;
         }
 
-        /* Section Title */
-        .section-title {
-            font-size: 2.75rem;
+        /* ═══════════════════════════════
+           PAGE TITLE
+        ═══════════════════════════════ */
+        .page-title-wrap {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            animation: fadeUp 0.5s ease both;
+        }
+
+        .page-title {
+            font-size: 2.8rem;
             font-weight: 700;
-            text-align: center;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, var(--text-dark), #4B5563);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            position: relative;
-            display: inline-block;
-            left: 50%;
-            transform: translateX(-50%);
+            color: var(--sunflower);
+            margin-bottom: 0.4rem;
         }
 
-        .section-title::after {
-            content: '';
-            position: absolute;
-            bottom: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100px;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary-yellow), var(--secondary-yellow));
+        .page-subtitle {
+            font-size: 0.95rem;
+            color: var(--text-soft);
+            font-weight: 400;
+        }
+
+        .title-line {
+            width: 48px;
+            height: 3px;
+            background: var(--sunflower);
             border-radius: 2px;
+            margin: 1rem auto 0;
         }
 
-        .section-subtitle {
-            text-align: center;
-            color: var(--text-medium);
-            margin-bottom: 3rem;
-            font-size: 1.1rem;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            line-height: 1.7;
-        }
-
-        /* Statistics Cards */
-        .stats-container {
+        /* ═══════════════════════════════
+           STAT CARDS ROW
+        ═══════════════════════════════ */
+        .stats-row {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 3rem;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.9rem;
+            margin-bottom: 1.8rem;
         }
 
         .stat-card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 1.5rem;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.1rem 1rem;
+            text-align: center;
+            animation: fadeUp 0.4s ease both;
+            transition: transform 0.2s;
         }
+        .stat-card:hover { transform: translateY(-2px); }
 
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
-            border-color: rgba(255, 215, 0, 0.3);
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-            background: linear-gradient(to bottom, var(--primary-yellow), var(--secondary-yellow));
-        }
-
-        .stat-content {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .stat-info h3 {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text-medium);
-            margin-bottom: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+        .stat-card:nth-child(1) { animation-delay: .05s; }
+        .stat-card:nth-child(2) { animation-delay: .10s; }
+        .stat-card:nth-child(3) { animation-delay: .15s; }
+        .stat-card:nth-child(4) { animation-delay: .20s; }
 
         .stat-number {
-            font-size: 2rem;
+            font-size: 1.7rem;
             font-weight: 700;
             line-height: 1;
+            margin-bottom: 0.25rem;
         }
-
-        .stat-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .stat-card:hover .stat-icon {
-            transform: scale(1.1);
-        }
-
-        /* Filter Tabs */
-        .filter-container {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 1.5rem;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-            margin-bottom: 2rem;
-            border: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .filter-title {
-            font-size: 1.1rem;
+        .stat-label {
+            font-size: 0.72rem;
             font-weight: 600;
-            color: var(--text-dark);
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            color: var(--text-faint);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
         }
 
-        .filter-title i {
-            color: var(--primary-yellow);
-        }
+        .stat-card.c-all    .stat-number { color: var(--text); }
+        .stat-card.c-pend   .stat-number { color: var(--sunflower); }
+        .stat-card.c-conf   .stat-number { color: var(--green); }
+        .stat-card.c-comp   .stat-number { color: var(--blue); }
 
-        .filter-tabs {
+        /* ═══════════════════════════════
+           FILTER TABS
+        ═══════════════════════════════ */
+        .filter-bar {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 0.5rem;
+            margin-bottom: 1.8rem;
+            animation: fadeUp 0.4s ease .25s both;
         }
 
         .filter-tab {
-            padding: 10px 24px;
+            padding: 0.5rem 1.1rem;
             border-radius: 50px;
-            background: rgba(255, 215, 0, 0.1);
-            color: var(--text-dark);
+            border: 1.5px solid var(--border);
+            background: var(--white);
+            color: var(--text-soft);
+            font-size: 0.82rem;
             font-weight: 600;
-            border: 2px solid transparent;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 0.95rem;
+            gap: 0.4rem;
         }
-
         .filter-tab:hover {
-            background: rgba(255, 215, 0, 0.2);
-            transform: translateY(-2px);
+            border-color: var(--sunflower);
+            color: var(--sun-dark);
         }
-
         .filter-tab.active {
-            background: linear-gradient(135deg, var(--primary-yellow), var(--secondary-yellow));
-            color: var(--primary-black);
-            border-color: var(--primary-yellow);
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+            background: var(--sunflower);
+            border-color: var(--sunflower);
+            color: var(--white);
         }
+        .filter-tab i { font-size: 0.75rem; }
 
-        .filter-tab i {
-            font-size: 0.9rem;
-        }
-
-        /* Booking Cards */
+        /* ═══════════════════════════════
+           BOOKING CARD
+        ═══════════════════════════════ */
         .booking-card {
-            background: var(--card-bg);
+            background: var(--white);
+            border: 1px solid var(--border);
             border-radius: 16px;
-            padding: 1.75rem;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-            margin-bottom: 1.5rem;
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            animation: fadeUp 0.4s ease both;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
-
         .booking-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
-            border-color: rgba(255, 215, 0, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(61, 50, 38, 0.07);
         }
+        .booking-card.filtered-out { display: none !important; }
 
-        .booking-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 5px;
-            height: 100%;
-            background: linear-gradient(to bottom, var(--primary-yellow), var(--secondary-yellow));
-            opacity: 0.8;
-        }
-
-        .booking-header {
+        /* header row */
+        .card-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.6rem;
         }
 
-        .booking-info h3 {
-            font-size: 1.3rem;
+        .card-header h3 {
+            font-size: 1.1rem;
             font-weight: 700;
-            color: var(--text-dark);
-            margin-bottom: 0.5rem;
+            color: var(--text);
+            margin-bottom: 0.2rem;
         }
 
-        .booking-meta {
+        .card-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .meta-item {
+            font-size: 0.78rem;
+            color: var(--text-soft);
+            font-weight: 500;
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 0.3rem;
+        }
+        .meta-item i {
+            color: var(--sunflower);
+            width: 13px;
+            font-size: 0.78rem;
+        }
+
+        /* status badge */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.3rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: capitalize;
+            letter-spacing: 0.3px;
+        }
+        .badge i { font-size: 0.7rem; }
+
+        .badge-pending   { background: #FEF3E0; color: var(--sun-dark); }
+        .badge-confirmed { background: var(--green-light); color: var(--green); }
+        .badge-completed { background: var(--blue-light); color: var(--blue); }
+        .badge-cancelled { background: var(--red-light); color: var(--red); }
+        .badge-refunded  { background: var(--purple-light); color: var(--purple); }
+
+        /* card body */
+        .card-body {
+            display: grid;
+            grid-template-columns: 1fr 220px;
+            gap: 1.2rem;
+            margin-bottom: 1.1rem;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.7rem;
+        }
+
+        .detail-box {
+            background: var(--cream);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.75rem 0.8rem;
+        }
+        .detail-box h4 {
+            font-size: 0.68rem;
+            font-weight: 600;
+            color: var(--text-faint);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .detail-box h4 i { color: var(--sunflower); font-size: 0.7rem; }
+        .detail-box p {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text);
+            line-height: 1.3;
+        }
+
+        /* price summary mini */
+        .price-box {
+            background: var(--cream);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.9rem;
+        }
+        .price-box h4 {
+            font-size: 0.68rem;
+            font-weight: 600;
+            color: var(--text-faint);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.6rem;
+        }
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.77rem;
+            font-weight: 500;
+            color: var(--text-soft);
+            padding: 0.2rem 0;
+        }
+        .price-row span:last-child { font-weight: 600; color: var(--text); }
+        .price-row.total {
+            margin-top: 0.45rem;
+            padding-top: 0.45rem;
+            border-top: 1px solid var(--border);
+            font-weight: 600;
+            color: var(--text);
+        }
+        .price-row.total span:last-child { color: var(--green); font-weight: 700; }
+
+        /* card actions */
+        .card-actions {
+            display: flex;
+            gap: 0.5rem;
             flex-wrap: wrap;
         }
 
-        .meta-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            color: var(--text-medium);
-            font-size: 0.9rem;
-        }
-
-        .meta-item i {
-            color: var(--primary-yellow);
-            width: 16px;
-        }
-
-        /* Status Badges */
-        .status-badge {
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
+        .btn {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            border: 1px solid;
-            transition: all 0.3s ease;
-        }
-
-        .status-badge:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .status-pending {
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.1));
-            color: #92400e;
-            border-color: rgba(245, 158, 11, 0.3);
-        }
-
-        .status-confirmed {
-            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(21, 128, 61, 0.1));
-            color: #065f46;
-            border-color: rgba(34, 197, 94, 0.3);
-        }
-
-        .status-completed {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(29, 78, 216, 0.1));
-            color: #1e40af;
-            border-color: rgba(59, 130, 246, 0.3);
-        }
-
-        .status-cancelled {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1));
-            color: #991b1b;
-            border-color: rgba(239, 68, 68, 0.3);
-        }
-
-        .status-refunded {
-            background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(147, 51, 234, 0.1));
-            color: #6b21a8;
-            border-color: rgba(168, 85, 247, 0.3);
-        }
-
-        /* Booking Content */
-        .booking-content {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 2rem;
-        }
-
-        .booking-details {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .detail-group {
-            background: rgba(255, 215, 0, 0.05);
-            border-radius: 12px;
-            padding: 1rem;
-            border: 1px solid rgba(255, 215, 0, 0.1);
-        }
-
-        .detail-group h4 {
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: var(--text-medium);
-            margin-bottom: 0.75rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .detail-group h4 i {
-            color: var(--primary-yellow);
-        }
-
-        .detail-content {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--text-dark);
-        }
-
-        /* Price Summary */
-        .price-summary {
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.05), rgba(255, 165, 0, 0.05));
-            border-radius: 12px;
-            padding: 1.5rem;
-            border: 1px solid rgba(255, 215, 0, 0.2);
-        }
-
-        .price-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
-        }
-
-        .price-item:last-child {
-            border-bottom: none;
-        }
-
-        .price-item.total {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--text-dark);
-            margin-top: 0.5rem;
-            padding-top: 0.5rem;
-            border-top: 2px solid rgba(255, 215, 0, 0.3);
-        }
-
-        .price-amount {
-            font-weight: 600;
-            color: var(--text-dark);
-        }
-
-        .price-amount.paid {
-            color: #059669;
-        }
-
-        /* Action Buttons */
-        .booking-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 1.5rem;
-        }
-
-        .action-btn {
-            padding: 10px 20px;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 0.95rem;
+            gap: 0.35rem;
+            padding: 0.45rem 1rem;
+            border-radius: 8px;
             border: none;
+            font-size: 0.78rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            position: relative;
-            overflow: hidden;
+            transition: all 0.2s;
+            font-family: inherit;
         }
+        .btn i { font-size: 0.72rem; }
 
-        .action-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        .btn-primary {
+            background: var(--sunflower);
+            color: var(--white);
         }
+        .btn-primary:hover { background: var(--sun-dark); }
 
-        .action-btn::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.6s ease;
+        .btn-danger {
+            background: var(--red-light);
+            color: var(--red);
         }
+        .btn-danger:hover { background: #e8c3c2; }
 
-        .action-btn:hover::after {
-            left: 100%;
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-soft);
+            border: 1.5px solid var(--border);
         }
+        .btn-ghost:hover { border-color: var(--text-soft); color: var(--text); }
 
-        .btn-view {
-            background: linear-gradient(135deg, var(--primary-black), #2D3748);
-            color: white;
-        }
-
-        .btn-view:hover {
-            background: linear-gradient(135deg, #2D3748, var(--primary-black));
-        }
-
-        .btn-cancel {
-            background: linear-gradient(135deg, #dc2626, #b91c1c);
-            color: white;
-        }
-
-        .btn-cancel:hover {
-            background: linear-gradient(135deg, #b91c1c, #991b1b);
-        }
-
-        .btn-disabled {
-            background: linear-gradient(135deg, #9ca3af, #6b7280);
-            color: white;
-            cursor: not-allowed;
-        }
-
-        .btn-disabled:hover {
-            transform: none;
-            box-shadow: none;
-        }
-
-        /* Empty State */
+        /* ═══════════════════════════════
+           EMPTY STATE
+        ═══════════════════════════════ */
         .empty-state {
             text-align: center;
-            padding: 4rem 2rem;
-            max-width: 600px;
-            margin: 0 auto;
+            padding: 3.5rem 1rem;
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            animation: fadeUp 0.4s ease both;
         }
-
         .empty-icon {
-            width: 120px;
-            height: 120px;
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 165, 0, 0.1));
+            width: 72px;
+            height: 72px;
+            background: var(--cream);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 2rem;
-            font-size: 3.5rem;
-            color: var(--primary-yellow);
-            animation: gentlePulse 2s ease-in-out infinite;
+            margin: 0 auto 1rem;
+            font-size: 1.8rem;
+            color: var(--sunflower);
         }
+        .empty-state h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.3rem; }
+        .empty-state p { font-size: 0.85rem; color: var(--text-soft); margin-bottom: 1.2rem; }
 
-        @keyframes gentlePulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+        /* ═══════════════════════════════
+           LOADING
+        ═══════════════════════════════ */
+        .loading-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 3.5rem 1rem;
         }
-
-        .empty-title {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: var(--text-dark);
-            margin-bottom: 1rem;
+        .spinner {
+            width: 36px;
+            height: 36px;
+            border: 3px solid var(--border);
+            border-top-color: var(--sunflower);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            margin-bottom: 0.8rem;
         }
+        .loading-wrap p { font-size: 0.85rem; color: var(--text-faint); font-weight: 500; }
 
-        .empty-description {
-            color: var(--text-medium);
-            line-height: 1.6;
-            margin-bottom: 2rem;
-            font-size: 1.1rem;
-        }
-
-        /* Modal */
-        .modal {
+        /* ═══════════════════════════════
+           MODAL — FULLY OPAQUE
+        ═══════════════════════════════ */
+        .modal-overlay {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
             z-index: 1000;
             justify-content: center;
             align-items: center;
             padding: 1rem;
-            backdrop-filter: blur(5px);
         }
+        .modal-overlay.show { display: flex; }
 
-        .modal.show {
-            display: flex;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .modal-content {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 2rem;
-            max-width: 800px;
+        .modal {
+            background: var(--white);
+            border-radius: 18px;
             width: 100%;
-            max-height: 90vh;
+            max-width: 680px;
+            max-height: 88vh;
             overflow-y: auto;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            animation: fadeUp 0.3s ease;
         }
 
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .modal-header {
+        .modal-head {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 1.3rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            background: var(--cream);
+            border-radius: 18px 18px 0 0;
         }
-
-        .modal-header h2 {
-            font-size: 1.75rem;
+        .modal-head h2 {
+            font-size: 1.1rem;
             font-weight: 700;
-            color: var(--text-dark);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 0.5rem;
+            color: var(--text);
         }
+        .modal-head h2 i { color: var(--sunflower); font-size: 1rem; }
 
-        .modal-header h2 i {
-            color: var(--primary-yellow);
-        }
-
-        .close-modal {
+        .modal-close {
             background: none;
             border: none;
-            color: var(--text-medium);
-            font-size: 1.5rem;
-            cursor: pointer;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-
-        .close-modal:hover {
-            background: rgba(255, 215, 0, 0.1);
-            color: var(--text-dark);
-            transform: rotate(90deg);
-        }
-
-        /* Loading Spinner */
-        .loading-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 4rem;
-            min-height: 300px;
-        }
-
-        .loading-spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid rgba(255, 215, 0, 0.2);
-            border-top-color: var(--primary-yellow);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 1.5rem;
-        }
-
-        .loading-text {
-            color: var(--text-medium);
+            color: var(--text-faint);
             font-size: 1.1rem;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .modal-close:hover { background: var(--cream); color: var(--text); }
+
+        .modal-body {
+            padding: 1.5rem;
+            background: var(--white);
+        }
+
+        /* modal sections */
+        .modal-section { margin-bottom: 1.5rem; }
+        .modal-section-title {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--text-faint);
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+            margin-bottom: 0.7rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .modal-section-title i { color: var(--sunflower); font-size: 0.72rem; }
+
+        /* dates grid in modal */
+        .modal-dates {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.6rem;
+        }
+        .modal-date-item {
+            background: var(--cream);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.7rem 0.8rem;
+        }
+        .modal-date-item .label {
+            font-size: 0.65rem;
+            color: var(--text-faint);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 0.2rem;
+        }
+        .modal-date-item .value {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        /* accommodation item */
+        .accom-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 0.9rem;
+            background: var(--cream);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+        }
+        .accom-item .name { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+        .accom-item .type {
+            font-size: 0.68rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-top: 0.15rem;
+        }
+        .type.room { color: var(--blue); }
+        .type.cottage { color: var(--green); }
+
+        .accom-item .price {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--sunflower);
+        }
+
+        /* payment item */
+        .payment-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.7rem 0.9rem;
+            background: var(--cream);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+        }
+        .payment-item .ref { font-size: 0.82rem; font-weight: 600; color: var(--text); }
+        .payment-item .info { font-size: 0.7rem; color: var(--text-faint); margin-top: 0.1rem; }
+        .payment-item .amount { font-size: 0.9rem; font-weight: 700; color: var(--green); }
+
+        /* modal price summary */
+        .modal-price-box {
+            background: var(--cream);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.9rem;
+            margin-bottom: 1.2rem;
+        }
+        .modal-price-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            color: var(--text-soft);
+            padding: 0.2rem 0;
             font-weight: 500;
         }
+        .modal-price-row span:last-child { color: var(--text); font-weight: 600; }
+        .modal-price-row.total {
+            border-top: 1px solid var(--border);
+            margin-top: 0.4rem;
+            padding-top: 0.4rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+        .modal-price-row.total span:last-child { color: var(--green); font-weight: 700; font-size: 0.88rem; }
 
-        /* Animation */
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        /* modal top row with badge */
+        .modal-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.3rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .modal-top h3 { font-size: 1.15rem; font-weight: 700; }
+        .modal-top .sub { font-size: 0.78rem; color: var(--text-soft); }
+
+        /* special req box */
+        .info-box {
+            background: var(--cream);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.8rem 0.9rem;
+            margin-bottom: 1.2rem;
+        }
+        .info-box h4 {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-faint);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .info-box h4 i { color: var(--sunflower); font-size: 0.68rem; }
+        .info-box p { font-size: 0.8rem; color: var(--text-soft); line-height: 1.5; }
+
+        /* modal actions */
+        .modal-actions {
+            display: flex;
+            gap: 0.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+            flex-wrap: wrap;
         }
 
-        /* Responsive Design */
-        @media (max-width: 992px) {
-            .section-title {
-                font-size: 2.5rem;
-            }
-            
-            .booking-content {
-                grid-template-columns: 1fr;
-            }
-            
-            .booking-details {
-                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            }
-        }
-
+        /* ═══════════════════════════════
+           RESPONSIVE
+        ═══════════════════════════════ */
         @media (max-width: 768px) {
-            .main-content {
-                margin-top: 70px;
-            }
-            
-            .section-title {
-                font-size: 2.25rem;
-                margin-bottom: 0.5rem;
-            }
-            
-            .section-subtitle {
-                margin-bottom: 2rem;
-            }
-            
-            .booking-header {
-                flex-direction: column;
-                gap: 1rem;
-            }
-            
-            .booking-meta {
-                justify-content: flex-start;
-            }
-            
-            .booking-actions {
-                flex-direction: column;
-            }
-            
-            .action-btn {
-                width: 100%;
-                justify-content: center;
-            }
-            
-            .modal-content {
-                padding: 1.5rem;
-            }
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+            .card-body { grid-template-columns: 1fr; }
+            .details-grid { grid-template-columns: repeat(2, 1fr); }
+            .modal-dates { grid-template-columns: 1fr 1fr; }
         }
 
-        @media (max-width: 576px) {
-            .bookings-container {
-                padding: 1.5rem 1rem;
-            }
-            
-            .section-title {
-                font-size: 2rem;
-            }
-            
-            .filter-tabs {
-                justify-content: center;
-            }
-            
-            .filter-tab {
-                padding: 8px 16px;
-                font-size: 0.9rem;
-            }
-            
-            .stat-card {
-                padding: 1.25rem;
-            }
-            
-            .stat-number {
-                font-size: 1.75rem;
-            }
-        }
-
-        /* ✅ FIXED: Add this to make sure cards are visible */
-        .booking-card.filtered-out {
-            display: none !important;
+        @media (max-width: 500px) {
+            .stats-row { grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
+            .stat-card { padding: 0.8rem 0.6rem; }
+            .details-grid { grid-template-columns: 1fr; }
+            .filter-tab { font-size: 0.75rem; padding: 0.4rem 0.85rem; }
+            .booking-card { padding: 1.1rem; }
+            .modal-dates { grid-template-columns: 1fr; }
         }
     </style>
 </head>
+
 <body>
-    <!-- Include Navbar -->
     @include('customerFolder.partials.navbar')
-    
-    <!-- Main Content -->
-    <div class="main-content">
-        <div class="bookings-container">
-            <h1 class="section-title cursive-font">My Bookings</h1>
-            <p class="section-subtitle">Track and manage all your reservations in one place</p>
-            
-            <!-- Statistics Cards -->
-            <div class="stats-container">
-                <div class="stat-card">
-                    <div class="stat-content">
-                        <div class="stat-info">
-                            <h3>Total Bookings</h3>
-                            <div class="stat-number" id="total-bookings">0</div>
-                        </div>
-                        <div class="stat-icon" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(29, 78, 216, 0.1)); color: #3b82f6;">
-                            <i class="fas fa-calendar-alt"></i>
-                        </div>
+
+    <div class="bookings-page-wrapper">
+        <main class="main-content">
+            <div class="bookings-container">
+
+                <!-- Title -->
+                <div class="page-title-wrap">
+                    <h1 class="page-title cursive-font">My Bookings</h1>
+                    <p class="page-subtitle">Track and manage all your reservations</p>
+                    <div class="title-line"></div>
+                </div>
+
+                <!-- Stats -->
+                <div class="stats-row">
+                    <div class="stat-card c-all">
+                        <div class="stat-number" id="total-bookings">0</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                    <div class="stat-card c-pend">
+                        <div class="stat-number" id="pending-bookings">0</div>
+                        <div class="stat-label">Pending</div>
+                    </div>
+                    <div class="stat-card c-conf">
+                        <div class="stat-number" id="confirmed-bookings">0</div>
+                        <div class="stat-label">Confirmed</div>
+                    </div>
+                    <div class="stat-card c-comp">
+                        <div class="stat-number" id="completed-bookings">0</div>
+                        <div class="stat-label">Completed</div>
                     </div>
                 </div>
-                
-                <div class="stat-card">
-                    <div class="stat-content">
-                        <div class="stat-info">
-                            <h3>Pending</h3>
-                            <div class="stat-number text-yellow-600" id="pending-bookings">0</div>
-                        </div>
-                        <div class="stat-icon" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.1)); color: #f59e0b;">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                    </div>
+
+                <!-- Filter Tabs -->
+                <div class="filter-bar">
+                    <button class="filter-tab active" data-status="all"><i class="fas fa-list"></i> All</button>
+                    <button class="filter-tab" data-status="pending"><i class="fas fa-clock"></i> Pending</button>
+                    <button class="filter-tab" data-status="confirmed"><i class="fas fa-check-circle"></i> Confirmed</button>
+                    <button class="filter-tab" data-status="completed"><i class="fas fa-flag-checkered"></i> Completed</button>
+                    <button class="filter-tab" data-status="cancelled"><i class="fas fa-times-circle"></i> Cancelled</button>
                 </div>
-                
-                <div class="stat-card">
-                    <div class="stat-content">
-                        <div class="stat-info">
-                            <h3>Confirmed</h3>
-                            <div class="stat-number text-green-600" id="confirmed-bookings">0</div>
-                        </div>
-                        <div class="stat-icon" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(21, 128, 61, 0.1)); color: #10b981;">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-content">
-                        <div class="stat-info">
-                            <h3>Completed</h3>
-                            <div class="stat-number text-blue-600" id="completed-bookings">0</div>
-                        </div>
-                        <div class="stat-icon" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(29, 78, 216, 0.1)); color: #3b82f6;">
-                            <i class="fas fa-flag-checkered"></i>
-                        </div>
+
+                <!-- Bookings List -->
+                <div id="bookings-list">
+                    <div class="loading-wrap">
+                        <div class="spinner"></div>
+                        <p>Loading your bookings...</p>
                     </div>
                 </div>
             </div>
-            
-            <!-- Filter Tabs -->
-            <div class="filter-container">
-                <h3 class="filter-title">
-                    <i class="fas fa-filter"></i>
-                    Filter by Status
-                </h3>
-                <div class="filter-tabs">
-                    <button class="filter-tab active" data-status="all">
-                        <i class="fas fa-list"></i> All Bookings
-                    </button>
-                    <button class="filter-tab" data-status="pending">
-                        <i class="fas fa-clock"></i> Pending
-                    </button>
-                    <button class="filter-tab" data-status="confirmed">
-                        <i class="fas fa-check-circle"></i> Confirmed
-                    </button>
-                    <button class="filter-tab" data-status="completed">
-                        <i class="fas fa-flag-checkered"></i> Completed
-                    </button>
-                    <button class="filter-tab" data-status="cancelled">
-                        <i class="fas fa-times-circle"></i> Cancelled
-                    </button>
-                </div>
+        </main>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="booking-modal">
+        <div class="modal">
+            <div class="modal-head">
+                <h2><i class="fas fa-calendar-alt"></i> Booking Details</h2>
+                <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
             </div>
-            
-            <!-- Bookings List -->
-            <div id="bookings-list">
-                <div class="loading-container" id="loading-spinner">
-                    <div class="loading-spinner"></div>
-                    <p class="loading-text">Loading your bookings...</p>
-                </div>
+            <div class="modal-body" id="booking-details">
+                <!-- filled by JS -->
             </div>
         </div>
     </div>
-    
-    <!-- Booking Details Modal -->
-    <div class="modal" id="booking-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>
-                    <i class="fas fa-calendar-alt"></i>
-                    Booking Details
-                </h2>
-                <button class="close-modal" onclick="closeModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div id="booking-details">
-                <!-- Content will be loaded here -->
-            </div>
-        </div>
-    </div>
-    
-    <!-- Include Footer -->
+
     @include('customerFolder.partials.footer')
 
-    <script>
-        // ✅ FIXED: Global variables for state management
-        let currentStatus = 'all';
-        let currentBookingId = null;
-        let allBookings = []; // Store all bookings for client-side filtering
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            loadBookings();
-            setupEventListeners();
-        });
-        
-        function setupEventListeners() {
-            // Filter tabs
-            document.querySelectorAll('.filter-tab').forEach(tab => {
-                tab.addEventListener('click', function() {
-                    console.log('Filter clicked:', this.dataset.status);
-                    
-                    // Update active tab
-                    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // Update current status
-                    currentStatus = this.dataset.status;
-                    
-                    // Filter bookings (client-side)
-                    filterBookings(currentStatus);
-                });
-            });
-        }
-        
-        function loadBookings() {
-            const bookingsList = document.getElementById('bookings-list');
-            const loadingSpinner = document.getElementById('loading-spinner');
-            
-            // Show loading
-            bookingsList.innerHTML = '<div class="loading-container" id="loading-spinner"><div class="loading-spinner"></div><p class="loading-text">Loading your bookings...</p></div>';
-            
-            // ✅ FIXED: Always fetch ALL bookings, then filter client-side
-            fetch('/api/my-bookings?status=all', {
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Bookings loaded:', data);
-                
-                if (data.success) {
-                    // Store all bookings globally
-                    allBookings = data.bookings;
-                    
-                    // Update statistics
-                    updateStatistics(data);
-                    
-                    if (data.bookings.length === 0) {
-                        showNoBookingsMessage();
-                    } else {
-                        // Render ALL bookings first
-                        renderBookingsCards(data.bookings);
-                        
-                        // Then apply current filter
-                        filterBookings(currentStatus);
-                    }
-                } else {
-                    throw new Error(data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error loading bookings:', error);
-                bookingsList.innerHTML = `
-                    <div class="booking-card text-center">
-                        <div class="text-red-500 text-4xl mb-4">
-                            <i class="fas fa-exclamation-triangle"></i>
-                        </div>
-                        <h3 class="text-xl font-semibold text-red-600 mb-2">Error loading bookings</h3>
-                        <p class="text-gray-600 mb-4">${error.message}</p>
-                        <button onclick="loadBookings()" class="action-btn btn-view" style="max-width: 150px; margin: 0 auto;">
-                            <i class="fas fa-redo mr-2"></i> Retry
-                        </button>
-                    </div>
-                `;
-            });
-        }
-        
-        // ✅ FIXED: Client-side filtering function
-        function filterBookings(status) {
-            console.log('Filtering bookings by status:', status);
-            
-            const bookingsList = document.getElementById('bookings-list');
-            const bookingCards = bookingsList.querySelectorAll('.booking-card');
-            let visibleCount = 0;
-            
-            console.log('Total booking cards found:', bookingCards.length);
-            
-            bookingCards.forEach(card => {
-                const cardStatus = card.dataset.status;
-                console.log('Card status:', cardStatus, 'Filter status:', status);
-                
-                if (status === 'all' || cardStatus === status) {
-                    card.classList.remove('filtered-out');
-                    card.style.display = 'block';
-                    visibleCount++;
-                } else {
-                    card.classList.add('filtered-out');
-                    card.style.display = 'none';
-                }
-            });
-            
-            console.log(`Showing ${visibleCount} bookings for status: ${status}`);
-            
-            // Show empty state if no bookings match filter
-            if (visibleCount === 0 && bookingCards.length > 0) {
-                // Don't clear the list, just hide all cards and show message
-                const existingEmpty = bookingsList.querySelector('.empty-state');
-                if (!existingEmpty) {
-                    const emptyDiv = document.createElement('div');
-                    emptyDiv.innerHTML = getEmptyStateHTML();
-                    bookingsList.appendChild(emptyDiv.firstElementChild);
-                }
-            } else {
-                // Remove empty state if it exists
-                const existingEmpty = bookingsList.querySelector('.empty-state');
-                if (existingEmpty) {
-                    existingEmpty.remove();
-                }
-            }
-        }
-        
-        // Helper function to generate empty state HTML
-        function getEmptyStateHTML() {
-            const emptyMessage = currentStatus !== 'all' 
-                ? `You don't have any ${currentStatus} bookings yet.`
-                : "You haven't made any bookings yet.";
-            
-            const actionButton = currentStatus !== 'all' 
-                ? `<button onclick="resetFilter()" class="action-btn btn-view" style="max-width: 200px; margin: 0 auto;">
-                        <i class="fas fa-list mr-2"></i> View All Bookings
-                   </button>`
-                : `<a href="{{ route('roomBooking') }}" class="action-btn btn-view" style="max-width: 200px; margin: 0 auto; text-decoration: none;">
-                        <i class="fas fa-plus mr-2"></i> Make a New Booking
-                   </a>`;
-            
-            return `
-                <div class="empty-state">
-                    <div class="empty-icon">
-                        <i class="far fa-calendar-alt"></i>
-                    </div>
-                    <h3 class="empty-title">No bookings found</h3>
-                    <p class="empty-description">${emptyMessage}</p>
-                    ${actionButton}
-                </div>
-            `;
-        }
-        
-        // Helper function to reset filter
-        function resetFilter() {
-            currentStatus = 'all';
+<script>
+let currentStatus = 'all';
+let allBookings = [];
+
+document.addEventListener('DOMContentLoaded', function () {
+    loadBookings();
+    setupFilters();
+});
+
+/* ─── FILTERS ─── */
+function setupFilters() {
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.addEventListener('click', function () {
             document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-            document.querySelector('.filter-tab[data-status="all"]').classList.add('active');
-            filterBookings('all');
-        }
-        
-        function updateStatistics(data) {
-            document.getElementById('total-bookings').textContent = data.total || 0;
-            document.getElementById('pending-bookings').textContent = data.pending || 0;
-            document.getElementById('confirmed-bookings').textContent = data.confirmed || 0;
-            document.getElementById('completed-bookings').textContent = data.completed || 0;
-        }
-        
-        function renderBookingsCards(bookings) {
-            const bookingsList = document.getElementById('bookings-list');
-            
-            if (!bookings || bookings.length === 0) {
-                showNoBookingsMessage();
-                return;
-            }
-            
-            const cardsHTML = bookings.map(booking => {
-                // Get status badge
-                let statusClass = 'status-pending';
-                let statusIcon = 'fa-clock';
-                
-                switch(booking.bookingStatus) {
-                    case 'confirmed':
-                        statusClass = 'status-confirmed';
-                        statusIcon = 'fa-check-circle';
-                        break;
-                    case 'completed':
-                        statusClass = 'status-completed';
-                        statusIcon = 'fa-flag-checkered';
-                        break;
-                    case 'cancelled':
-                        statusClass = 'status-cancelled';
-                        statusIcon = 'fa-times-circle';
-                        break;
-                    case 'refunded':
-                        statusClass = 'status-refunded';
-                        statusIcon = 'fa-undo';
-                        break;
-                }
-                
-                // Format prices
-                const totalPrice = parseFloat(booking.totalPrice || 0).toFixed(2);
-                const totalPaid = parseFloat(booking.total_paid || 0).toFixed(2);
-                const remainingBalance = (parseFloat(totalPrice) - parseFloat(totalPaid)).toFixed(2);
-                
-                // ✅ FIXED: Add data-status attribute for filtering
-                return `
-                    <div class="booking-card" data-status="${booking.bookingStatus}">
-                        <div class="booking-header">
-                            <div class="booking-info">
-                                <h3>Booking #${booking.bookingID}</h3>
-                                <div class="booking-meta">
-                                    <span class="meta-item">
-                                        <i class="far fa-calendar"></i>
-                                        ${booking.formatted_event_start || 'N/A'}
-                                    </span>
-                                    <span class="meta-item">
-                                        <i class="fas fa-users"></i>
-                                        ${booking.numGuests || 0} guest${(booking.numGuests || 0) > 1 ? 's' : ''}
-                                    </span>
-                                    <span class="meta-item">
-                                        <i class="far fa-clock"></i>
-                                        ${booking.formatted_created_at || 'N/A'}
-                                    </span>
-                                </div>
-                            </div>
-                            <span class="${statusClass} status-badge">
-                                <i class="fas ${statusIcon}"></i>
-                                ${booking.bookingStatus ? booking.bookingStatus.charAt(0).toUpperCase() + booking.bookingStatus.slice(1) : 'Pending'}
-                            </span>
-                        </div>
-                        
-                        <div class="booking-content">
-                            <div class="booking-details">
-                                <div class="detail-group">
-                                    <h4><i class="fas fa-calendar-day"></i> Event Dates</h4>
-                                    <div class="detail-content">
-                                        ${booking.formatted_event_start || 'N/A'} to ${booking.formatted_event_end || 'N/A'}
-                                    </div>
-                                </div>
-                                
-                                <div class="detail-group">
-                                    <h4><i class="fas fa-home"></i> Accommodations</h4>
-                                    <div class="detail-content">
-                                        ${booking.accommodations ? booking.accommodations.length : 0} item${(booking.accommodations && booking.accommodations.length > 1) ? 's' : ''}
-                                    </div>
-                                </div>
-                                
-                                <div class="detail-group">
-                                    <h4><i class="fas fa-star"></i> Booking Type</h4>
-                                    <div class="detail-content">
-                                        ${booking.eventType || 'Normal Booking'}
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="price-summary">
-                                <h4 class="font-semibold mb-3 text-lg">Payment Summary</h4>
-                                <div class="price-item">
-                                    <span>Total Amount</span>
-                                    <span class="price-amount">₱${totalPrice}</span>
-                                </div>
-                                <div class="price-item">
-                                    <span>Amount Paid</span>
-                                    <span class="price-amount paid">₱${totalPaid}</span>
-                                </div>
-                                <div class="price-item total">
-                                    <span>Remaining Balance</span>
-                                    <span class="price-amount ${remainingBalance === '0.00' ? 'paid' : ''}">
-                                        ₱${remainingBalance}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="booking-actions">
-                            <button onclick="viewBooking(${booking.bookingID})" class="action-btn btn-view">
-                                <i class="fas fa-eye mr-2"></i> View Details
-                            </button>
-                            ${(booking.bookingStatus === 'pending' || booking.bookingStatus === 'confirmed') ? `
-                                <button onclick="cancelBooking(${booking.bookingID})" class="action-btn btn-cancel">
-                                    <i class="fas fa-times mr-2"></i> Cancel Booking
-                                </button>
-                            ` : ''}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            bookingsList.innerHTML = cardsHTML;
-        }
-        
-        function showNoBookingsMessage() {
-            const bookingsList = document.getElementById('bookings-list');
-            bookingsList.innerHTML = getEmptyStateHTML();
-        }
-        
-        function viewBooking(bookingId) {
-            currentBookingId = bookingId;
-            
-            const modal = document.getElementById('booking-modal');
-            const detailsContainer = document.getElementById('booking-details');
-            
-            // Show loading in modal
-            detailsContainer.innerHTML = `
-                <div class="loading-container">
-                    <div class="loading-spinner"></div>
-                    <p class="loading-text">Loading booking details...</p>
-                </div>
-            `;
-            
-            modal.classList.add('show');
-            document.body.style.overflow = 'hidden';
-            
-            // Fetch booking details
-            fetch(`/api/my-bookings/${bookingId}`, {
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    renderBookingDetails(data.booking);
-                } else {
-                    throw new Error(data.message);
-                }
-            })
-            .catch(error => {
-                detailsContainer.innerHTML = `
-                    <div class="text-center py-8">
-                        <div class="text-red-500 text-4xl mb-4">
-                            <i class="fas fa-exclamation-triangle"></i>
-                        </div>
-                        <h3 class="text-xl font-semibold text-red-600 mb-2">Error loading booking details</h3>
-                        <p class="text-gray-600">${error.message}</p>
-                    </div>
-                `;
-            });
-        }
-        
-        function renderBookingDetails(booking) {
-            const detailsContainer = document.getElementById('booking-details');
-            
-            // Get status badge
-            let statusClass = 'status-pending';
-            let statusIcon = 'fa-clock';
-            
-            switch(booking.bookingStatus) {
-                case 'confirmed':
-                    statusClass = 'status-confirmed';
-                    statusIcon = 'fa-check-circle';
-                    break;
-                case 'completed':
-                    statusClass = 'status-completed';
-                    statusIcon = 'fa-flag-checkered';
-                    break;
-                case 'cancelled':
-                    statusClass = 'status-cancelled';
-                    statusIcon = 'fa-times-circle';
-                    break;
-            }
-            
-            // Format payment history
-            const paymentsHTML = booking.payments && booking.payments.length > 0 
-                ? booking.payments.map(payment => `
-                    <div class="border border-gray-200 rounded-lg p-3 mb-2 bg-gray-50">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <p class="font-semibold text-sm">${payment.paymentReference || 'Payment'}</p>
-                                <p class="text-xs text-gray-600">
-                                    ${new Date(payment.paymentDate).toLocaleDateString('en-US', { 
-                                        year: 'numeric', 
-                                        month: 'short', 
-                                        day: 'numeric'
-                                    })} • 
-                                    ${payment.paymentMethod || 'N/A'} • ${payment.paymentType || 'Payment'}
-                                </p>
-                            </div>
-                            <div class="text-right">
-                                <p class="font-bold text-lg">₱${parseFloat(payment.amountPaid || 0).toFixed(2)}</p>
-                                <span class="${payment.paymentStatus === 'completed' ? 'status-confirmed' : 'status-pending'} status-badge" style="font-size: 0.75rem;">
-                                    ${payment.paymentStatus || 'pending'}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                `).join('')
-                : `<div class="text-center py-4 text-gray-500">
-                    <i class="fas fa-receipt text-2xl mb-2"></i>
-                    <p>No payment records found.</p>
-                   </div>`;
-            
-            detailsContainer.innerHTML = `
-                <div class="space-y-6">
-                    <!-- Status and ID -->
-                    <div class="flex items-center justify-between mb-6">
-                        <div>
-                            <h3 class="text-2xl font-bold text-gray-800">Booking #${booking.bookingID}</h3>
-                            <p class="text-gray-600">${booking.eventType || 'Normal Booking'}</p>
-                        </div>
-                        <span class="${statusClass} status-badge">
-                            <i class="fas ${statusIcon}"></i>
-                            ${booking.bookingStatus.charAt(0).toUpperCase() + booking.bookingStatus.slice(1)}
-                        </span>
-                    </div>
-                    
-                    <!-- Grid Layout -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Dates Card -->
-                        <div class="border border-gray-200 rounded-xl p-5 bg-gray-50">
-                            <h4 class="font-semibold text-lg mb-4 text-gray-800 flex items-center gap-2">
-                                <i class="fas fa-calendar-alt text-yellow-500"></i>
-                                Dates
-                            </h4>
-                            <div class="space-y-3">
-                                <div class="flex items-start">
-                                    <i class="fas fa-play-circle text-green-500 mt-1 mr-3"></i>
-                                    <div>
-                                        <p class="font-medium text-sm text-gray-600">Event Start</p>
-                                        <p class="text-gray-800">${booking.formatted_details?.event_start || 'N/A'}</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-start">
-                                    <i class="fas fa-stop-circle text-red-500 mt-1 mr-3"></i>
-                                    <div>
-                                        <p class="font-medium text-sm text-gray-600">Event End</p>
-                                        <p class="text-gray-800">${booking.formatted_details?.event_end || 'N/A'}</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-start">
-                                    <i class="fas fa-clock text-purple-500 mt-1 mr-3"></i>
-                                    <div>
-                                        <p class="font-medium text-sm text-gray-600">Booked On</p>
-                                        <p class="text-gray-800">${booking.formatted_details?.created_at || 'N/A'}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Payment Card -->
-                        <div class="border border-gray-200 rounded-xl p-5 bg-gray-50">
-                            <h4 class="font-semibold text-lg mb-4 text-gray-800 flex items-center gap-2">
-                                <i class="fas fa-money-bill-wave text-yellow-500"></i>
-                                Payment Summary
-                            </h4>
-                            <div class="space-y-3">
-                                <div class="flex justify-between items-center">
-                                    <span class="font-medium text-gray-700">Total Amount:</span>
-                                    <span class="font-bold text-lg text-gray-900">${booking.formatted_details?.total_price || '₱0.00'}</span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="font-medium text-gray-700">Amount Paid:</span>
-                                    <span class="font-bold text-lg text-green-600">${booking.formatted_details?.total_paid || '₱0.00'}</span>
-                                </div>
-                                <div class="flex justify-between items-center border-t pt-3">
-                                    <span class="font-medium text-gray-700">Remaining Balance:</span>
-                                    <span class="font-bold text-lg ${booking.formatted_details?.remaining_balance === '₱0.00' ? 'text-green-600' : 'text-yellow-600'}">
-                                        ${booking.formatted_details?.remaining_balance || '₱0.00'}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Accommodations -->
-                    <div class="border border-gray-200 rounded-xl p-5 bg-gray-50">
-                        <h4 class="font-semibold text-lg mb-4 text-gray-800 flex items-center gap-2">
-                            <i class="fas fa-home text-yellow-500"></i>
-                            Accommodations
-                        </h4>
-                        <div class="space-y-3">
-                            ${booking.cart?.items ? booking.cart.items.map(item => `
-                                <div class="flex justify-between items-center border-b border-gray-100 pb-3 last:border-0">
-                                    <div>
-                                        <h5 class="font-semibold text-gray-800">${item.unit?.unitName || 'N/A'}</h5>
-                                        <p class="text-sm text-gray-600 flex items-center gap-2">
-                                            <span class="inline-flex items-center gap-1">
-                                                <i class="fas ${item.unit?.unitType === 'room' ? 'fa-bed' : 'fa-home'}"></i>
-                                                ${item.unit?.unitType ? item.unit.unitType.charAt(0).toUpperCase() + item.unit.unitType.slice(1) : 'N/A'}
-                                            </span>
-                                            <span>•</span>
-                                            <span>${booking.numGuests || 1} guest${booking.numGuests > 1 ? 's' : ''}</span>
-                                        </p>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="font-bold text-lg">₱${parseFloat(item.subtotalPrice || 0).toFixed(2)}</span>
-                                        <p class="text-xs text-gray-500">Unit price</p>
-                                    </div>
-                                </div>
-                            `).join('') : '<p class="text-gray-500">No accommodations found.</p>'}
-                        </div>
-                    </div>
-                    
-                    <!-- Payment History -->
-                    <div class="border border-gray-200 rounded-xl p-5 bg-gray-50">
-                        <h4 class="font-semibold text-lg mb-4 text-gray-800 flex items-center gap-2">
-                            <i class="fas fa-history text-yellow-500"></i>
-                            Payment History
-                        </h4>
-                        <div class="space-y-2">
-                            ${paymentsHTML}
-                        </div>
-                    </div>
-                    
-                    <!-- Special Requirements -->
-                    ${booking.specialRequirements ? `
-                        <div class="border border-gray-200 rounded-xl p-5 bg-gray-50">
-                            <h4 class="font-semibold text-lg mb-4 text-gray-800 flex items-center gap-2">
-                                <i class="fas fa-sticky-note text-yellow-500"></i>
-                                Special Requirements
-                            </h4>
-                            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                                <p class="text-gray-700">${booking.specialRequirements}</p>
-                            </div>
-                        </div>
-                    ` : ''}
-                    
-                    <!-- Actions -->
-                    <div class="pt-4 border-t border-gray-200">
-                        <div class="flex flex-col sm:flex-row gap-3">
-                            ${(booking.bookingStatus === 'pending' || booking.bookingStatus === 'confirmed') ? `
-                                <button onclick="cancelBooking(${booking.bookingID}, true)" class="action-btn btn-cancel">
-                                    <i class="fas fa-times mr-2"></i> Cancel Booking
-                                </button>
-                            ` : ''}
-                            <button onclick="closeModal()" class="action-btn btn-view">
-                                <i class="fas fa-times mr-2"></i> Close
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-        
-        function cancelBooking(bookingId, fromModal = false) {
-            if (!confirm('Are you sure you want to cancel this booking? This action cannot be undone.')) {
-                return;
-            }
-            
-            fetch(`/api/my-bookings/${bookingId}/cancel`, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Booking cancelled successfully.');
-                    if (fromModal) {
-                        closeModal();
-                    }
-                    loadBookings(); // Refresh the list
-                } else {
-                    alert('Failed to cancel booking: ' + data.message);
-                }
-            })
-            .catch(error => {
-                alert('Error cancelling booking: ' + error.message);
-            });
-        }
-        
-        function closeModal() {
-            document.getElementById('booking-modal').classList.remove('show');
-            document.body.style.overflow = 'auto';
-        }
-        
-        // Close modal when clicking outside
-        document.getElementById('booking-modal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeModal();
-            }
+            this.classList.add('active');
+            currentStatus = this.dataset.status;
+            applyFilter();
         });
-        
-        // Close modal with Escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeModal();
+    });
+}
+
+function applyFilter() {
+    const cards = document.querySelectorAll('.booking-card');
+    let visible = 0;
+
+    cards.forEach(card => {
+        const match = (currentStatus === 'all' || card.dataset.status === currentStatus);
+        card.classList.toggle('filtered-out', !match);
+        if (match) visible++;
+    });
+
+    // remove any stale empty state
+    const old = document.getElementById('empty-placeholder');
+    if (old) old.remove();
+
+    // show empty state only if cards exist but none visible
+    if (cards.length > 0 && visible === 0) {
+        const el = document.createElement('div');
+        el.id = 'empty-placeholder';
+        el.innerHTML = emptyHTML(
+            `No ${currentStatus} bookings yet.`,
+            `<button onclick="resetFilter()" class="btn btn-primary"><i class="fas fa-list"></i> View All</button>`
+        );
+        document.getElementById('bookings-list').appendChild(el);
+    }
+}
+
+function resetFilter() {
+    currentStatus = 'all';
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    document.querySelector('.filter-tab[data-status="all"]').classList.add('active');
+    applyFilter();
+}
+
+/* ─── LOAD BOOKINGS ─── */
+function loadBookings() {
+    document.getElementById('bookings-list').innerHTML =
+        '<div class="loading-wrap"><div class="spinner"></div><p>Loading your bookings...</p></div>';
+
+    fetch('/api/my-bookings?status=all', {
+        headers: {
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+    .then(r => { if (!r.ok) throw new Error('Network error'); return r.json(); })
+    .then(data => {
+        if (!data.success) throw new Error(data.message);
+        allBookings = data.bookings;
+        updateStats(data);
+
+        if (data.bookings.length === 0) {
+            document.getElementById('bookings-list').innerHTML = emptyHTML(
+                "You haven't made any bookings yet.",
+                `<a href="{{ route('roomBooking') }}" class="btn btn-primary" style="text-decoration:none;"><i class="fas fa-plus"></i> Make a Booking</a>`
+            );
+        } else {
+            document.getElementById('bookings-list').innerHTML = data.bookings.map((b, i) => cardHTML(b, i)).join('');
+            applyFilter();
+        }
+    })
+    .catch(err => {
+        document.getElementById('bookings-list').innerHTML = emptyHTML(
+            err.message || 'Something went wrong.',
+            `<button onclick="loadBookings()" class="btn btn-primary"><i class="fas fa-redo"></i> Retry</button>`
+        );
+    });
+}
+
+/* ─── STATS ─── */
+function updateStats(d) {
+    document.getElementById('total-bookings').textContent     = d.total || 0;
+    document.getElementById('pending-bookings').textContent   = d.pending || 0;
+    document.getElementById('confirmed-bookings').textContent = d.confirmed || 0;
+    document.getElementById('completed-bookings').textContent = d.completed || 0;
+}
+
+/* ─── HELPERS ─── */
+function badgeClass(status) {
+    const map = { pending:'badge-pending', confirmed:'badge-confirmed', completed:'badge-completed', cancelled:'badge-cancelled', refunded:'badge-refunded' };
+    return map[status] || 'badge-pending';
+}
+function badgeIcon(status) {
+    const map = { pending:'fa-clock', confirmed:'fa-check-circle', completed:'fa-flag-checkered', cancelled:'fa-times-circle', refunded:'fa-undo' };
+    return map[status] || 'fa-clock';
+}
+function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : 'Pending'; }
+
+/* ─── CARD HTML ─── */
+function cardHTML(b, i) {
+    const total    = parseFloat(b.totalPrice || 0).toFixed(2);
+    const paid     = parseFloat(b.total_paid || 0).toFixed(2);
+    const balance  = (parseFloat(total) - parseFloat(paid)).toFixed(2);
+    const guests   = b.numGuests || b.cart?.numGuests || 1;
+    const start    = b.formatted_event_start || 'N/A';
+    const end      = b.formatted_event_end || 'N/A';
+    const booked   = b.formatted_created_at ? b.formatted_created_at.split(' ')[0] : 'N/A';
+    const accomCnt = b.accommodations ? b.accommodations.length : (b.cart?.items?.length || 0);
+    const status   = b.bookingStatus || 'pending';
+
+    return `
+    <div class="booking-card" data-status="${status}" style="animation-delay:${i * 0.06}s">
+        <div class="card-header">
+            <div>
+                <h3>Booking #${b.bookingID}</h3>
+                <div class="card-meta">
+                    <span class="meta-item"><i class="far fa-calendar"></i> ${start}</span>
+                    <span class="meta-item"><i class="fas fa-users"></i> ${guests} guest${guests > 1 ? 's' : ''}</span>
+                    <span class="meta-item"><i class="far fa-clock"></i> Booked ${booked}</span>
+                </div>
+            </div>
+            <span class="badge ${badgeClass(status)}"><i class="fas ${badgeIcon(status)}"></i> ${cap(status)}</span>
+        </div>
+
+        <div class="card-body">
+            <div class="details-grid">
+                <div class="detail-box">
+                    <h4><i class="fas fa-calendar-day"></i> Dates</h4>
+                    <p>${start} – ${end}</p>
+                </div>
+                <div class="detail-box">
+                    <h4><i class="fas fa-home"></i> Accommodations</h4>
+                    <p>${accomCnt} item${accomCnt !== 1 ? 's' : ''}</p>
+                </div>
+                <div class="detail-box">
+                    <h4><i class="fas fa-star"></i> Type</h4>
+                    <p>${b.eventType || 'Standard'}</p>
+                </div>
+            </div>
+            <div class="price-box">
+                <h4>Payment</h4>
+                <div class="price-row"><span>Total</span><span>₱${total}</span></div>
+                <div class="price-row"><span>Paid</span><span style="color:var(--green)">₱${paid}</span></div>
+                <div class="price-row total"><span>Balance</span><span>₱${balance}</span></div>
+            </div>
+        </div>
+
+        <div class="card-actions">
+            <button onclick="viewBooking(${b.bookingID})" class="btn btn-primary"><i class="fas fa-eye"></i> View Details</button>
+            ${(status === 'pending' || status === 'confirmed') ?
+                `<button onclick="cancelBooking(${b.bookingID})" class="btn btn-danger"><i class="fas fa-times"></i> Cancel</button>` : ''}
+        </div>
+    </div>`;
+}
+
+/* ─── EMPTY STATE ─── */
+function emptyHTML(msg, btn) {
+    return `
+    <div class="empty-state">
+        <div class="empty-icon"><i class="far fa-calendar-alt"></i></div>
+        <h3>No bookings found</h3>
+        <p>${msg}</p>
+        ${btn}
+    </div>`;
+}
+
+/* ─── VIEW BOOKING MODAL ─── */
+function viewBooking(id) {
+    const modal = document.getElementById('booking-modal');
+    const body  = document.getElementById('booking-details');
+    body.innerHTML = '<div class="loading-wrap"><div class="spinner"></div><p>Loading...</p></div>';
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+
+    fetch(`/api/my-bookings/${id}`, {
+        headers: { 'Accept':'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') }
+    })
+    .then(r => { if(!r.ok) throw new Error('Failed to load'); return r.json(); })
+    .then(d => { if(d.success) renderModal(d.booking); else throw new Error(d.message); })
+    .catch(err => {
+        body.innerHTML = `<div class="empty-state"><div class="empty-icon" style="color:var(--red)"><i class="fas fa-exclamation-triangle"></i></div><h3>Error</h3><p>${err.message}</p></div>`;
+    });
+}
+
+function renderModal(b) {
+    const status  = b.bookingStatus || 'pending';
+    const guests  = b.numGuests || b.cart?.numGuests || 1;
+    const start   = b.formatted_details?.event_start || 'N/A';
+    const end     = b.formatted_details?.event_end || 'N/A';
+    const booked  = b.formatted_details?.created_at ? b.formatted_details.created_at.split(' ')[0] : 'N/A';
+
+    // accommodations
+    let accomHTML = '<p style="font-size:0.8rem;color:var(--text-faint);text-align:center;padding:1rem 0;">No accommodations found.</p>';
+    if (b.cart?.items?.length) {
+        accomHTML = b.cart.items.map(item => {
+            const unit = item.unit || {};
+            const days = b.cart.daysCount || 1;
+            let price = 0;
+            if (unit.unitType === 'room') {
+                price = parseFloat(unit.unitRatePrice || 0) * (guests < 2 ? 2 : guests) * days;
+            } else {
+                price = parseFloat(item.subtotalPrice || unit.unitRatePrice || 0);
             }
-        });
-    </script>
+            return `
+            <div class="accom-item">
+                <div>
+                    <div class="name">${unit.unitName || 'N/A'}</div>
+                    <div class="type ${unit.unitType || ''}">${unit.unitType ? cap(unit.unitType) : ''} • ${guests} guest${guests>1?'s':''}</div>
+                </div>
+                <div class="price">₱${price.toFixed(2)}</div>
+            </div>`;
+        }).join('');
+    }
+
+    // payments
+    let payHTML = '<p style="font-size:0.8rem;color:var(--text-faint);text-align:center;padding:1rem 0;">No payment records.</p>';
+    if (b.payments?.length) {
+        payHTML = b.payments.map(p => {
+            const date = new Date(p.paymentDate).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+            return `
+            <div class="payment-item">
+                <div>
+                    <div class="ref">${p.paymentReference || 'Payment'}</div>
+                    <div class="info">${date} • ${p.paymentMethod || 'N/A'} • ${p.paymentType || 'Payment'}</div>
+                </div>
+                <div>
+                    <div class="amount">₱${parseFloat(p.amountPaid || 0).toFixed(2)}</div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    document.getElementById('booking-details').innerHTML = `
+        <div class="modal-top">
+            <div>
+                <h3>Booking #${b.bookingID}</h3>
+                <p class="sub">${b.eventType || 'Standard Booking'}</p>
+            </div>
+            <span class="badge ${badgeClass(status)}"><i class="fas ${badgeIcon(status)}"></i> ${cap(status)}</span>
+        </div>
+
+        <!-- Dates -->
+        <div class="modal-section">
+            <div class="modal-section-title"><i class="fas fa-calendar-alt"></i> Dates</div>
+            <div class="modal-dates">
+                <div class="modal-date-item"><div class="label">Start</div><div class="value">${start}</div></div>
+                <div class="modal-date-item"><div class="label">End</div><div class="value">${end}</div></div>
+                <div class="modal-date-item"><div class="label">Booked On</div><div class="value">${booked}</div></div>
+            </div>
+        </div>
+
+        <!-- Price Summary -->
+        <div class="modal-section">
+            <div class="modal-section-title"><i class="fas fa-wallet"></i> Payment Summary</div>
+            <div class="modal-price-box">
+                <div class="modal-price-row"><span>Total Amount</span><span>${b.formatted_details?.total_price || '₱0.00'}</span></div>
+                <div class="modal-price-row"><span>Amount Paid</span><span style="color:var(--green)">${b.formatted_details?.total_paid || '₱0.00'}</span></div>
+                <div class="modal-price-row total"><span>Balance</span><span>${b.formatted_details?.remaining_balance || '₱0.00'}</span></div>
+            </div>
+        </div>
+
+        <!-- Accommodations -->
+        <div class="modal-section">
+            <div class="modal-section-title"><i class="fas fa-home"></i> Accommodations</div>
+            ${accomHTML}
+        </div>
+
+        <!-- Payments -->
+        <div class="modal-section">
+            <div class="modal-section-title"><i class="fas fa-receipt"></i> Payment History</div>
+            ${payHTML}
+        </div>
+
+        ${b.specialRequirements ? `
+        <div class="info-box">
+            <h4><i class="fas fa-sticky-note"></i> Special Requirements</h4>
+            <p>${b.specialRequirements}</p>
+        </div>` : ''}
+
+        <div class="modal-actions">
+            ${(status === 'pending' || status === 'confirmed') ?
+                `<button onclick="cancelBooking(${b.bookingID}, true)" class="btn btn-danger"><i class="fas fa-times"></i> Cancel Booking</button>` : ''}
+            <button onclick="closeModal()" class="btn btn-ghost"><i class="fas fa-times"></i> Close</button>
+        </div>
+    `;
+}
+
+/* ─── CANCEL ─── */
+function cancelBooking(id, fromModal = false) {
+    if (!confirm('Cancel this booking? This cannot be undone.')) return;
+    fetch(`/api/my-bookings/${id}/cancel`, {
+        method: 'POST',
+        headers: { 'Accept':'application/json', 'Content-Type':'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') }
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (d.success) { alert('Booking cancelled.'); if (fromModal) closeModal(); loadBookings(); }
+        else alert('Failed: ' + d.message);
+    })
+    .catch(e => alert('Error: ' + e.message));
+}
+
+/* ─── MODAL CONTROLS ─── */
+function closeModal() {
+    document.getElementById('booking-modal').classList.remove('show');
+    document.body.style.overflow = 'auto';
+}
+
+document.getElementById('booking-modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>
 </body>
 </html>

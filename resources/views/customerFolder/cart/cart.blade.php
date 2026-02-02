@@ -7,120 +7,786 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" type="image/x-icon" href="{{ asset('images/sunflower1.png') }}">
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;500;600;700&display=swap');
-        
+
+        /* ═══════════════════════════════
+           PROFESSIONAL COLOR PALETTE
+        ═══════════════════════════════ */
         :root {
-            --primary-black: #000000;
-            --primary-yellow: #FFD700;
-            --secondary-yellow: #FFA500;
-            --light-bg: #FFFBF0;
-            --card-bg: #FFFFFF;
-            --text-dark: #1F2937;
-            --text-medium: #6B7280;
-            --text-light: #9CA3AF;
-            --border-color: #E5E7EB;
-            --shadow-light: rgba(0, 0, 0, 0.05);
-            --shadow-medium: rgba(0, 0, 0, 0.1);
+            --cream:        #FDF8F0;
+            --cream-dark:   #F5EDE0;
+            --sunflower:    #E8A825;
+            --sun-light:    #F0C660;
+            --sun-dark:     #C88A1A;
+            --text:         #3D3226;
+            --text-soft:    #7A6E5E;
+            --text-faint:   #A89A87;
+            --border:       #E8DDD0;
+            --white:        #FFFFFF;
+            --red:          #D9534F;
+            --red-light:    #F2D5D4;
+            --red-dark:     #B8403C;
+            --green:        #3A9D6E;
+            --green-light:  #E6F5EE;
+            --green-dark:   #2E7D58;
+            --blue:         #5B8DB8;
+            --blue-light:   #E4EEF6;
+            --blue-dark:    #4A7296;
+            --dark:         #2D2420;
+            --dark-hover:   #3D3530;
         }
-        
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: var(--light-bg);
-            color: var(--text-dark);
-            overflow-x: hidden;
+            background: linear-gradient(135deg, #FDF8F0 0%, #F5EDE0 100%);
+            color: var(--text);
+            min-height: 100vh;
         }
-        
-        .cursive-font {
-            font-family: 'Dancing Script', cursive;
-        }
-        
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 10px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: #f8f9fa;
-            border-radius: 10px;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(to bottom, var(--primary-yellow), var(--secondary-yellow));
-            border-radius: 10px;
-            border: 2px solid #f8f9fa;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(to bottom, #FFC800, #FF9500);
-        }
-        
-        /* Animations */
-        .fade-in {
-            animation: fadeIn 0.5s ease-in-out;
-        }
-        
-        .slide-up {
-            animation: slideUp 0.4s ease-out;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes slideUp {
+
+        .cursive-font { font-family: 'Dancing Script', cursive; }
+
+        /* ─── ANIMATIONS ─── */
+        @keyframes fadeUp {
             from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            to   { opacity: 1; transform: translateY(0); }
         }
-        
-        /* Glass morphism */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
-        
-        /* Gradients */
-        .gradient-sunflower {
-            background: linear-gradient(135deg, var(--primary-yellow), var(--secondary-yellow));
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to   { opacity: 1; transform: translateX(0); }
         }
-        
-        .gradient-success {
-            background: linear-gradient(135deg, #10B981, #059669);
+
+        /* ═══════════════════════════════
+           LAYOUT
+        ═══════════════════════════════ */
+        .main-content {
+            margin-top: 80px;
+            min-height: calc(100vh - 80px);
+            padding: 3rem 1.5rem 5rem;
         }
-        
-        .gradient-warning {
-            background: linear-gradient(135deg, #F59E0B, #D97706);
+
+        .cart-container {
+            max-width: 1100px;
+            margin: 0 auto;
         }
-        
-        .gradient-error {
-            background: linear-gradient(135deg, #EF4444, #DC2626);
+
+        /* ═══════════════════════════════
+           PAGE TITLE - PROFESSIONAL
+        ═══════════════════════════════ */
+        .page-title-wrap {
+            text-align: center;
+            margin-bottom: 3.5rem;
+            animation: fadeUp 0.6s ease both;
         }
-        
-        .gradient-dark {
-            background: linear-gradient(135deg, var(--primary-black), #2D3748);
+
+        .page-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--sunflower);
+            margin-bottom: 0.8rem;
+            text-shadow: 0 2px 8px rgba(232, 168, 37, 0.15);
+            letter-spacing: -0.5px;
         }
-        
-        /* Transitions */
-        .smooth-transition {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+        .page-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-soft);
+            font-weight: 500;
+            letter-spacing: 0.3px;
         }
-        
-        /* Card hover effects */
-        .cart-item-hover {
+
+        .title-line {
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(to right, var(--sun-dark), var(--sunflower), var(--sun-light));
+            border-radius: 4px;
+            margin: 1.5rem auto 0;
+            box-shadow: 0 2px 8px rgba(232, 168, 37, 0.3);
+        }
+
+        /* ═══════════════════════════════
+           LOADING STATE
+        ═══════════════════════════════ */
+        .loading-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 6rem 1rem;
+        }
+        .spinner {
+            width: 56px;
+            height: 56px;
+            border: 5px solid var(--border);
+            border-top-color: var(--sunflower);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 1.5rem;
+        }
+        .loading-wrap p { 
+            font-size: 1rem; 
+            color: var(--text-soft); 
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        /* ═══════════════════════════════
+           SUMMARY HEADER - PROFESSIONAL
+        ═══════════════════════════════ */
+        .summary-card {
+            background: var(--white);
+            border: 1px solid rgba(232, 221, 208, 0.6);
+            border-radius: 24px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            animation: fadeUp 0.5s ease both;
+            box-shadow: 0 8px 32px rgba(61, 50, 38, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .summary-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(to right, var(--sunflower), var(--sun-light));
+        }
+
+        .summary-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .summary-left h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.6rem;
+            letter-spacing: -0.3px;
+        }
+
+        /* booking type pill */
+        .type-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1.1rem;
+            border-radius: 100px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+        }
+        .type-pill.room {
+            background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%);
+            color: var(--white);
+        }
+        .type-pill.cottage {
+            background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+            color: var(--white);
+        }
+        .type-pill i { font-size: 0.8rem; }
+
+        /* ═══════════════════════════════
+           DATE PILLS - FIXED WIDTH (COMPACT)
+        ═══════════════════════════════ */
+        .date-pills {
+            display: inline-flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .date-pill {
+            background: linear-gradient(135deg, var(--cream) 0%, #FFFEF9 100%);
+            border: 2px solid var(--border);
+            border-radius: 14px;
+            padding: 0.7rem 1rem;
+            text-align: center;
+            width: auto;
+            min-width: fit-content;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(61, 50, 38, 0.05);
+        }
+        .date-pill:hover {
+            border-color: var(--sunflower);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(232, 168, 37, 0.2);
+        }
+        .date-pill .label {
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: var(--text-faint);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 0.3rem;
+            white-space: nowrap;
+        }
+        .date-pill .value {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--text);
+            white-space: nowrap;
+        }
+
+        /* ═══════════════════════════════
+           WARNING BANNERS - ENHANCED
+        ═══════════════════════════════ */
+        .warning-banner {
+            border-radius: 20px;
+            padding: 1.5rem 1.8rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1.2rem;
+            animation: fadeUp 0.5s ease both;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        }
+        .warning-banner .w-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 1.1rem;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+        }
+        .warning-banner h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+        }
+        .warning-banner p {
+            font-size: 0.88rem;
+            line-height: 1.6;
+            font-weight: 500;
+        }
+        .warning-banner .w-actions {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .warning-banner.yellow {
+            background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+            border: 2px solid #F0D68A;
+        }
+        .warning-banner.yellow .w-icon { background: var(--white); color: var(--sunflower); }
+        .warning-banner.yellow h4 { color: #92400E; }
+        .warning-banner.yellow p { color: #78350F; }
+
+        .warning-banner.red {
+            background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%);
+            border: 2px solid #FECACA;
+        }
+        .warning-banner.red .w-icon { background: var(--white); color: var(--red); }
+        .warning-banner.red h4 { color: #991B1B; }
+        .warning-banner.red p { color: #7F1D1D; }
+
+        /* ═══════════════════════════════
+           CART ITEM CARD - PROFESSIONAL REDESIGN
+        ═══════════════════════════════ */
+        .item-card {
+            background: var(--white);
+            border: 1px solid rgba(232, 221, 208, 0.6);
+            border-radius: 24px;
+            padding: 0;
+            margin-bottom: 1.2rem;
+            animation: fadeUp 0.5s ease both;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(61, 50, 38, 0.06);
+            position: relative;
+        }
+
+        .item-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 5px;
             transition: all 0.3s ease;
         }
-        
-        .cart-item-hover:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(255, 215, 0, 0.15);
+
+        .item-card.room::before { background: linear-gradient(to bottom, var(--blue), var(--blue-dark)); }
+        .item-card.cottage::before { background: linear-gradient(to bottom, var(--green), var(--green-dark)); }
+        .item-card.cottage.unavailable::before { background: linear-gradient(to bottom, var(--red), var(--red-dark)); }
+
+        .item-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(61, 50, 38, 0.12);
         }
-        
-        /* Notification Container */
+
+        .item-card-inner {
+            padding: 0;
+            display: flex;
+        }
+
+        .item-row {
+            display: flex;
+            width: 100%;
+            min-height: 100%;
+        }
+
+        /* ═══════════════════════════════
+           IMAGE CONTAINER - FULL HEIGHT WITH BETTER QUALITY
+        ═══════════════════════════════ */
+        .item-img-wrapper {
+            position: relative;
+            width: 280px;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .item-img {
+            width: 100%;
+            height: 100%;
+            min-height: 100%;
+            object-fit: contain;
+            display: block;
+            transition: transform 0.4s ease;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+        }
+
+        .item-card:hover .item-img {
+            transform: scale(1.05);
+        }
+
+        .item-img.grayscale { 
+            filter: grayscale(1) opacity(0.6); 
+        }
+
+        /* ═══════════════════════════════
+           DELETE BUTTON - TOP RIGHT CORNER AS X
+        ═══════════════════════════════ */
+        .btn-delete {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: rgba(217, 83, 79, 0.95);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--white);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(217, 83, 79, 0.35);
+            font-size: 0.95rem;
+            z-index: 10;
+        }
+
+        .btn-delete:hover {
+            background: var(--red-dark);
+            transform: scale(1.15) rotate(90deg);
+            box-shadow: 0 6px 24px rgba(217, 83, 79, 0.5);
+        }
+
+        .btn-delete:active {
+            transform: scale(0.95) rotate(90deg);
+        }
+
+        /* ═══════════════════════════════
+           ITEM CONTENT - RIGHT SIDE
+        ═══════════════════════════════ */
+        .item-content { 
+            display: flex;
+            flex-direction: column;
+            gap: 0.9rem;
+            padding: 2rem 4.5rem 2rem 2rem; /* Extra right padding for delete button */
+            flex: 1;
+            min-width: 0;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .item-title-section {
+            flex: 1;
+        }
+
+        .item-name {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.3px;
+            line-height: 1.3;
+        }
+
+        .item-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            padding: 0.3rem 0.75rem;
+            border-radius: 100px;
+        }
+        .item-badge.room { background: var(--blue-light); color: var(--blue); }
+        .item-badge.cottage { background: var(--green-light); color: var(--green); }
+
+        .item-price-section {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.6rem;
+        }
+
+        .item-price {
+            font-size: 1.7rem;
+            font-weight: 700;
+            white-space: nowrap;
+            letter-spacing: -0.5px;
+        }
+        .item-price.blue { color: var(--blue); }
+        .item-price.green { color: var(--green); }
+        .item-price.red   { color: var(--red); }
+
+        /* tags row */
+        .item-tags {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .item-tag {
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.4rem 0.85rem;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.2s ease;
+        }
+        .item-tag:hover {
+            transform: translateY(-2px);
+        }
+        .item-tag.blue  { background: var(--blue-light); color: var(--blue); }
+        .item-tag.green { background: var(--green-light); color: var(--green); }
+        .item-tag.red   { background: var(--red-light); color: var(--red); }
+        .item-tag i { font-size: 0.75rem; }
+
+        /* calculation note */
+        .calc-note {
+            background: linear-gradient(135deg, var(--cream) 0%, #FFFEF9 100%);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 0.85rem 1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+        }
+        .calc-note i { 
+            color: var(--sunflower); 
+            font-size: 0.9rem; 
+            margin-top: 2px; 
+            flex-shrink: 0; 
+        }
+        .calc-note p { 
+            font-size: 0.8rem; 
+            color: var(--text-soft); 
+            line-height: 1.6; 
+            font-weight: 500; 
+        }
+        .calc-note p strong { color: var(--text); font-weight: 700; }
+
+        .calc-note.red { 
+            border-color: #FECACA; 
+            background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%); 
+        }
+        .calc-note.red i { color: var(--red); }
+        .calc-note.red p { color: #991B1B; }
+        .calc-note.red p strong { color: #991B1B; }
+
+        /* ═══════════════════════════════
+           PRICE BREAKDOWN - PROFESSIONAL
+        ═══════════════════════════════ */
+        .breakdown-card {
+            background: var(--white);
+            border: 1px solid rgba(232, 221, 208, 0.6);
+            border-radius: 24px;
+            overflow: hidden;
+            margin-top: 2rem;
+            animation: fadeUp 0.5s ease .2s both;
+            box-shadow: 0 8px 32px rgba(61, 50, 38, 0.08);
+        }
+
+        .breakdown-content {
+            padding: 2.5rem;
+        }
+
+        .breakdown-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-soft);
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+        .breakdown-title i { 
+            color: var(--sunflower); 
+            font-size: 0.9rem;
+        }
+
+        .breakdown-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 0;
+            font-size: 0.95rem;
+            color: var(--text-soft);
+            font-weight: 500;
+        }
+        .breakdown-row span:first-child {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .breakdown-row span:last-child { 
+            font-weight: 700; 
+            color: var(--text);
+            font-size: 1.05rem;
+        }
+        .breakdown-row .row-icon { 
+            color: var(--sunflower); 
+            font-size: 0.85rem;
+        }
+
+        .breakdown-row.total {
+            border-top: 3px solid var(--sunflower);
+            margin-top: 1rem;
+            padding-top: 1.2rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .breakdown-row.total span:last-child { 
+            color: var(--green); 
+            font-size: 1.8rem;
+            font-weight: 800;
+        }
+
+        /* ═══════════════════════════════
+           ACTION BUTTONS - IMPROVED LAYOUT
+        ═══════════════════════════════ */
+        .actions-section {
+            background: linear-gradient(135deg, var(--cream) 0%, #FFFEF9 100%);
+            border-top: 2px solid var(--border);
+            padding: 2rem 2.5rem;
+        }
+
+        .actions-section-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-soft);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .actions-section-title i { 
+            color: var(--sunflower); 
+            font-size: 0.75rem; 
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            padding: 1rem 1.5rem;
+            border-radius: 14px;
+            border: none;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            text-decoration: none;
+            white-space: nowrap;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.12);
+            letter-spacing: 0.3px;
+        }
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+        }
+        .btn:active {
+            transform: translateY(-1px);
+        }
+        .btn i { font-size: 0.85rem; }
+
+        /* Professional Button Colors */
+        .btn-rooms {
+            background: linear-gradient(135deg, var(--dark) 0%, var(--dark-hover) 100%);
+            color: var(--white);
+        }
+        .btn-rooms:hover { 
+            background: linear-gradient(135deg, #1A1310 0%, var(--dark) 100%);
+        }
+
+        .btn-cottages {
+            background: linear-gradient(135deg, var(--sunflower) 0%, var(--sun-dark) 100%);
+            color: var(--white);
+        }
+        .btn-cottages:hover { 
+            background: linear-gradient(135deg, var(--sun-dark) 0%, #A66F15 100%);
+        }
+
+        .btn-checkout {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+            color: var(--white);
+            font-size: 1.05rem;
+            padding: 1.3rem 1.8rem;
+            box-shadow: 0 4px 16px rgba(58, 157, 110, 0.3);
+        }
+        .btn-checkout:hover { 
+            background: linear-gradient(135deg, var(--green-dark) 0%, #25654A 100%);
+            box-shadow: 0 6px 28px rgba(58, 157, 110, 0.4);
+        }
+
+        .btn-disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            pointer-events: none;
+            filter: grayscale(0.3);
+        }
+
+        .btn-warning {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, var(--sunflower) 0%, var(--sun-dark) 100%);
+            color: var(--white);
+            font-size: 1.05rem;
+            padding: 1.3rem 1.8rem;
+        }
+
+        .btn-error {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, var(--red) 0%, var(--red-dark) 100%);
+            color: var(--white);
+            font-size: 1.05rem;
+            padding: 1.3rem 1.8rem;
+        }
+
+        /* Small buttons for warnings */
+        .btn-sm {
+            font-size: 0.8rem;
+            padding: 0.55rem 1rem;
+            border-radius: 12px;
+        }
+        .btn-sm-dark { 
+            background: linear-gradient(135deg, var(--dark) 0%, var(--dark-hover) 100%);
+            color: var(--white); 
+        }
+        .btn-sm-sun  { 
+            background: linear-gradient(135deg, var(--sunflower) 0%, var(--sun-dark) 100%);
+            color: var(--white); 
+        }
+        .btn-sm-red  { 
+            background: linear-gradient(135deg, var(--red) 0%, var(--red-dark) 100%);
+            color: var(--white); 
+        }
+        .btn-sm-ghost { 
+            background: var(--white); 
+            color: var(--text-soft); 
+            border: 2px solid var(--border); 
+        }
+        .btn-sm-ghost:hover { 
+            border-color: var(--text-soft); 
+            color: var(--text); 
+            background: var(--cream);
+        }
+
+        /* ═══════════════════════════════
+           EMPTY STATE
+        ═══════════════════════════════ */
+        .empty-state {
+            text-align: center;
+            padding: 5rem 2rem;
+            background: var(--white);
+            border: 1px solid rgba(232, 221, 208, 0.6);
+            border-radius: 24px;
+            animation: fadeUp 0.5s ease both;
+            box-shadow: 0 8px 32px rgba(61, 50, 38, 0.08);
+        }
+        .empty-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--cream) 0%, #FFFEF9 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            font-size: 2.5rem;
+            color: var(--sunflower);
+            border: 3px solid var(--border);
+            box-shadow: 0 4px 16px rgba(232, 168, 37, 0.15);
+        }
+        .empty-state h3 { 
+            font-size: 1.5rem; 
+            font-weight: 700; 
+            margin-bottom: 0.6rem;
+            color: var(--text);
+        }
+        .empty-state p { 
+            font-size: 1rem; 
+            color: var(--text-soft); 
+            margin-bottom: 2rem; 
+        }
+        .empty-btns { 
+            display: flex; 
+            gap: 1rem; 
+            justify-content: center; 
+            flex-wrap: wrap; 
+        }
+
+        /* ═══════════════════════════════
+           NOTIFICATIONS - ORIGINAL DESIGN
+        ═══════════════════════════════ */
         .notification-container {
             position: fixed;
             top: 100px;
@@ -162,8 +828,8 @@
         }
         
         .notification.info {
-            background: linear-gradient(135deg, var(--primary-yellow), var(--secondary-yellow));
-            color: var(--primary-black);
+            background: linear-gradient(135deg, var(--sunflower), var(--sun-light));
+            color: var(--dark);
         }
         
         .notification.warning {
@@ -248,1290 +914,838 @@
         .notification-slide-out {
             animation: slideOutRight 0.5s ease-out forwards;
         }
-        
-        /* Button styling */
-        .btn-modern {
-            border-radius: 12px;
-            font-weight: 600;
-            letter-spacing: 0.025em;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-            border: none;
+
+        /* ═══════════════════════════════
+           AVAILABILITY MODAL
+        ═══════════════════════════════ */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            backdrop-filter: blur(8px);
+        }
+        .modal-overlay.show { display: flex; }
+
+        .modal {
+            background: var(--white);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 650px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.3);
+            animation: fadeUp 0.4s ease;
+        }
+
+        .modal-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            border-bottom: 2px solid var(--border);
+            background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%);
+            border-radius: 24px 24px 0 0;
+        }
+        .modal-head h2 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--red);
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+        }
+        .modal-head h2 i { font-size: 1.1rem; }
+        .modal-close {
+            background: var(--white);
+            border: 2px solid var(--red-light);
+            color: var(--red);
+            font-size: 1.2rem;
             cursor: pointer;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            transition: all 0.3s;
         }
-        
-        .btn-modern::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.6s ease;
+        .modal-close:hover { 
+            background: var(--red);
+            color: var(--white);
+            border-color: var(--red);
+            transform: rotate(90deg);
         }
-        
-        .btn-modern:hover::after {
-            left: 100%;
+
+        .modal-body { padding: 2rem; }
+
+        .modal-info-box {
+            background: var(--blue-light);
+            border: 2px solid #c8dff0;
+            border-radius: 14px;
+            padding: 1rem 1.2rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.7rem;
+            margin-bottom: 1.5rem;
         }
-        
-        .btn-modern:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        .modal-info-box i { 
+            color: var(--blue); 
+            font-size: 1rem; 
+            margin-top: 2px; 
+            flex-shrink: 0; 
         }
-        
-        /* Loading spinner */
-        .spinner-modern {
-            border: 3px solid rgba(255, 215, 0, 0.2);
-            border-radius: 50%;
-            border-top-color: var(--primary-yellow);
-            animation: spin 1s linear infinite;
+        .modal-info-box p { 
+            font-size: 0.85rem; 
+            color: #1e40af; 
+            font-weight: 500; 
+            line-height: 1.6; 
         }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+
+        .unavail-item {
+            background: linear-gradient(135deg, var(--cream) 0%, #FFFEF9 100%);
+            border: 2px solid var(--border);
+            border-radius: 14px;
+            padding: 1.1rem 1.3rem;
+            margin-bottom: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
         }
-        
-        /* Badge styling */
-        .type-badge-modern {
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            letter-spacing: 0.025em;
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        .unavail-item .ui-name { 
+            font-size: 0.95rem; 
+            font-weight: 700; 
+            color: var(--text); 
+            margin-bottom: 0.3rem; 
         }
-        
-        /* Input styling */
-        .input-modern {
-            border-radius: 12px;
-            border: 2px solid var(--border-color);
-            transition: all 0.3s ease;
+        .unavail-item .ui-reason { 
+            font-size: 0.78rem; 
+            color: var(--red); 
+            font-weight: 600; 
         }
-        
-        .input-modern:focus {
-            border-color: var(--primary-yellow);
-            box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.15);
-            outline: none;
+        .unavail-item .ui-badge {
+            font-size: 0.68rem; 
+            font-weight: 700; 
+            text-transform: uppercase;
+            padding: 0.3rem 0.65rem; 
+            border-radius: 100px;
         }
-        
-        /* Price display */
-        .price-display {
-            font-feature-settings: "tnum";
-            font-variant-numeric: tabular-nums;
+        .unavail-item .ui-badge.room { background: var(--blue-light); color: var(--blue); }
+        .unavail-item .ui-badge.cottage { background: var(--green-light); color: var(--green); }
+
+        .modal-foot {
+            display: flex;
+            gap: 0.8rem;
+            padding: 1.5rem 2rem;
+            border-top: 2px solid var(--border);
+            background: linear-gradient(135deg, var(--cream) 0%, #FFFEF9 100%);
+            border-radius: 0 0 24px 24px;
         }
-        
-        /* Main content spacing */
-        .main-content {
-            margin-top: 80px;
-            min-height: calc(100vh - 300px);
-        }
-        
-        .btn-disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            pointer-events: none;
-        }
-        
-        /* Modal styling */
-        .modal-enter {
-            animation: fadeIn 0.3s ease-out;
-        }
-        
-        /* Animations */
-        .animate-fade-in {
-            animation: fadeIn 0.5s ease-out;
-        }
-        
-        .animate-slide-up {
-            animation: slideUp 0.4s ease-out;
-        }
-        
-        .animate-slide-in {
-            animation: slideIn 0.5s ease-out;
-        }
-        
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(100%);
+
+        /* ═══════════════════════════════
+           RESPONSIVE DESIGN
+        ═══════════════════════════════ */
+        @media (max-width: 968px) {
+            .item-row { 
+                flex-direction: column;
             }
-            to {
-                opacity: 1;
-                transform: translateX(0);
+            
+            .item-img-wrapper {
+                width: 100%;
+                height: 240px;
+            }
+
+            .item-img {
+                height: 240px;
             }
         }
-        
-        /* Pulse animation */
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+
+        @media (max-width: 768px) {
+            .actions-grid { 
+                grid-template-columns: 1fr;
+            }
+            
+            .summary-top { 
+                flex-direction: column; 
+                align-items: flex-start; 
+            }
+            
+            .page-title {
+                font-size: 2.8rem;
+            }
+
+            .breakdown-content,
+            .actions-section {
+                padding: 2rem 1.5rem;
+            }
+
+            .item-content {
+                padding: 1.5rem 4rem 1.5rem 1.5rem;
+            }
+
+            .date-pills {
+                width: 100%;
+            }
         }
-        
-        .pulse {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 2rem 1rem 4rem;
+            }
+            
+            .page-title {
+                font-size: 2.3rem;
+            }
+
+            .summary-card,
+            .breakdown-card,
+            .item-card {
+                border-radius: 18px;
+            }
+
+            .breakdown-content,
+            .actions-section {
+                padding: 1.5rem 1.2rem;
+            }
+
+            .item-content {
+                padding: 1.2rem 3.5rem 1.2rem 1.2rem;
+            }
+
+            .date-pill {
+                flex: 1;
+            }
+            
+            .btn-delete {
+                top: 0.75rem;
+                right: 0.75rem;
+                width: 34px;
+                height: 34px;
+                font-size: 0.85rem;
+            }
         }
     </style>
 </head>
 
-<body class="flex flex-col min-h-screen">
-    <!-- Import Navigation -->
+<body>
     @include('customerFolder.partials.navbar')
-    <!-- Main Content -->
-    <main class="main-content flex-grow">
-        <div class="container mx-auto px-4 py-8">
-            <!-- Page Header -->
-            <div class="text-center mb-12 slide-up">
-                <h1 class="text-5xl font-bold mb-4 cursive-font">Your Shopping Cart</h1>
-                <p class="text-gray-600 text-lg max-w-2xl mx-auto">Review your selected items and proceed to checkout</p>
-                <div class="w-24 h-1 gradient-sunflower mx-auto mt-6 rounded-full"></div>
+
+    <main class="main-content">
+        <div class="cart-container">
+
+            <!-- Title -->
+            <div class="page-title-wrap">
+                <h1 class="page-title cursive-font">Your Cart</h1>
+                <p class="page-subtitle">Review and finalize your booking selections</p>
+                <div class="title-line"></div>
             </div>
-            
-            <div id="cart-container" class="max-w-6xl mx-auto">
-                <!-- Loading Spinner -->
-                <div id="loading-spinner" class="text-center py-16 fade-in">
-                    <div class="inline-block relative mb-6">
-                        <div class="spinner-modern w-16 h-16"></div>
-                        <div class="absolute inset-0 flex items-center justify-center">
-                            <i class="fas fa-shopping-cart text-yellow-500 text-xl"></i>
-                        </div>
-                    </div>
-                    <p class="text-xl font-medium text-gray-700 mb-2">Loading your cart</p>
-                    <p class="text-gray-500">Please wait while we fetch your items...</p>
-                    <div class="w-48 h-1 bg-gradient-to-r from-yellow-100 to-orange-100 mx-auto mt-4 rounded-full overflow-hidden">
-                        <div class="h-full gradient-sunflower rounded-full pulse" style="width: 60%;"></div>
-                    </div>
+
+            <!-- Cart content rendered by JS -->
+            <div id="cart-container">
+                <div class="loading-wrap">
+                    <div class="spinner"></div>
+                    <p>Loading your cart...</p>
                 </div>
-                
-                <!-- Cart items will be loaded here by JavaScript -->
             </div>
         </div>
     </main>
 
-    <!-- Import Footer -->
     @include('customerFolder.partials.footer')
 
-    <!-- Notification Container -->
+    <!-- Notifications -->
     <div id="notification-container" class="notification-container"></div>
 
-    <!-- Availability Modal Container -->
+    <!-- Availability modal -->
     <div id="availability-modal-container"></div>
 
-    <script>
-        // Global variables
-        let entranceFeeAmount = 0;
-        let hasActiveEntranceFee = false;
-        let cartUnitType = null;
-        let cartItemCount = 0;
-        let activeNotifications = new Set();
+<script>
+/* ═══════════════════════════════
+   GLOBALS
+═══════════════════════════════ */
+let entranceFeeAmount = 0;
+let hasActiveEntranceFee = false;
+let cartUnitType = null;
+let cartItemCount = 0;
 
-        document.addEventListener('DOMContentLoaded', function() {
-            loadCartItems();
+document.addEventListener('DOMContentLoaded', loadCartItems);
+
+/* ═══════════════════════════════
+   LOAD CART
+═══════════════════════════════ */
+function loadCartItems() {
+    const container = document.getElementById('cart-container');
+    container.innerHTML = '<div class="loading-wrap"><div class="spinner"></div><p>Loading your cart...</p></div>';
+
+    fetch('/api/cart/items', {
+        headers: {
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+    .then(r => { if (!r.ok) throw new Error('Network error'); return r.json(); })
+    .then(data => {
+        if (data.success && data.cart && data.items && data.items.length > 0) {
+            cartItemCount  = data.items.length;
+            cartUnitType   = data.cart_type;
+            entranceFeeAmount     = parseFloat(data.entrance_fee) || 0;
+            hasActiveEntranceFee  = data.has_active_entrance_fee || false;
+            renderCart(data.cart, data.items, container);
+        } else {
+            showEmpty(container);
+        }
+    })
+    .catch(err => showError(container, err));
+}
+
+/* ═══════════════════════════════
+   EMPTY / ERROR
+═══════════════════════════════ */
+function showEmpty(container) {
+    container.innerHTML = `
+        <div class="empty-state">
+            <div class="empty-icon"><i class="fas fa-shopping-cart"></i></div>
+            <h3>Your cart is empty</h3>
+            <p>Start exploring our beautiful accommodations!</p>
+            <div class="empty-btns">
+                <a href="{{ route('roomBooking') }}" class="btn btn-rooms"><i class="fas fa-bed"></i> Browse Rooms</a>
+                <a href="{{ route('cottageBooking') }}" class="btn btn-cottages"><i class="fas fa-home"></i> Browse Cottages</a>
+            </div>
+        </div>`;
+}
+
+function showError(container, err) {
+    container.innerHTML = `
+        <div class="empty-state">
+            <div class="empty-icon" style="color:var(--red)"><i class="fas fa-exclamation-triangle"></i></div>
+            <h3>Error loading cart</h3>
+            <p>${err.message || 'Please login first or add items to your cart.'}</p>
+            <button onclick="loadCartItems()" class="btn btn-cottages"><i class="fas fa-redo"></i> Retry</button>
+        </div>`;
+}
+
+/* ═══════════════════════════════
+   RENDER CART
+═══════════════════════════════ */
+function renderCart(cart, items, container) {
+    const days     = cart.daysCount > 0 ? cart.daysCount : 1;
+    const guests   = parseInt(cart.numGuests);
+    const checkIn  = cart.checkInDate;
+    const checkOut = cart.checkOutDate;
+
+    let totalRoom = 0, totalCottage = 0;
+    const hasCottageInCart = cartUnitType === 'cottage' || cartUnitType === 'mixed';
+    const canProceed = !(hasCottageInCart && !hasActiveEntranceFee) && cartUnitType !== 'mixed';
+
+    // ─── Items HTML ───
+    const itemsHTML = items.map((item, i) => {
+        const unit = item.unit;
+        const rate = parseFloat(unit.unitRatePrice);
+        const type = unit.unitType;
+        let total  = 0;
+        let calc   = item.calculation || '';
+        let priceColor = 'blue';
+
+        if (type === 'room') {
+            total = item.calculatedSubtotal || (rate * guests * days);
+            totalRoom += total;
+        } else {
+            total = item.calculatedSubtotal || rate;
+            totalCottage += total;
+            priceColor = hasActiveEntranceFee ? 'green' : 'red';
+        }
+
+        const isUnavailable = (type === 'cottage' && !hasActiveEntranceFee);
+
+        return `
+        <div class="item-card ${type} ${isUnavailable ? 'unavailable' : ''}" style="animation-delay:${i*0.08}s">
+            <!-- Delete button in top-right corner -->
+            <button onclick="removeFromCart(${item.cartItemID})" class="btn-delete" title="Remove item">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <div class="item-card-inner">
+                <div class="item-row">
+                    <div class="item-img-wrapper">
+                        <img class="item-img ${isUnavailable ? 'grayscale' : ''}" src="${getUnitImage(unit)}" alt="${unit.unitName}">
+                    </div>
+                    
+                    <div class="item-content">
+                        <div class="item-header">
+                            <div class="item-title-section">
+                                <div class="item-name">${unit.unitName}</div>
+                                <span class="item-badge ${type}">
+                                    <i class="fas ${type==='room'?'fa-bed':'fa-home'}"></i> 
+                                    ${type.charAt(0).toUpperCase()+type.slice(1)}
+                                </span>
+                            </div>
+                            <div class="item-price-section">
+                                <div class="item-price ${priceColor}">₱${total.toFixed(2)}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="item-tags">
+                            <span class="item-tag ${isUnavailable?'red':'blue'}">
+                                <i class="fas fa-users"></i> ${guests} guest${guests>1?'s':''}
+                            </span>
+                            <span class="item-tag ${isUnavailable?'red':'blue'}">
+                                <i class="fas ${type==='room'?'fa-calendar-alt':'fa-calendar-day'}"></i> 
+                                ${type==='room' ? days+' day(s)' : 'Day use'}
+                            </span>
+                        </div>
+                        
+                        ${calc ? `
+                        <div class="calc-note ${isUnavailable?'red':''}">
+                            <i class="fas ${isUnavailable?'fa-exclamation-triangle':'fa-calculator'}"></i>
+                            <p>${calc}</p>
+                        </div>` : ''}
+                        
+                        ${type === 'room' && guests === 1 ? `
+                        <div class="calc-note">
+                            <i class="fas fa-info-circle"></i>
+                            <p><strong>Note:</strong> Single occupancy — minimum charge applies for 2 guests.</p>
+                        </div>` : ''}
+                        
+                        ${isUnavailable ? `
+                        <div class="calc-note red">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <p><strong>Cannot proceed:</strong> No active entrance fee. Contact management or remove this item.</p>
+                        </div>` : ''}
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+
+    // ─── Warning banners ───
+    let warnings = '';
+    if (cartUnitType === 'mixed') {
+        const roomCount    = items.filter(i => i.unit?.unitType === 'room').length;
+        const cottageCount = items.filter(i => i.unit?.unitType === 'cottage').length;
+        warnings = `
+        <div class="warning-banner yellow">
+            <div class="w-icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <div>
+                <h4>Mixed Cart Detected</h4>
+                <p>Rooms and cottages cannot be booked together in a single reservation. Please remove one type to continue.</p>
+                <div class="w-actions">
+                    <button onclick="removeAllRooms()" class="btn btn-sm btn-sm-dark">
+                        <i class="fas fa-bed"></i> Remove Rooms (${roomCount})
+                    </button>
+                    <button onclick="removeAllCottages()" class="btn btn-sm btn-sm-sun">
+                        <i class="fas fa-home"></i> Remove Cottages (${cottageCount})
+                    </button>
+                </div>
+            </div>
+        </div>`;
+    } else if (hasCottageInCart && !hasActiveEntranceFee) {
+        warnings = `
+        <div class="warning-banner red">
+            <div class="w-icon"><i class="fas fa-exclamation-circle"></i></div>
+            <div>
+                <h4>Entrance Fee Required</h4>
+                <p>Cottage bookings require an active entrance fee. Please contact villa management or remove cottage items to proceed.</p>
+                <div class="w-actions">
+                    <button onclick="loadCartItems()" class="btn btn-sm btn-sm-ghost">
+                        <i class="fas fa-sync-alt"></i> Refresh Cart
+                    </button>
+                    <button onclick="removeAllCottages()" class="btn btn-sm btn-sm-red">
+                        <i class="fas fa-trash-alt"></i> Remove Cottages
+                    </button>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    // ─── Price breakdown rows ───
+    let breakdownRows = '';
+    if (totalRoom > 0) {
+        breakdownRows += `
+        <div class="breakdown-row">
+            <span><i class="fas fa-bed row-icon"></i> Rooms Subtotal</span>
+            <span>₱${totalRoom.toFixed(2)}</span>
+        </div>`;
+    }
+    if (totalCottage > 0) {
+        breakdownRows += `
+        <div class="breakdown-row">
+            <span><i class="fas fa-home row-icon"></i> Cottages Subtotal</span>
+            <span>₱${totalCottage.toFixed(2)}</span>
+        </div>`;
+    }
+    const grandTotal = totalRoom + totalCottage;
+
+    // ─── Checkout button ───
+    let checkoutBtn = '';
+    if (canProceed) {
+        checkoutBtn = `
+        <button onclick="proceedToCheckout()" class="btn btn-checkout checkout-button">
+            <i class="fas fa-lock"></i> Proceed to Secure Checkout
+        </button>`;
+    } else if (cartUnitType === 'mixed') {
+        checkoutBtn = `
+        <button class="btn btn-warning btn-disabled">
+            <i class="fas fa-exclamation-circle"></i> Fix Cart to Continue
+        </button>`;
+    } else {
+        checkoutBtn = `
+        <button class="btn btn-error btn-disabled">
+            <i class="fas fa-ban"></i> Entrance Fee Required
+        </button>`;
+    }
+
+    // ─── Assemble ───
+    container.innerHTML = `
+        ${warnings}
+
+        <!-- Summary header -->
+        <div class="summary-card">
+            <div class="summary-top">
+                <div class="summary-left">
+                    <h2 class="cursive-font">Booking Summary</h2>
+                    ${cartUnitType && cartUnitType !== 'mixed' ? `
+                    <span class="type-pill ${cartUnitType}">
+                        <i class="fas ${cartUnitType==='room'?'fa-bed':'fa-home'}"></i> 
+                        ${cartUnitType==='room'?'Room':'Cottage'} Booking
+                    </span>` : ''}
+                </div>
+                <div class="date-pills">
+                    <div class="date-pill">
+                        <div class="label">Check-in</div>
+                        <div class="value">${checkIn}</div>
+                    </div>
+                    <div class="date-pill">
+                        <div class="label">Check-out</div>
+                        <div class="value">${checkOut}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Items -->
+        ${itemsHTML}
+
+        <!-- Breakdown Card with Actions -->
+        <div class="breakdown-card">
+            <div class="breakdown-content">
+                <div class="breakdown-title">
+                    <i class="fas fa-receipt"></i> Price Summary
+                </div>
+                ${breakdownRows}
+                <div class="breakdown-row total">
+                    <span><i class="fas fa-wallet row-icon"></i> Total Amount</span>
+                    <span>₱${grandTotal.toFixed(2)}</span>
+                </div>
+            </div>
+            
+            <div class="actions-section">
+                <div class="actions-section-title">
+                    <i class="fas fa-plus-circle"></i> Add More Items
+                </div>
+                <div class="actions-grid">
+                    <a href="{{ route('roomBooking') }}" class="btn btn-rooms">
+                        <i class="fas fa-bed"></i> Add Rooms
+                    </a>
+                    <a href="{{ route('cottageBooking') }}" class="btn btn-cottages">
+                        <i class="fas fa-home"></i> Add Cottages
+                    </a>
+                    ${checkoutBtn}
+                </div>
+            </div>
+        </div>`;
+}
+
+/* ═══════════════════════════════
+   CHECKOUT
+═══════════════════════════════ */
+function proceedToCheckout() {
+    const btn = document.querySelector('.checkout-button');
+    if (!btn) return;
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner" style="animation:spin 0.7s linear infinite"></i> Validating...';
+    btn.disabled = true;
+    clearNotifications();
+
+    fetch('/api/cart/items', {
+        headers: { 'Accept':'application/json', 'X-CSRF-TOKEN': csrfToken() }
+    })
+    .then(r => { if(!r.ok) throw new Error('Network error'); return r.json(); })
+    .then(d => {
+        if (!d.success || !d.cart) throw new Error('Cart not found');
+        return fetch('/api/cart/validate-before-checkout', {
+            method:'POST',
+            headers: { 'Content-Type':'application/json', 'X-CSRF-TOKEN': csrfToken(), 'Accept':'application/json' },
+            body: JSON.stringify({})
         });
+    })
+    .then(r => { if(!r.ok) throw new Error('Server error'); return r.json(); })
+    .then(v => {
+        if (v.success) {
+            showNotification('All items available! Redirecting to checkout…', 'success', 2500);
+            setTimeout(() => { window.location.href = "{{ route('booking.page') }}"; }, 1500);
+        } else {
+            btn.innerHTML = orig;
+            btn.disabled  = false;
 
-        function loadCartItems() {
-            const container = document.getElementById('cart-container');
-            const loadingSpinner = document.getElementById('loading-spinner');
-            
-            console.log('Loading cart items from CartController...');
-            
-            // Show loading
-            if (loadingSpinner) {
-                loadingSpinner.classList.remove('hidden');
+            if (v.has_availability_issues && v.unavailable_items) {
+                showNotification(v.validation_errors?.[0] || 'Some items are unavailable.', 'error');
+                setTimeout(() => showUnavailableModal(v.unavailable_items, v.validation_errors), 900);
+            } else {
+                showNotification(v.message || 'Unable to proceed. Please try again.', 'error');
             }
-            
-            // Load cart items using CartController
-            fetch('/api/cart/items', {
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok: ' + response.status);
-                }
-                return response.json();
-            })
-            .then(cartData => {
-                console.log('Cart data loaded:', cartData);
-                
-                // Hide loading spinner
-                if (loadingSpinner) {
-                    loadingSpinner.classList.add('hidden');
-                }
-                
-                // Check if cart exists and has items
-                if (cartData.success && cartData.cart && cartData.items && cartData.items.length > 0) {
-                    cartItemCount = cartData.items.length;
-                    cartUnitType = cartData.cart_type;
-                    entranceFeeAmount = parseFloat(cartData.entrance_fee) || 0;
-                    hasActiveEntranceFee = cartData.has_active_entrance_fee || false;
-                    
-                    // Render cart items
-                    renderCartItems(cartData.cart, cartData.items, container);
-                } else {
-                    showEmptyCartMessage(container);
-                }
-            })
-            .catch(error => {
-                console.error('Error loading cart items:', error);
-                if (loadingSpinner) {
-                    loadingSpinner.classList.add('hidden');
-                }
-                
-                showErrorMessage(container, error);
-            });
         }
+    })
+    .catch(err => {
+        btn.innerHTML = orig;
+        btn.disabled  = false;
+        showNotification('Validation failed. Check your connection.', 'error');
+    });
+}
 
-        function showEmptyCartMessage(container) {
-            container.innerHTML = `
-                <div class="text-center py-16 slide-up">
-                    <div class="glass-card max-w-md mx-auto p-10 rounded-2xl">
-                        <div class="inline-flex items-center justify-center w-24 h-24 rounded-full gradient-sunflower mb-6 text-white">
-                            <i class="fas fa-shopping-cart text-4xl"></i>
-                        </div>
-                        <h3 class="text-2xl font-bold text-gray-900 mb-3 cursive-font">Your cart is empty</h3>
-                        <p class="text-gray-600 mb-8">Looks like you haven't added any items yet. Start exploring our offerings!</p>
-                        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                            <a href="{{ route('roomBooking') }}" class="btn-modern gradient-dark text-white font-bold py-3 px-8 rounded-xl hover:shadow-lg transition-all duration-300 flex items-center justify-center">
-                                <i class="fas fa-bed mr-3 text-lg"></i>
-                                Book Rooms
-                            </a>
-                            <a href="{{ route('cottageBooking') }}" class="btn-modern gradient-sunflower text-black font-bold py-3 px-8 rounded-xl hover:shadow-lg transition-all duration-300 flex items-center justify-center">
-                                <i class="fas fa-home mr-3 text-lg"></i>
-                                Book Cottages
-                            </a>
-                        </div>
-                    </div>
+/* ═══════════════════════════════
+   UNAVAILABLE MODAL
+═══════════════════════════════ */
+function showUnavailableModal(items, errors) {
+    const itemsHTML = items.map(item => `
+        <div class="unavail-item">
+            <div>
+                <div class="ui-name">
+                    ${item.unit?.unitName || 'Unknown'} 
+                    <span class="ui-badge ${item.unit?.unitType || ''}">${item.unit?.unitType || ''}</span>
                 </div>
-            `;
-        }
-
-        function showErrorMessage(container, error) {
-            container.innerHTML = `
-                <div class="text-center py-16 slide-up">
-                    <div class="glass-card max-w-md mx-auto p-10 rounded-2xl border-l-4 border-red-500">
-                        <div class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-red-50 to-pink-50 mb-6">
-                            <i class="fas fa-exclamation-triangle text-4xl text-gradient-error"></i>
-                        </div>
-                        <h3 class="text-2xl font-bold text-gray-900 mb-3">Error</h3>
-                        <p class="text-gray-600 mb-6">We're having trouble loading your cart. Please login first or add something in your cart.</p>
-
-                        <button onclick="loadCartItems()" class="btn-modern gradient-sunflower text-black font-bold py-3 px-8 rounded-xl hover:shadow-lg mx-auto">
-                            <i class="fas fa-redo-alt mr-2"></i>
-                            Retry Loading
-                        </button>
-                    </div>
+                <div class="ui-reason">
+                    <i class="fas fa-exclamation-circle"></i> ${item.reason || 'Not available'}
                 </div>
-            `;
-        }
+            </div>
+            ${item.cartItemID ? `
+            <button onclick="removeUnavailItem(${item.cartItemID})" class="btn btn-sm btn-sm-red">
+                <i class="fas fa-trash-alt"></i> Remove
+            </button>` : ''}
+        </div>`).join('');
 
-        function renderCartItems(cart, items, container) {
-            const daysCount = cart.daysCount && cart.daysCount > 0 ? cart.daysCount : 1;
-            const numGuests = parseInt(cart.numGuests);
-            
-            // ✅ FIXED DATE FORMAT: "2025-12-13"
-            const checkInDate = cart.checkInDate;
-            const checkOutDate = cart.checkOutDate;
-            
-            let totalRoomAmount = 0;
-            let totalCottageAmount = 0;
-            let cottageEntranceFee = 0;
-            let hasRoom = false;
-            let hasCottage = false;
-            
-            // Process each item
-            const itemsHTML = items.map(item => {
-                const unit = item.unit;
-                const unitPrice = parseFloat(unit.unitRatePrice);
-                let itemTotal = 0;
-                let calculation = item.calculation || '';
-                let itemType = unit.unitType;
-                
-                if (itemType === 'room') {
-                    hasRoom = true;
-                    itemTotal = item.calculatedSubtotal || (unitPrice * numGuests * daysCount);
-                    totalRoomAmount += itemTotal;
-                    
-                    return `
-                        <div class="glass-card cart-item-hover p-6 rounded-2xl mb-6 slide-up border-l-4 border-blue-500">
-                            <div class="flex flex-col md:flex-row items-center md:items-start justify-between gap-6">
-                                <div class="flex items-start space-x-6 flex-1">
-                                    <div class="relative">
-                                        <img src="${getUnitImage(unit)}" alt="${unit.unitName}" class="cart-item-image w-32 h-32 rounded-xl">
-                                        <span class="type-badge-modern bg-gradient-to-r from-blue-500 to-indigo-600 text-white absolute -top-2 -right-2">
-                                            <i class="fas fa-bed mr-1"></i>
-                                            Room
-                                        </span>
-                                    </div>
-                                    <div class="flex-1">
-                                        <div class="flex flex-col md:flex-row md:items-center justify-between mb-4">
-                                            <h3 class="font-bold text-xl text-gray-900 mb-2 md:mb-0">${unit.unitName}</h3>
-                                            <div class="text-right">
-                                                <p class="font-bold text-2xl text-blue-600 price-display">₱${itemTotal.toFixed(2)}</p>
-                                                <button onclick="removeFromCart(${item.cartItemID})" class="text-red-500 hover:text-red-700 text-sm mt-1 transition-colors flex items-center justify-end">
-                                                    <i class="fas fa-trash-alt mr-2"></i>
-                                                    Remove Item
-                                                </button>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="flex flex-wrap gap-3 mb-4">
-                                            <span class="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg text-sm font-medium inline-flex items-center">
-                                                <i class="fas fa-users mr-2"></i> ${numGuests} ${numGuests === 1 ? 'guest' : 'guests'}
-                                            </span>
-                                            <span class="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg text-sm font-medium inline-flex items-center">
-                                                <i class="fas fa-calendar-alt mr-2"></i> ${daysCount} day(s)
-                                            </span>
-                                        </div>
-                                        
-                                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-100">
-                                            <div class="flex items-start">
-                                                <i class="fas fa-calculator text-blue-500 text-lg mr-3 mt-1"></i>
-                                                <div>
-                                                    <p class="font-medium text-blue-800 mb-1">Price Calculation</p>
-                                                    <p class="text-sm text-blue-700">${calculation}</p>
-                                                    ${numGuests === 1 ? 
-                                                        `<p class="text-xs text-blue-600 mt-2 flex items-center">
-                                                            <i class="fas fa-info-circle mr-2"></i> Single occupancy: minimum charge for 2 guests
-                                                        </p>` : ''
-                                                    }
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                } else if (itemType === 'cottage') {
-                    hasCottage = true;
-                    itemTotal = item.calculatedSubtotal || unitPrice;
-                    
-                    if (hasActiveEntranceFee) {
-                        cottageEntranceFee += parseFloat(entranceFeeAmount) * numGuests;
-                        totalCottageAmount += itemTotal;
-                    } else {
-                        totalCottageAmount += unitPrice;
-                    }
-                    
-                    const isDisabled = !hasActiveEntranceFee;
-                    
-                    return `
-                        <div class="glass-card cart-item-hover p-6 rounded-2xl mb-6 slide-up border-l-4 ${isDisabled ? 'border-red-500' : 'border-green-500'} ${isDisabled ? 'opacity-80' : ''}">
-                            <div class="flex flex-col md:flex-row items-center md:items-start justify-between gap-6">
-                                <div class="flex items-start space-x-6 flex-1">
-                                    <div class="relative">
-                                        <img src="${getUnitImage(unit)}" alt="${unit.unitName}" class="cart-item-image w-32 h-32 rounded-xl ${isDisabled ? 'grayscale' : ''}">
-                                        <span class="type-badge-modern ${isDisabled ? 'bg-gradient-to-r from-red-500 to-pink-600' : 'gradient-sunflower'} text-white absolute -top-2 -right-2">
-                                            <i class="fas fa-home mr-1"></i>
-                                            Cottage
-                                        </span>
-                                    </div>
-                                    <div class="flex-1">
-                                        <div class="flex flex-col md:flex-row md:items-center justify-between mb-4">
-                                            <h3 class="font-bold text-xl text-gray-900 mb-2 md:mb-0">${unit.unitName}</h3>
-                                            <div class="text-right">
-                                                <p class="font-bold text-2xl ${isDisabled ? 'text-red-600' : 'text-green-600'} price-display">₱${itemTotal.toFixed(2)}</p>
-                                                <button onclick="removeFromCart(${item.cartItemID})" class="${isDisabled ? 'text-red-400 hover:text-red-600' : 'text-red-500 hover:text-red-700'} text-sm mt-1 transition-colors flex items-center justify-end">
-                                                    <i class="fas fa-trash-alt mr-2"></i>
-                                                    Remove Item
-                                                </button>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="flex flex-wrap gap-3 mb-4">
-                                            <span class="${isDisabled ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'} px-3 py-1.5 rounded-lg text-sm font-medium inline-flex items-center">
-                                                <i class="fas fa-users mr-2"></i> ${numGuests} ${numGuests === 1 ? 'guest' : 'guests'}
-                                            </span>
-                                            <span class="${isDisabled ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'} px-3 py-1.5 rounded-lg text-sm font-medium inline-flex items-center">
-                                                <i class="fas fa-calendar-day mr-2"></i> Day use only
-                                            </span>
-                                        </div>
-                                        
-                                        <div class="${isDisabled ? 'bg-gradient-to-r from-red-50 to-pink-50 border-red-100' : 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-100'} p-4 rounded-xl border">
-                                            <div class="flex items-start">
-                                                <i class="fas ${isDisabled ? 'fa-exclamation-triangle text-red-500' : 'fa-calculator text-green-500'} text-lg mr-3 mt-1"></i>
-                                                <div>
-                                                    <p class="font-medium ${isDisabled ? 'text-red-800' : 'text-green-800'} mb-1">${isDisabled ? 'Important Notice' : 'Price Calculation'}</p>
-                                                    <p class="text-sm ${isDisabled ? 'text-red-700' : 'text-green-700'}">${calculation}</p>
-                                                    ${isDisabled ? 
-                                                        `<p class="text-xs text-red-600 mt-2 flex items-center">
-                                                            <i class="fas fa-info-circle mr-2"></i> Cannot proceed to booking without active entrance fee
-                                                        </p>` :
-                                                        `<p class="text-xs text-green-600 mt-2 flex items-center">
-                                                            <i class="fas fa-check-circle mr-2"></i> Day use only (not multiplied by days)
-                                                        </p>`
-                                                    }
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
-                
-                return '';
-            }).join('');
+    const ids = JSON.stringify(items.filter(i=>i.cartItemID).map(i=>i.cartItemID));
 
-            // Calculate totals
-            const accommodationSubtotal = totalRoomAmount + totalCottageAmount;
-            const total = accommodationSubtotal;
-
-            // Check if we can proceed to booking
-            const hasCottageInCart = cartUnitType === 'cottage' || cartUnitType === 'mixed';
-            const canProceedToBooking = !(hasCottageInCart && !hasActiveEntranceFee) && cartUnitType !== 'mixed';
-
-            // Warning messages
-            let warningMessage = '';
-            if (cartUnitType === 'mixed') {
-                warningMessage = `
-                    <div class="glass-card mb-8 p-6 rounded-2xl slide-up border-l-4 border-yellow-500">
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0 w-12 h-12 rounded-full gradient-sunflower flex items-center justify-center mr-4 text-white">
-                                <i class="fas fa-exclamation-triangle text-xl"></i>
-                            </div>
-                            <div class="flex-1">
-                                <h4 class="font-bold text-lg text-yellow-800 mb-2">Mixed Cart Items Detected</h4>
-                                <p class="text-yellow-700 mb-4">
-                                    You cannot have both rooms and cottages in the same booking. Please remove either all room items or all cottage items to proceed.
-                                </p>
-                                <div class="flex flex-col sm:flex-row gap-3">
-                                    <button onclick="removeAllRooms()" class="btn-modern gradient-dark text-white py-3 px-6 rounded-xl hover:shadow-lg flex items-center justify-center">
-                                        <i class="fas fa-bed mr-3"></i>
-                                        Remove All Rooms (${items.filter(i => i.unit?.unitType === 'room').length})
-                                    </button>
-                                    <button onclick="removeAllCottages()" class="btn-modern gradient-warning text-white py-3 px-6 rounded-xl hover:shadow-lg flex items-center justify-center">
-                                        <i class="fas fa-home mr-3"></i>
-                                        Remove All Cottages (${items.filter(i => i.unit?.unitType === 'cottage').length})
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else if (hasCottageInCart && !hasActiveEntranceFee) {
-                warningMessage = `
-                    <div class="glass-card mb-8 p-6 rounded-2xl slide-up border-l-4 border-red-500">
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0 w-12 h-12 rounded-full gradient-error text-white flex items-center justify-center mr-4">
-                                <i class="fas fa-exclamation-circle text-xl"></i>
-                            </div>
-                            <div class="flex-1">
-                                <h4 class="font-bold text-lg text-red-800 mb-2">Entrance Fee Required</h4>
-                                <p class="text-red-700 mb-4">
-                                    Your cart contains cottage items, but there is no active entrance fee set up in the system.
-                                    Please contact villa management to set up an entrance fee before proceeding with booking.
-                                </p>
-                                <div class="flex flex-wrap gap-3">
-                                    <button onclick="loadCartItems()" class="btn-modern gradient-sunflower text-black py-2 px-5 rounded-xl text-sm hover:shadow-lg">
-                                        <i class="fas fa-sync-alt mr-2"></i> Refresh Cart
-                                    </button>
-                                    <button onclick="removeAllCottages()" class="btn-modern gradient-error text-white py-2 px-5 rounded-xl text-sm hover:shadow-lg">
-                                        <i class="fas fa-trash-alt mr-2"></i> Remove All Cottages
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            const cartHTML = `
-                ${warningMessage}
-                
-                <!-- Cart Header -->
-                <div class="glass-card rounded-2xl p-8 mb-8 slide-up">
-                    <div class="flex flex-col lg:flex-row lg:items-center justify-between mb-8">
-                        <div>
-                            <h2 class="text-2xl font-bold text-gray-900 mb-2 cursive-font">Booking Summary</h2>
-                            ${cartUnitType && cartUnitType !== 'mixed' ? `
-                                <span class="type-badge-modern ${cartUnitType === 'room' ? 'bg-gradient-to-r from-blue-500 to-indigo-600' : 'gradient-sunflower'} text-white mt-2">
-                                    <i class="fas ${cartUnitType === 'room' ? 'fa-bed' : 'fa-home'} mr-2"></i>
-                                    ${cartUnitType === 'room' ? 'Room Booking' : 'Cottage Booking'}
-                                </span>
-                            ` : ''}
-                        </div>
-                        <div class="mt-6 lg:mt-0 grid grid-cols-2 lg:grid-cols-4 gap-4">
-                            <div class="text-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl">
-                                <p class="text-sm font-medium text-blue-700 mb-1">Check-in</p>
-                                <p class="font-bold text-blue-900">${checkInDate}</p>
-                            </div>
-                            <div class="text-center p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl">
-                                <p class="text-sm font-medium text-purple-700 mb-1">Check-out</p>
-                                <p class="font-bold text-purple-900">${checkOutDate}</p>
-                            </div>
-                            <div class="text-center p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl">
-                                <p class="text-sm font-medium text-green-700 mb-1">Duration</p>
-                                <p class="font-bold text-green-900">${daysCount} day(s)</p>
-                            </div>
-                            <div class="text-center p-4 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl">
-                                <p class="text-sm font-medium text-amber-700 mb-1">Guests</p>
-                                <p class="font-bold text-amber-900">${numGuests}</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Cart Items -->
-                    <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                        <i class="fas fa-list-ul mr-3 text-blue-500"></i>
-                        Your Items (${items.length})
-                    </h3>
-                    <div class="space-y-4">
-                        ${itemsHTML}
-                    </div>
-                    
-                    <!-- Price Breakdown -->
-                    <div class="border-t border-gray-200 mt-8 pt-8">
-                        <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                            <i class="fas fa-file-invoice-dollar mr-3 text-green-500"></i>
-                            Price Breakdown
-                        </h3>
-                        <div class="space-y-4 max-w-lg ml-auto">
-                            ${totalRoomAmount > 0 ? `
-                            <div class="flex justify-between items-center py-3 border-b border-gray-100">
-                                <span class="text-gray-700 flex items-center">
-                                    <i class="fas fa-bed text-blue-500 mr-3"></i>
-                                    Room Total
-                                </span>
-                                <span class="font-bold text-xl text-blue-600 price-display">₱${totalRoomAmount.toFixed(2)}</span>
-                            </div>
-                            ` : ''}
-                            
-                            ${totalCottageAmount > 0 ? `
-                            <div class="flex justify-between items-center py-3 border-b border-gray-100">
-                                <span class="text-gray-700 flex items-center">
-                                    <i class="fas fa-home ${hasActiveEntranceFee ? 'text-green-500' : 'text-red-500'} mr-3"></i>
-                                    Cottage Total
-                                </span>
-                                <span class="font-bold text-xl ${hasActiveEntranceFee ? 'text-green-600' : 'text-red-600'} price-display">₱${totalCottageAmount.toFixed(2)}</span>
-                            </div>
-                            ` : ''}
-                            
-                            <!-- Grand Total -->
-                            <div class="flex justify-between items-center pt-6 mt-6 border-t border-gray-300">
-                                <span class="text-gray-900 text-xl font-bold flex items-center">
-                                    <i class="fas fa-receipt mr-3 text-purple-500"></i>
-                                    Total Amount
-                                </span>
-                                <span class="${cartUnitType === 'mixed' ? 'text-yellow-600' : 'text-green-600'} font-bold text-3xl price-display">₱${total.toFixed(2)}</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Action Buttons -->
-                    <div class="mt-12 flex flex-col md:flex-row gap-6">
-                        <div class="flex-1 flex flex-col sm:flex-row gap-4">
-                            <a href="{{ route('roomBooking') }}" class="btn-modern gradient-dark text-white text-center font-bold py-4 px-8 rounded-xl hover:shadow-xl transition-all duration-300 flex items-center justify-center">
-                                <i class="fas fa-plus-circle mr-3 text-lg"></i>
-                                Add More Rooms
-                            </a>
-                            <a href="{{ route('cottageBooking') }}" class="btn-modern gradient-sunflower text-black text-center font-bold py-4 px-8 rounded-xl hover:shadow-xl transition-all duration-300 flex items-center justify-center">
-                                <i class="fas fa-plus-circle mr-3 text-lg"></i>
-                                Add More Cottages
-                            </a>
-                        </div>
-                        
-                        ${canProceedToBooking ? 
-                            `<button onclick="proceedToCheckout()" class="flex-1 btn-modern gradient-success text-white text-center font-bold py-4 px-8 rounded-xl hover:shadow-xl transition-all duration-300 flex items-center justify-center checkout-button">
-                                <i class="fas fa-lock mr-3 text-lg"></i>
-                                Proceed to Secure Checkout
-                            </button>` :
-                            cartUnitType === 'mixed' ?
-                            `<button class="flex-1 gradient-warning text-white text-center font-bold py-4 px-8 rounded-xl flex items-center justify-center btn-disabled">
-                                <i class="fas fa-exclamation-circle mr-3 text-lg"></i>
-                                Fix Mixed Cart to Continue
-                            </button>` :
-                            hasCottage && !hasActiveEntranceFee ?
-                            `<button onclick="showEntranceFeeAlert()" class="flex-1 gradient-error text-white text-center font-bold py-4 px-8 rounded-xl flex items-center justify-center btn-disabled">
-                                <i class="fas fa-ban mr-3 text-lg"></i>
-                                Entrance Fee Required
-                            </button>` :
-                            `<button onclick="proceedToCheckout()" class="flex-1 btn-modern gradient-success text-white text-center font-bold py-4 px-8 rounded-xl hover:shadow-xl transition-all duration-300 flex items-center justify-center checkout-button">
-                                <i class="fas fa-lock mr-3 text-lg"></i>
-                                Proceed to Secure Checkout
-                            </button>`
-                        }
-                    </div>
+    document.getElementById('availability-modal-container').innerHTML = `
+        <div class="modal-overlay show" id="avail-modal">
+            <div class="modal">
+                <div class="modal-head">
+                    <h2><i class="fas fa-exclamation-circle"></i> Booking Issues (${items.length})</h2>
+                    <button class="modal-close" onclick="closeAvailModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
-            `;
-            
-            container.innerHTML = cartHTML;
-        }
-
-        // ✅ ENHANCED: proceedToCheckout function with ALL validations
-        function proceedToCheckout() {
-            const checkoutBtn = document.querySelector('.checkout-button');
-            if (!checkoutBtn) return;
-            
-            const originalContent = checkoutBtn.innerHTML;
-            checkoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Validating...';
-            checkoutBtn.disabled = true;
-            
-            // Clear any existing notifications first
-            clearAllNotifications();
-            
-            // First, load cart to get current cart ID
-            fetch('/api/cart/items', {
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Network error: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(cartData => {
-                if (!cartData.success || !cartData.cart) {
-                    throw new Error('Cart not found');
-                }
-                
-                // Validate cart before proceeding
-                return fetch('/api/cart/validate-before-checkout', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({})
-                });
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Server error: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(validationData => {
-                console.log('Validation response:', validationData);
-                
-                if (validationData.success) {
-                    // ✅ SUCCESS - ALL CHECKS PASSED
-                    showNotification('✓ All items are available! Redirecting to checkout...', 'success', 2000);
-                    
-                    // ✅ Only redirect if validation is 100% successful
-                    setTimeout(() => {
-                        window.location.href = "{{ route('booking.page') }}";
-                    }, 1500);
-                    
-                } else {
-                    // ❌ VALIDATION FAILED - DO NOT REDIRECT
-                    checkoutBtn.innerHTML = originalContent;
-                    checkoutBtn.disabled = false;
-                    
-                    // Handle different validation failures with proper error messages
-                    if (validationData.has_special_event_conflict) {
-                        showNotification(
-                            '❌ Cannot book during special event period. Please choose different dates.',
-                            'error',
-                            5000
-                        );
-                        
-                    } else if (validationData.has_special_event_unit_conflict) {
-                        showNotification(
-                            `❌ ${validationData.special_event_details?.unitName || 'Selected unit'} is reserved for special events only.`,
-                            'error',
-                            5000
-                        );
-                        
-                    } else if (validationData.has_availability_issues && validationData.unavailable_items) {
-                        // Show first error message
-                        if (validationData.validation_errors && validationData.validation_errors.length > 0) {
-                            showNotification(
-                                `❌ ${validationData.validation_errors[0]}`,
-                                'error',
-                                5000
-                            );
-                        }
-                        
-                        // Show modal for unavailable items
-                        setTimeout(() => {
-                            showUnavailableItemsModal(validationData.unavailable_items, validationData.validation_errors);
-                        }, 1000);
-                        
-                    } else if (validationData.has_mixed_items) {
-                        showNotification(
-                            '❌ Rooms and cottages cannot be booked together. Please book them separately.',
-                            'error',
-                            5000
-                        );
-                        
-                    } else if (validationData.has_entrance_fee_issue) {
-                        showNotification(
-                            '❌ Cottage bookings require an active entrance fee. Please contact management.',
-                            'error',
-                            5000
-                        );
-                        
-                    } else if (validationData.cart_empty) {
-                        showNotification(
-                            '❌ Your cart is empty! Please add accommodations first.',
-                            'error',
-                            5000
-                        );
-                        
-                    } else if (validationData.login_required) {
-                        showNotification(
-                            '❌ Please login first to proceed with booking.',
-                            'error',
-                            5000
-                        );
-                        
-                    } else {
-                        showNotification(
-                            `❌ ${validationData.message || 'Unable to process your request. Please try again.'}`,
-                            'error',
-                            5000
-                        );
-                    }
-                    
-                    // ✅ CRITICAL: DO NOT REDIRECT ON ANY ERROR
-                }
-            })
-            .catch(error => {
-                console.error('Validation error:', error);
-                
-                checkoutBtn.innerHTML = originalContent;
-                checkoutBtn.disabled = false;
-                
-                showNotification(
-                    '❌ Validation failed. Please check your internet connection and try again.',
-                    'error',
-                    5000
-                );
-            });
-        }
-
-        // ✅ Show Unavailable Items Modal
-        function showUnavailableItemsModal(unavailableItems, validationErrors) {
-            const itemsList = unavailableItems.map((item, index) => {
-                let icon = 'fa-exclamation-triangle';
-                let bgColor = 'bg-gradient-to-r from-red-50 to-pink-50';
-                let borderColor = 'border-red-500';
-                let iconColor = 'text-red-600';
-                let badgeColor = 'bg-red-100 text-red-800';
-                
-                if (item.reason && item.reason.includes('blocked')) {
-                    icon = 'fa-tools';
-                    bgColor = 'bg-gradient-to-r from-yellow-50 to-orange-50';
-                    borderColor = 'border-yellow-500';
-                    iconColor = 'text-yellow-600';
-                    badgeColor = 'bg-yellow-100 text-yellow-800';
-                } else if (item.reason && item.reason.includes('already booked')) {
-                    icon = 'fa-calendar-times';
-                    bgColor = 'bg-gradient-to-r from-blue-50 to-indigo-50';
-                    borderColor = 'border-blue-500';
-                    iconColor = 'text-blue-600';
-                    badgeColor = 'bg-blue-100 text-blue-800';
-                }
-                
-                return `
-                    <div class="${bgColor} border-l-4 ${borderColor} p-5 rounded-xl mb-4">
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0 w-12 h-12 bg-white rounded-lg flex items-center justify-center mr-4 shadow-sm border">
-                                <i class="fas ${icon} ${iconColor} text-xl"></i>
-                            </div>
-                            <div class="flex-1">
-                                <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
-                                    <h4 class="font-bold text-lg text-gray-900 mb-1">
-                                        ${item.unit?.unitName || 'Unknown Unit'}
-                                        <span class="ml-2 px-2 py-1 ${badgeColor} text-xs font-medium rounded-full">
-                                            ${item.unit?.unitType === 'room' ? '🏨 Room' : '🏡 Cottage'}
-                                        </span>
-                                    </h4>
-                                    <span class="text-sm font-medium px-3 py-1 rounded-full bg-red-100 text-red-700">
-                                        Not Available
-                                    </span>
-                                </div>
-                                
-                                <p class="text-gray-700 mb-3 font-medium">
-                                    <i class="fas ${icon} ${iconColor} mr-2"></i>
-                                    ${item.reason || 'Not available for selected dates'}
-                                </p>
-                                
-                                ${item.cartItemID ? `
-                                <div class="flex justify-end">
-                                    <button onclick="removeUnavailableItem(${item.cartItemID})" 
-                                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center text-sm">
-                                        <i class="fas fa-trash-alt mr-2"></i>
-                                        Remove Item
-                                    </button>
-                                </div>
-                                ` : ''}
-                            </div>
-                        </div>
+                <div class="modal-body">
+                    <div class="modal-info-box">
+                        <i class="fas fa-info-circle"></i>
+                        <p>Some accommodations are no longer available for your selected dates. Please remove them to continue with your booking.</p>
                     </div>
-                `;
-            }).join('');
-            
-            const modalHTML = `
-                <div class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
-                    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden">
-                        <!-- Header -->
-                        <div class="bg-gradient-to-r from-red-500 to-red-600 p-6">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center">
-                                    <div class="bg-white p-3 rounded-full shadow-lg mr-4">
-                                        <i class="fas fa-exclamation-circle text-red-600 text-2xl"></i>
-                                    </div>
-                                    <div>
-                                        <h3 class="text-2xl font-bold text-white">Booking Issues Found</h3>
-                                        <p class="text-red-100 mt-1">${unavailableItems.length} item(s) need attention</p>
-                                    </div>
-                                </div>
-                                <button onclick="closeModal()" class="text-white hover:text-red-200 text-3xl transition-transform hover:rotate-90">
-                                    &times;
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <!-- Body -->
-                        <div class="p-6 overflow-y-auto max-h-[55vh]">
-                            <div class="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4">
-                                <div class="flex items-start">
-                                    <i class="fas fa-info-circle text-blue-600 text-xl mr-3 mt-1"></i>
-                                    <div>
-                                        <h4 class="font-bold text-blue-800 mb-1">What happened?</h4>
-                                        <p class="text-blue-700">Some accommodations in your cart are no longer available for your selected dates.</p>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            ${validationErrors && validationErrors.length > 0 ? `
-                            <div class="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
-                                <div class="flex items-start">
-                                    <i class="fas fa-exclamation-circle text-red-600 text-xl mr-3 mt-1"></i>
-                                    <div>
-                                        <h4 class="font-bold text-red-800 mb-1">Validation Errors</h4>
-                                        <ul class="list-disc pl-5 text-red-700 space-y-1">
-                                            ${validationErrors.map(error => `<li>${error}</li>`).join('')}
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                            ` : ''}
-                            
-                            <div class="space-y-4">
-                                ${itemsList}
-                            </div>
-                        </div>
-                        
-                        <!-- Footer -->
-                        <div class="border-t border-gray-200 bg-gray-50 p-6">
-                            <div class="flex flex-col sm:flex-row gap-4">
-                                <button onclick="closeModal()" 
-                                        class="px-6 py-3 border-2 border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-100 transition-all flex-1 flex items-center justify-center">
-                                    <i class="fas fa-arrow-left mr-2"></i>
-                                    Continue Shopping
-                                </button>
-                                <button onclick="removeAllUnavailableItems(${JSON.stringify(unavailableItems.filter(item => item.cartItemID).map(item => item.cartItemID))})" 
-                                        class="px-6 py-3 bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 transition-colors flex-1 flex items-center justify-center">
-                                    <i class="fas fa-trash-alt mr-2"></i>
-                                    Remove All Items
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    ${itemsHTML}
                 </div>
-            `;
-            
-            showCustomModal(modalHTML);
-        }
-
-        // ✅ Show Custom Modal
-        function showCustomModal(modalHTML) {
-            let modalContainer = document.getElementById('availability-modal-container');
-            if (!modalContainer) {
-                modalContainer = document.createElement('div');
-                modalContainer.id = 'availability-modal-container';
-                document.body.appendChild(modalContainer);
-            }
-            
-            modalContainer.innerHTML = modalHTML;
-        }
-
-        // ✅ Close Modal
-        function closeModal() {
-            const modalContainer = document.getElementById('availability-modal-container');
-            if (modalContainer) {
-                modalContainer.innerHTML = '';
-            }
-        }
-
-        // ✅ Show Notification Function
-        function showNotification(message, type = 'error', duration = 4000) {
-            const notificationId = 'notification-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
-            
-            // Create notification element
-            const notification = document.createElement('div');
-            notification.id = notificationId;
-            notification.className = `notification notification-slide-in ${type}`;
-            
-            const icons = {
-                success: 'fa-check-circle',
-                error: 'fa-exclamation-circle',
-                warning: 'fa-exclamation-triangle',
-                info: 'fa-info-circle'
-            };
-            
-            const titles = {
-                success: 'Success',
-                error: 'Error',
-                warning: 'Warning',
-                info: 'Information'
-            };
-            
-            notification.innerHTML = `
-                <div class="notification-icon">
-                    <i class="fas ${icons[type] || 'fa-info-circle'}"></i>
+                <div class="modal-foot">
+                    <button onclick="closeAvailModal()" class="btn btn-sm btn-sm-ghost" style="flex:1">
+                        <i class="fas fa-arrow-left"></i> Go Back
+                    </button>
+                    <button onclick="removeAllUnavail(${ids})" class="btn btn-sm btn-sm-red" style="flex:1">
+                        <i class="fas fa-trash-alt"></i> Remove All
+                    </button>
                 </div>
-                <div class="notification-content">
-                    <div class="notification-title">${titles[type] || 'Notification'}</div>
-                    <div class="notification-message">${message}</div>
-                </div>
-                <button class="notification-close" onclick="removeNotification('${notificationId}')">
-                    <i class="fas fa-times"></i>
-                </button>
-            `;
-            
-            // Add to container
-            const container = document.getElementById('notification-container');
-            container.appendChild(notification);
-            
-            // Add to active set
-            activeNotifications.add(notificationId);
-            
-            // Auto remove after duration
-            setTimeout(() => {
-                removeNotification(notificationId);
-            }, duration);
-            
-            return notificationId;
-        }
+            </div>
+        </div>`;
+}
 
-        // ✅ Remove specific notification
-        function removeNotification(notificationId) {
-            const notification = document.getElementById(notificationId);
-            if (notification) {
-                notification.classList.remove('notification-slide-in');
-                notification.classList.add('notification-slide-out');
-                
-                setTimeout(() => {
-                    if (notification.parentElement) {
-                        notification.remove();
-                    }
-                }, 500);
+function closeAvailModal() {
+    document.getElementById('availability-modal-container').innerHTML = '';
+}
+
+/* ═══════════════════════════════
+   REMOVE ITEMS
+═══════════════════════════════ */
+function removeFromCart(id) {
+    if (!confirm('Remove this item from your cart?')) return;
+    
+    showNotification('Removing item...', 'info', 1500);
+    
+    fetch(`/api/cart/remove/${id}`, {
+        method:'DELETE',
+        headers: { 'X-CSRF-TOKEN': csrfToken(), 'Accept':'application/json' }
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (d.success) { 
+            showNotification('Item removed successfully!', 'success'); 
+            setTimeout(() => { loadCartItems(); updateBadge(); }, 500); 
+        } else {
+            showNotification('Failed: ' + d.message, 'error');
+        }
+    })
+    .catch(() => showNotification('Error removing item.', 'error'));
+}
+
+function removeUnavailItem(id) {
+    closeAvailModal();
+    fetch(`/api/cart/remove/${id}`, {
+        method:'DELETE',
+        headers: { 'X-CSRF-TOKEN': csrfToken(), 'Accept':'application/json' }
+    })
+    .then(() => { 
+        showNotification('Item removed.', 'success'); 
+        setTimeout(loadCartItems, 600); 
+    })
+    .catch(() => showNotification('Error.', 'error'));
+}
+
+function removeAllUnavail(ids) {
+    if (!confirm('Remove all unavailable items?')) return;
+    closeAvailModal();
+    Promise.all(ids.map(id => fetch(`/api/cart/remove/${id}`, {
+        method:'DELETE', headers: { 'X-CSRF-TOKEN': csrfToken(), 'Accept':'application/json' }
+    })))
+    .then(() => { 
+        showNotification('All unavailable items removed.', 'success'); 
+        setTimeout(() => { loadCartItems(); updateBadge(); }, 500); 
+    })
+    .catch(() => showNotification('Some items could not be removed.', 'error'));
+}
+
+function removeAllRooms() {
+    if (!confirm('Remove all room items from your cart?')) return;
+    fetch('/api/cart/items', { headers: { 'Accept':'application/json', 'X-CSRF-TOKEN': csrfToken() } })
+    .then(r => r.json())
+    .then(d => {
+        const rooms = (d.items||[]).filter(i => i.unit?.unitType === 'room');
+        if (!rooms.length) return showNotification('No room items found.', 'info');
+        return Promise.all(rooms.map(i => fetch(`/api/cart/remove/${i.cartItemID}`, {
+            method:'DELETE', headers: { 'X-CSRF-TOKEN': csrfToken(), 'Accept':'application/json' }
+        }))).then(() => { 
+            showNotification('All rooms removed.', 'success'); 
+            setTimeout(() => { loadCartItems(); updateBadge(); }, 500); 
+        });
+    })
+    .catch(() => showNotification('Error.', 'error'));
+}
+
+function removeAllCottages() {
+    if (!confirm('Remove all cottage items from your cart?')) return;
+    fetch('/api/cart/items', { headers: { 'Accept':'application/json', 'X-CSRF-TOKEN': csrfToken() } })
+    .then(r => r.json())
+    .then(d => {
+        const cottages = (d.items||[]).filter(i => i.unit?.unitType === 'cottage');
+        if (!cottages.length) return showNotification('No cottage items found.', 'info');
+        return Promise.all(cottages.map(i => fetch(`/api/cart/remove/${i.cartItemID}`, {
+            method:'DELETE', headers: { 'X-CSRF-TOKEN': csrfToken(), 'Accept':'application/json' }
+        }))).then(() => { 
+            showNotification('All cottages removed.', 'success'); 
+            setTimeout(() => { loadCartItems(); updateBadge(); }, 500); 
+        });
+    })
+    .catch(() => showNotification('Error.', 'error'));
+}
+
+/* ═══════════════════════════════
+   NOTIFICATIONS - ORIGINAL FUNCTIONS
+═══════════════════════════════ */
+let activeNotifications = new Set();
+
+function showNotification(msg, type='info', duration=3500) {
+    const id = 'notification-' + Date.now() + '-' + Math.random().toString(36).substr(2,6);
+    const icons = { 
+        success:'fa-check-circle', 
+        error:'fa-exclamation-circle', 
+        warning:'fa-exclamation-triangle', 
+        info:'fa-info-circle' 
+    };
+    const titles = { 
+        success:'Success', 
+        error:'Error', 
+        warning:'Warning', 
+        info:'Information' 
+    };
+
+    const el = document.createElement('div');
+    el.id = id;
+    el.className = `notification notification-slide-in ${type}`;
+    el.innerHTML = `
+        <div class="notification-icon">
+            <i class="fas ${icons[type]}"></i>
+        </div>
+        <div class="notification-content">
+            <div class="notification-title">${titles[type]}</div>
+            <div class="notification-message">${msg}</div>
+        </div>
+        <button class="notification-close" onclick="removeNotification('${id}')">
+            <i class="fas fa-times"></i>
+        </button>`;
+
+    document.getElementById('notification-container').appendChild(el);
+    activeNotifications.add(id);
+    
+    requestAnimationFrame(() => {
+        el.classList.add('show');
+    });
+    
+    setTimeout(() => removeNotification(id), duration);
+    return id;
+}
+
+function removeNotification(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('show');
+    el.classList.remove('notification-slide-in');
+    el.classList.add('notification-slide-out');
+    setTimeout(() => el && el.remove(), 500);
+    activeNotifications.delete(id);
+}
+
+function clearNotifications() {
+    document.querySelectorAll('.notification').forEach(n => { 
+        n.classList.remove('show');
+        n.classList.remove('notification-slide-in'); 
+        n.classList.add('notification-slide-out'); 
+        setTimeout(() => n.remove(), 500); 
+    });
+    activeNotifications.clear();
+}
+
+// Alias for compatibility
+function clearAllNotifications() {
+    clearNotifications();
+}
+
+/* ═══════════════════════════════
+   HELPERS
+═══════════════════════════════ */
+function csrfToken() { 
+    return document.querySelector('meta[name="csrf-token"]').getAttribute('content'); 
+}
+
+function getUnitImage(unit) {
+    try {
+        if (unit.images) {
+            const imgs = typeof unit.images === 'string' ? JSON.parse(unit.images) : unit.images;
+            if (Array.isArray(imgs) && imgs[0]) {
+                return imgs[0].startsWith('http') ? imgs[0] : `/storage/${imgs[0]}`;
             }
-            activeNotifications.delete(notificationId);
         }
+    } catch(e) {}
+    return 'https://via.placeholder.com/400x300?text=No+Image';
+}
 
-        // ✅ Clear all notifications
-        function clearAllNotifications() {
-            const container = document.getElementById('notification-container');
-            const notifications = container.querySelectorAll('.notification');
-            
-            notifications.forEach(notification => {
-                notification.classList.remove('notification-slide-in');
-                notification.classList.add('notification-slide-out');
-                
-                setTimeout(() => {
-                    if (notification.parentElement) {
-                        notification.remove();
-                    }
-                }, 500);
-            });
-            
-            activeNotifications.clear();
+function updateBadge() {
+    fetch('/api/cart/count', { headers: { 'Accept':'application/json' } })
+    .then(r => r.json())
+    .then(d => {
+        const badge = document.querySelector('.cart-badge');
+        if (badge) {
+            badge.style.display = (d.success && d.count > 0) ? 'flex' : 'none';
+            if (d.count > 0) badge.textContent = d.count;
         }
-
-        // ✅ Remove Unavailable Item
-        function removeUnavailableItem(cartItemId) {
-            if (!confirm('Are you sure you want to remove this unavailable item from your cart?')) {
-                return;
-            }
-            
-            removeFromCart(cartItemId);
-            closeModal();
-            setTimeout(() => {
-                loadCartItems();
-            }, 1000);
-        }
-
-        // ✅ Remove All Unavailable Items
-        function removeAllUnavailableItems(cartItemIds) {
-            if (!confirm('Are you sure you want to remove all unavailable items from your cart?')) {
-                return;
-            }
-            
-            if (!Array.isArray(cartItemIds) || cartItemIds.length === 0) {
-                showNotification('No items to remove', 'info');
-                closeModal();
-                return;
-            }
-            
-            const modalContainer = document.getElementById('availability-modal-container');
-            if (modalContainer) {
-                const loadingHTML = `
-                    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                        <div class="bg-white rounded-2xl shadow-2xl p-8 text-center">
-                            <div class="spinner-modern w-16 h-16 mx-auto mb-4"></div>
-                            <p class="text-xl font-medium text-gray-700">Removing items...</p>
-                        </div>
-                    </div>
-                `;
-                modalContainer.innerHTML = loadingHTML;
-            }
-            
-            const removePromises = cartItemIds.map(cartItemId => 
-                fetch(`/api/cart/remove/${cartItemId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    }
-                })
-            );
-            
-            Promise.all(removePromises)
-                .then(() => {
-                    showNotification('All unavailable items removed successfully!', 'success');
-                    closeModal();
-                    setTimeout(() => {
-                        loadCartItems();
-                        updateNavbarCartBadge();
-                    }, 500);
-                })
-                .catch(error => {
-                    console.error('Error removing items:', error);
-                    showNotification('Failed to remove some items. Please try again.', 'error');
-                    closeModal();
-                });
-        }
-
-        function removeFromCart(cartItemId) {
-            if (!confirm('Are you sure you want to remove this item from your cart?')) {
-                return;
-            }
-            
-            const button = event.target;
-            const originalHTML = button.innerHTML;
-            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Removing...';
-            button.disabled = true;
-            button.classList.add('btn-disabled');
-            
-            fetch(`/api/cart/remove/${cartItemId}`, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showNotification('Item removed from cart successfully!', 'success');
-                    setTimeout(() => {
-                        loadCartItems();
-                        updateNavbarCartBadge();
-                    }, 500);
-                } else {
-                    showNotification('Error: ' + data.message, 'error');
-                    button.innerHTML = originalHTML;
-                    button.disabled = false;
-                    button.classList.remove('btn-disabled');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showNotification('Failed to remove item. Please try again.', 'error');
-                button.innerHTML = originalHTML;
-                button.disabled = false;
-                button.classList.remove('btn-disabled');
-            });
-        }
-
-        function removeAllRooms() {
-            if (!confirm('Are you sure you want to remove all room items from your cart? This cannot be undone.')) {
-                return;
-            }
-            
-            fetch('/api/cart/items', {
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success && data.items && data.items.length > 0) {
-                    const roomItems = data.items.filter(item => 
-                        item.unit && item.unit.unitType === 'room'
-                    );
-                    
-                    if (roomItems.length === 0) {
-                        showNotification('No room items found in cart', 'info');
-                        return;
-                    }
-                    
-                    const removePromises = roomItems.map(item => 
-                        fetch(`/api/cart/remove/${item.cartItemID}`, {
-                            method: 'DELETE',
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json'
-                            }
-                        })
-                    );
-                    
-                    Promise.all(removePromises)
-                        .then(() => {
-                            showNotification('All room items removed from cart successfully!', 'success');
-                            setTimeout(() => {
-                                loadCartItems();
-                                updateNavbarCartBadge();
-                            }, 500);
-                        })
-                        .catch(error => {
-                            console.error('Error removing room items:', error);
-                            showNotification('Failed to remove some room items', 'error');
-                        });
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching cart items:', error);
-                showNotification('Failed to load cart items', 'error');
-            });
-        }
-
-        function removeAllCottages() {
-            if (!confirm('Are you sure you want to remove all cottage items from your cart? This cannot be undone.')) {
-                return;
-            }
-            
-            fetch('/api/cart/items', {
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success && data.items && data.items.length > 0) {
-                    const cottageItems = data.items.filter(item => 
-                        item.unit && item.unit.unitType === 'cottage'
-                    );
-                    
-                    if (cottageItems.length === 0) {
-                        showNotification('No cottage items found in cart', 'info');
-                        return;
-                    }
-                    
-                    const removePromises = cottageItems.map(item => 
-                        fetch(`/api/cart/remove/${item.cartItemID}`, {
-                            method: 'DELETE',
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json'
-                            }
-                        })
-                    );
-                    
-                    Promise.all(removePromises)
-                        .then(() => {
-                            showNotification('All cottage items removed from cart successfully!', 'success');
-                            setTimeout(() => {
-                                loadCartItems();
-                                updateNavbarCartBadge();
-                            }, 500);
-                        })
-                        .catch(error => {
-                            console.error('Error removing cottage items:', error);
-                            showNotification('Failed to remove some cottage items', 'error');
-                        });
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching cart items:', error);
-                showNotification('Failed to load cart items', 'error');
-            });
-        }
-
-        function showEntranceFeeAlert() {
-            showNotification('Cannot proceed to booking. Please remove cottage items or contact management to set up an entrance fee.', 'error');
-        }
-
-        function getUnitImage(unit) {
-            let imageUrl = '';
-            
-            try {
-                if (unit.images) {
-                    const images = typeof unit.images === 'string' ? JSON.parse(unit.images) : unit.images;
-                    if (Array.isArray(images) && images.length > 0 && images[0]) {
-                        imageUrl = images[0];
-                        if (!imageUrl.startsWith('http')) {
-                            imageUrl = `/storage/${imageUrl}`;
-                        }
-                    }
-                }
-            } catch (e) {
-                console.error('Error parsing images:', e);
-            }
-            
-            return imageUrl;
-        }
-
-        function updateNavbarCartBadge() {
-            fetch('/api/cart/count', {
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                const cartBadge = document.querySelector('.cart-badge');
-                if (cartBadge) {
-                    if (data.success && data.count > 0) {
-                        cartBadge.textContent = data.count;
-                        cartBadge.style.display = 'flex';
-                        cartBadge.classList.add('animate-pulse');
-                        setTimeout(() => {
-                            cartBadge.classList.remove('animate-pulse');
-                        }, 1000);
-                    } else {
-                        cartBadge.style.display = 'none';
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('Error updating cart badge:', error);
-                const cartBadge = document.querySelector('.cart-badge');
-                if (cartBadge) {
-                    cartBadge.style.display = 'none';
-                }
-            });
-        }
-    </script>
+    }).catch(()=>{});
+}
+</script>
 </body>
 </html>
