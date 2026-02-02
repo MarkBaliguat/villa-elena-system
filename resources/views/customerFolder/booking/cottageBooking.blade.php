@@ -204,8 +204,8 @@
             text-align: center;
             margin-bottom: 1rem;
             background: linear-gradient(135deg, var(--text-dark), #4B5563);
-            -webkit-background-clip: text;
             background-clip: text;
+            -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             position: relative;
             display: inline-block;
@@ -291,126 +291,219 @@
             transform: scale(1.1);
         }
 
-        /* Accommodation Cards */
+        /* Accommodation Cards - Horizontal Layout */
         .accommodation-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-            gap: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 3rem;
             margin-top: 2rem;
         }
 
         .accommodation-card {
             background: var(--card-bg);
-            border-radius: 20px;
+            border-radius: 24px;
             overflow: hidden;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
+            display: grid;
+            grid-template-columns: 45% 1fr;
+            gap: 0;
+            min-height: 400px;
             border: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         .accommodation-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
             border-color: rgba(255, 215, 0, 0.3);
         }
 
+        /* Image Gallery Section */
         .card-image-container {
             position: relative;
-            height: 220px;
             overflow: hidden;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.03), rgba(255, 165, 0, 0.03));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
         }
 
-        .card-image {
+        .image-gallery {
+            position: relative;
             width: 100%;
             height: 100%;
-            object-fit: contain;
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 370px;
         }
 
-        .accommodation-card:hover .card-image {
-            transform: scale(1.08);
+        .gallery-main-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: transform 0.4s ease;
+        }
+
+        .gallery-main-image:hover {
+            transform: scale(1.02);
+        }
+
+        .gallery-thumbnails {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            padding: 10px 14px;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(10px);
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .thumbnail {
+            width: 55px;
+            height: 55px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            opacity: 0.5;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .thumbnail:hover {
+            opacity: 0.8;
+            transform: scale(1.05);
+        }
+
+        .thumbnail.active {
+            opacity: 1;
+            border-color: var(--primary-yellow);
+            transform: scale(1.1);
+        }
+
+        .gallery-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+
+        .gallery-nav:hover {
+            background: rgba(0, 0, 0, 0.7);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .gallery-nav.prev {
+            left: 15px;
+        }
+
+        .gallery-nav.next {
+            right: 15px;
         }
 
         /* Image Placeholder Style */
         .card-image-placeholder {
             width: 100%;
             height: 100%;
+            min-height: 370px;
             background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 165, 0, 0.1));
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             color: var(--text-medium);
+            border-radius: 16px;
         }
 
         .card-image-placeholder i {
-            font-size: 3rem;
-            margin-bottom: 0.5rem;
+            font-size: 4rem;
+            margin-bottom: 1rem;
             color: var(--primary-yellow);
+            opacity: 0.5;
         }
 
         .card-image-placeholder p {
-            font-size: 0.9rem;
+            font-size: 1rem;
             font-weight: 500;
         }
 
         .card-badge {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            top: 25px;
+            right: 25px;
             background: linear-gradient(135deg, var(--primary-yellow), var(--secondary-yellow));
             color: var(--primary-black);
-            padding: 6px 16px;
+            padding: 8px 20px;
             border-radius: 20px;
             font-weight: 600;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
-            z-index: 1;
+            z-index: 3;
         }
 
+        /* Card Content Section */
         .card-content {
-            padding: 1.75rem;
-            flex-grow: 1;
+            padding: 2.5rem 3rem;
             display: flex;
             flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-header {
+            margin-bottom: 1.5rem;
         }
 
         .card-title {
-            font-size: 1.5rem;
+            font-size: 2.25rem;
             font-weight: 700;
-            margin-bottom: 0.75rem;
+            margin-bottom: 1rem;
             color: var(--text-dark);
-            line-height: 1.3;
+            line-height: 1.2;
         }
 
         .card-description {
             color: var(--text-medium);
-            margin-bottom: 1.25rem;
-            font-size: 0.95rem;
-            line-height: 1.6;
-            flex-grow: 1;
+            margin-bottom: 1.5rem;
+            font-size: 1.05rem;
+            line-height: 1.7;
         }
 
         .card-features {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 1.5rem;
+            gap: 10px;
+            margin-bottom: 2rem;
         }
 
         .feature-tag {
             background: rgba(255, 215, 0, 0.1);
             color: var(--text-dark);
-            padding: 6px 14px;
-            border-radius: 8px;
-            font-size: 0.85rem;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 0.95rem;
             font-weight: 500;
             border: 1px solid rgba(255, 215, 0, 0.2);
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .feature-tag:hover {
@@ -418,34 +511,38 @@
             transform: translateY(-2px);
         }
 
+        .card-price-section {
+            margin-bottom: 2rem;
+        }
+
         .card-price {
-            font-size: 1.5rem;
+            font-size: 2.5rem;
             font-weight: 700;
             color: var(--text-dark);
-            margin-bottom: 1.5rem;
+            margin-bottom: 0.5rem;
             display: flex;
-            align-items: center;
-            gap: 5px;
+            align-items: baseline;
+            gap: 8px;
         }
 
         .price-period {
-            font-size: 0.9rem;
+            font-size: 1.1rem;
             color: var(--text-medium);
             font-weight: 500;
         }
 
+        /* Button Section */
         .card-actions {
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 12px;
-            margin-top: auto;
         }
 
         .action-btn {
-            flex: 1;
-            padding: 14px 20px;
+            padding: 16px 24px;
             border-radius: 12px;
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 1rem;
             border: none;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -466,6 +563,19 @@
             transform: translateY(-1px);
         }
 
+        .btn-virtual-tour {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #FFFBF0, #FFF8E1);
+            color: var(--primary-black);
+            border: 2px solid var(--primary-yellow);
+            font-size: 1.05rem;
+        }
+
+        .btn-virtual-tour:hover {
+            background: linear-gradient(135deg, #FFF8E1, #FFECB3);
+            border-color: var(--secondary-yellow);
+        }
+
         .btn-cart {
             background: linear-gradient(135deg, var(--primary-yellow), var(--secondary-yellow));
             color: var(--primary-black);
@@ -482,6 +592,126 @@
 
         .btn-book:hover {
             background: linear-gradient(135deg, #2D3748, var(--primary-black));
+        }
+
+        /* Image Zoom Modal */
+        .image-zoom-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .image-zoom-modal.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .zoom-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .zoom-image {
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: zoomIn 0.3s ease;
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .zoom-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 1.5rem;
+        }
+
+        .zoom-nav:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 215, 0, 0.8);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .zoom-nav.prev {
+            left: 30px;
+        }
+
+        .zoom-nav.next {
+            right: 30px;
+        }
+
+        .zoom-close {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 1.5rem;
+        }
+
+        .zoom-close:hover {
+            background: rgba(255, 69, 58, 0.8);
+            border-color: rgba(255, 69, 58, 1);
+            transform: scale(1.1);
+        }
+
+        .zoom-counter {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 500;
         }
 
         /* Loading Spinner */
@@ -623,32 +853,13 @@
             background: rgba(255, 255, 255, 0.1);
         }
 
-        /* Same Day Booking Highlight */
-        .same-day-highlight {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 165, 0, 0.1));
-            color: var(--text-dark);
-            padding: 12px 20px;
-            border-radius: 10px;
-            margin-top: 1rem;
-            border: 1px solid rgba(255, 215, 0, 0.2);
-            animation: gentlePulse 3s ease-in-out infinite;
-        }
-
-        .same-day-highlight i {
-            color: var(--primary-yellow);
-            font-size: 1.2rem;
-        }
-
         /* Animations */
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
 
-        @keyframes fadeIn {
+        @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
@@ -659,7 +870,7 @@
         }
 
         .fade-in {
-            animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         /* Custom Scrollbar */
@@ -683,8 +894,12 @@
 
         /* Responsive Design */
         @media (max-width: 1200px) {
-            .accommodation-cards {
-                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            .accommodation-card {
+                grid-template-columns: 50% 1fr;
+            }
+
+            .card-title {
+                font-size: 2rem;
             }
         }
 
@@ -705,6 +920,15 @@
             .tab-btn {
                 padding: 14px 30px;
                 font-size: 1rem;
+            }
+
+            .accommodation-card {
+                grid-template-columns: 1fr;
+                min-height: auto;
+            }
+
+            .card-content {
+                padding: 2rem;
             }
         }
 
@@ -740,16 +964,43 @@
             }
             
             .accommodation-cards {
-                grid-template-columns: 1fr;
                 gap: 2rem;
+            }
+
+            .card-title {
+                font-size: 1.75rem;
+            }
+
+            .card-price {
+                font-size: 2rem;
             }
             
             .card-actions {
-                flex-direction: column;
+                grid-template-columns: 1fr;
             }
-            
-            .action-btn {
-                width: 100%;
+
+            .btn-virtual-tour {
+                grid-column: 1;
+            }
+
+            .zoom-nav {
+                width: 50px;
+                height: 50px;
+            }
+
+            .zoom-nav.prev {
+                left: 15px;
+            }
+
+            .zoom-nav.next {
+                right: 15px;
+            }
+
+            .zoom-close {
+                width: 45px;
+                height: 45px;
+                top: 15px;
+                right: 15px;
             }
             
             .notification {
@@ -757,6 +1008,16 @@
                 right: 20px;
                 max-width: none;
                 top: 80px;
+            }
+
+            .gallery-thumbnails {
+                bottom: 10px;
+                padding: 8px 10px;
+            }
+
+            .thumbnail {
+                width: 45px;
+                height: 45px;
             }
         }
 
@@ -784,11 +1045,23 @@
             }
             
             .card-title {
-                font-size: 1.35rem;
+                font-size: 1.5rem;
             }
             
             .card-price {
-                font-size: 1.35rem;
+                font-size: 1.75rem;
+            }
+
+            .card-content {
+                padding: 1.5rem;
+            }
+
+            .image-gallery {
+                min-height: 280px;
+            }
+
+            .card-image-placeholder {
+                min-height: 280px;
             }
         }
     </style>
@@ -805,7 +1078,6 @@
                 <h1 class="text-4xl md:text-6xl font-bold mb-4 fade-in">Discover Our Cottages</h1>
                 <p class="text-xl md:text-2xl mb-8 fade-in" style="animation-delay: 0.2s;">Perfect for day trips and family gatherings</p>
                 
-
                 <!-- Booking Card -->
                 <div class="booking-card fade-in" style="animation-delay: 0.4s;">
                     <h3 class="text-2xl font-semibold text-gray-900 mb-6 text-center">Book Your Cottage</h3>
@@ -887,6 +1159,23 @@
         </section>
     </div>
 
+    <!-- Image Zoom Modal -->
+    <div id="imageZoomModal" class="image-zoom-modal">
+        <button class="zoom-close" onclick="closeZoomModal()">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="zoom-content">
+            <button class="zoom-nav prev" onclick="changeZoomImage(-1)">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <img id="zoomImage" class="zoom-image" src="" alt="Zoomed image">
+            <button class="zoom-nav next" onclick="changeZoomImage(1)">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+        <div class="zoom-counter" id="zoomCounter">1 / 3</div>
+    </div>
+
     <!-- Include Footer -->
     @include('customerFolder.partials.footer')
 
@@ -901,6 +1190,8 @@
         let cartItemCount = 0;
         let cartItems = [];
         let cartDates = { checkIn: '', checkOut: '' };
+        let currentZoomImages = [];
+        let currentZoomIndex = 0;
 
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize date inputs
@@ -1018,7 +1309,153 @@
             // Load cart count and items
             loadCartCount();
             loadCartItemsForValidation();
+
+            // Close zoom modal on ESC key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeZoomModal();
+                }
+            });
         });
+
+        // Image Gallery Functions
+        function createImageGallery(images, unitId) {
+            if (!images || images.length === 0) {
+                return `
+                    <div class="card-image-placeholder">
+                        <i class="fas fa-home"></i>
+                        <p>No images available</p>
+                    </div>
+                `;
+            }
+
+            const mainImageUrl = images[0];
+            
+            let html = `
+                <div class="image-gallery" data-unit-id="${unitId}">
+                    <img src="${mainImageUrl}" alt="Unit image" class="gallery-main-image" onclick="openZoomModal(${unitId}, 0)">
+            `;
+
+            // Add navigation arrows if more than 1 image
+            if (images.length > 1) {
+                html += `
+                    <button class="gallery-nav prev" onclick="changeGalleryImage(${unitId}, -1)">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="gallery-nav next" onclick="changeGalleryImage(${unitId}, 1)">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                `;
+
+                // Add thumbnails
+                html += '<div class="gallery-thumbnails">';
+                images.forEach((img, index) => {
+                    html += `
+                        <img src="${img}" 
+                             alt="Thumbnail ${index + 1}" 
+                             class="thumbnail ${index === 0 ? 'active' : ''}" 
+                             onclick="setGalleryImage(${unitId}, ${index})">
+                    `;
+                });
+                html += '</div>';
+            }
+
+            html += '</div>';
+            return html;
+        }
+
+        function changeGalleryImage(unitId, direction) {
+            const gallery = document.querySelector(`[data-unit-id="${unitId}"]`);
+            if (!gallery) return;
+
+            const mainImage = gallery.querySelector('.gallery-main-image');
+            const thumbnails = gallery.querySelectorAll('.thumbnail');
+            
+            if (thumbnails.length === 0) return;
+
+            let currentIndex = -1;
+            thumbnails.forEach((thumb, index) => {
+                if (thumb.classList.contains('active')) {
+                    currentIndex = index;
+                }
+            });
+
+            let newIndex = currentIndex + direction;
+            if (newIndex < 0) newIndex = thumbnails.length - 1;
+            if (newIndex >= thumbnails.length) newIndex = 0;
+
+            setGalleryImage(unitId, newIndex);
+        }
+
+        function setGalleryImage(unitId, index) {
+            const gallery = document.querySelector(`[data-unit-id="${unitId}"]`);
+            if (!gallery) return;
+
+            const mainImage = gallery.querySelector('.gallery-main-image');
+            const thumbnails = gallery.querySelectorAll('.thumbnail');
+
+            if (index < 0 || index >= thumbnails.length) return;
+
+            // Update main image
+            mainImage.src = thumbnails[index].src;
+            mainImage.onclick = () => openZoomModal(unitId, index);
+
+            // Update active thumbnail
+            thumbnails.forEach(thumb => thumb.classList.remove('active'));
+            thumbnails[index].classList.add('active');
+        }
+
+        // Zoom Modal Functions
+        function openZoomModal(unitId, startIndex = 0) {
+            const gallery = document.querySelector(`[data-unit-id="${unitId}"]`);
+            if (!gallery) return;
+
+            const thumbnails = gallery.querySelectorAll('.thumbnail');
+            currentZoomImages = Array.from(thumbnails).map(thumb => thumb.src);
+            
+            if (currentZoomImages.length === 0) {
+                const mainImage = gallery.querySelector('.gallery-main-image');
+                if (mainImage) {
+                    currentZoomImages = [mainImage.src];
+                }
+            }
+
+            currentZoomIndex = startIndex;
+            updateZoomModal();
+
+            const modal = document.getElementById('imageZoomModal');
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeZoomModal() {
+            const modal = document.getElementById('imageZoomModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function changeZoomImage(direction) {
+            currentZoomIndex += direction;
+            
+            if (currentZoomIndex < 0) {
+                currentZoomIndex = currentZoomImages.length - 1;
+            }
+            if (currentZoomIndex >= currentZoomImages.length) {
+                currentZoomIndex = 0;
+            }
+
+            updateZoomModal();
+        }
+
+        function updateZoomModal() {
+            const zoomImage = document.getElementById('zoomImage');
+            const zoomCounter = document.getElementById('zoomCounter');
+
+            if (currentZoomImages.length > 0) {
+                zoomImage.src = currentZoomImages[currentZoomIndex];
+                zoomCounter.textContent = `${currentZoomIndex + 1} / ${currentZoomImages.length}`;
+            }
+        }
 
         // Function to load cart count
         function loadCartCount() {
@@ -1149,7 +1586,7 @@
                 });
         }
 
-        // Render function with Add to Cart and Book Now buttons
+        // Render function with horizontal layout and image gallery
         function renderUnits(units, container, type) {
             if (!units || units.length === 0) {
                 renderEmptyState(container, 'No ' + type + ' available for the selected date. Please try a different date.');
@@ -1157,21 +1594,21 @@
             }
             
             container.innerHTML = '';
-            container.style.display = 'grid';
+            container.style.display = 'flex';
             
             units.forEach(unit => {
-                // Use first image if available, otherwise use placeholder
-                let imageUrl = '';
-                
+                // Parse images
+                let images = [];
                 try {
                     if (unit.images) {
-                        const images = typeof unit.images === 'string' ? JSON.parse(unit.images) : unit.images;
-                        if (Array.isArray(images) && images.length > 0 && images[0]) {
-                            imageUrl = images[0];
-                            // If it's a local path, convert to full URL
-                            if (!imageUrl.startsWith('http')) {
-                                imageUrl = `/storage/${imageUrl}`;
-                            }
+                        const parsedImages = typeof unit.images === 'string' ? JSON.parse(unit.images) : unit.images;
+                        if (Array.isArray(parsedImages)) {
+                            images = parsedImages.map(img => {
+                                if (!img.startsWith('http')) {
+                                    return `/storage/${img}`;
+                                }
+                                return img;
+                            }).filter(img => img);
                         }
                     }
                 } catch (e) {
@@ -1182,36 +1619,41 @@
                 card.className = 'accommodation-card fade-in';
                 card.innerHTML = `
                     <div class="card-image-container">
-                        ${imageUrl ? 
-                            `<img src="${imageUrl}" alt="${unit.unitName}" class="card-image">` :
-                            `<div class="card-image-placeholder">
-                                <i class="fas fa-home"></i>
-                                <p>No image available</p>
-                            </div>`
-                        }
+                        ${createImageGallery(images, unit.unitID)}
+                        <span class="card-badge">
+                            <i class="fas fa-check-circle mr-1"></i>
+                            Available
+                        </span>
                     </div>
                     <div class="card-content">
-                        <h3 class="card-title">${unit.unitName}</h3>
-                        <p class="card-description">${unit.description || 'Perfect for day trips and family gatherings. Enjoy the outdoors in comfort and style.'}</p>
+                        <div class="card-header">
+                            <h3 class="card-title">${unit.unitName}</h3>
+                            <p class="card-description">${unit.description || 'Perfect for day trips and family gatherings. Enjoy the outdoors in comfort and style.'}</p>
+                        </div>
+                        
                         <div class="card-features">
                             <span class="feature-tag">
-                                <i class="fas fa-users mr-1"></i>
+                                <i class="fas fa-users"></i>
                                 ${unit.capacity} guests
                             </span>
                             <span class="feature-tag">
-                                <i class="fas fa-home mr-1"></i>
+                                <i class="fas fa-home"></i>
                                 ${unit.unitType}
                             </span>
-                            <span class="feature-tag" style="background: rgba(16, 185, 129, 0.1); color: #065f46; border-color: rgba(16, 185, 129, 0.2);">
-                                <i class="fas fa-check-circle mr-1"></i>
-                                Available
-                            </span>
                         </div>
-                        <div class="card-price">
-                            ₱${parseInt(unit.unitRatePrice).toLocaleString()}
-                            <span class="price-period">/ day</span>
+                        
+                        <div class="card-price-section">
+                            <div class="card-price">
+                                ₱${parseInt(unit.unitRatePrice).toLocaleString()}
+                                <span class="price-period">/ day</span>
+                            </div>
                         </div>
+                        
                         <div class="card-actions">
+                            <button onclick="openVirtualTour(${unit.unitID})" class="action-btn btn-virtual-tour">
+                                <i class="fas fa-vr-cardboard"></i>
+                                View in Virtual Tour
+                            </button>
                             <button onclick="addToCart(${unit.unitID}, this)" class="action-btn btn-cart">
                                 <i class="fas fa-cart-plus"></i>
                                 Add to Cart
@@ -1258,6 +1700,13 @@
             currentGuests = 1;
             
             loadUnits('cottages');
+        }
+
+        // Virtual Tour function (placeholder)
+        function openVirtualTour(unitId) {
+            showNotification('Virtual tour feature coming soon!', 'info');
+            // TODO: Implement virtual tour route
+            // window.location.href = `/virtual-tour/${unitId}`;
         }
 
         // Add to Cart function for cottages
