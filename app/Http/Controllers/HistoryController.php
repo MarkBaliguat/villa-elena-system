@@ -14,10 +14,7 @@ class HistoryController extends Controller
 
     public function getHistory(Request $request)
     {
-        $status = $request->get('status', 'all');
-        $search = $request->get('search', '');
-        $page = $request->get('page', 1);
-        $perPage = 10;
+        $bookingId = $request->get('booking_id', null);
 
         // Build query for completed and cancelled bookings
         $query = DB::table('bookings')
@@ -29,7 +26,8 @@ class HistoryController extends Controller
                 'bookings.bookingID',
                 'bookings.bookingStatus',
                 'bookings.bookingType',
-                'carts.numGuests', // CHANGED: Moved from bookings to carts
+                'bookings.gcash_payment_intent_id',
+                'carts.numGuests',
                 'bookings.totalPrice',
                 'bookings.specialRequirements',
                 'bookings.eventType',
@@ -38,6 +36,7 @@ class HistoryController extends Controller
                 'bookings.created_at',
                 'carts.checkInDate',
                 'carts.checkOutDate',
+                'carts.daysCount',
                 'users.name as guest_name',
                 'users.email',
                 'users.phoneNumber as phone',
@@ -48,7 +47,8 @@ class HistoryController extends Controller
                 'bookings.bookingID',
                 'bookings.bookingStatus', 
                 'bookings.bookingType',
-                'carts.numGuests', // CHANGED: Moved from bookings to carts
+                'bookings.gcash_payment_intent_id',
+                'carts.numGuests',
                 'bookings.totalPrice',
                 'bookings.specialRequirements',
                 'bookings.eventType',
@@ -57,37 +57,21 @@ class HistoryController extends Controller
                 'bookings.created_at',
                 'carts.checkInDate',
                 'carts.checkOutDate',
+                'carts.daysCount',
                 'users.name',
                 'users.email',
                 'users.phoneNumber'
             );
 
-        // Apply status filter
-        if ($status !== 'all') {
-            $query->where('bookings.bookingStatus', $status);
+        // If specific booking ID requested, filter by it
+        if ($bookingId) {
+            $query->where('bookings.bookingID', $bookingId);
         }
 
-        // Apply search filter
-        if ($search) {
-            $query->where(function($q) use ($search) {
-                $q->where('users.name', 'like', "%{$search}%")
-                  ->orWhere('users.email', 'like', "%{$search}%")
-                  ->orWhere('users.phoneNumber', 'like', "%{$search}%")
-                  ->orWhere('bookings.eventType', 'like', "%{$search}%") // ADDED: Search by event type
-                  ->orWhere('units.unitName', 'like', "%{$search}%"); // ADDED: Search by unit name
-            });
-        }
+        // Get all bookings (no backend pagination)
+        $bookings = $query->orderBy('bookings.created_at', 'desc')->get();
 
-        // Get total count for pagination
-        $total = $query->count();
-
-        // Apply pagination and ordering
-        $bookings = $query->orderBy('bookings.created_at', 'desc')
-                         ->skip(($page - 1) * $perPage)
-                         ->take($perPage)
-                         ->get();
-
-        // Calculate payment summaries
+        // Calculate payment summaries and get payment references
         $bookingsWithPayments = $bookings->map(function($booking) {
             $payments = DB::table('payments')
                 ->where('bookingID', $booking->bookingID)
@@ -102,6 +86,12 @@ class HistoryController extends Controller
             
             $netPaid = $totalPaid - $totalRefunded;
 
+            // Get the first payment reference (or concatenate all)
+            $paymentReference = $payments->where('paymentStatus', 'completed')
+                                       ->pluck('paymentReference')
+                                       ->filter()
+                                       ->first();
+
             return [
                 'bookingID' => $booking->bookingID,
                 'guest_name' => $booking->guest_name,
@@ -111,7 +101,8 @@ class HistoryController extends Controller
                 'booking_type' => $booking->bookingType,
                 'checkin_date' => $booking->checkInDate,
                 'checkout_date' => $booking->checkOutDate,
-                'num_guests' => $booking->numGuests, // CHANGED: Now comes from carts table
+                'days_count' => $booking->daysCount ?? 1,
+                'num_guests' => $booking->numGuests,
                 'total_price' => $booking->totalPrice,
                 'units' => $booking->units,
                 'special_requirements' => $booking->specialRequirements,
@@ -119,6 +110,8 @@ class HistoryController extends Controller
                 'cancelled_at' => $booking->cancelledAt,
                 'cancellation_reason' => $booking->cancellationReason,
                 'created_at' => $booking->created_at,
+                'gcash_payment_intent_id' => $booking->gcash_payment_intent_id,
+                'payment_reference' => $paymentReference,
                 'total_paid' => $totalPaid,
                 'total_refunded' => $totalRefunded,
                 'net_paid' => $netPaid,
@@ -129,10 +122,7 @@ class HistoryController extends Controller
         return response()->json([
             'success' => true,
             'data' => $bookingsWithPayments,
-            'total' => $total,
-            'current_page' => (int)$page,
-            'per_page' => $perPage,
-            'last_page' => ceil($total / $perPage)
+            'total' => $bookingsWithPayments->count()
         ]);
     }
 
@@ -152,7 +142,8 @@ class HistoryController extends Controller
                     'bookings.bookingID',
                     'bookings.bookingStatus',
                     'bookings.bookingType',
-                    'carts.numGuests', // CHANGED: Moved from bookings to carts
+                    'bookings.gcash_payment_intent_id',
+                    'carts.numGuests',
                     'bookings.totalPrice',
                     'bookings.specialRequirements',
                     'bookings.eventType',
@@ -174,7 +165,8 @@ class HistoryController extends Controller
                     'bookings.bookingID',
                     'bookings.bookingStatus', 
                     'bookings.bookingType',
-                    'carts.numGuests', // CHANGED: Moved from bookings to carts
+                    'bookings.gcash_payment_intent_id',
+                    'carts.numGuests',
                     'bookings.totalPrice',
                     'bookings.specialRequirements',
                     'bookings.eventType',
@@ -212,6 +204,12 @@ class HistoryController extends Controller
             
             $netPaid = $totalPaid - $totalRefunded;
 
+            // Get payment reference
+            $paymentReference = $payments->where('paymentStatus', 'completed')
+                                       ->pluck('paymentReference')
+                                       ->filter()
+                                       ->first();
+
             $formattedPayments = $payments->map(function($payment) {
                 return [
                     'paymentID' => $payment->paymentID,
@@ -241,7 +239,7 @@ class HistoryController extends Controller
                     'checkin_date' => $booking->checkInDate,
                     'checkout_date' => $booking->checkOutDate,
                     'days_count' => $booking->daysCount,
-                    'num_guests' => $booking->numGuests, // CHANGED: Now comes from carts table
+                    'num_guests' => $booking->numGuests,
                     'total_price' => $booking->totalPrice,
                     'units' => $booking->units,
                     'unit_ids' => $booking->unit_ids,
@@ -250,6 +248,8 @@ class HistoryController extends Controller
                     'cancelled_at' => $booking->cancelledAt,
                     'cancellation_reason' => $booking->cancellationReason,
                     'created_at' => $booking->created_at,
+                    'gcash_payment_intent_id' => $booking->gcash_payment_intent_id,
+                    'payment_reference' => $paymentReference,
                     'total_paid' => $totalPaid,
                     'total_refunded' => $totalRefunded,
                     'net_paid' => $netPaid,
@@ -285,7 +285,8 @@ class HistoryController extends Controller
                     'bookings.bookingID',
                     'bookings.bookingStatus',
                     'bookings.bookingType',
-                    'carts.numGuests', // CHANGED: Moved from bookings to carts
+                    'bookings.gcash_payment_intent_id',
+                    'carts.numGuests',
                     'bookings.totalPrice',
                     'bookings.specialRequirements',
                     'bookings.eventType',
@@ -304,7 +305,8 @@ class HistoryController extends Controller
                     'bookings.bookingID',
                     'bookings.bookingStatus', 
                     'bookings.bookingType',
-                    'carts.numGuests', // CHANGED: Moved from bookings to carts
+                    'bookings.gcash_payment_intent_id',
+                    'carts.numGuests',
                     'bookings.totalPrice',
                     'bookings.specialRequirements',
                     'bookings.eventType',
@@ -349,6 +351,11 @@ class HistoryController extends Controller
                 
                 $netPaid = $totalPaid - $totalRefunded;
 
+                $paymentReference = $payments->where('paymentStatus', 'completed')
+                                           ->pluck('paymentReference')
+                                           ->filter()
+                                           ->first();
+
                 return [
                     'Booking ID' => $booking->bookingID,
                     'Guest Name' => $booking->guest_name,
@@ -358,10 +365,12 @@ class HistoryController extends Controller
                     'Booking Type' => ucfirst(str_replace('-', ' ', $booking->bookingType)),
                     'Check-in Date' => $booking->checkInDate,
                     'Check-out Date' => $booking->checkOutDate,
-                    'Number of Guests' => $booking->numGuests, // CHANGED: Now comes from carts table
+                    'Number of Guests' => $booking->numGuests,
                     'Total Price' => '₱' . number_format($booking->totalPrice, 2),
                     'Units' => $booking->units,
                     'Event Type' => $booking->eventType ?: 'Normal Booking',
+                    'GCash Payment Intent ID' => $booking->gcash_payment_intent_id ?: 'N/A',
+                    'Payment Reference' => $paymentReference ?: 'N/A',
                     'Total Paid' => '₱' . number_format($totalPaid, 2),
                     'Total Refunded' => '₱' . number_format($totalRefunded, 2),
                     'Net Paid' => '₱' . number_format($netPaid, 2),

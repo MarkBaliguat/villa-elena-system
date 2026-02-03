@@ -9,7 +9,7 @@
     <link rel="icon" type="image/x-icon" href="{{ asset('images/sunflower1.png') }}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-    <title>Reservations - Villa Elena</title>
+    <title>Booking History - Villa Elena</title>
     <style>
         /* ===== SIDEBAR RESPONSIVE LAYOUT ===== */
         .page-container {
@@ -58,41 +58,41 @@
             background: #555;
         }
 
-        #bookingsTable {
+        #historyTable {
             width: 100%;
             table-layout: auto;
         }
 
-        #bookingsTable th,
-        #bookingsTable td {
+        #historyTable th,
+        #historyTable td {
             white-space: nowrap;
             transition: padding 0.3s ease, font-size 0.3s ease;
         }
 
         /* Compact when sidebar expanded */
-        #mainContent.ml-64 #bookingsTable th,
-        #mainContent.ml-64 #bookingsTable td {
+        #mainContent.ml-64 #historyTable th,
+        #mainContent.ml-64 #historyTable td {
             padding: 0.75rem 0.5rem;
             font-size: 0.8125rem;
         }
 
         /* Spacious when sidebar collapsed */
-        #mainContent.ml-24 #bookingsTable th,
-        #mainContent.ml-24 #bookingsTable td {
+        #mainContent.ml-24 #historyTable th,
+        #mainContent.ml-24 #historyTable td {
             padding: 0.875rem 0.75rem;
             font-size: 0.875rem;
         }
 
         /* Column sizing */
-        #bookingsTable th:nth-child(1), #bookingsTable td:nth-child(1) { min-width: 160px; }
-        #bookingsTable th:nth-child(2), #bookingsTable td:nth-child(2) { min-width: 200px; }
-        #bookingsTable th:nth-child(3), #bookingsTable td:nth-child(3) { min-width: 160px; }
-        #bookingsTable th:nth-child(4), #bookingsTable td:nth-child(4) { min-width: 140px; }
-        #bookingsTable th:nth-child(5), #bookingsTable td:nth-child(5) { min-width: 100px; }
-        #bookingsTable th:nth-child(6), #bookingsTable td:nth-child(6) { min-width: 130px; }
+        #historyTable th:nth-child(1), #historyTable td:nth-child(1) { min-width: 160px; }
+        #historyTable th:nth-child(2), #historyTable td:nth-child(2) { min-width: 200px; }
+        #historyTable th:nth-child(3), #historyTable td:nth-child(3) { min-width: 160px; }
+        #historyTable th:nth-child(4), #historyTable td:nth-child(4) { min-width: 140px; }
+        #historyTable th:nth-child(5), #historyTable td:nth-child(5) { min-width: 100px; }
+        #historyTable th:nth-child(6), #historyTable td:nth-child(6) { min-width: 130px; }
 
         /* Allow wrapping on booking details column */
-        #bookingsTable td:nth-child(2) {
+        #historyTable td:nth-child(2) {
             white-space: normal;
         }
 
@@ -144,7 +144,7 @@
         }
 
         /* ===== MOBILE CARD VIEW ===== */
-        .booking-card {
+        .history-card {
             display: none;
             background: white;
             border-radius: 0.5rem;
@@ -154,7 +154,7 @@
             border-left: 4px solid #3b82f6;
         }
 
-        .booking-card .card-header {
+        .history-card .card-header {
             display: flex;
             justify-content: space-between;
             align-items: start;
@@ -163,18 +163,18 @@
             border-bottom: 1px solid #e5e7eb;
         }
 
-        .booking-card .card-body {
+        .history-card .card-body {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 0.75rem;
         }
 
-        .booking-card .card-item {
+        .history-card .card-item {
             display: flex;
             flex-direction: column;
         }
 
-        .booking-card .card-label {
+        .history-card .card-label {
             font-size: 0.75rem;
             color: #6b7280;
             font-weight: 600;
@@ -182,43 +182,12 @@
             margin-bottom: 0.25rem;
         }
 
-        .booking-card .card-value {
+        .history-card .card-value {
             font-size: 0.875rem;
             color: #111827;
         }
 
-        .booking-card .card-actions {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 0.75rem;
-            padding-top: 0.75rem;
-            border-top: 1px solid #e5e7eb;
-        }
-
-        .booking-card .card-actions button {
-            flex: 1;
-            padding: 0.5rem;
-            border-radius: 0.375rem;
-            font-size: 0.8125rem;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.375rem;
-            border: none;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-
-        .booking-card .card-actions button:hover {
-            opacity: 0.85;
-        }
-
-        .btn-card-edit { background: #2563eb; color: white; }
-        .btn-card-payment { background: #16a34a; color: white; }
-        .btn-card-delete { background: #dc2626; color: white; }
-
-        .booking-card:hover {
+        .history-card:hover {
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             transform: translateY(-2px);
             transition: all 0.3s ease;
@@ -246,11 +215,11 @@
 
         /* ===== SHOW CARDS / HIDE TABLE ON MOBILE ===== */
         @media (max-width: 1024px) {
-            #bookingsTable {
+            #historyTable {
                 display: none;
             }
 
-            .booking-card {
+            .history-card {
                 display: block;
             }
 
@@ -286,7 +255,7 @@
                 padding: 1rem !important;
             }
 
-            .booking-card .card-body {
+            .history-card .card-body {
                 grid-template-columns: 1fr;
             }
 
@@ -302,15 +271,6 @@
                 flex-direction: column;
                 align-items: stretch;
             }
-
-            .header-row .action-buttons {
-                width: 100%;
-            }
-
-            .header-row .action-buttons button {
-                width: 100%;
-                justify-content: center;
-            }
         }
 
         /* ===== EXTRA SMALL ===== */
@@ -319,12 +279,8 @@
                 padding: 0.75rem !important;
             }
 
-            .booking-card {
+            .history-card {
                 padding: 0.75rem;
-            }
-
-            .booking-card .card-actions {
-                flex-direction: column;
             }
 
             .filter-bar button {
@@ -360,8 +316,8 @@
             <div class="mb-6">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2">
                     <div>
-                        <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Reservations</h1>
-                        <p class="text-gray-500 text-sm mt-1">Manage all bookings and reservations</p>
+                        <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Booking History</h1>
+                        <p class="text-gray-500 text-sm mt-1">View completed and cancelled bookings</p>
                     </div>
                     <div class="flex items-center gap-4">
                         <span class="text-xs md:text-sm text-gray-600" id="currentDate"></span>
@@ -369,23 +325,12 @@
                 </div>
             </div>
 
-            {{-- Include Modals --}}
-            @include('adminFolder.reservation.modals.add-booking-modal')
-            @include('adminFolder.reservation.modals.edit-booking-modal')
-            @include('adminFolder.reservation.modals.payment-refund-modal')
-
-            {{-- Filters and Add Button --}}
+            {{-- Filters and Stats --}}
             <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
 
-                {{-- Top Row: Title + Add Button --}}
+                {{-- Top Row: Title --}}
                 <div class="header-row">
-                    <h2 class="text-xl font-semibold text-gray-800">Active Reservations</h2>
-                    <div class="action-buttons">
-                        <button onclick="openModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium flex items-center gap-2 transition">
-                            <i class="fas fa-plus"></i>
-                            Add Booking
-                        </button>
-                    </div>
+                    <h2 class="text-xl font-semibold text-gray-800">Historical Records</h2>
                 </div>
 
                 {{-- Search and Filter --}}
@@ -403,8 +348,8 @@
                         </div>
                         <select id="statusFilter" class="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
                             <option value="all">All Status</option>
-                            <option value="pending">Pending</option>
-                            <option value="confirmed">Confirmed</option>
+                            <option value="completed">Completed</option>
+                            <option value="cancelled">Cancelled</option>
                         </select>
                         <button type="button" onclick="clearFilters()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2.5 rounded-lg font-medium">
                             Clear
@@ -432,7 +377,7 @@
 
                 {{-- Desktop Table View --}}
                 <div class="table-responsive">
-                    <table class="w-full" id="bookingsTable">
+                    <table class="w-full" id="historyTable">
                         <thead>
                             <tr class="border-b border-gray-200">
                                 <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600 uppercase">Guest Info</th>
@@ -440,14 +385,14 @@
                                 <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600 uppercase">Payment</th>
                                 <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600 uppercase">Units</th>
                                 <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600 uppercase">Status</th>
-                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600 uppercase">Actions</th>
+                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600 uppercase">Date</th>
                             </tr>
                         </thead>
-                        <tbody id="bookingsTableBody">
+                        <tbody id="historyTableBody">
                             <tr>
                                 <td colspan="6" class="text-center py-8 text-gray-500">
                                     <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
-                                    <p>Loading bookings...</p>
+                                    <p>Loading history...</p>
                                 </td>
                             </tr>
                         </tbody>
@@ -455,7 +400,7 @@
                 </div>
 
                 {{-- Mobile Card View --}}
-                <div id="bookingsCardsContainer">
+                <div id="historyCardsContainer">
                     <!-- Cards generated here for mobile -->
                 </div>
 
@@ -504,9 +449,9 @@
 
         // Pagination variables
         let currentPage = 1;
-        const perPage = 2;
-        let totalBookings = 0;
-        let allBookings = [];
+        const perPage = 10;
+        let totalRecords = 0;
+        let allHistory = [];
 
         // Set current date
         document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
@@ -520,92 +465,26 @@
         function clearFilters() {
             document.getElementById('searchInput').value = '';
             document.getElementById('statusFilter').value = 'all';
-            loadBookings('all', '', 1);
+            loadHistory('all', '', 1);
         }
 
-        // Phone number validation
-        function validatePhoneNumber(phone) {
-            const cleaned = phone.replace(/\D/g, '');
-            const isValid = /^09\d{9}$/.test(cleaned);
-            return {
-                isValid: isValid,
-                formatted: isValid ? cleaned : phone,
-                error: isValid ? null : 'Phone number must be exactly 11 digits and start with 09 (e.g., 09486036516)'
-            };
-        }
-
-        function setupPhoneValidation(inputId) {
-            const phoneInput = document.getElementById(inputId);
-            if (!phoneInput) return;
-
-            phoneInput.addEventListener('input', function(e) {
-                let value = e.target.value.replace(/\D/g, '');
-                if (value.length > 11) value = value.substring(0, 11);
-                if (value.length > 0) value = value.replace(/(\d{4})(\d{3})(\d{4})/, '$1 $2 $3');
-                e.target.value = value;
-                validatePhoneField(phoneInput);
-            });
-
-            phoneInput.addEventListener('blur', function() {
-                validatePhoneField(phoneInput);
-            });
-        }
-
-        function validatePhoneField(phoneInput) {
-            const value = phoneInput.value.replace(/\D/g, '');
-            const validation = validatePhoneNumber(value);
-
-            const existingError = phoneInput.parentNode.querySelector('.phone-error');
-            if (existingError) existingError.remove();
-
-            phoneInput.classList.remove('border-red-500', 'border-green-500');
-
-            if (value === '') return true;
-
-            if (!validation.isValid) {
-                phoneInput.classList.add('border-red-500');
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'phone-error text-red-500 text-xs mt-1';
-                errorDiv.textContent = validation.error;
-                phoneInput.parentNode.appendChild(errorDiv);
-                return false;
-            } else {
-                phoneInput.classList.add('border-green-500');
-                return true;
-            }
-        }
-
-        function validateFormPhoneNumbers() {
-            const addPhoneInput = document.getElementById('phone');
-            const editPhoneInput = document.getElementById('edit_phone');
-            let isValid = true;
-
-            if (addPhoneInput && addPhoneInput.value) {
-                if (!validatePhoneField(addPhoneInput)) isValid = false;
-            }
-            if (editPhoneInput && editPhoneInput.value) {
-                if (!validatePhoneField(editPhoneInput)) isValid = false;
-            }
-            return isValid;
-        }
-
-        // Load bookings
-        function loadBookings(status = 'all', search = '', page = 1) {
-            const tbody = document.getElementById('bookingsTableBody');
-            const cardsContainer = document.getElementById('bookingsCardsContainer');
-
+        // Load history data
+        function loadHistory(status = 'all', search = '', page = 1) {
+            const tbody = document.getElementById('historyTableBody');
+            const cardsContainer = document.getElementById('historyCardsContainer');
+            
             const loadingRow = `
                 <tr>
                     <td colspan="6" class="text-center py-8 text-gray-500">
                         <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
-                        <p>Loading bookings...</p>
+                        <p>Loading history...</p>
                     </td>
                 </tr>`;
 
             tbody.innerHTML = loadingRow;
             cardsContainer.innerHTML = `<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-gray-500"></i></div>`;
 
-            let url = `/admin/bookings?`;
+            let url = `/admin/history/data?`;
             if (status !== 'all') url += `status=${status}&`;
             if (search) url += `search=${search}&`;
             url += `page=${page}&per_page=${perPage}`;
@@ -614,168 +493,165 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        allBookings = data.data;
-                        totalBookings = data.total || data.data.length;
+                        allHistory = data.data;
+                        totalRecords = data.total || data.data.length;
                         currentPage = page;
-
-                        displayBookings(data.data);
-                        displayBookingCards(data.data);
+                        
+                        displayHistory(data.data);
+                        displayHistoryCards(data.data);
                         updatePagination(data.total || data.data.length, page);
                         updateShowingText(data.data.length, page, data.total || data.data.length);
                     } else {
-                        const errorMsg = `<tr><td colspan="6" class="text-center py-8 text-red-500">Error loading bookings</td></tr>`;
+                        const errorMsg = `<tr><td colspan="6" class="text-center py-8 text-red-500">Error loading history</td></tr>`;
                         tbody.innerHTML = errorMsg;
-                        cardsContainer.innerHTML = `<div class="text-center py-8 text-red-500">Error loading bookings</div>`;
+                        cardsContainer.innerHTML = `<div class="text-center py-8 text-red-500">Error loading history</div>`;
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-red-500">Error loading bookings</td></tr>`;
-                    cardsContainer.innerHTML = `<div class="text-center py-8 text-red-500">Error loading bookings</div>`;
+                    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-red-500">Error loading history</td></tr>`;
+                    cardsContainer.innerHTML = `<div class="text-center py-8 text-red-500">Error loading history</div>`;
                 });
         }
 
-        // Display bookings in table (Desktop) - REMOVED NET PAID
-        function displayBookings(bookings) {
-            const tbody = document.getElementById('bookingsTableBody');
-
-            if (bookings.length === 0) {
+        // Display history in table (Desktop)
+        function displayHistory(history) {
+            const tbody = document.getElementById('historyTableBody');
+            
+            if (history.length === 0) {
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="6" class="text-center py-8 text-gray-500">
                             <i class="fas fa-inbox text-4xl mb-2"></i>
-                            <p>No bookings found</p>
+                            <p>No historical records found</p>
                         </td>
                     </tr>`;
                 return;
             }
 
-            tbody.innerHTML = bookings.map(booking => `
+            tbody.innerHTML = history.map(record => `
                 <tr class="border-b border-gray-100 table-row-hover">
                     <td class="py-4 px-4">
                         <div>
-                            <p class="font-medium text-gray-900">${booking.guest_name}</p>
-                            <p class="text-sm text-gray-500">${booking.email}</p>
-                            <p class="text-sm text-gray-500">${booking.phone}</p>
+                            <p class="font-medium text-gray-900">${record.guest_name}</p>
+                            <p class="text-sm text-gray-500">${record.email}</p>
+                            <p class="text-sm text-gray-500">${record.phone}</p>
                         </div>
                     </td>
                     <td class="py-4 px-4">
                         <div>
-                            <p class="text-sm"><span class="font-medium">Type:</span> ${booking.booking_type}</p>
-                            <p class="text-sm"><span class="font-medium">Check-in:</span> ${booking.checkin_date}</p>
-                            <p class="text-sm"><span class="font-medium">Check-out:</span> ${booking.checkout_date || 'N/A'}</p>
-                            <p class="text-sm"><span class="font-medium">Guests:</span> ${booking.num_guests}</p>
-                            <p class="text-sm"><span class="font-medium">Price:</span> ₱${parseFloat(booking.total_price).toFixed(2)}</p>
+                            <p class="text-sm"><span class="font-medium">Type:</span> ${record.booking_type}</p>
+                            <p class="text-sm"><span class="font-medium">Check-in:</span> ${record.checkin_date}</p>
+                            <p class="text-sm"><span class="font-medium">Check-out:</span> ${record.checkout_date || 'N/A'}</p>
+                            <p class="text-sm"><span class="font-medium">Guests:</span> ${record.num_guests}</p>
+                            <p class="text-sm"><span class="font-medium">Price:</span> ₱${parseFloat(record.total_price).toFixed(2)}</p>
+                            ${record.event_type !== 'normal-booking' ? `<p class="text-sm"><span class="font-medium">Event:</span> ${record.event_type}</p>` : ''}
+                            ${record.cancellation_reason ? `<p class="text-sm"><span class="font-medium">Cancel Reason:</span> ${record.cancellation_reason}</p>` : ''}
                         </div>
                     </td>
                     <td class="py-4 px-4">
                         <div class="space-y-1">
-                            <p class="text-sm"><span class="font-medium">Total:</span> ₱${parseFloat(booking.total_price).toFixed(2)}</p>
-                            <p class="text-sm"><span class="font-medium">Paid:</span> ₱${parseFloat(booking.total_paid || 0).toFixed(2)}</p>
-                            <p class="text-sm"><span class="font-medium">Refunded:</span> ₱${parseFloat(booking.total_refunded || 0).toFixed(2)}</p>
-                            <p class="text-sm"><span class="font-medium">Balance:</span> ₱${parseFloat(booking.remaining_balance || booking.total_price).toFixed(2)}</p>
-                            ${booking.payment_status ? `<p class="text-xs ${getPaymentStatusColor(booking.payment_status)}">${booking.payment_status.toUpperCase()}</p>` : ''}
+                            <p class="text-sm"><span class="font-medium">Total:</span> ₱${parseFloat(record.total_price).toFixed(2)}</p>
+                            <p class="text-sm"><span class="font-medium">Paid:</span> ₱${parseFloat(record.total_paid || 0).toFixed(2)}</p>
+                            <p class="text-sm"><span class="font-medium">Refunded:</span> ₱${parseFloat(record.total_refunded || 0).toFixed(2)}</p>
+                            <p class="text-sm"><span class="font-medium">Net Paid:</span> ₱${parseFloat(record.net_paid || 0).toFixed(2)}</p>
                         </div>
                     </td>
                     <td class="py-4 px-4">
-                        <p class="text-sm text-gray-700">${booking.units}</p>
+                        <p class="text-sm text-gray-700">${record.units}</p>
                     </td>
                     <td class="py-4 px-4">
-                        <span class="status-badge ${getStatusColor(booking.booking_status)}">
-                            ${booking.booking_status.toUpperCase()}
+                        <span class="status-badge ${getStatusColor(record.booking_status)}">
+                            ${record.booking_status.toUpperCase()}
                         </span>
                     </td>
                     <td class="py-4 px-4">
-                        <div class="flex gap-2">
-                            <button onclick="editBooking(${booking.bookingID})" class="text-blue-600 hover:text-blue-800" title="Edit">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button onclick="openPaymentModal(${booking.bookingID})" class="text-green-600 hover:text-green-800" title="Payment Management">
-                                <i class="fas fa-credit-card"></i>
-                            </button>
-                            <button onclick="deleteBooking(${booking.bookingID})" class="text-red-600 hover:text-red-800" title="Delete">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                        <div class="text-sm text-gray-600">
+                            <p>Created: ${new Date(record.created_at).toLocaleDateString()}</p>
+                            ${record.cancelled_at ? `<p>Cancelled: ${new Date(record.cancelled_at).toLocaleDateString()}</p>` : ''}
                         </div>
                     </td>
                 </tr>
             `).join('');
         }
 
-        // Display bookings as cards (Mobile) - REMOVED NET PAID
-        function displayBookingCards(bookings) {
-            const container = document.getElementById('bookingsCardsContainer');
+        // Display history as cards (Mobile)
+        function displayHistoryCards(history) {
+            const container = document.getElementById('historyCardsContainer');
 
-            if (bookings.length === 0) {
+            if (history.length === 0) {
                 container.innerHTML = '';
                 return;
             }
 
-            container.innerHTML = bookings.map(booking => `
-                <div class="booking-card">
+            container.innerHTML = history.map(record => `
+                <div class="history-card">
                     <div class="card-header">
                         <div>
-                            <h3 class="font-semibold text-gray-900 text-lg">${booking.guest_name}</h3>
-                            <p class="text-sm text-gray-500">${booking.email}</p>
-                            <p class="text-sm text-gray-500">${booking.phone}</p>
+                            <h3 class="font-semibold text-gray-900 text-lg">${record.guest_name}</h3>
+                            <p class="text-sm text-gray-500">${record.email}</p>
+                            <p class="text-sm text-gray-500">${record.phone}</p>
                         </div>
-                        <span class="status-badge ${getStatusColor(booking.booking_status)}">
-                            ${booking.booking_status.toUpperCase()}
+                        <span class="status-badge ${getStatusColor(record.booking_status)}">
+                            ${record.booking_status.toUpperCase()}
                         </span>
                     </div>
                     <div class="card-body">
                         <div class="card-item">
                             <span class="card-label">Booking Type</span>
-                            <span class="card-value">${booking.booking_type}</span>
+                            <span class="card-value">${record.booking_type}</span>
                         </div>
                         <div class="card-item">
                             <span class="card-label">Check-in</span>
-                            <span class="card-value">${booking.checkin_date}</span>
+                            <span class="card-value">${record.checkin_date}</span>
                         </div>
                         <div class="card-item">
                             <span class="card-label">Check-out</span>
-                            <span class="card-value">${booking.checkout_date || 'N/A'}</span>
+                            <span class="card-value">${record.checkout_date || 'N/A'}</span>
                         </div>
                         <div class="card-item">
                             <span class="card-label">Guests</span>
-                            <span class="card-value">${booking.num_guests}</span>
+                            <span class="card-value">${record.num_guests}</span>
                         </div>
                         <div class="card-item">
                             <span class="card-label">Units</span>
-                            <span class="card-value">${booking.units}</span>
+                            <span class="card-value">${record.units}</span>
                         </div>
                         <div class="card-item">
                             <span class="card-label">Total Price</span>
-                            <span class="card-value font-semibold text-blue-600">₱${parseFloat(booking.total_price).toFixed(2)}</span>
+                            <span class="card-value font-semibold text-blue-600">₱${parseFloat(record.total_price).toFixed(2)}</span>
                         </div>
                         <div class="card-item">
                             <span class="card-label">Amount Paid</span>
-                            <span class="card-value text-green-600">₱${parseFloat(booking.total_paid || 0).toFixed(2)}</span>
+                            <span class="card-value text-green-600">₱${parseFloat(record.total_paid || 0).toFixed(2)}</span>
                         </div>
                         <div class="card-item">
                             <span class="card-label">Refunded</span>
-                            <span class="card-value text-orange-600">₱${parseFloat(booking.total_refunded || 0).toFixed(2)}</span>
+                            <span class="card-value text-orange-600">₱${parseFloat(record.total_refunded || 0).toFixed(2)}</span>
                         </div>
                         <div class="card-item">
-                            <span class="card-label">Balance</span>
-                            <span class="card-value font-semibold text-red-600">₱${parseFloat(booking.remaining_balance || booking.total_price).toFixed(2)}</span>
+                            <span class="card-label">Net Paid</span>
+                            <span class="card-value font-semibold">₱${parseFloat(record.net_paid || 0).toFixed(2)}</span>
                         </div>
-                        ${booking.payment_status ? `
                         <div class="card-item">
-                            <span class="card-label">Payment Status</span>
-                            <span class="card-value ${getPaymentStatusColor(booking.payment_status)} font-semibold">${booking.payment_status.toUpperCase()}</span>
+                            <span class="card-label">Created Date</span>
+                            <span class="card-value">${new Date(record.created_at).toLocaleDateString()}</span>
+                        </div>
+                        ${record.event_type !== 'normal-booking' ? `
+                        <div class="card-item">
+                            <span class="card-label">Event Type</span>
+                            <span class="card-value">${record.event_type}</span>
                         </div>` : ''}
-                    </div>
-                    <div class="card-actions">
-                        <button class="btn-card-edit" onclick="editBooking(${booking.bookingID})">
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
-                        <button class="btn-card-payment" onclick="openPaymentModal(${booking.bookingID})">
-                            <i class="fas fa-credit-card"></i> Payment
-                        </button>
-                        <button class="btn-card-delete" onclick="deleteBooking(${booking.bookingID})">
-                            <i class="fas fa-trash"></i> Delete
-                        </button>
+                        ${record.cancellation_reason ? `
+                        <div class="card-item" style="grid-column: 1 / -1;">
+                            <span class="card-label">Cancellation Reason</span>
+                            <span class="card-value">${record.cancellation_reason}</span>
+                        </div>` : ''}
+                        ${record.cancelled_at ? `
+                        <div class="card-item">
+                            <span class="card-label">Cancelled Date</span>
+                            <span class="card-value">${new Date(record.cancelled_at).toLocaleDateString()}</span>
+                        </div>` : ''}
                     </div>
                 </div>
             `).join('');
@@ -795,7 +671,7 @@
 
             // Previous
             if (currentPage > 1) {
-                html += `<button onclick="loadBookings(getCurrentStatus(), getCurrentSearch(), ${currentPage - 1})" 
+                html += `<button onclick="loadHistory(getCurrentStatus(), getCurrentSearch(), ${currentPage - 1})" 
                     class="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">
                     <i class="fas fa-chevron-left"></i></button>`;
             }
@@ -807,7 +683,7 @@
 
             // First + ellipsis
             if (start > 1) {
-                html += `<button onclick="loadBookings(getCurrentStatus(), getCurrentSearch(), 1)" 
+                html += `<button onclick="loadHistory(getCurrentStatus(), getCurrentSearch(), 1)" 
                     class="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">1</button>`;
                 if (start > 2) html += `<span class="px-3 py-2 text-sm text-gray-400">...</span>`;
             }
@@ -817,7 +693,7 @@
                 if (i === currentPage) {
                     html += `<button class="px-3 py-2 text-sm border border-blue-500 bg-blue-500 text-white rounded-lg transition">${i}</button>`;
                 } else {
-                    html += `<button onclick="loadBookings(getCurrentStatus(), getCurrentSearch(), ${i})" 
+                    html += `<button onclick="loadHistory(getCurrentStatus(), getCurrentSearch(), ${i})" 
                         class="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">${i}</button>`;
                 }
             }
@@ -825,13 +701,13 @@
             // Last + ellipsis
             if (end < totalPages) {
                 if (end < totalPages - 1) html += `<span class="px-3 py-2 text-sm text-gray-400">...</span>`;
-                html += `<button onclick="loadBookings(getCurrentStatus(), getCurrentSearch(), ${totalPages})" 
+                html += `<button onclick="loadHistory(getCurrentStatus(), getCurrentSearch(), ${totalPages})" 
                     class="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">${totalPages}</button>`;
             }
 
             // Next
             if (currentPage < totalPages) {
-                html += `<button onclick="loadBookings(getCurrentStatus(), getCurrentSearch(), ${currentPage + 1})" 
+                html += `<button onclick="loadHistory(getCurrentStatus(), getCurrentSearch(), ${currentPage + 1})" 
                     class="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">
                     <i class="fas fa-chevron-right"></i></button>`;
             }
@@ -855,109 +731,79 @@
         // Status colors
         function getStatusColor(status) {
             switch(status.toLowerCase()) {
-                case 'confirmed': return 'bg-green-100 text-green-800';
-                case 'pending':   return 'bg-yellow-100 text-yellow-800';
+                case 'completed': return 'bg-green-100 text-green-800';
+                case 'cancelled': return 'bg-red-100 text-red-800';
                 default:          return 'bg-gray-100 text-gray-800';
             }
         }
 
-        function getPaymentStatusColor(status) {
-            switch(status.toLowerCase()) {
-                case 'completed': return 'text-green-600';
-                case 'pending':   return 'text-yellow-600';
-                case 'failed':    return 'text-red-600';
-                case 'refunded':  return 'text-blue-600';
-                default:          return 'text-gray-600';
-            }
-        }
-
-        // Delete booking
-        function deleteBooking(bookingId) {
-            if (!confirm('Are you sure you want to delete this booking?')) return;
-
-            fetch(`/admin/bookings/${bookingId}`, {
-                method: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': csrfToken }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Booking deleted successfully!');
-                    loadBookings(getCurrentStatus(), getCurrentSearch(), currentPage);
-                } else {
-                    alert('Error: ' + (data.message || 'Failed to delete booking'));
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error deleting booking');
-            });
-        }
-
-        // Export to CSV - REMOVED NET PAID
+        // Export to CSV
         function exportToCSV() {
-            if (allBookings.length === 0) { alert('No data to export'); return; }
+            if (allHistory.length === 0) { alert('No data to export'); return; }
 
-            const headers = ['Guest Name','Email','Phone','Booking Type','Check-in','Check-out','Guests','Units','Total Price','Amount Paid','Amount Refunded','Remaining Balance','Status','Payment Status','Special Requirements'];
-            const rows = allBookings.map(b => [
-                `"${b.guest_name}"`,`"${b.email}"`,`"${b.phone}"`,`"${b.booking_type}"`,
-                `"${b.checkin_date}"`,`"${b.checkout_date || 'N/A'}"`,`"${b.num_guests}"`,`"${b.units}"`,
-                `"₱${parseFloat(b.total_price).toFixed(2)}"`,
-                `"₱${parseFloat(b.total_paid || 0).toFixed(2)}"`,
-                `"₱${parseFloat(b.total_refunded || 0).toFixed(2)}"`,
-                `"₱${parseFloat(b.remaining_balance || b.total_price).toFixed(2)}"`,
-                `"${b.booking_status}"`,`"${b.payment_status || 'No Payment'}"`,`"${b.special_requirements || 'N/A'}"`
+            const headers = ['Guest Name','Email','Phone','Booking Type','Status','Check-in','Check-out','Guests','Units','Total Price','Amount Paid','Amount Refunded','Net Paid','Event Type','Cancellation Reason','Created Date','Cancelled Date'];
+            const rows = allHistory.map(r => [
+                `"${r.guest_name}"`,`"${r.email}"`,`"${r.phone}"`,`"${r.booking_type}"`,`"${r.booking_status}"`,
+                `"${r.checkin_date}"`,`"${r.checkout_date || 'N/A'}"`,`"${r.num_guests}"`,`"${r.units}"`,
+                `"₱${parseFloat(r.total_price).toFixed(2)}"`,
+                `"₱${parseFloat(r.total_paid || 0).toFixed(2)}"`,
+                `"₱${parseFloat(r.total_refunded || 0).toFixed(2)}"`,
+                `"₱${parseFloat(r.net_paid || 0).toFixed(2)}"`,
+                `"${r.event_type}"`,`"${r.cancellation_reason || 'N/A'}"`,
+                `"${new Date(r.created_at).toLocaleDateString()}"`,
+                `"${r.cancelled_at ? new Date(r.cancelled_at).toLocaleDateString() : 'N/A'}"`
             ]);
 
             const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.setAttribute('href', URL.createObjectURL(blob));
-            link.setAttribute('download', `active_reservations_${new Date().toISOString().split('T')[0]}.csv`);
+            link.setAttribute('download', `booking_history_${new Date().toISOString().split('T')[0]}.csv`);
             link.style.visibility = 'hidden';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         }
 
-        // Print table - REMOVED NET PAID
+        // Print table
         function printTable() {
-            if (allBookings.length === 0) { alert('No data to print'); return; }
+            if (allHistory.length === 0) { alert('No data to print'); return; }
 
             const printWindow = window.open('', '_blank');
             const printContent = `
                 <!DOCTYPE html><html><head>
-                    <title>Active Reservations Report - Villa Elena</title>
+                    <title>Booking History Report - Villa Elena</title>
                     <style>
                         body { font-family: Arial, sans-serif; margin: 20px; }
                         h1 { color: #2d3748; text-align: center; margin-bottom: 20px; }
                         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
                         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 11px; }
                         th { background-color: #f8f9fa; font-weight: bold; }
-                        .status-confirmed { background-color: #d1fae5; color: #065f46; }
-                        .status-pending { background-color: #fef3c7; color: #92400e; }
+                        .status-completed { background-color: #d1fae5; color: #065f46; }
+                        .status-cancelled { background-color: #fecaca; color: #991b1b; }
                         .print-date { text-align: right; margin-bottom: 20px; color: #6b7280; }
                     </style>
                 </head><body>
-                    <h1>Active Reservations Report - Villa Elena</h1>
+                    <h1>Booking History Report - Villa Elena</h1>
                     <div class="print-date">Printed on: ${new Date().toLocaleString()}</div>
                     <table><thead><tr>
-                        <th>Guest Name</th><th>Email</th><th>Phone</th><th>Type</th>
+                        <th>Guest Name</th><th>Email</th><th>Phone</th><th>Type</th><th>Status</th>
                         <th>Check-in</th><th>Check-out</th><th>Guests</th><th>Units</th>
-                        <th>Total</th><th>Paid</th><th>Refunded</th><th>Balance</th><th>Status</th>
+                        <th>Total</th><th>Paid</th><th>Refunded</th><th>Net Paid</th>
                     </tr></thead><tbody>
-                        ${allBookings.map(b => `<tr>
-                            <td>${b.guest_name}</td><td>${b.email}</td><td>${b.phone}</td>
-                            <td>${b.booking_type}</td><td>${b.checkin_date}</td><td>${b.checkout_date || 'N/A'}</td>
-                            <td>${b.num_guests}</td><td>${b.units}</td>
-                            <td>₱${parseFloat(b.total_price).toFixed(2)}</td>
-                            <td>₱${parseFloat(b.total_paid || 0).toFixed(2)}</td>
-                            <td>₱${parseFloat(b.total_refunded || 0).toFixed(2)}</td>
-                            <td>₱${parseFloat(b.remaining_balance || b.total_price).toFixed(2)}</td>
-                            <td><span class="status-${b.booking_status}">${b.booking_status.toUpperCase()}</span></td>
+                        ${allHistory.map(r => `<tr>
+                            <td>${r.guest_name}</td><td>${r.email}</td><td>${r.phone}</td>
+                            <td>${r.booking_type}</td>
+                            <td><span class="status-${r.booking_status}">${r.booking_status.toUpperCase()}</span></td>
+                            <td>${r.checkin_date}</td><td>${r.checkout_date || 'N/A'}</td>
+                            <td>${r.num_guests}</td><td>${r.units}</td>
+                            <td>₱${parseFloat(r.total_price).toFixed(2)}</td>
+                            <td>₱${parseFloat(r.total_paid || 0).toFixed(2)}</td>
+                            <td>₱${parseFloat(r.total_refunded || 0).toFixed(2)}</td>
+                            <td>₱${parseFloat(r.net_paid || 0).toFixed(2)}</td>
                         </tr>`).join('')}
                     </tbody></table>
-                    <div style="margin-top:20px;text-align:center;color:#6b7280;">Total Records: ${allBookings.length}</div>
+                    <div style="margin-top:20px;text-align:center;color:#6b7280;">Total Records: ${allHistory.length}</div>
                 </body></html>`;
 
             printWindow.document.write(printContent);
@@ -966,29 +812,28 @@
             setTimeout(() => { printWindow.print(); printWindow.close(); }, 500);
         }
 
-        // Export to PDF - REMOVED NET PAID
+        // Export to PDF
         function exportToPDF() {
-            if (allBookings.length === 0) { alert('No data to export'); return; }
+            if (allHistory.length === 0) { alert('No data to export'); return; }
 
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
 
             doc.setFontSize(16);
             doc.setTextColor(40, 40, 40);
-            doc.text('Active Reservations Report - Villa Elena', 14, 15);
+            doc.text('Booking History Report - Villa Elena', 14, 15);
             doc.setFontSize(10);
             doc.setTextColor(100, 100, 100);
             doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 22);
 
-            const headers = ['Guest','Email','Phone','Type','Check-in','Check-out','Guests','Units','Total','Paid','Refunded','Balance','Status'];
-            const rows = allBookings.map(b => [
-                b.guest_name, b.email, b.phone, b.booking_type,
-                b.checkin_date, b.checkout_date || 'N/A', b.num_guests, b.units,
-                `₱${parseFloat(b.total_price).toFixed(2)}`,
-                `₱${parseFloat(b.total_paid || 0).toFixed(2)}`,
-                `₱${parseFloat(b.total_refunded || 0).toFixed(2)}`,
-                `₱${parseFloat(b.remaining_balance || b.total_price).toFixed(2)}`,
-                b.booking_status.toUpperCase()
+            const headers = ['Guest','Email','Phone','Type','Status','Check-in','Check-out','Guests','Units','Total','Paid','Refunded','Net'];
+            const rows = allHistory.map(r => [
+                r.guest_name, r.email, r.phone, r.booking_type, r.booking_status.toUpperCase(),
+                r.checkin_date, r.checkout_date || 'N/A', r.num_guests, r.units,
+                `₱${parseFloat(r.total_price).toFixed(2)}`,
+                `₱${parseFloat(r.total_paid || 0).toFixed(2)}`,
+                `₱${parseFloat(r.total_refunded || 0).toFixed(2)}`,
+                `₱${parseFloat(r.net_paid || 0).toFixed(2)}`
             ]);
 
             doc.autoTable({
@@ -998,30 +843,30 @@
                 alternateRowStyles: { fillColor: [249, 250, 251] }
             });
 
-            doc.save(`active_reservations_${new Date().toISOString().split('T')[0]}.pdf`);
+            doc.save(`booking_history_${new Date().toISOString().split('T')[0]}.pdf`);
         }
 
         // Filter and search listeners
         document.getElementById('statusFilter').addEventListener('change', function() {
-            loadBookings(this.value, document.getElementById('searchInput').value, 1);
+            loadHistory(this.value, document.getElementById('searchInput').value, 1);
         });
 
         document.getElementById('searchInput').addEventListener('input', function() {
             clearTimeout(this.searchTimeout);
             this.searchTimeout = setTimeout(() => {
-                loadBookings(getCurrentStatus(), this.value, 1);
+                loadHistory(getCurrentStatus(), this.value, 1);
             }, 500);
         });
 
         // Repaginate on resize
         window.addEventListener('resize', () => {
-            if (totalBookings > 0) updatePagination(totalBookings, currentPage);
+            if (totalRecords > 0) updatePagination(totalRecords, currentPage);
         });
 
         // Load on page load
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('=== RESERVATIONS PAGE LOADED ===');
-            loadBookings('all', '', 1);
+            console.log('=== HISTORY PAGE LOADED ===');
+            loadHistory('all', '', 1);
         });
     </script>
 </body>

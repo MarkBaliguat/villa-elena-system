@@ -12,6 +12,7 @@ use App\Models\EntranceFee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\Mail\BookingConfirmationEmail;
 use App\Mail\BookingCompletedEmail;
@@ -743,6 +744,20 @@ class BookingController extends Controller
             // Store old status for comparison
             $oldStatus = $booking->bookingStatus;
             $newStatus = $validated['booking_status'];
+            
+            // ✅ TRACK CANCELLATION DATA
+            if ($newStatus === 'cancelled' && $oldStatus !== 'cancelled') {
+                $booking->cancelledAt = now();
+                $booking->cancelledBy = Auth::id(); // Get current admin user ID
+                $booking->cancellationReason = $validated['cancellation_reason'] ?? null;
+                
+                Log::info('Booking cancelled', [
+                    'booking_id' => $id,
+                    'cancelled_by' => Auth::id(),
+                    'cancelled_at' => now(),
+                    'reason' => $validated['cancellation_reason']
+                ]);
+            }
             
             // Check for special event conflicts before updating
             if (in_array($newStatus, ['confirmed', 'pending'])) {

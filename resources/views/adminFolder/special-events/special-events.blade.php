@@ -637,7 +637,7 @@
                 });
         }
 
-        // Display bookings in table (Desktop)
+        // Display bookings in table (Desktop) - REMOVED NET PAID
         function displayBookings(bookings) {
             const tbody = document.getElementById('bookingsTableBody');
 
@@ -678,7 +678,6 @@
                             <p class="text-sm"><span class="font-medium">Total:</span> ₱${parseFloat(booking.total_price).toFixed(2)}</p>
                             <p class="text-sm"><span class="font-medium">Paid:</span> ₱${parseFloat(booking.total_paid || 0).toFixed(2)}</p>
                             <p class="text-sm"><span class="font-medium">Refunded:</span> ₱${parseFloat(booking.total_refunded || 0).toFixed(2)}</p>
-                            <p class="text-sm"><span class="font-medium">Net Paid:</span> ₱${parseFloat(booking.net_paid || 0).toFixed(2)}</p>
                             <p class="text-sm"><span class="font-medium">Balance:</span> ₱${parseFloat(booking.remaining_balance || booking.total_price).toFixed(2)}</p>
                             ${booking.payment_status ? `<p class="text-xs ${getPaymentStatusColor(booking.payment_status)}">${booking.payment_status.toUpperCase()}</p>` : ''}
                         </div>
@@ -708,7 +707,7 @@
             }).join('');
         }
 
-        // Display event cards (Mobile)
+        // Display event cards (Mobile) - REMOVED NET PAID
         function displayEventCards(bookings) {
             const container = document.getElementById('eventsCardsContainer');
 
@@ -760,10 +759,6 @@
                         <div class="card-item">
                             <span class="card-label">Refunded</span>
                             <span class="card-value text-orange-600">₱${parseFloat(booking.total_refunded || 0).toFixed(2)}</span>
-                        </div>
-                        <div class="card-item">
-                            <span class="card-label">Net Paid</span>
-                            <span class="card-value font-semibold">₱${parseFloat(booking.net_paid || 0).toFixed(2)}</span>
                         </div>
                         <div class="card-item">
                             <span class="card-label">Balance</span>
@@ -829,7 +824,7 @@
             // Pages
             for (let i = start; i <= end; i++) {
                 if (i === currentPage) {
-                    html += `<button class="px-3 py-2 text-sm border border-violet-500 bg-violet-500 text-white rounded-lg transition">${i}</button>`;
+                    html += `<button class="px-3 py-2 text-sm border border-blue-500 bg-blue-500 text-white rounded-lg transition">${i}</button>`;
                 } else {
                     html += `<button onclick="loadBookings(getCurrentStatus(), getCurrentSearch(), ${i})" 
                         class="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">${i}</button>`;
@@ -910,11 +905,11 @@
             });
         }
 
-        // Export to CSV
+        // Export to CSV - REMOVED NET PAID
         function exportToCSV() {
             if (allBookings.length === 0) { alert('No data to export'); return; }
 
-            const headers = ['Guest Name','Email','Phone','Event Name','Event Date','Start Time','End Time','Guests','Venue','Total Price','Amount Paid','Amount Refunded','Net Paid','Remaining Balance','Status','Payment Status','Special Requirements'];
+            const headers = ['Guest Name','Email','Phone','Event Name','Event Date','Start Time','End Time','Guests','Venue','Total Price','Amount Paid','Amount Refunded','Remaining Balance','Status','Payment Status','Special Requirements'];
             const rows = allBookings.map(b => {
                 const eventDate = b.checkin_date ? b.checkin_date : 'N/A';
                 return [
@@ -924,7 +919,6 @@
                     `"₱${parseFloat(b.total_price).toFixed(2)}"`,
                     `"₱${parseFloat(b.total_paid || 0).toFixed(2)}"`,
                     `"₱${parseFloat(b.total_refunded || 0).toFixed(2)}"`,
-                    `"₱${parseFloat(b.net_paid || 0).toFixed(2)}"`,
                     `"₱${parseFloat(b.remaining_balance || b.total_price).toFixed(2)}"`,
                     `"${b.booking_status}"`,`"${b.payment_status || 'No Payment'}"`,
                     `"${b.special_requirements || 'N/A'}"`
@@ -942,7 +936,7 @@
             document.body.removeChild(link);
         }
 
-        // Print table
+        // Print table - REMOVED NET PAID
         function printTable() {
             if (allBookings.length === 0) { alert('No data to print'); return; }
 
@@ -968,7 +962,7 @@
                     <table><thead><tr>
                         <th>Guest Name</th><th>Email</th><th>Phone</th><th>Event Name</th>
                         <th>Event Date</th><th>Time</th><th>Guests</th><th>Venue</th>
-                        <th>Total</th><th>Paid</th><th>Refunded</th><th>Net</th><th>Balance</th><th>Status</th>
+                        <th>Total</th><th>Paid</th><th>Refunded</th><th>Balance</th><th>Status</th>
                     </tr></thead><tbody>
                         ${allBookings.map(b => {
                             const eventDate = b.checkin_date ? b.checkin_date : 'N/A';
@@ -980,7 +974,6 @@
                                 <td>₱${parseFloat(b.total_price).toFixed(2)}</td>
                                 <td>₱${parseFloat(b.total_paid || 0).toFixed(2)}</td>
                                 <td>₱${parseFloat(b.total_refunded || 0).toFixed(2)}</td>
-                                <td>₱${parseFloat(b.net_paid || 0).toFixed(2)}</td>
                                 <td>₱${parseFloat(b.remaining_balance || b.total_price).toFixed(2)}</td>
                                 <td><span class="status-${b.booking_status}">${b.booking_status.toUpperCase()}</span></td>
                             </tr>`;
@@ -995,7 +988,7 @@
             setTimeout(() => { printWindow.print(); printWindow.close(); }, 500);
         }
 
-        // Export to PDF
+        // Export to PDF - REMOVED NET PAID
         function exportToPDF() {
             if (allBookings.length === 0) { alert('No data to export'); return; }
 
@@ -1009,7 +1002,7 @@
             doc.setTextColor(100, 100, 100);
             doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 22);
 
-            const headers = ['Guest','Email','Phone','Event','Date','Time','Guests','Venue','Total','Paid','Refunded','Net','Balance','Status'];
+            const headers = ['Guest','Email','Phone','Event','Date','Time','Guests','Venue','Total','Paid','Refunded','Balance','Status'];
             const rows = allBookings.map(b => {
                 const eventDate = b.checkin_date ? b.checkin_date : 'N/A';
                 return [
@@ -1019,7 +1012,6 @@
                     `₱${parseFloat(b.total_price).toFixed(2)}`,
                     `₱${parseFloat(b.total_paid || 0).toFixed(2)}`,
                     `₱${parseFloat(b.total_refunded || 0).toFixed(2)}`,
-                    `₱${parseFloat(b.net_paid || 0).toFixed(2)}`,
                     `₱${parseFloat(b.remaining_balance || b.total_price).toFixed(2)}`,
                     b.booking_status.toUpperCase()
                 ];

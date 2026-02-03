@@ -48,13 +48,24 @@ class DashboardController extends Controller
         $cottagesCount = Unit::where('unitType', 'cottage')->count();
         $specialUnitsCount = Unit::where('unitType', 'special')->count();
         
-        // Revenue Statistics
-        $totalRevenue = Payment::where('paymentStatus', 'completed')->sum('amountPaid');
+        // Revenue Statistics (Only from completed bookings)
+        $totalRevenue = Payment::where('paymentStatus', 'completed')
+            ->whereHas('booking', function($query) {
+                $query->where('bookingStatus', 'completed');
+            })
+            ->sum('amountPaid');
+            
         $monthlyRevenue = Payment::where('paymentStatus', 'completed')
+            ->whereHas('booking', function($query) {
+                $query->where('bookingStatus', 'completed');
+            })
             ->whereDate('paymentDate', '>=', $thisMonth)
             ->sum('amountPaid');
         
         $todayRevenue = Payment::where('paymentStatus', 'completed')
+            ->whereHas('booking', function($query) {
+                $query->where('bookingStatus', 'completed');
+            })
             ->whereDate('paymentDate', $today)
             ->sum('amountPaid');
         
@@ -90,11 +101,12 @@ class DashboardController extends Controller
 
         // Upcoming Check-ins (Next 7 days)
         $upcomingCheckIns = Booking::with(['cart.user', 'cart.cartItems.unit'])
-            ->whereHas('cart', function($query) {
-                $query->whereBetween('checkInDate', [Carbon::today(), Carbon::today()->addDays(7)]);
-            })
-            ->where('bookingStatus', 'confirmed')
-            ->orderBy('created_at')
+            ->join('carts', 'bookings.cartID', '=', 'carts.cartID')
+            ->whereBetween('carts.checkInDate', [Carbon::today(), Carbon::today()->addDays(7)])
+            ->where('bookings.bookingStatus', 'confirmed')
+            ->orderBy('carts.checkInDate', 'asc')
+            ->orderBy('bookings.created_at', 'asc')
+            ->select('bookings.*')
             ->limit(5)
             ->get()
             ->map(function($booking) {
@@ -108,11 +120,14 @@ class DashboardController extends Controller
                 ];
             });
 
-        // Monthly Revenue Chart Data (Last 6 months)
+        // Monthly Revenue Chart Data (Last 6 months) - Only completed bookings
         $monthlyRevenueData = [];
         for ($i = 5; $i >= 0; $i--) {
             $month = Carbon::now()->subMonths($i);
             $revenue = Payment::where('paymentStatus', 'completed')
+                ->whereHas('booking', function($query) {
+                    $query->where('bookingStatus', 'completed');
+                })
                 ->whereYear('paymentDate', $month->year)
                 ->whereMonth('paymentDate', $month->month)
                 ->sum('amountPaid');
