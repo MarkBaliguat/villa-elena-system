@@ -10,10 +10,10 @@
 		<link rel="stylesheet" type="text/css" href="css/font-awesome.css">
 		<link rel="stylesheet" type="text/css" href="style.css">
 		
-		<!-- Google Fonts -->
+		<!-- Google Fonts for sunflower theme -->
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
 		
 		<!-- Insert this line above script imports  -->
 		<script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
@@ -25,23 +25,24 @@
 		<script>if (window.module) module = window.module;</script>
 		
 		<style>
-			/* ===== SCROLLBAR ===== */
+			/* SCROLLBAR STYLING */
 			::-webkit-scrollbar {
-				width: 6px;
-				height: 6px;
+				width: 0.4em;
+				height: 0.4em;
 			}
 			::-webkit-scrollbar-track {
-				background: rgba(255,255,255,0.04);
+				background: rgba(255, 215, 0, 0.1);
+				border-radius: 10px;
 			}
 			::-webkit-scrollbar-thumb {
-				background: rgba(180,160,80,0.45);
-				border-radius: 3px;
+				background: linear-gradient(45deg, #FFD700, #FFA500);
+				border-radius: 10px;
+				transition: background .5s;
 			}
 			::-webkit-scrollbar-thumb:hover {
-				background: rgba(180,160,80,0.7);
+				background: linear-gradient(45deg, #FFA500, #FF8C00);
 			}
 
-			/* ===== BASE ===== */
 			body {
 				margin: 0;
 				overflow: hidden;
@@ -55,7 +56,6 @@
 				display: block;
 			}
 			
-			/* ===== LOADING OVERLAY ===== */
 			#overlay {
 				position: absolute;
 				top: 0; left: 0;
@@ -75,7 +75,7 @@
 				font-weight: 600;
 			}
 			
-			/* ===== HOTSPOT TOOLTIP ===== */
+			/* Hotspot Tooltip Styles */
 			.hotspot-tooltip {
 				position: absolute;
 				background: linear-gradient(135deg, rgba(139, 69, 19, 0.95) 0%, rgba(101, 67, 33, 0.95) 100%);
@@ -96,6 +96,7 @@
 				text-align: center;
 				backdrop-filter: blur(5px);
 			}
+
 			.hotspot-tooltip::after {
 				content: '';
 				position: absolute;
@@ -106,426 +107,532 @@
 				border-style: solid;
 				border-color: #FFD700 transparent transparent transparent;
 			}
+
 			.hotspot-tooltip.show {
 				opacity: 1;
 			}
-
-			/* ===================================================
-			   SIDEBAR — Redesigned with Villa Elena branding
-			   =================================================== */
+			
+			/* SIDEBAR STYLES - Sunflower Theme */
 			#sidebar {
 				position: fixed;
 				top: 0;
-				left: -380px;
-				width: 340px;
+				left: -400px;
+				width: 350px;
 				height: 100vh;
-				background: #111111;
+				background: linear-gradient(180deg, #FFF8DC 0%, #FFFAF0 100%);
+				box-shadow: 10px 0 30px rgba(139, 69, 19, 0.3);
 				z-index: 1000;
-				transition: left 0.4s cubic-bezier(.4,0,.2,1);
-				color: #fff;
+				transition: left 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+				padding: 25px;
+				color: #8B4513;
 				overflow-y: auto;
-				overflow-x: hidden;
-				border-right: 1px solid rgba(180,160,80,0.2);
+				border-right: 5px solid #FFD700;
 				display: flex;
 				flex-direction: column;
 			}
-
+			
+			#sidebar::before {
+				content: '';
+				position: absolute;
+				top: 0;
+				right: 0;
+				width: 100%;
+				height: 100%;
+				background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.05"><path fill="%238B4513" d="M50,10 C65,10 77,22 77,37 C77,52 65,64 50,64 C35,64 23,52 23,37 C23,22 35,10 50,10 Z M50,30 C55,30 59,34 59,39 C59,44 55,48 50,48 C45,48 41,44 41,39 C41,34 45,30 50,30 Z"/></svg>');
+				background-size: 100px;
+				pointer-events: none;
+			}
+			
 			#sidebar.active {
 				left: 0;
 			}
-
-			/* ---- SIDEBAR HEADER (Villa Elena Branding) ---- */
-			.sidebar-header {
-				position: relative;
-				width: 100%;
-				padding: 38px 0 32px;
-				text-align: center;
-				flex-shrink: 0;
-				background: linear-gradient(180deg, #0a1628 0%, #0f1e2e 40%, #111111 100%);
-				border-bottom: 1px solid rgba(180,160,80,0.18);
-				overflow: hidden;
+			
+			/* Hide sidebar toggle button when sidebar is open */
+			#sidebar.active ~ .sidebar-toggle {
+				display: none;
 			}
-
-			/* subtle texture overlay on header */
-			.sidebar-header::before {
-				content: '';
-				position: absolute;
-				inset: 0;
-				background:
-					radial-gradient(ellipse 120% 60% at 50% 0%, rgba(30,70,90,0.45) 0%, transparent 70%),
-					radial-gradient(ellipse 80% 40% at 20% 100%, rgba(20,50,70,0.2) 0%, transparent 60%),
-					radial-gradient(ellipse 60% 50% at 80% 80%, rgba(25,60,80,0.15) 0%, transparent 60%);
-				pointer-events: none;
-			}
-
-			/* decorative thin gold line under title */
-			.sidebar-header::after {
-				content: '';
-				position: absolute;
-				bottom: 0;
-				left: 50%;
-				transform: translateX(-50%);
+			
+			.sidebar-toggle {
+				position: fixed;
+				top: 25px;
+				left: 25px;
 				width: 60px;
-				height: 2px;
-				background: linear-gradient(90deg, transparent, rgba(180,160,80,0.6), transparent);
-			}
-
-			.sidebar-header .brand-title {
-				position: relative;
-				z-index: 1;
-				font-family: 'Great Vibes', cursive;
-				font-size: 34px;
-				font-weight: 400;
-				color: #ffffff;
-				letter-spacing: 1px;
-				margin: 0 0 6px;
-				text-shadow: 0 2px 12px rgba(0,0,0,0.5);
-			}
-
-			.sidebar-header .brand-subtitle {
-				position: relative;
-				z-index: 1;
-				font-family: 'Poppins', sans-serif;
-				font-size: 10.5px;
-				font-weight: 400;
-				color: rgba(180,160,80,0.75);
-				letter-spacing: 2.2px;
-				text-transform: uppercase;
-				margin: 0;
-			}
-
-			/* ===== CLOSE BUTTON — clean X, no circle ===== */
-			.sidebar-close {
-				position: absolute;
-				top: 18px;
-				right: 18px;
-				z-index: 2;
-				width: auto;
-				height: auto;
-				background: none;
+				height: 60px;
+				background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+				color: #8B4513;
 				border: none;
-				border-radius: 0;
-				color: rgba(255,255,255,0.5);
-				font-size: 18px;
+				border-radius: 50%;
+				font-size: 26px;
 				cursor: pointer;
+				z-index: 1001;
+				box-shadow: 0 6px 20px rgba(139, 69, 19, 0.4);
+				transition: all 0.3s ease;
 				display: flex;
 				align-items: center;
 				justify-content: center;
-				transition: color 0.25s ease, transform 0.25s ease;
-				padding: 4px;
-				line-height: 1;
 			}
-			.sidebar-close:hover {
-				color: rgba(180,160,80,0.95);
-				transform: scale(1.1);
+			
+			.sidebar-toggle:hover {
+				background: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);
+				transform: scale(1.1) rotate(15deg);
+				box-shadow: 0 8px 25px rgba(139, 69, 19, 0.6);
 			}
-
-			/* ---- hamburger toggle (outside sidebar) ---- */
-			.sidebar-toggle {
-				position: fixed;
-				top: 22px;
-				left: 22px;
-				width: 52px;
-				height: 52px;
-				background: rgba(20,20,20,0.82);
-				backdrop-filter: blur(6px);
-				border: 1.5px solid rgba(180,160,80,0.5);
-				color: #fff;
+			
+			/* Close button inside sidebar */
+			.sidebar-close {
+				position: absolute;
+				top: 20px;
+				right: 20px;
+				width: 45px;
+				height: 45px;
+				background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+				color: #8B4513;
+				border: none;
 				border-radius: 50%;
 				font-size: 22px;
 				cursor: pointer;
-				z-index: 1001;
-				box-shadow: 0 4px 16px rgba(0,0,0,0.45);
-				transition: background 0.25s, border-color 0.25s, opacity 0.3s, transform 0.3s;
+				box-shadow: 0 4px 15px rgba(139, 69, 19, 0.3);
+				transition: all 0.3s ease;
 				display: flex;
 				align-items: center;
 				justify-content: center;
+				z-index: 1002;
 			}
-			.sidebar-toggle:hover {
-				background: rgba(40,40,40,0.9);
-				border-color: rgba(180,160,80,0.8);
+			
+			.sidebar-close:hover {
+				background: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);
+				transform: scale(1.1) rotate(90deg);
 			}
-			/* hide hamburger when sidebar is open — controlled via JS class */
-			.sidebar-toggle.hidden {
-				opacity: 0;
-				pointer-events: none;
-				transform: translateX(-20px);
-			}
-
-			/* ---- nav list ---- */
-			.sidebar-nav {
-				list-style: none;
-				margin: 0;
-				padding: 8px 0 12px;
-				flex: 1;
-			}
-
-			.sidebar-nav > li {
-				border-bottom: 1px solid rgba(255,255,255,0.055);
-			}
-			.sidebar-nav > li:first-child {
-				border-top: none;
-			}
-			.sidebar-nav > li:last-child {
-				border-bottom: none;
-			}
-
-			/* ---- single nav row ---- */
-			.nav-item {
-				display: flex;
-				align-items: center;
-				gap: 14px;
-				padding: 15px 24px;
-				color: rgba(255,255,255,0.78);
-				font-size: 15px;
-				font-weight: 400;
-				cursor: pointer;
-				transition: background 0.22s, color 0.22s, padding-left 0.22s;
-				text-decoration: none;
-				user-select: none;
-				-webkit-user-select: none;
-				position: relative;
-			}
-			.nav-item:hover {
-				background: rgba(180,160,80,0.07);
-				color: #fff;
-				padding-left: 28px;
-			}
-			.nav-item .nav-icon {
-				font-size: 16px;
-				width: 20px;
+			
+			.sidebar-header {
 				text-align: center;
-				color: rgba(180,160,80,0.6);
-				transition: color 0.22s;
+				margin-bottom: 30px;
+				padding-bottom: 25px;
+				border-bottom: 3px solid #FFD700;
+				position: relative;
+				padding-right: 40px; /* Space for close button */
+				padding-left: 20px;
 			}
-			.nav-item:hover .nav-icon {
-				color: rgba(180,160,80,0.9);
-			}
-			/* gold left-bar on active nav-item */
-			.nav-item.active {
-				color: #fff;
-				font-weight: 500;
-				background: rgba(180,160,80,0.06);
-			}
-			.nav-item.active::before {
-				content: '';
+			
+			.sidebar-header::after {
+				content: '🌻';
 				position: absolute;
-				left: 0; top: 0; bottom: 0;
-				width: 3px;
-				background: linear-gradient(180deg, rgba(180,160,80,0.8), rgba(180,160,80,0.3));
-				border-radius: 0 2px 2px 0;
+				bottom: -20px;
+				left: 50%;
+				transform: translateX(-50%);
+				font-size: 24px;
+				background: #FFF8DC;
+				padding: 0 15px;
 			}
-			.nav-item.active .nav-icon {
-				color: rgba(180,160,80,0.9);
+			
+			.sidebar-header h2 {
+				margin: 0;
+				font-size: 28px;
+				font-weight: 700;
+				letter-spacing: 0.5px;
+				color: #8B4513;
+				text-shadow: 2px 2px 4px rgba(255, 215, 0, 0.3);
+				font-family: 'Playfair Display', serif;
+				margin-bottom: 10px;
 			}
-
-			/* ---- dropdown trigger (category header) ---- */
-			.dropdown-trigger {
-				display: flex;
-				align-items: center;
-				justify-content: space-between;
-				padding: 15px 24px;
-				color: rgba(255,255,255,0.78);
-				font-size: 15px;
-				font-weight: 400;
-				cursor: pointer;
-				transition: background 0.22s, color 0.22s;
-				user-select: none;
-				-webkit-user-select: none;
-			}
-			.dropdown-trigger:hover {
-				background: rgba(180,160,80,0.07);
-				color: #fff;
-			}
-			.dropdown-trigger .trigger-left {
-				display: flex;
-				align-items: center;
-				gap: 14px;
-			}
-			.dropdown-trigger .nav-icon {
-				font-size: 16px;
-				width: 20px;
-				text-align: center;
-				color: rgba(180,160,80,0.6);
-				transition: color 0.22s;
-			}
-			.dropdown-trigger:hover .nav-icon,
-			.dropdown-trigger.open .nav-icon {
-				color: rgba(180,160,80,0.9);
-			}
-			.dropdown-trigger .chevron {
-				font-size: 10px;
-				color: rgba(255,255,255,0.3);
-				transition: transform 0.3s ease, color 0.3s;
-			}
-			.dropdown-trigger.open .chevron {
-				transform: rotate(180deg);
-				color: rgba(180,160,80,0.6);
-			}
-			.dropdown-trigger.open {
-				color: #fff;
-			}
-
-			/* ---- dropdown panel ---- */
-			.dropdown-panel {
-				max-height: 0;
-				overflow: hidden;
-				transition: max-height 0.4s cubic-bezier(.4,0,.2,1);
-				background: linear-gradient(180deg, rgba(180,160,80,0.03) 0%, rgba(0,0,0,0.15) 100%);
-			}
-			.dropdown-panel.open {
-				max-height: 600px;
-			}
-
-			/* ---- sub-group label ---- */
-			.sub-label {
-				padding: 10px 24px 3px 42px;
-				font-size: 10px;
+			
+			.sidebar-header h3 {
+				margin: 10px 0 5px;
+				font-size: 18px;
 				font-weight: 600;
-				text-transform: uppercase;
-				letter-spacing: 1.6px;
-				color: rgba(180,160,80,0.55);
-				margin-top: 8px;
+				color: #D2691E;
+				font-family: 'Playfair Display', serif;
 			}
-			.sub-label:first-child {
-				margin-top: 4px;
+			
+			.sidebar-header p {
+				margin: 5px 0 0;
+				font-size: 14px;
+				color: #A0522D;
+				font-style: italic;
+				opacity: 0.9;
 			}
-
-			/* ---- individual dropdown item ---- */
-			.dropdown-item-wrap {
-				position: relative;
-			}
-			.dropdown-item {
+			
+			/* Home Button Styles */
+			.home-button {
+				background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+				color: #8B4513;
+				padding: 18px;
+				border-radius: 12px;
+				cursor: pointer;
+				transition: all 0.3s ease;
+				font-weight: 600;
+				text-align: center;
+				margin-bottom: 25px;
 				display: flex;
 				align-items: center;
-				gap: 10px;
-				padding: 11px 24px 11px 42px;
-				font-size: 14px;
-				color: rgba(255,255,255,0.6);
+				justify-content: center;
+				gap: 12px;
+				border: 3px solid #FFF8DC;
+				box-shadow: 0 4px 15px rgba(139, 69, 19, 0.2);
+				font-size: 16px;
+				font-family: 'Playfair Display', serif;
+			}
+			
+			.home-button:hover {
+				background: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);
+				transform: translateY(-3px);
+				box-shadow: 0 8px 25px rgba(139, 69, 19, 0.4);
+			}
+			
+			.home-button i {
+				font-size: 20px;
+				transition: transform 0.3s ease;
+			}
+			
+			.home-button:hover i {
+				transform: scale(1.2);
+			}
+			
+			.location-category {
+				margin-bottom: 30px;
+				background: rgba(255, 248, 220, 0.8);
+				border-radius: 15px;
+				padding: 20px;
+				border-left: 5px solid #FFD700;
+				box-shadow: 0 4px 15px rgba(139, 69, 19, 0.1);
+				transition: transform 0.3s ease;
+			}
+			
+			.location-category:hover {
+				transform: translateY(-3px);
+				box-shadow: 0 6px 20px rgba(139, 69, 19, 0.2);
+			}
+			
+			.category-title {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				margin-bottom: 20px;
+				font-size: 20px;
+				font-weight: 600;
+				color: #8B4513;
+				font-family: 'Playfair Display', serif;
+			}
+			
+			.category-title i {
+				color: #FFD700;
+				font-size: 22px;
+				background: #8B4513;
+				width: 40px;
+				height: 40px;
+				border-radius: 50%;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				box-shadow: 0 4px 8px rgba(139, 69, 19, 0.3);
+			}
+			
+			.location-list {
+				list-style: none;
+				padding: 0;
+				margin: 0;
+			}
+			
+			.location-item {
+				padding: 15px;
+				margin-bottom: 10px;
+				background: rgba(255, 255, 255, 0.9);
+				border-radius: 10px;
 				cursor: pointer;
-				transition: background 0.18s, color 0.18s, padding-left 0.18s;
+				transition: all 0.3s ease;
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				border: 2px solid transparent;
+				position: relative;
+				overflow: hidden;
 			}
-			.dropdown-item:hover {
-				background: rgba(180,160,80,0.07);
-				color: rgba(255,255,255,0.92);
-				padding-left: 48px;
-			}
-			.dropdown-item.active {
-				color: #fff;
-				font-weight: 500;
-				background: rgba(180,160,80,0.08);
-			}
-			.dropdown-item.active::before {
+			
+			.location-item::before {
 				content: '';
 				position: absolute;
 				left: 0;
 				top: 0;
-				bottom: 0;
-				width: 3px;
-				background: linear-gradient(180deg, rgba(180,160,80,0.8), rgba(180,160,80,0.3));
-				border-radius: 0 2px 2px 0;
+				height: 100%;
+				width: 4px;
+				background: linear-gradient(180deg, #FFD700 0%, #FFA500 100%);
+				transform: translateX(-100%);
+				transition: transform 0.3s ease;
 			}
-
-			/* ---- divider ---- */
-			.sidebar-divider {
-				height: 1px;
-				margin: 4px 18px;
-				background: linear-gradient(90deg, transparent, rgba(180,160,80,0.2), transparent);
+			
+			.location-item:hover {
+				background: rgba(255, 248, 220, 0.95);
+				border-color: #FFD700;
+				transform: translateX(8px);
 			}
-
-			/* ===== CURRENT LOCATION BADGE — dark sidebar-matched ===== */
+			
+			.location-item:hover::before {
+				transform: translateX(0);
+			}
+			
+			.location-item.active {
+				background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 165, 0, 0.2) 100%);
+				border-color: #FFD700;
+				font-weight: 600;
+			}
+			
+			.location-item i {
+				color: #FFD700;
+				font-size: 16px;
+				min-width: 24px;
+				text-align: center;
+			}
+			
+			.location-name {
+				flex: 1;
+				font-size: 15px;
+				color: #8B4513;
+				font-weight: 500;
+			}
+			
 			.current-location {
 				position: fixed;
-				bottom: 32px;
-				right: 28px;
-				background: rgba(17, 17, 17, 0.88);
-				backdrop-filter: blur(10px);
-				-webkit-backdrop-filter: blur(10px);
-				color: rgba(180,160,80,0.9);
-				padding: 12px 22px;
-				border-radius: 10px;
-				box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
-				font-weight: 500;
+				bottom: 80px; /* Raised higher to avoid taskbar */
+				right: 30px;
+				background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+				color: #8B4513;
+				padding: 18px 30px;
+				border-radius: 35px;
+				box-shadow: 0 6px 25px rgba(139, 69, 19, 0.4);
+				font-weight: 600;
 				z-index: 999;
 				display: flex;
 				align-items: center;
-				gap: 10px;
-				border: 1px solid rgba(180,160,80,0.25);
-				font-family: 'Poppins', sans-serif;
-				font-size: 14px;
-				letter-spacing: 0.3px;
-				transition: border-color 0.3s ease, box-shadow 0.3s ease;
+				gap: 15px;
+				animation: sunflowerPulse 2s infinite;
+				border: 3px solid #FFF8DC;
+				font-family: 'Playfair Display', serif;
+				font-size: 16px;
 			}
-			.current-location:hover {
-				border-color: rgba(180,160,80,0.5);
-				box-shadow: 0 4px 22px rgba(0, 0, 0, 0.55);
+			
+			@keyframes sunflowerPulse {
+				0% { 
+					box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7),
+					0 6px 25px rgba(139, 69, 19, 0.4);
+				}
+				70% { 
+					box-shadow: 0 0 0 15px rgba(255, 215, 0, 0),
+					0 6px 25px rgba(139, 69, 19, 0.4);
+				}
+				100% { 
+					box-shadow: 0 0 0 0 rgba(255, 215, 0, 0),
+					0 6px 25px rgba(139, 69, 19, 0.4);
+				}
 			}
+			
 			.current-location i {
-				color: rgba(180,160,80,0.75);
-				font-size: 14px;
+				color: #8B4513;
+				font-size: 20px;
 			}
-
-			/* ===== TEMP MEDIA OVERLAY ===== */
+			
 			#tmp {
 				position: fixed;
-				top: 0; left: 0; right: 0; bottom: 0;
+				top: 0;
+				left: 0; 
+				right: 0;
+				bottom: 0;
 				padding: 3em;
 				background-color: rgba(139, 69, 19, 0.9);
 				backdrop-filter: blur(10px);
 				display: none;
 				z-index: 21;
 			}
-
-			/* ===== LOADING SCREEN ===== */
+			
+			.sidebar-footer {
+				margin-top: auto;
+				padding-top: 25px;
+				border-top: 2px solid rgba(255, 215, 0, 0.3);
+				text-align: center;
+				font-size: 13px;
+				color: #A0522D;
+				display: flex;
+				flex-direction: column;
+				gap: 8px;
+				padding-bottom: 20px; /* Reduced padding */
+			}
+			
+			.sidebar-footer p:first-child {
+				font-weight: 600;
+				font-size: 14px;
+				color: #8B4513;
+				font-family: 'Playfair Display', serif;
+			}
+			
+			.sidebar-footer p:last-child {
+				font-style: italic;
+				opacity: 0.8;
+				display: none; /* Hide the bottom text that gets covered by taskbar */
+			}
+			
+			/* Mobile Styles - Peeking Sidebar */
+			@media (max-width: 768px) {
+				#sidebar {
+					width: 320px;
+					/* Leaves 10px visible */
+					padding: 20px;
+				}
+				
+				#sidebar::after {
+					content: '🏞️';
+					position: absolute;
+					right: -40px;
+					top: 50%;
+					transform: translateY(-50%);
+					font-size: 24px;
+					background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+					width: 40px;
+					height: 100px;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					border-radius: 0 10px 10px 0;
+					cursor: pointer;
+					box-shadow: 5px 0 15px rgba(139, 69, 19, 0.3);
+					color: #8B4513;
+					z-index: 1;
+				}
+				
+				#sidebar.active {
+					left: 0;
+				}
+				
+				#sidebar.active::after {
+					right: -40px;
+					background: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);
+				}
+				
+				.sidebar-header h2 {
+					font-size: 24px;
+				}
+				
+				.sidebar-header h3 {
+					font-size: 16px;
+				}
+				
+				.sidebar-header p {
+					font-size: 13px;
+				}
+				
+				.category-title {
+					font-size: 18px;
+				}
+				
+				.location-name {
+					font-size: 14px;
+				}
+				
+				.current-location {
+					bottom: 80px; /* Higher on mobile too */
+					right: 20px;
+					padding: 15px 25px;
+					font-size: 14px;
+				}
+				
+				.sidebar-toggle {
+					width: 55px;
+					height: 55px;
+					font-size: 22px;
+					top: 20px;
+					left: 20px;
+				}
+				
+				.sidebar-close {
+					width: 40px;
+					height: 40px;
+					font-size: 20px;
+					top: 15px;
+					right: 15px;
+				}
+				
+				.home-button {
+					padding: 15px;
+					font-size: 15px;
+				}
+				
+				.sidebar-footer {
+					padding-bottom: 15px; /* Less padding on mobile */
+				}
+				
+				.hotspot-tooltip {
+					font-size: 14px;
+					padding: 10px 16px;
+					max-width: 250px;
+				}
+			}
+			
+			@media (max-width: 480px) {
+				#sidebar {
+					width: 300px;
+					 /* Leaves 10px visible */
+				}
+				
+				.sidebar-header h2 {
+					font-size: 22px;
+				}
+				
+				.category-title {
+					font-size: 17px;
+				}
+				
+				.location-item {
+					padding: 12px;
+				}
+				
+				.current-location {
+					bottom: 70px;
+					padding: 12px 20px;
+					font-size: 13px;
+				}
+				
+				.hotspot-tooltip {
+					font-size: 13px;
+					padding: 8px 14px;
+					max-width: 200px;
+				}
+			}
+			
+			/* Touch device optimizations */
+			@media (hover: none) and (pointer: coarse) {
+				.location-item:hover {
+					transform: none;
+				}
+				
+				.sidebar-toggle:hover {
+					transform: none;
+				}
+				
+				.sidebar-close:hover {
+					transform: none;
+				}
+				
+				.home-button:hover {
+					transform: none;
+				}
+				
+				.location-category:hover {
+					transform: none;
+				}
+				
+				.hotspot-tooltip {
+					display: none;
+				}
+			}
+			
+			/* Loading animation */
 			.loading-sunflower {
 				display: inline-block;
 				animation: rotateSunflower 2s linear infinite;
 				margin: 0 10px;
 			}
+			
 			@keyframes rotateSunflower {
-				0%   { transform: rotate(0deg); }
+				0% { transform: rotate(0deg); }
 				100% { transform: rotate(360deg); }
-			}
-
-			/* ===== RESPONSIVE ===== */
-			@media (max-width: 768px) {
-				#sidebar { width: 310px; left: -340px; }
-				.nav-item,
-				.dropdown-trigger { padding: 14px 22px; font-size: 15px; }
-				.dropdown-item { padding: 10px 22px 10px 40px; font-size: 14px; }
-				.sub-label { padding-left: 40px; }
-				.current-location {
-					bottom: 28px; right: 18px;
-					padding: 10px 18px; font-size: 13px;
-				}
-				.sidebar-toggle {
-					width: 48px; height: 48px;
-					top: 18px; left: 18px; font-size: 20px;
-				}
-			}
-			@media (max-width: 480px) {
-				#sidebar { width: 280px; left: -310px; }
-				.sidebar-header .brand-title { font-size: 28px; }
-				.sidebar-header .brand-subtitle { font-size: 9px; letter-spacing: 1.8px; }
-				.nav-item,
-				.dropdown-trigger { padding: 13px 18px; font-size: 14px; }
-				.dropdown-item { padding: 10px 18px 10px 36px; font-size: 13px; }
-				.sub-label { padding-left: 36px; }
-				.current-location {
-					bottom: 22px; right: 14px;
-					padding: 9px 16px; font-size: 12px;
-				}
-				.hotspot-tooltip { font-size: 13px; padding: 8px 14px; max-width: 200px; }
-			}
-			/* touch: remove hover transforms */
-			@media (hover: none) and (pointer: coarse) {
-				.nav-item:hover,
-				.dropdown-trigger:hover,
-				.dropdown-item:hover {
-					background: transparent;
-					padding-left: revert;
-				}
-				.hotspot-tooltip { display: none; }
 			}
 		</style>
 	</head>
@@ -535,235 +642,149 @@
 			<span class="loading-sunflower">🌻</span> Loading Villa Elena <span class="loading-sunflower">🌻</span>
 		</div>
     	
-		<!-- Hamburger toggle -->
-		<button class="sidebar-toggle" id="hamburgerBtn" onclick="toggleSidebar()" aria-label="Open menu">
+		<!-- Sidebar Toggle Button (Hidden when sidebar is open) -->
+		<button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle navigation menu">
 			<i class="fa fa-bars"></i>
 		</button>
-
-		<!-- ============================================================
-		     SIDEBAR
-		     ============================================================ -->
+		
+		<!-- Sidebar -->
 		<div id="sidebar">
-
-			<!-- Branded Header -->
+			<!-- Close button inside sidebar -->
+			<button class="sidebar-close" onclick="toggleSidebar()" aria-label="Close menu">
+				<i class="fa fa-times"></i>
+			</button>
+			
 			<div class="sidebar-header">
-				<button class="sidebar-close" onclick="toggleSidebar()" aria-label="Close menu">
-					<i class="fa fa-times"></i>
-				</button>
-				<h1 class="brand-title">Villa Elena</h1>
-				<p class="brand-subtitle">Family Resort &amp; Agri-Tourism Farm</p>
+				<h2>Villa Elena Family Resort Virtual Tour</h2>
+				<h3>Family Resort & Agri-Tourism Farm</h3>
+				<p>Explore our beautiful resort with 360° panoramic views</p>
 			</div>
-
-			<ul class="sidebar-nav">
-
-				<!-- Home -->
-				<li>
-					<div class="nav-item" onclick="goToHomePage()">
-						<i class="fa fa-home nav-icon"></i>
-						<span>Home</span>
-					</div>
-				</li>
-
-				<!-- Centro / Main Plaza -->
-				<li>
-					<div class="nav-item" onclick="goToLocation('4centro.jpg')">
-						<i class="fa fa-map-marker nav-icon"></i>
-						<span>Centro – Main Plaza</span>
-					</div>
-				</li>
-
-				<!-- Lobby & Fountain -->
-				<li>
-					<div class="nav-item" onclick="goToLocation('1lobbyandfountain.jpg')">
-						<i class="fa fa-star nav-icon"></i>
-						<span>Lobby &amp; Fountain</span>
-					</div>
-				</li>
-
-				<!-- ================================================
-				     SWIMMING POOLS  (dropdown)
-				     ================================================ -->
-				<li>
-					<div class="dropdown-trigger" onclick="toggleDropdown('pools-panel', this)">
-						<div class="trigger-left">
-							<i class="fa fa-tint nav-icon"></i>
-							<span>Swimming Pools</span>
-						</div>
-						<i class="fa fa-chevron-down chevron"></i>
-					</div>
-					<div class="dropdown-panel" id="pools-panel">
-						<div class="dropdown-item-wrap">
-							<div class="dropdown-item" onclick="goToLocation('5frontpool.jpg')">Front Pool</div>
-						</div>
-						<div class="dropdown-item-wrap">
-							<div class="dropdown-item" onclick="goToLocation('14backpool.jpg')">Back Pool</div>
-						</div>
-					</div>
-				</li>
-
-				<!-- ── divider ── -->
-				<li><div class="sidebar-divider"></div></li>
-
-				<!-- ================================================
-				     ROOMS  (dropdown)
-				     ================================================ -->
-				<li>
-					<div class="dropdown-trigger" onclick="toggleDropdown('rooms-panel', this)">
-						<div class="trigger-left">
-							<i class="fa fa-bed nav-icon"></i>
-							<span>Rooms</span>
-						</div>
-						<i class="fa fa-chevron-down chevron"></i>
-					</div>
-					<div class="dropdown-panel" id="rooms-panel">
-						<div class="dropdown-item-wrap">
-							<div class="dropdown-item" onclick="goToLocation('37sunflowerhouseroom1ulit.jpg')">Room 1</div>
-						</div>
-						<div class="dropdown-item-wrap">
-							<div class="dropdown-item" onclick="goToLocation('39sunflowerhouseroom2.jpg')">Room 2</div>
-						</div>
-						<div class="dropdown-item-wrap">
-							<div class="dropdown-item" onclick="goToLocation('40sunflowerhouseroom3.jpg')">Room 3</div>
-						</div>
-						<div class="dropdown-item-wrap">
-							<div class="dropdown-item" onclick="goToLocation('41sunflowerhouseroom4ulit.jpg')">Room 4</div>
-						</div>
-						<div class="dropdown-item-wrap">
-							<div class="dropdown-item" onclick="goToLocation('42sunflowerhouseroom5.jpg')">Room 5</div>
-						</div>
-						<div class="dropdown-item-wrap">
-							<div class="dropdown-item" onclick="goToLocation('44sunflowerhouseroom6.jpg')">Room 6</div>
-						</div>
-						<div class="dropdown-item-wrap">
-							<div class="dropdown-item" onclick="goToLocation('45sunflowerhouseroom7.jpg')">Room 7</div>
-						</div>
-						<div class="dropdown-item-wrap">
-							<div class="dropdown-item" onclick="goToLocation('46sunflowerhouseroom8siguro.jpg')">Room 8</div>
-						</div>
-						<div class="dropdown-item-wrap">
-							<div class="dropdown-item" onclick="goToLocation('47sunflowerhouseroom9siguro.jpg')">Room 9</div>
-						</div>
-						<div class="dropdown-item-wrap">
-							<div class="dropdown-item" onclick="goToLocation('52room10.jpg')">Room 10</div>
-						</div>
-						<div class="dropdown-item-wrap">
-							<div class="dropdown-item" onclick="goToLocation('49sunflowerhouseroom11ulit.jpg')">Room 11</div>
-						</div>
-						<div class="dropdown-item-wrap">
-							<div class="dropdown-item" onclick="goToLocation('50sunflowerhousebalconyview.jpg')">Balcony View</div>
-						</div>
-					</div>
-				</li>
-
-				<!-- ================================================
-				     COTTAGES  (dropdown) — FIXED icon
-				     ================================================ -->
-				<li>
-					<div class="dropdown-trigger" onclick="toggleDropdown('cottages-panel', this)">
-						<div class="trigger-left">
-							<i class="fa fa-home nav-icon"></i>
-							<span>Cottages</span>
-						</div>
-						<i class="fa fa-chevron-down chevron"></i>
-					</div>
-					<div class="dropdown-panel" id="cottages-panel">
-						<!-- Front Cottages -->
-						<div class="sub-label">Front Cottages</div>
-						<div class="dropdown-item-wrap">
-							<div class="dropdown-item" onclick="goToLocation('3tonicottageandihawan.jpg')">Toni Cottage</div>
-						</div>
-						<div class="dropdown-item-wrap">
-							<div class="dropdown-item" onclick="goToLocation('6arcelicottageandhardin.jpg')">Arceli Cottage</div>
-						</div>
-						<div class="dropdown-item-wrap">
-							<div class="dropdown-item" onclick="goToLocation('9estercottage.jpg')">Ester Cottage</div>
-						</div>
-						<div class="dropdown-item-wrap">
-							<div class="dropdown-item" onclick="goToLocation('villaelenafront.jpg')">Villa Elena</div>
-						</div>
-						<!-- Back Cottages -->
-						<div class="sub-label">Back Cottages</div>
-						<div class="dropdown-item-wrap">
-							<div class="dropdown-item" onclick="goToLocation('16backminicottages.jpg')">Back Mini Cottages</div>
-						</div>
-					</div>
-				</li>
-
-				<!-- ================================================
-				     CAMPING AREA  (dropdown)
-				     ================================================ -->
-				<li>
-					<div class="dropdown-trigger" onclick="toggleDropdown('camping-panel', this)">
-						<div class="trigger-left">
-							<i class="fa fa-flag nav-icon"></i>
-							<span>Camping Area</span>
-						</div>
-						<i class="fa fa-chevron-down chevron"></i>
-					</div>
-					<div class="dropdown-panel" id="camping-panel">
-						<div class="dropdown-item-wrap">
-							<div class="dropdown-item" onclick="goToLocation('27duloatcampsiteentrance.jpg')">Duloat Campsite Entrance</div>
-						</div>
-						<div class="dropdown-item-wrap">
-							<div class="dropdown-item" onclick="goToLocation('28campsite1.jpg')">Campsite 1</div>
-						</div>
-						<div class="dropdown-item-wrap">
-							<div class="dropdown-item" onclick="goToLocation('29campsite2.jpg')">Campsite 2</div>
-						</div>
-						<div class="dropdown-item-wrap">
-							<div class="dropdown-item" onclick="goToLocation('30campsite3.jpg')">Campsite 3</div>
-						</div>
-						<div class="dropdown-item-wrap">
-							<div class="dropdown-item" onclick="goToLocation('31campsite4.jpg')">Campsite 4</div>
-						</div>
-						<div class="dropdown-item-wrap">
-							<div class="dropdown-item" onclick="goToLocation('32pavillion2.jpg')">Pavilion</div>
-						</div>
-					</div>
-				</li>
-
-				<!-- ================================================
-				     SUNFLOWER AREA  (dropdown)
-				     ================================================ -->
-				<li>
-					<div class="dropdown-trigger" onclick="toggleDropdown('sunflower-panel', this)">
-						<div class="trigger-left">
-							<i class="fa fa-leaf nav-icon"></i>
-							<span>Sunflower Area</span>
-						</div>
-						<i class="fa fa-chevron-down chevron"></i>
-					</div>
-					<div class="dropdown-panel" id="sunflower-panel">
-						<div class="dropdown-item-wrap">
-							<div class="dropdown-item" onclick="goToLocation('23entrancesasunflower.jpg')">Sunflower Farm Entrance</div>
-						</div>
-						<div class="dropdown-item-wrap">
-							<div class="dropdown-item" onclick="goToLocation('24sunflowerfarmcenter.jpg')">Farm Center</div>
-						</div>
-						<div class="dropdown-item-wrap">
-							<div class="dropdown-item" onclick="goToLocation('22papaya.jpg')">Papaya Garden</div>
-						</div>
-						<div class="dropdown-item-wrap">
-							<div class="dropdown-item" onclick="goToLocation('21bridgeatsunflowerfarmentrance.jpg')">Bridge</div>
-						</div>
-						<div class="dropdown-item-wrap">
-							<div class="dropdown-item" onclick="goToLocation('25sunflowertocampsite.jpg')">Sunflower to Campsite</div>
-						</div>
-						<div class="dropdown-item-wrap">
-							<div class="dropdown-item" onclick="goToLocation('10sunflowerhouse.jpg')">Sunflower House</div>
-						</div>
-						<div class="dropdown-item-wrap">
-							<div class="dropdown-item" onclick="goToLocation('12sunflowerhouseandwellnesscenter.jpg')">Wellness Center</div>
-						</div>
-					</div>
-				</li>
-
-			</ul><!-- end sidebar-nav -->
-		</div><!-- end #sidebar -->
-
-		<!-- Current Location Badge -->
+			
+			<!-- Home Button -->
+			<div class="home-button" onclick="goToHomePage()">
+				<i class="fa fa-home"></i>
+				<span>Back to Main Website</span>
+			</div>
+			
+			<!-- Navigation Categories -->
+			<div class="location-category">
+				<div class="category-title">
+					<i class="fa fa-building"></i>
+					<span>Main Resort Areas</span>
+				</div>
+				<ul class="location-list">
+					<li class="location-item" onclick="goToLocation('4centro.jpg')">
+						<i class="fa fa-map-marker-alt"></i>
+						<span class="location-name">Centro - Main Plaza</span>
+					</li>
+					<li class="location-item" onclick="goToLocation('1lobbyandfountain.jpg')">
+						<i class="fa fa-home"></i>
+						<span class="location-name">Lobby & Fountain Entrance</span>
+					</li>
+					<li class="location-item" onclick="goToLocation('2joypavillionandevelyncottage.jpg')">
+						<i class="fa fa-umbrella-beach"></i>
+						<span class="location-name">Joy Pavilion Area</span>
+					</li>
+				</ul>
+			</div>
+			
+			<div class="location-category">
+				<div class="category-title">
+					<i class="fa fa-swimming-pool"></i>
+					<span>Swimming Pools</span>
+				</div>
+				<ul class="location-list">
+					<li class="location-item" onclick="goToLocation('5frontpool.jpg')">
+						<i class="fa fa-water"></i>
+						<span class="location-name">Main Front Pool</span>
+					</li>
+					<li class="location-item" onclick="goToLocation('8poolviewsadaan~2.jpg')">
+						<i class="fa fa-swimmer"></i>
+						<span class="location-name">Pool View Sadaan</span>
+					</li>
+					<li class="location-item" onclick="goToLocation('14backpool.jpg')">
+						<i class="fa fa-umbrella"></i>
+						<span class="location-name">Back Pool Relaxation</span>
+					</li>
+				</ul>
+			</div>
+			
+			<div class="location-category">
+				<div class="category-title">
+					<i class="fa fa-bed"></i>
+					<span>Accommodations</span>
+				</div>
+				<ul class="location-list">
+					<li class="location-item" onclick="goToLocation('3tonicottageandihawan.jpg')">
+						<i class="fa fa-campground"></i>
+						<span class="location-name">Toni Cottage</span>
+					</li>
+					<li class="location-item" onclick="goToLocation('6arcelicottageandhardin.jpg')">
+						<i class="fa fa-cabin"></i>
+						<span class="location-name">Arceli Cottage</span>
+					</li>
+					<li class="location-item" onclick="goToLocation('villaelenafront.jpg')">
+						<i class="fa fa-house-user"></i>
+						<span class="location-name">Villa Elena Front</span>
+					</li>
+					<li class="location-item" onclick="goToLocation('villaelenaparking.jpg')">
+						<i class="fa fa-parking"></i>
+						<span class="location-name">Villa Elena Parking</span>
+					</li>
+				</ul>
+			</div>
+			
+			<div class="location-category">
+				<div class="category-title">
+					<i class="fa fa-leaf"></i>
+					<span>Nature & Gardens</span>
+				</div>
+				<ul class="location-list">
+					<li class="location-item" onclick="goToLocation('7hardin.jpg')">
+						<i class="fa fa-seedling"></i>
+						<span class="location-name">Hardin - Garden Area</span>
+					</li>
+					<li class="location-item" onclick="goToLocation('11backresortandcr.jpg')">
+						<i class="fa fa-tree"></i>
+						<span class="location-name">Back Resort Nature Trail</span>
+					</li>
+					<li class="location-item" onclick="goToLocation('13backside.jpg')">
+						<i class="fa fa-mountain"></i>
+						<span class="location-name">Backside Scenic View</span>
+					</li>
+				</ul>
+			</div>
+			
+			<div class="location-category">
+				<div class="category-title">
+					<i class="fa fa-seedling"></i>
+					<span>Agri-Tourism Farm</span>
+				</div>
+				<ul class="location-list">
+					<li class="location-item" onclick="goToLocation('23entrancesasunflower.jpg')">
+						<i class="fa fa-sun"></i>
+						<span class="location-name">Sunflower Farm Entrance</span>
+					</li>
+					<li class="location-item" onclick="goToLocation('24sunflowerfarmcenter.jpg')">
+						<i class="fa fa-tractor"></i>
+						<span class="location-name">Farm Center</span>
+					</li>
+					<li class="location-item" onclick="goToLocation('27duloatcampsiteentrance.jpg')">
+						<i class="fa fa-campground"></i>
+						<span class="location-name">Campsite Area</span>
+					</li>
+				</ul>
+			</div>
+			
+			<div class="sidebar-footer">
+				<p>🌻 Villa Elena Family Resort 🌻</p>
+				<p>Click any location to instantly teleport there</p>
+			</div>
+		</div>
+		
+		<!-- Current Location Indicator (Moved higher to avoid taskbar) -->
 		<div class="current-location" id="currentLocation">
-			<i class="fa fa-map-marker"></i>
+			<i class="fa fa-map-marker-alt"></i>
 			<span>Centro - Main Plaza</span>
 		</div>
 		
@@ -809,7 +830,7 @@
 				if (panoramaParam && panoramaParam.endsWith('.jpg')) {
 					return panoramaParam;
 				}
-				return '4centro.jpg';
+				return '4centro.jpg'; // Default panorama
 			}
 
 			function init() {
@@ -846,7 +867,11 @@
 				currentPanorama = initialPanorama;
 				loadHotspotsFor(currentPanorama);
 
-				updateCurrentLocation(getLocationName(currentPanorama));
+				// Update current location display
+				const locationName = getLocationName(currentPanorama);
+				updateCurrentLocation(locationName);
+
+				// Update active state in sidebar
 				updateActiveLocation(currentPanorama);
 
 				window.addEventListener('resize', onWindowResize);
@@ -854,6 +879,16 @@
 				renderer.domElement.addEventListener('touchstart', handleTouchStart, { passive: false });
 				renderer.domElement.addEventListener('touchmove', handleTouchMove, { passive: false });
 				renderer.domElement.addEventListener('pointermove', onPointerMove, false);
+
+				// Mobile sidebar peek handler
+				if (window.innerWidth <= 768) {
+					const sidebar = document.getElementById('sidebar');
+					sidebar.addEventListener('click', function(e) {
+						if (!sidebar.classList.contains('active') && e.clientX > window.innerWidth - 50) {
+							toggleSidebar();
+						}
+					});
+				}
 			}
 
 			function onMouseWheel(e) {
@@ -1070,9 +1105,6 @@
 	addHotspot('images/chevrontilted.png', new THREE.Vector3(390.01241942533056, -82.82470616827274, -15.963405690718485), () => {
 		switchPanorama('13backside.jpg');
 	});
-	addHotspot('images/chevrontilted.png', new THREE.Vector3(-372.90109496792587, -91.30120756089592, 110.16236387844319), () => {
-		switchPanorama('17poolviewsadaanan.jpg');
-	});
 }
 
 			if (panorama === '15backpoolview.jpg') {
@@ -1105,9 +1137,6 @@
 	});
 	addHotspot('images/chevrontilted.png', new THREE.Vector3(-52.6295052324781, 9.916818905268887, -395.5263069604661), () => {
 		switchPanorama('48sunflowerhouselobby2ndfloorpart2retake.jpg');
-	});
-	addHotspot('images/chevrontilted.png', new THREE.Vector3(179.9634711009018, -97.18352512697977, -342.84740115720524), () => {
-		switchPanorama('36sunflowerhousefunctionhall.jpg');
 	});
 }
 
@@ -1486,7 +1515,8 @@
 	});
 }
 
-/*panoramas-end*/
+
+/*panoramas-end*/
 			}
 
 			function switchPanorama(panoramaName) {
@@ -1500,7 +1530,11 @@
 					currentPanorama = panoramaName;
 					loadHotspotsFor(currentPanorama);
 					
-					updateCurrentLocation(getLocationName(panoramaName));
+					// Update current location display
+					const locationName = getLocationName(panoramaName);
+					updateCurrentLocation(locationName);
+					
+					// Update active state in sidebar
 					updateActiveLocation(panoramaName);
 					
 					overlay.style.opacity = '0';
@@ -1519,8 +1553,10 @@
 					sprite.position.copy(position);
 					sprite.scale.set(40, 40, 1);
 					
+					// Get destination name from the panorama file name
 					const panoramaFileName = onClickCallback.toString().match(/switchPanorama\('(.*?)'\)/);
 					let destinationName = "Go to location";
+					
 					if (panoramaFileName && panoramaFileName[1]) {
 						destinationName = getLocationName(panoramaFileName[1]);
 					}
@@ -1534,6 +1570,8 @@
 					
 					spriteHotspots.push(sprite);
 					scene.add(sprite);
+					
+					// Create tooltip element
 					createTooltipForHotspot(sprite);
 				});
 			}
@@ -1548,7 +1586,9 @@
 
 			function clearHotspots() {
 				spriteHotspots.forEach(sprite => {
-					if (sprite.userData.tooltipElement) sprite.userData.tooltipElement.remove();
+					if (sprite.userData.tooltipElement) {
+						sprite.userData.tooltipElement.remove();
+					}
 					scene.remove(sprite);
 				});
 				spriteHotspots = [];
@@ -1561,23 +1601,31 @@
 				raycaster.setFromCamera(mouse, camera);
 				const intersects = raycaster.intersectObjects(spriteHotspots);
 
+				// Hide all tooltips first
 				spriteHotspots.forEach(sprite => {
 					sprite.userData.targetScale = 40;
-					if (sprite.userData.tooltipElement) sprite.userData.tooltipElement.classList.remove('show');
+					if (sprite.userData.tooltipElement) {
+						sprite.userData.tooltipElement.classList.remove('show');
+					}
 				});
 
 				if (intersects.length > 0) {
 					const intersectedSprite = intersects[0].object;
 					intersectedSprite.userData.targetScale = 50;
+					
+					// Show tooltip
 					if (intersectedSprite.userData.tooltipElement) {
 						const vector = new THREE.Vector3();
 						intersectedSprite.getWorldPosition(vector);
 						vector.project(camera);
+						
 						const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
 						const y = (vector.y * -0.5 + 0.5) * window.innerHeight;
+						
 						const tooltip = intersectedSprite.userData.tooltipElement;
 						tooltip.style.left = (x - tooltip.offsetWidth / 2) + 'px';
-						tooltip.style.top = (y - 60) + 'px';
+						tooltip.style.top = (y - 60) + 'px'; // 60px above hotspot
+						
 						tooltip.classList.add('show');
 					}
 				}
@@ -1587,27 +1635,49 @@
 				camera.aspect = window.innerWidth / window.innerHeight;
 				camera.updateProjectionMatrix();
 				renderer.setSize(window.innerWidth, window.innerHeight);
+				
+				// Update tooltip positions on resize
+				spriteHotspots.forEach(sprite => {
+					if (sprite.userData.tooltipElement && sprite.userData.tooltipElement.classList.contains('show')) {
+						const vector = new THREE.Vector3();
+						sprite.getWorldPosition(vector);
+						vector.project(camera);
+						
+						const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+						const y = (vector.y * -0.5 + 0.5) * window.innerHeight;
+						
+						const tooltip = sprite.userData.tooltipElement;
+						tooltip.style.left = (x - tooltip.offsetWidth / 2) + 'px';
+						tooltip.style.top = (y - 60) + 'px';
+					}
+				});
 			}
 
 			function animate() {
 				requestAnimationFrame(animate);
+
+				// Smooth transition FOV
 				camera.fov += (targetFov - camera.fov) * 0.1;
 				camera.updateProjectionMatrix();
 
+				// Smooth hotspot scale animation
 				spriteHotspots.forEach(sprite => {
 					const currentScale = sprite.scale.x;
 					const target = sprite.userData.targetScale || 40;
 					const newScale = THREE.MathUtils.lerp(currentScale, target, 0.1);
 					sprite.scale.set(newScale, newScale, 1);
 				});
-
+				
+				// Update tooltip positions
 				spriteHotspots.forEach(sprite => {
 					if (sprite.userData.tooltipElement && sprite.userData.tooltipElement.classList.contains('show')) {
 						const vector = new THREE.Vector3();
 						sprite.getWorldPosition(vector);
 						vector.project(camera);
+						
 						const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
 						const y = (vector.y * -0.5 + 0.5) * window.innerHeight;
+						
 						const tooltip = sprite.userData.tooltipElement;
 						tooltip.style.left = (x - tooltip.offsetWidth / 2) + 'px';
 						tooltip.style.top = (y - 60) + 'px';
@@ -1624,82 +1694,47 @@
 					(event.clientX / window.innerWidth) * 2 - 1,
 					-(event.clientY / window.innerHeight) * 2 + 1
 				);
+
 				const clickRaycaster = new THREE.Raycaster();
 				clickRaycaster.setFromCamera(mouseClick, camera);
 				const intersects = clickRaycaster.intersectObjects(spriteHotspots);
+
 				if (intersects.length > 0) {
 					const clicked = intersects[0].object;
 					if (clicked.userData.onClick) clicked.userData.onClick();
 				}
 			});
-
-			/* ============================================================
-			   SIDEBAR FUNCTIONS
-			   ============================================================ */
+			
+			// Sidebar Functions
 			function toggleSidebar() {
 				const sidebar = document.getElementById('sidebar');
-				const hamburger = document.getElementById('hamburgerBtn');
-				const isActive = sidebar.classList.toggle('active');
-				// show/hide hamburger based on sidebar state
-				hamburger.classList.toggle('hidden', isActive);
+				sidebar.classList.toggle('active');
 			}
-
-			function toggleDropdown(panelId, triggerEl) {
-				const panel = document.getElementById(panelId);
-				const isOpen = panel.classList.contains('open');
-
-				// close ALL panels first
-				document.querySelectorAll('.dropdown-panel').forEach(p => p.classList.remove('open'));
-				document.querySelectorAll('.dropdown-trigger').forEach(t => t.classList.remove('open'));
-
-				// toggle the clicked one
-				if (!isOpen) {
-					panel.classList.add('open');
-					triggerEl.classList.add('open');
-				}
-			}
-
+			
 			function goToLocation(panoramaName) {
 				switchPanorama(panoramaName);
-				// close sidebar after selecting a location
-				const sidebar = document.getElementById('sidebar');
-				const hamburger = document.getElementById('hamburgerBtn');
-				if (sidebar.classList.contains('active')) {
-					sidebar.classList.remove('active');
-					hamburger.classList.remove('hidden');
+				// Optionally close sidebar after selection
+				if (window.innerWidth < 768) {
+					toggleSidebar();
 				}
 			}
-
+			
 			function updateCurrentLocation(locationName) {
-				document.getElementById('currentLocation').querySelector('span').textContent = locationName;
+				const currentLocationElement = document.getElementById('currentLocation');
+				currentLocationElement.querySelector('span').textContent = locationName;
 			}
-
+			
 			function updateActiveLocation(panoramaName) {
-				document.querySelectorAll('.dropdown-item').forEach(el => el.classList.remove('active'));
-				document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-
-				// check dropdown items
-				document.querySelectorAll('.dropdown-item').forEach(el => {
-					if (el.getAttribute('onclick') && el.getAttribute('onclick').includes(panoramaName)) {
-						el.classList.add('active');
-						// open the parent panel
-						const panel = el.closest('.dropdown-panel');
-						if (panel) {
-							panel.classList.add('open');
-							const trigger = panel.previousElementSibling;
-							if (trigger && trigger.classList.contains('dropdown-trigger')) {
-								trigger.classList.add('open');
-							}
-						}
-					}
+				// Remove active class from all items
+				document.querySelectorAll('.location-item').forEach(item => {
+					item.classList.remove('active');
 				});
-
-				// check top-level nav items
-				document.querySelectorAll('.nav-item').forEach(el => {
-					if (el.getAttribute('onclick') && el.getAttribute('onclick').includes(panoramaName)) {
-						el.classList.add('active');
-					}
-				});
+				
+				// Add active class to matching item
+				const matchingItem = document.querySelector(`.location-item[onclick*="${panoramaName}"]`);
+				if (matchingItem) {
+					matchingItem.classList.add('active');
+				}
 			}
 			
 			function getLocationName(panoramaName) {
@@ -1760,9 +1795,11 @@
 					'51wellnesscenter.jpg': 'Wellness Center',
 					'52room10.jpg': 'Room 10'
 				};
+				
 				return locationMap[panoramaName] || panoramaName.replace('.jpg', '').replace(/^\d+/, '').replace(/([A-Z])/g, ' $1').replace(/~/g, ' ').trim();
 			}
 			
+			// Go to Home Page
 			function goToHomePage() {
 				window.location.href = '/';
 			}
@@ -1770,12 +1807,15 @@
 			// Close sidebar when clicking outside
 			document.addEventListener('click', function(event) {
 				const sidebar = document.getElementById('sidebar');
-				const toggleButton = document.getElementById('hamburgerBtn');
+				const toggleButton = document.querySelector('.sidebar-toggle');
+				const sidebarClose = document.querySelector('.sidebar-close');
+				
 				if (sidebar.classList.contains('active') && 
 					!sidebar.contains(event.target) && 
-					!toggleButton.contains(event.target)) {
+					!toggleButton.contains(event.target) &&
+					!sidebarClose.contains(event.target) &&
+					event.clientX < window.innerWidth - 50) {
 					sidebar.classList.remove('active');
-					toggleButton.classList.remove('hidden');
 				}
 			});
 			
@@ -1809,7 +1849,8 @@
 			
 			/*customjs*/
 
-/*customjs-end*/
+
+/*customjs-end*/
         </script>
 	</body>
 </html>
