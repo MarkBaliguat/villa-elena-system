@@ -108,11 +108,6 @@
 			.hotspot-tooltip.show {
 				opacity: 1;
 			}
-			
-			/* Hide tooltips when media is showing */
-			body.media-active .hotspot-tooltip {
-				display: none !important;
-			}
 
 			/* ===================================================
 			   SIDEBAR — Redesigned with Villa Elena branding
@@ -469,69 +464,15 @@
 				font-size: 14px;
 			}
 
-			/* ===== TEMP MEDIA OVERLAY - IMPROVED ===== */
+			/* ===== TEMP MEDIA OVERLAY ===== */
 			#tmp {
 				position: fixed;
-				top: 0;
-				left: 0;
-				right: 0;
-				bottom: 0;
-				padding: 0;
-				background-color: rgba(0, 0, 0, 0.92);
+				top: 0; left: 0; right: 0; bottom: 0;
+				padding: 3em;
+				background-color: rgba(139, 69, 19, 0.9);
 				backdrop-filter: blur(10px);
 				display: none;
-				z-index: 2000;
-				align-items: center;
-				justify-content: center;
-			}
-			
-			#tmpcontent {
-				width: 100%;
-				height: 100%;
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				padding: 40px;
-				box-sizing: border-box;
-			}
-			
-			#tmpcontent img {
-				max-width: 90%;
-				max-height: 90vh;
-				width: auto;
-				height: auto;
-				object-fit: contain;
-				border-radius: 8px;
-				box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-			}
-			
-			.mediaclosebutton {
-				position: fixed;
-				top: 30px;
-				right: 30px;
-				width: 50px;
-				height: 50px;
-				background: rgba(0, 0, 0, 0.7);
-				border: 2px solid rgba(180,160,80,0.6);
-				border-radius: 50%;
-				color: #fff;
-				font-size: 24px;
-				cursor: pointer;
-				z-index: 2001;
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				transition: all 0.3s ease;
-			}
-			
-			.mediaclosebutton:hover {
-				background: rgba(180,160,80,0.8);
-				border-color: rgba(180,160,80,0.9);
-				transform: scale(1.1);
-			}
-			
-			.mediaclosebutton i {
-				pointer-events: none;
+				z-index: 21;
 			}
 
 			/* ===== LOADING SCREEN ===== */
@@ -560,20 +501,6 @@
 					width: 48px; height: 48px;
 					top: 18px; left: 18px; font-size: 20px;
 				}
-				#tmpcontent {
-					padding: 20px;
-				}
-				#tmpcontent img {
-					max-width: 95%;
-					max-height: 85vh;
-				}
-				.mediaclosebutton {
-					top: 20px;
-					right: 20px;
-					width: 45px;
-					height: 45px;
-					font-size: 22px;
-				}
 			}
 			@media (max-width: 480px) {
 				#sidebar { width: 280px; left: -310px; }
@@ -588,20 +515,6 @@
 					padding: 9px 16px; font-size: 12px;
 				}
 				.hotspot-tooltip { font-size: 13px; padding: 8px 14px; max-width: 200px; }
-				#tmpcontent {
-					padding: 15px;
-				}
-				#tmpcontent img {
-					max-width: 100%;
-					max-height: 80vh;
-				}
-				.mediaclosebutton {
-					top: 15px;
-					right: 15px;
-					width: 40px;
-					height: 40px;
-					font-size: 20px;
-				}
 			}
 			/* touch: remove hover transforms */
 			@media (hover: none) and (pointer: coarse) {
@@ -985,18 +898,6 @@
 	addHotspot('images/chevrontilted.png', new THREE.Vector3(354.2011950899555, -86.75522954203637, 163.05615855972073), () => {
 		switchPanorama('6arcelicottageandhardin.jpg');
 	});
-	addHotspot('images/whitetilted.png', new THREE.Vector3(-13.030979964429319, -28.68804869117521, -398.0484453289454), () => {
-		showMedia(1, 'images/Joy(Pavillon1).png');
-	});
-	addHotspot('images/whitetilted.png', new THREE.Vector3(151.61838543220495, -50.77789094322067, 365.7093609308093), () => {
-		showMedia(1, 'images/Emma.png');
-	});
-	addHotspot('images/whitetilted.png', new THREE.Vector3(-39.07907685422833, -49.965145308839816, 394.41566454242303), () => {
-		showMedia(1, 'images/Edna.png');
-	});
-	addHotspot('images/whitetilted.png', new THREE.Vector3(-281.7607491850554, -31.875194374457866, 281.12516595440275), () => {
-		showMedia(1, 'images/Elsa.png');
-	});
 }
 
 			if (panorama === '2joypavillionandevelyncottage.jpg') {
@@ -1069,9 +970,6 @@
 	addHotspot('images/chevrontilted.png', new THREE.Vector3(-15.041904000236265, -70.34302164816367, -392.5564138965774), () => {
 		switchPanorama('8poolviewsadaan~2.jpg');
 	});
-	addHotspot('images/whitetilted.png', new THREE.Vector3(-310.80869162231807, -73.81338876630664, -239.27326188191745), () => {
-		showMedia(1, 'images/Arceli.png');
-	});
 }
 
 			if (panorama === '8poolviewsadaan~2.jpg') {
@@ -1095,9 +993,6 @@
 	});
 	addHotspot('images/chevrontilted.png', new THREE.Vector3(-25.354835821205945, -77.80449022116667, -390.5114160475177), () => {
 		switchPanorama('10sunflowerhouse.jpg');
-	});
-	addHotspot('images/whitetilted.png', new THREE.Vector3(-390.20312396101167, -86.5162485114547, -0.8502683557014463), () => {
-		showMedia(1, 'images/Ester.png');
 	});
 }
 
@@ -1203,18 +1098,6 @@
 	});
 	addHotspot('images/chevrontilted.png', new THREE.Vector3(393.2688792074785, -51.76306954280934, 46.38767468442593), () => {
 		switchPanorama('15backpoolview.jpg');
-	});
-	addHotspot('images/whitetilted.png', new THREE.Vector3(-337.11989185454274, -38.326306041747685, -210.21947380761054), () => {
-		showMedia(1, 'images/BackCottage1.png');
-	});
-	addHotspot('images/whitetilted.png', new THREE.Vector3(-389.4201457253263, -59.34871442321956, -64.74805952734258), () => {
-		showMedia(1, 'images/BackCottage2.png');
-	});
-	addHotspot('images/whitetilted.png', new THREE.Vector3(-382.69125612560754, -59.660561588275655, 96.88382590299923), () => {
-		showMedia(1, 'images/BackCottage3.png');
-	});
-	addHotspot('images/whitetilted.png', new THREE.Vector3(-326.2772608659513, -46.02116719109715, 225.2454729960003), () => {
-		showMedia(1, 'images/BackCottage4.png');
 	});
 }
 
@@ -1414,9 +1297,6 @@
 	addHotspot('images/chevrontilted.png', new THREE.Vector3(85.3527230708329, -83.11562743746437, -381.23360258299465), () => {
 		switchPanorama('30campsite3.jpg');
 	});
-	addHotspot('images/whitetilted.png', new THREE.Vector3(-398.8380359995487, -26.613422999577335, -1.176131748566013), () => {
-		showMedia(1, 'images/Pavillon2.png');
-	});
 }
 
 			if (panorama === '32pavillion2.jpg') {
@@ -1611,7 +1491,8 @@
 	});
 }
 
-/*panoramas-end*/
+
+/*panoramas-end*/
 			}
 
 			function switchPanorama(panoramaName) {
@@ -1934,7 +1815,8 @@
 			
 			/*customjs*/
 
-/*customjs-end*/
+
+/*customjs-end*/
         </script>
 	</body>
 </html>
