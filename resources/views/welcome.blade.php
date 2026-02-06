@@ -21,7 +21,6 @@
         body {
             font-family: 'Poppins', sans-serif;
             scroll-behavior: smooth;
-            background-color: var(--light-bg);
         }
         
         .cursive-font {
@@ -82,6 +81,19 @@
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
         
+        .hero-content h1 .cursive-font {
+            display: block;
+            line-height: 1;      /* override inherited 1.2 */
+            margin-top: 0;       /* kill phantom space */
+        }
+        
+        .hero-content h1 .at {
+            display: block;          /* replaces <br> */
+            margin: .2em 0;
+            font-size: 0.55em;       /* smaller than main line */
+            font-weight: 400;
+            opacity: 0.85;
+        }
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -602,7 +614,9 @@
     <section id="home" class="hero-section">
         <div id="particles-container"></div>
         <div class="hero-content text-center text-white">
-            <h1 class="mb-4">Relax. Recharge. Reconnect at<br><span class="cursive-font">Villa Elena</span></h1>
+            <h1 class="mb-4">Relax. Recharge. Reconnect.<br>
+                <span class="cursive-font at">at</span>
+                <span class="cursive-font">Villa Elena</span></h1>
             <a href="{{ route('roomBooking') }}" class="btn-book inline-block">Book Your Stay</a>
         </div>
     </section>
