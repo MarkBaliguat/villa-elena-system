@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Villa Elena - Family Resort & Agri-Tourism Farm</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.tailwindcss.com"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="icon" type="image/x-icon" href="{{ asset('images/sunflower1.png') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
     <style>
@@ -663,21 +663,21 @@
             
             <div class="gallery-grid mb-8">
                 <div class="gallery-item">
-                    <img src="/images/sunflower-gallery1.jpg" alt="Sunflower field 1" 
+                    <img src="/images/goldenfields.jpg" alt="Sunflower field 1" 
                          onerror="this.src='/images/golden-fields.jpg'">
                     <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
                         <h3 class="text-white text-xl font-semibold">Golden Fields</h3>
                     </div>
                 </div>
                 <div class="gallery-item">
-                    <img src="/images/sunflower-gallery2.jpg" alt="Sunflower field 2"
+                    <img src="/images/sunsetglow.jpg" alt="Sunflower field 2"
                          onerror="this.src='/images/sunsetglow.jpg'">
                     <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
                         <h3 class="text-white text-xl font-semibold">Sunset Glow</h3>
                     </div>
                 </div>
                 <div class="gallery-item">
-                    <img src="/images/sunflower-gallery3.jpg" alt="Sunflower field 3"
+                    <img src="/images/mission-pic2.jpg" alt="Sunflower field 3"
                          onerror="this.src='/images/nature-beauty.jpg'">
                     <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
                         <h3 class="text-white text-xl font-semibold">Nature's Beauty</h3>
@@ -762,7 +762,7 @@
                 
                 <!-- Farm Tour -->
                 <div class="facility-card">
-                    <img src="/images/farm-tour.jpg" alt="Farm Tour" class="facility-image"
+                    <img src="/images/contact.jpg" alt="Farm Tour" class="facility-image"
                          onerror="this.src='/images/contact-image.jpg'">
                     <div class="p-6">
                         <div class="facility-icon">
