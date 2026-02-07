@@ -224,7 +224,7 @@
                     // ✅ Payment verified and booking created successfully
                     console.log('✅ Payment verified - Booking created');
                     displayBookingDetails(data.booking, data.payment);
-                    showNotification('✅ Payment successful! Booking confirmed.', 'success');
+                    showNotification(' Payment successful! Booking confirmed.', 'success');
                     
                 } else {
                     // ❌ Payment failed or verification error

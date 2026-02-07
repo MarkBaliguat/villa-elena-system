@@ -15,6 +15,13 @@
            PROFESSIONAL COLOR PALETTE
         ═══════════════════════════════ */
         :root {
+            /* White variations for depth */
+            --white-pure:     #FFFFFF;
+            --white-soft:     #FAFAFA;
+            --white-warm:     #F8F8F8;
+            --white-pearl:    #F5F5F5;
+            --white-ivory:    #F2F2F2;
+            
             --cream:        #FDF8F0;
             --cream-dark:   #F5EDE0;
             --sunflower:    #E8A825;
@@ -24,6 +31,7 @@
             --text-soft:    #7A6E5E;
             --text-faint:   #A89A87;
             --border:       #E8DDD0;
+            --border-light: #F0E8DC;
             --white:        #FFFFFF;
             --red:          #D9534F;
             --red-light:    #F2D5D4;
@@ -42,7 +50,7 @@
 
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #FDF8F0 0%, #F5EDE0 100%);
+            background: var(--white-soft);
             color: var(--text);
             min-height: 100vh;
         }
@@ -122,7 +130,7 @@
         .spinner {
             width: 56px;
             height: 56px;
-            border: 5px solid var(--border);
+            border: 5px solid var(--white-pearl);
             border-top-color: var(--sunflower);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
@@ -136,16 +144,16 @@
         }
 
         /* ═══════════════════════════════
-           SUMMARY HEADER - PROFESSIONAL
+           SUMMARY HEADER - REFINED WHITE
         ═══════════════════════════════ */
         .summary-card {
-            background: var(--white);
-            border: 1px solid rgba(232, 221, 208, 0.6);
+            background: var(--white-pure);
+            border: 1px solid var(--border-light);
             border-radius: 24px;
             padding: 2.5rem;
             margin-bottom: 2rem;
             animation: fadeUp 0.5s ease both;
-            box-shadow: 0 8px 32px rgba(61, 50, 38, 0.08);
+            box-shadow: 0 2px 12px rgba(61, 50, 38, 0.04);
             position: relative;
             overflow: hidden;
         }
@@ -200,7 +208,7 @@
         .type-pill i { font-size: 0.8rem; }
 
         /* ═══════════════════════════════
-           DATE PILLS - FIXED WIDTH (COMPACT)
+           DATE PILLS - REFINED WHITE
         ═══════════════════════════════ */
         .date-pills {
             display: inline-flex;
@@ -209,20 +217,21 @@
         }
 
         .date-pill {
-            background: linear-gradient(135deg, var(--cream) 0%, #FFFEF9 100%);
-            border: 2px solid var(--border);
+            background: var(--white-warm);
+            border: 1px solid var(--border-light);
             border-radius: 14px;
             padding: 0.7rem 1rem;
             text-align: center;
             width: auto;
             min-width: fit-content;
             transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(61, 50, 38, 0.05);
+            box-shadow: 0 1px 4px rgba(61, 50, 38, 0.03);
         }
         .date-pill:hover {
             border-color: var(--sunflower);
             transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(232, 168, 37, 0.2);
+            box-shadow: 0 4px 16px rgba(232, 168, 37, 0.15);
+            background: var(--white-pure);
         }
         .date-pill .label {
             font-size: 0.68rem;
@@ -251,7 +260,7 @@
             align-items: flex-start;
             gap: 1.2rem;
             animation: fadeUp 0.5s ease both;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
         }
         .warning-banner .w-icon {
             width: 48px;
@@ -262,7 +271,7 @@
             justify-content: center;
             flex-shrink: 0;
             font-size: 1.1rem;
-            box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         .warning-banner h4 {
             font-size: 1rem;
@@ -285,7 +294,7 @@
             background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
             border: 2px solid #F0D68A;
         }
-        .warning-banner.yellow .w-icon { background: var(--white); color: var(--sunflower); }
+        .warning-banner.yellow .w-icon { background: var(--white-pure); color: var(--sunflower); }
         .warning-banner.yellow h4 { color: #92400E; }
         .warning-banner.yellow p { color: #78350F; }
 
@@ -293,23 +302,23 @@
             background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%);
             border: 2px solid #FECACA;
         }
-        .warning-banner.red .w-icon { background: var(--white); color: var(--red); }
+        .warning-banner.red .w-icon { background: var(--white-pure); color: var(--red); }
         .warning-banner.red h4 { color: #991B1B; }
         .warning-banner.red p { color: #7F1D1D; }
 
         /* ═══════════════════════════════
-           CART ITEM CARD - PROFESSIONAL REDESIGN
+           CART ITEM CARD - PURE WHITE
         ═══════════════════════════════ */
         .item-card {
-            background: var(--white);
-            border: 1px solid rgba(232, 221, 208, 0.6);
+            background: var(--white-pure);
+            border: 1px solid var(--border-light);
             border-radius: 24px;
             padding: 0;
             margin-bottom: 1.2rem;
             animation: fadeUp 0.5s ease both;
             transition: all 0.3s ease;
             overflow: hidden;
-            box-shadow: 0 4px 20px rgba(61, 50, 38, 0.06);
+            box-shadow: 0 2px 12px rgba(61, 50, 38, 0.04);
             position: relative;
         }
 
@@ -329,7 +338,7 @@
 
         .item-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 12px 40px rgba(61, 50, 38, 0.12);
+            box-shadow: 0 8px 24px rgba(61, 50, 38, 0.08);
         }
 
         .item-card-inner {
@@ -351,6 +360,7 @@
             width: 280px;
             flex-shrink: 0;
             overflow: hidden;
+            background: var(--white-warm);
         }
 
         .item-img {
@@ -384,8 +394,8 @@
             border-radius: 50%;
             background: rgba(217, 83, 79, 0.95);
             backdrop-filter: blur(10px);
-            border: 2px solid var(--white);
-            color: var(--white);
+            border: 2px solid var(--white-pure);
+            color: var(--white-pure);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -497,8 +507,8 @@
 
         /* calculation note */
         .calc-note {
-            background: linear-gradient(135deg, var(--cream) 0%, #FFFEF9 100%);
-            border: 2px solid var(--border);
+            background: var(--white-warm);
+            border: 1px solid var(--border-light);
             border-radius: 12px;
             padding: 0.85rem 1rem;
             display: flex;
@@ -528,16 +538,16 @@
         .calc-note.red p strong { color: #991B1B; }
 
         /* ═══════════════════════════════
-           PRICE BREAKDOWN - PROFESSIONAL
+           PRICE BREAKDOWN - PURE WHITE
         ═══════════════════════════════ */
         .breakdown-card {
-            background: var(--white);
-            border: 1px solid rgba(232, 221, 208, 0.6);
+            background: var(--white-pure);
+            border: 1px solid var(--border-light);
             border-radius: 24px;
             overflow: hidden;
             margin-top: 2rem;
             animation: fadeUp 0.5s ease .2s both;
-            box-shadow: 0 8px 32px rgba(61, 50, 38, 0.08);
+            box-shadow: 0 2px 12px rgba(61, 50, 38, 0.04);
         }
 
         .breakdown-content {
@@ -555,7 +565,7 @@
             align-items: center;
             gap: 0.6rem;
             padding-bottom: 1rem;
-            border-bottom: 2px solid var(--border);
+            border-bottom: 2px solid var(--white-pearl);
         }
         .breakdown-title i { 
             color: var(--sunflower); 
@@ -601,11 +611,11 @@
         }
 
         /* ═══════════════════════════════
-           ACTION BUTTONS - IMPROVED LAYOUT
+           ACTION BUTTONS - SOFT WHITE BG
         ═══════════════════════════════ */
         .actions-section {
-            background: linear-gradient(135deg, var(--cream) 0%, #FFFEF9 100%);
-            border-top: 2px solid var(--border);
+            background: var(--white-warm);
+            border-top: 1px solid var(--border-light);
             padding: 2rem 2.5rem;
         }
 
@@ -730,32 +740,32 @@
             color: var(--white); 
         }
         .btn-sm-ghost { 
-            background: var(--white); 
+            background: var(--white-pure); 
             color: var(--text-soft); 
             border: 2px solid var(--border); 
         }
         .btn-sm-ghost:hover { 
             border-color: var(--text-soft); 
             color: var(--text); 
-            background: var(--cream);
+            background: var(--white-warm);
         }
 
         /* ═══════════════════════════════
-           EMPTY STATE
+           EMPTY STATE - PURE WHITE
         ═══════════════════════════════ */
         .empty-state {
             text-align: center;
             padding: 5rem 2rem;
-            background: var(--white);
-            border: 1px solid rgba(232, 221, 208, 0.6);
+            background: var(--white-pure);
+            border: 1px solid var(--border-light);
             border-radius: 24px;
             animation: fadeUp 0.5s ease both;
-            box-shadow: 0 8px 32px rgba(61, 50, 38, 0.08);
+            box-shadow: 0 2px 12px rgba(61, 50, 38, 0.04);
         }
         .empty-icon {
             width: 100px;
             height: 100px;
-            background: linear-gradient(135deg, var(--cream) 0%, #FFFEF9 100%);
+            background: var(--white-warm);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -763,8 +773,8 @@
             margin: 0 auto 2rem;
             font-size: 2.5rem;
             color: var(--sunflower);
-            border: 3px solid var(--border);
-            box-shadow: 0 4px 16px rgba(232, 168, 37, 0.15);
+            border: 2px solid var(--border-light);
+            box-shadow: 0 2px 8px rgba(232, 168, 37, 0.1);
         }
         .empty-state h3 { 
             font-size: 1.5rem; 
@@ -916,7 +926,7 @@
         }
 
         /* ═══════════════════════════════
-           AVAILABILITY MODAL
+           AVAILABILITY MODAL - PURE WHITE
         ═══════════════════════════════ */
         .modal-overlay {
             display: none;
@@ -932,7 +942,7 @@
         .modal-overlay.show { display: flex; }
 
         .modal {
-            background: var(--white);
+            background: var(--white-pure);
             border-radius: 24px;
             width: 100%;
             max-width: 650px;
@@ -947,7 +957,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 1.5rem 2rem;
-            border-bottom: 2px solid var(--border);
+            border-bottom: 2px solid var(--white-pearl);
             background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%);
             border-radius: 24px 24px 0 0;
         }
@@ -961,7 +971,7 @@
         }
         .modal-head h2 i { font-size: 1.1rem; }
         .modal-close {
-            background: var(--white);
+            background: var(--white-pure);
             border: 2px solid var(--red-light);
             color: var(--red);
             font-size: 1.2rem;
@@ -976,7 +986,7 @@
         }
         .modal-close:hover { 
             background: var(--red);
-            color: var(--white);
+            color: var(--white-pure);
             border-color: var(--red);
             transform: rotate(90deg);
         }
@@ -1007,8 +1017,8 @@
         }
 
         .unavail-item {
-            background: linear-gradient(135deg, var(--cream) 0%, #FFFEF9 100%);
-            border: 2px solid var(--border);
+            background: var(--white-warm);
+            border: 1px solid var(--border-light);
             border-radius: 14px;
             padding: 1.1rem 1.3rem;
             margin-bottom: 0.8rem;
@@ -1042,8 +1052,8 @@
             display: flex;
             gap: 0.8rem;
             padding: 1.5rem 2rem;
-            border-top: 2px solid var(--border);
-            background: linear-gradient(135deg, var(--cream) 0%, #FFFEF9 100%);
+            border-top: 1px solid var(--white-pearl);
+            background: var(--white-warm);
             border-radius: 0 0 24px 24px;
         }
 
@@ -1164,6 +1174,7 @@
     <div id="availability-modal-container"></div>
 
 <script>
+/* JavaScript remains the same - no changes needed */
 /* ═══════════════════════════════
    GLOBALS
 ═══════════════════════════════ */

@@ -8,6 +8,7 @@ use App\Models\CartItem;
 use App\Models\Payment;
 use App\Models\EntranceFee;
 use App\Models\Unit;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -364,7 +365,7 @@ class CustomerBookingController extends Controller
 
     /**
      * ✅ Store booking - VALIDATION FIRST, NO DATABASE WRITES UNTIL PAYMENT CONFIRMED
-     * ✅ UPDATED: Removed tax and service fee calculations
+     * ✅ UPDATED: Phone number validation and storage added
      */
     public function store(Request $request)
     {
@@ -379,19 +380,48 @@ class CustomerBookingController extends Controller
             ], 401);
         }
 
-        $request->validate([
+        // ✅ VALIDATE REQUEST INCLUDING PHONE NUMBER
+        $validator = Validator::make($request->all(), [
             'full_name' => 'required|string|max:255',
             'email' => 'required|email',
-            'phone' => 'required|string',
+            'phone' => ['required', 'string', 'regex:/^09\d{9}$/'],
             'booking_type' => 'required|in:day-use,overnight',
             'event_type' => 'required|string',
             'payment_method' => 'required|string',
             'payment_amount' => 'required|numeric|min:0',
             'special_requirements' => 'nullable|string'
+        ], [
+            'phone.required' => 'Phone number is required.',
+            'phone.regex' => 'Phone number must start with 09 and be exactly 11 digits.'
         ]);
+
+        if ($validator->fails()) {
+            Log::error('Validation failed:', $validator->errors()->toArray());
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
 
         try {
             $userId = Auth::id();
+            
+            // ✅ UPDATE USER'S PHONE NUMBER
+            Log::info('Updating user phone number...');
+            $user = User::find($userId);
+            if ($user) {
+                $phoneNumber = $request->phone;
+                
+                // Only update if phone is different or empty
+                if (empty($user->phoneNumber) || $user->phoneNumber !== $phoneNumber) {
+                    $user->phoneNumber = $phoneNumber;
+                    $user->save();
+                    Log::info('User phone number updated:', ['phone' => $phoneNumber]);
+                } else {
+                    Log::info('User phone number unchanged');
+                }
+            }
             
             // ========== PHASE 1: CART RETRIEVAL & VALIDATION (NO DATABASE WRITES) ==========
             Log::info('PHASE 1: Starting cart retrieval and validation...');
@@ -581,8 +611,7 @@ class CustomerBookingController extends Controller
                 ], 400);
             }
 
-            // ✅ REMOVED: Tax and service fee calculations
-            // Total is now just the subtotal
+            // ✅ Total is now just the subtotal (no tax or service fee)
             $totalPrice = $subtotal;
 
             Log::info('Price calculation (no tax/service fee):', [
@@ -654,6 +683,7 @@ class CustomerBookingController extends Controller
                         'special_requirements' => $request->special_requirements,
                         'event_start' => $cart->checkInDate,
                         'event_end' => $cart->checkOutDate,
+                        'phone' => $request->phone, // Include phone number
                     ],
                     'payment_data' => [
                         'payment_amount' => $paymentAmount,
@@ -787,6 +817,16 @@ class CustomerBookingController extends Controller
                 ], 400);
             }
             
+            // ✅ UPDATE USER'S PHONE NUMBER (if provided in booking data)
+            if (isset($bookingData['phone'])) {
+                $user = User::find(Auth::id());
+                if ($user && (empty($user->phoneNumber) || $user->phoneNumber !== $bookingData['phone'])) {
+                    $user->phoneNumber = $bookingData['phone'];
+                    $user->save();
+                    Log::info('User phone number updated during GCash payment:', ['phone' => $bookingData['phone']]);
+                }
+            }
+            
             // ✅ STEP 2: Create PayMongo payment intent
             $amount = floatval($paymentData['payment_amount']);
             
@@ -911,6 +951,16 @@ class CustomerBookingController extends Controller
                 // Quick re-validation
                 if ($this->hasStrictSpecialEventConflict($checkIn, $checkOut)) {
                     throw new \Exception('Date conflict detected. Please restart booking.');
+                }
+                
+                // ✅ UPDATE USER'S PHONE NUMBER (if not already updated)
+                if (isset($bookingData['phone'])) {
+                    $user = User::find($cart->user_id);
+                    if ($user && (empty($user->phoneNumber) || $user->phoneNumber !== $bookingData['phone'])) {
+                        $user->phoneNumber = $bookingData['phone'];
+                        $user->save();
+                        Log::info('User phone number updated after successful GCash payment:', ['phone' => $bookingData['phone']]);
+                    }
                 }
                 
                 // ✅ CREATE BOOKING

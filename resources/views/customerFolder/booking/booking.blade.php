@@ -39,7 +39,7 @@
 
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #FFFBF0 0%, #FFF8E1 100%);
+            background: #FFFFFF;
             color: #1F2937;
         }
         
@@ -61,7 +61,7 @@
         /* ─── PAGE TITLE WITH ENHANCED STYLING ─── */
         .page-title-wrap {
             text-align: center;
-            margin-bottom: 1.5rem;
+            margin-bottom: 2.5rem;
             animation: fadeInDown 0.6s ease-out;
         }
 
@@ -109,14 +109,23 @@
             }
         }
 
-        /* ─── ENHANCED STEP PROGRESS BAR ─── */
-        .stepper {
+        /* ─── CONTENT LAYOUT WITH VERTICAL STEPPER ─── */
+        .content-layout {
             display: flex;
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
             align-items: flex-start;
-            justify-content: center;
-            max-width: 600px;
-            margin: 2rem auto 3rem;
-            position: relative;
+        }
+
+        /* ─── VERTICAL STEP PROGRESS BAR (LEFT SIDE) ─── */
+        .stepper {
+            position: sticky;
+            top: 100px;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            min-width: 200px;
             animation: fadeIn 0.8s ease-out 0.2s both;
         }
 
@@ -127,50 +136,35 @@
 
         .step-item {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            flex: 1;
+            align-items: flex-start;
+            gap: 1rem;
             position: relative;
-            z-index: 1;
+            padding-bottom: 2.5rem;
         }
 
-        .step-head {
-            display: flex;
-            align-items: center;
-            width: 100%;
-            justify-content: center;
+        .step-item:last-child {
+            padding-bottom: 0;
         }
 
-        .step-line {
-            flex: 1;
-            height: 4px;
-            background: linear-gradient(90deg, #E5E7EB, #D1D5DB);
-            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            max-width: 120px;
-            border-radius: 2px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .step-line::before {
+        .step-item::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, var(--booking-primary-yellow), var(--booking-secondary-yellow));
-            transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            left: 24px;
+            top: 50px;
+            width: 3px;
+            height: calc(100% - 50px);
+            background: linear-gradient(180deg, #E5E7EB, #D1D5DB);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .step-line.active::before {
-            left: 0;
+        .step-item:last-child::before {
+            display: none;
         }
 
-        .step-line.left { order: -1; }
-        .step-line.right { order: 1; }
-        .step-item:first-child .step-line.left { visibility: hidden; }
-        .step-item:last-child .step-line.right { visibility: hidden; }
+        .step-item.active::before,
+        .step-item.completed::before {
+            background: linear-gradient(180deg, var(--booking-primary-yellow), var(--booking-secondary-yellow));
+        }
 
         .step-circle {
             width: 50px;
@@ -188,7 +182,7 @@
             z-index: 2;
             transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            order: 0;
+            flex-shrink: 0;
         }
 
         .step-circle::before {
@@ -232,28 +226,41 @@
             font-size: 1.1rem;
         }
 
+        .step-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            padding-top: 0.5rem;
+        }
+
         .step-label {
-            margin-top: 12px;
-            font-size: 0.75rem;
+            font-size: 0.95rem;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             color: var(--booking-text-light);
             transition: all 0.4s;
-            text-align: center;
+        }
+
+        .step-desc {
+            font-size: 0.75rem;
+            color: var(--booking-text-medium);
+            line-height: 1.4;
         }
 
         .step-item.active .step-label {
             color: var(--booking-secondary-yellow);
-            transform: scale(1.05);
         }
 
-        /* ─── ENHANCED STEP PANELS WITH SWIPE ANIMATION ─── */
+        .step-item.active .step-desc {
+            color: var(--booking-text-dark);
+        }
+
+        /* ─── PANELS CONTAINER (RIGHT SIDE) ─── */
         .panels-container {
             position: relative;
             overflow: hidden;
-            max-width: 700px;
-            margin: 0 auto;
+            flex: 1;
         }
 
         .step-panel {
@@ -309,12 +316,12 @@
             }
         }
 
-        /* ─── VIBRANT BOOKING CARD ─── */
+        /* ─── ENHANCED BOOKING CARD WITH VISIBLE BORDER ─── */
         .booking-card {
-            background: linear-gradient(135deg, #FFFFFF, #FEFEFE);
+            background: #FFFFFF;
             border-radius: 24px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05);
-            border: none;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            border: 2px solid #E5E7EB;
             overflow: hidden;
             margin-bottom: 1.5rem;
             position: relative;
@@ -396,6 +403,11 @@
             filter: drop-shadow(0 2px 4px rgba(255, 215, 0, 0.3));
         }
 
+        .form-label .required {
+            color: var(--booking-red);
+            margin-left: 2px;
+        }
+
         .form-input,
         .form-textarea {
             width: 100%;
@@ -426,6 +438,11 @@
             border-color: #D1D5DB;
         }
 
+        .form-input.error,
+        .form-textarea.error {
+            border-color: var(--booking-red);
+        }
+
         .form-textarea {
             resize: vertical;
             min-height: 100px;
@@ -435,6 +452,18 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 1.2rem;
+        }
+
+        .error-message {
+            color: var(--booking-red);
+            font-size: 0.75rem;
+            margin-top: 0.4rem;
+            display: none;
+            font-weight: 600;
+        }
+
+        .error-message.show {
+            display: block;
         }
 
         /* ─── VIBRANT PAYMENT METHOD CARDS ─── */
@@ -1218,48 +1247,127 @@
         }
 
         /* ─── RESPONSIVE ─── */
+        @media (max-width: 1024px) {
+            .content-layout {
+                flex-direction: column;
+            }
+
+            .stepper {
+                position: static;
+                flex-direction: row;
+                justify-content: center;
+                min-width: auto;
+                width: 100%;
+                max-width: 600px;
+                margin: 0 auto 2rem;
+            }
+
+            .step-item {
+                flex-direction: column;
+                align-items: center;
+                padding-bottom: 0;
+                flex: 1;
+            }
+
+            .step-item::before {
+                display: none;
+            }
+
+            .step-item::after {
+                content: '';
+                position: absolute;
+                top: 24px;
+                left: 50px;
+                width: calc(100% - 50px);
+                height: 3px;
+                background: linear-gradient(90deg, #E5E7EB, #D1D5DB);
+                transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            .step-item:last-child::after {
+                display: none;
+            }
+
+            .step-item.active::after,
+            .step-item.completed::after {
+                background: linear-gradient(90deg, var(--booking-primary-yellow), var(--booking-secondary-yellow));
+            }
+
+            .step-content {
+                align-items: center;
+                text-align: center;
+                margin-top: 0.5rem;
+            }
+
+            .step-label {
+                font-size: 0.75rem;
+            }
+
+            .step-desc {
+                display: none;
+            }
+        }
+
         @media (max-width: 640px) {
             .main-content {
                 margin-top: 70px;
                 padding-top: 2rem;
             }
+            
             .row-2 {
                 grid-template-columns: 1fr;
             }
+            
             .pay-grid,
             .amount-row {
                 grid-template-columns: 1fr;
             }
+            
             .card-body,
             .card-header {
                 padding-left: 1.5rem;
                 padding-right: 1.5rem;
             }
+            
             .rules-list {
                 padding-left: 1.5rem;
                 padding-right: 1.5rem;
             }
+            
             .rules-header {
                 padding-left: 1.5rem;
                 padding-right: 1.5rem;
             }
+            
             .contact-strip {
                 flex-direction: column;
                 gap: 0.8rem;
             }
+            
             .page-title {
                 font-size: 2rem;
             }
+            
             .step-circle {
                 width: 44px;
                 height: 44px;
                 font-size: 0.9rem;
             }
+            
             .btn-row {
                 flex-direction: column;
             }
+            
             .action-btn {
                 width: 100%;
+            }
+
+            .stepper {
+                padding: 0 1rem;
+            }
+
+            .step-label {
+                font-size: 0.65rem;
             }
         }
     </style>
@@ -1277,288 +1385,298 @@
                 <div class="page-title-line"></div>
             </div>
 
-            <!-- Step Progress -->
-            <div class="stepper">
-                <div class="step-item active" id="step-nav-1">
-                    <div class="step-head">
-                        <div class="step-line left"></div>
+            <!-- CONTENT LAYOUT: Stepper Left, Panels Right -->
+            <div class="content-layout">
+                <!-- VERTICAL STEP PROGRESS (LEFT SIDE) -->
+                <div class="stepper">
+                    <div class="step-item active" id="step-nav-1">
                         <div class="step-circle active"><i class="fas fa-user"></i></div>
-                        <div class="step-line right" id="line-1"></div>
+                        <div class="step-content">
+                            <div class="step-label">Details</div>
+                            <div class="step-desc">Enter your information</div>
+                        </div>
                     </div>
-                    <div class="step-label">Details</div>
-                </div>
-                <div class="step-item" id="step-nav-2">
-                    <div class="step-head">
-                        <div class="step-line left" id="line-1b"></div>
+                    <div class="step-item" id="step-nav-2">
                         <div class="step-circle"><i class="fas fa-file-invoice"></i></div>
-                        <div class="step-line right" id="line-2"></div>
+                        <div class="step-content">
+                            <div class="step-label">Summary</div>
+                            <div class="step-desc">Review your booking</div>
+                        </div>
                     </div>
-                    <div class="step-label">Summary</div>
-                </div>
-                <div class="step-item" id="step-nav-3">
-                    <div class="step-head">
-                        <div class="step-line left" id="line-2b"></div>
+                    <div class="step-item" id="step-nav-3">
                         <div class="step-circle"><i class="fas fa-check-circle"></i></div>
-                        <div class="step-line right"></div>
-                    </div>
-                    <div class="step-label">Confirm</div>
-                </div>
-            </div>
-
-            <!-- Panels Container -->
-            <div class="panels-container">
-                <!-- ══════════════════════════════════════
-                     STEP 1 – Guest Info + Payment
-                ══════════════════════════════════════ -->
-                <div class="step-panel active" id="panel-1">
-                    <div class="booking-card">
-                        <div class="card-header">
-                            <h2>Guest Information</h2>
-                            <p>Fill in your details and choose how you'd like to pay.</p>
+                        <div class="step-content">
+                            <div class="step-label">Confirm</div>
+                            <div class="step-desc">Finalize your stay</div>
                         </div>
-                        <div class="card-body">
-                            <form id="bookingForm">
-                                @csrf
+                    </div>
+                </div>
 
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        <i class="fas fa-user"></i>
-                                        <span>Full Name</span>
-                                    </label>
-                                    <input type="text" name="full_name" class="form-input" readonly>
-                                </div>
+                <!-- PANELS CONTAINER (RIGHT SIDE) -->
+                <div class="panels-container">
+                    <!-- ══════════════════════════════════════
+                         STEP 1 – Guest Info + Payment
+                    ══════════════════════════════════════ -->
+                    <div class="step-panel active" id="panel-1">
+                        <div class="booking-card">
+                            <div class="card-header">
+                                <h2>Guest Information</h2>
+                                <p>Fill in your details and choose how you'd like to pay.</p>
+                            </div>
+                            <div class="card-body">
+                                <form id="bookingForm">
+                                    @csrf
 
-                                <div class="row-2">
                                     <div class="form-group">
                                         <label class="form-label">
-                                            <i class="fas fa-envelope"></i>
-                                            <span>Email</span>
+                                            <i class="fas fa-user"></i>
+                                            <span>Full Name</span>
+                                            <span class="required">*</span>
                                         </label>
-                                        <input type="email" name="email" class="form-input" readonly>
+                                        <input type="text" name="full_name" class="form-input" readonly>
+                                        <div class="error-message" id="error-name">Name is required</div>
                                     </div>
-                                    <div class="form-group">
-                                        <label class="form-label">
-                                            <i class="fas fa-phone"></i>
-                                            <span>Phone</span>
-                                        </label>
-                                        <input type="tel" name="phone" class="form-input" readonly>
-                                    </div>
-                                </div>
 
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        <i class="fas fa-comment-dots"></i>
-                                        <span>Special Requirements</span>
-                                    </label>
-                                    <textarea name="special_requirements" class="form-textarea" placeholder="Any special requests or requirements…"></textarea>
-                                </div>
-
-                                <!-- Payment Method -->
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        <i class="fas fa-credit-card"></i>
-                                        <span>Payment Method</span>
-                                    </label>
-                                    <div class="pay-grid">
-                                        <div class="pay-card" id="pay-cash" onclick="selectPayMethod('cash')">
-                                            <div class="pay-check"><i class="fas fa-check"></i></div>
-                                            <div class="pay-icon"><i class="fas fa-money-bill-wave"></i></div>
-                                            <div class="pay-title">Cash</div>
-                                            <div class="pay-sub">Pay on arrival</div>
+                                    <div class="row-2">
+                                        <div class="form-group">
+                                            <label class="form-label">
+                                                <i class="fas fa-envelope"></i>
+                                                <span>Email</span>
+                                                <span class="required">*</span>
+                                            </label>
+                                            <input type="email" name="email" class="form-input" readonly>
+                                            <div class="error-message" id="error-email">Valid email is required</div>
                                         </div>
-                                        <div class="pay-card" id="pay-gcash" onclick="selectPayMethod('gcash')">
-                                            <div class="pay-check"><i class="fas fa-check"></i></div>
-                                            <div class="pay-icon"><i class="fas fa-mobile-alt"></i></div>
-                                            <div class="pay-title">GCash</div>
-                                            <div class="pay-sub">Pay online now</div>
+                                        <div class="form-group">
+                                            <label class="form-label">
+                                                <i class="fas fa-phone"></i>
+                                                <span>Phone (09XXXXXXXXX)</span>
+                                                <span class="required">*</span>
+                                            </label>
+                                            <input type="tel" name="phone" class="form-input" id="phone-input" placeholder="09XXXXXXXXX" maxlength="11">
+                                            <div class="error-message" id="error-phone">Phone must start with 09 and be 11 digits</div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <!-- Amount Selection (appears after method) -->
-                                <div id="amount-section" style="display:none;">
                                     <div class="form-group">
                                         <label class="form-label">
-                                            <i class="fas fa-dollar-sign"></i>
-                                            <span>Payment Amount</span>
+                                            <i class="fas fa-comment-dots"></i>
+                                            <span>Special Requirements</span>
                                         </label>
-                                        <div class="amount-row">
-                                            <div class="amount-chip" id="chip-down" onclick="selectAmount('downpayment')">
-                                                <div class="chip-check"><i class="fas fa-check"></i></div>
-                                                <div class="chip-label">Downpayment</div>
-                                                <div class="chip-amount" id="chip-down-amt">₱0.00</div>
-                                                <div class="chip-note">50% of total</div>
+                                        <textarea name="special_requirements" class="form-textarea" placeholder="Any special requests or requirements…"></textarea>
+                                    </div>
+
+                                    <!-- Payment Method -->
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            <i class="fas fa-credit-card"></i>
+                                            <span>Payment Method</span>
+                                            <span class="required">*</span>
+                                        </label>
+                                        <div class="pay-grid">
+                                            <div class="pay-card" id="pay-cash" onclick="selectPayMethod('cash')">
+                                                <div class="pay-check"><i class="fas fa-check"></i></div>
+                                                <div class="pay-icon"><i class="fas fa-money-bill-wave"></i></div>
+                                                <div class="pay-title">Cash</div>
+                                                <div class="pay-sub">Pay on arrival</div>
                                             </div>
-                                            <div class="amount-chip" id="chip-full" onclick="selectAmount('full')">
-                                                <div class="chip-check"><i class="fas fa-check"></i></div>
-                                                <div class="chip-label">Full Payment</div>
-                                                <div class="chip-amount" id="chip-full-amt">₱0.00</div>
-                                                <div class="chip-note">100% of total</div>
+                                            <div class="pay-card" id="pay-gcash" onclick="selectPayMethod('gcash')">
+                                                <div class="pay-check"><i class="fas fa-check"></i></div>
+                                                <div class="pay-icon"><i class="fas fa-mobile-alt"></i></div>
+                                                <div class="pay-title">GCash</div>
+                                                <div class="pay-sub">Pay online now</div>
                                             </div>
                                         </div>
+                                        <div class="error-message" id="error-payment">Please select a payment method</div>
+                                    </div>
+
+                                    <!-- Amount Selection (appears after method) -->
+                                    <div id="amount-section" style="display:none;">
+                                        <div class="form-group">
+                                            <label class="form-label">
+                                                <i class="fas fa-dollar-sign"></i>
+                                                <span>Payment Amount</span>
+                                                <span class="required">*</span>
+                                            </label>
+                                            <div class="amount-row">
+                                                <div class="amount-chip" id="chip-down" onclick="selectAmount('downpayment')">
+                                                    <div class="chip-check"><i class="fas fa-check"></i></div>
+                                                    <div class="chip-label">Downpayment</div>
+                                                    <div class="chip-amount" id="chip-down-amt">₱0.00</div>
+                                                    <div class="chip-note">50% of total</div>
+                                                </div>
+                                                <div class="amount-chip" id="chip-full" onclick="selectAmount('full')">
+                                                    <div class="chip-check"><i class="fas fa-check"></i></div>
+                                                    <div class="chip-label">Full Payment</div>
+                                                    <div class="chip-amount" id="chip-full-amt">₱0.00</div>
+                                                    <div class="chip-note">100% of total</div>
+                                                </div>
+                                            </div>
+                                            <div class="error-message" id="error-amount">Please select a payment amount</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Hidden fields -->
+                                    <input type="hidden" name="payment_method" id="h-payment-method">
+                                    <input type="hidden" name="payment_amount" id="h-payment-amount">
+                                    <input type="hidden" name="booking_type" id="h-booking-type">
+                                    <input type="hidden" name="event_type" value="normal-booking">
+                                </form>
+
+                                <div class="btn-row">
+                                    <button class="action-btn btn-primary" id="btn-next1" onclick="goToStep2()" disabled>
+                                        <span>Next Step</span>
+                                        <i class="fas fa-arrow-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ══════════════════════════════════════
+                         STEP 2 – Booking Summary
+                    ══════════════════════════════════════ -->
+                    <div class="step-panel" id="panel-2">
+                        <div class="booking-card">
+                            <div class="card-header">
+                                <h2>Booking Summary</h2>
+                                <p>Review your stay details and pricing before we proceed.</p>
+                            </div>
+                            <div class="card-body" id="summary-body">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+
+                        <div class="btn-row">
+                            <button class="action-btn btn-secondary" onclick="goToStep(1)">
+                                <i class="fas fa-arrow-left"></i>
+                                <span>Back</span>
+                            </button>
+                            <button class="action-btn btn-primary" onclick="goToStep3()">
+                                <span>Next Step</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ══════════════════════════════════════
+                         STEP 3 – Rules + Confirm
+                    ══════════════════════════════════════ -->
+                    <div class="step-panel" id="panel-3">
+
+                        <!-- Room Rules -->
+                        <div class="booking-card rules-card" id="room-rules-card" style="display:none;">
+                            <div class="rules-header">
+                                <div class="rules-icon room-icon"><i class="fas fa-bed"></i></div>
+                                <div>
+                                    <h3>Room Guidelines</h3>
+                                    <p>Rules that apply to your room booking.</p>
+                                </div>
+                            </div>
+                            <ul class="rules-list">
+                                <li><i class="fas fa-circle ri g"></i> Check-in starts at <strong>2:00 PM</strong>; check-out is by <strong>11:00 AM</strong>.</li>
+                                <li><i class="fas fa-circle ri y"></i> Bed linens and towels are provided — extra sets available on request.</li>
+                                <li><i class="fas fa-circle ri y"></i> No outside food or beverages are allowed inside the rooms.</li>
+                                <li><i class="fas fa-circle ri r"></i> Smoking is strictly prohibited inside the room and balcony.</li>
+                                <li><i class="fas fa-circle ri r"></i> Damages or misuse of room amenities will be charged to the guest.</li>
+                                <li><i class="fas fa-circle ri y"></i> Quiet hours are from <strong>10:00 PM – 7:00 AM</strong>.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Cottage Rules -->
+                        <div class="booking-card rules-card" id="cottage-rules-card" style="display:none;">
+                            <div class="rules-header">
+                                <div class="rules-icon cottage-icon"><i class="fas fa-home"></i></div>
+                                <div>
+                                    <h3>Cottage Guidelines</h3>
+                                    <p>Rules that apply to your cottage booking.</p>
+                                </div>
+                            </div>
+                            <ul class="rules-list">
+                                <li><i class="fas fa-circle ri g"></i> Cottage access begins at <strong>9:00 AM</strong> and ends at <strong>5:00 PM</strong> (day use).</li>
+                                <li><i class="fas fa-circle ri y"></i> Entrance fee per guest is included in your total.</li>
+                                <li><i class="fas fa-circle ri y"></i> Cooking is allowed inside the cottage using provided facilities only.</li>
+                                <li><i class="fas fa-circle ri r"></i> Open flames or grills are not permitted inside or near the cottage.</li>
+                                <li><i class="fas fa-circle ri r"></i> Guests are responsible for cleaning up before departure.</li>
+                                <li><i class="fas fa-circle ri y"></i> Children must be accompanied by an adult at all times near the pool area.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Cancellation + Contact -->
+                        <div class="booking-card rules-card">
+                            <div class="rules-header">
+                                <div class="rules-icon general-icon"><i class="fas fa-info-circle"></i></div>
+                                <div>
+                                    <h3>Cancellation & Contact</h3>
+                                    <p>Important details before you confirm.</p>
+                                </div>
+                            </div>
+                            <div class="card-body" style="padding-top:0;">
+                                <div class="cancel-notice">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <p>Cancellations made <strong>less than 48 hours</strong> before check-in are non-refundable. Cancellations made 48 hours or more in advance will receive a full downpayment refund.</p>
+                                </div>
+
+                                <div style="margin-top:1rem;">
+                                    <div class="section-label" style="margin-top:0;">Reach Us</div>
+                                    <div class="contact-strip">
+                                        <div class="contact-item"><i class="fas fa-phone"></i> +63 (XXX) XXX-XXXX</div>
+                                        <div class="contact-item"><i class="fas fa-envelope"></i> villa.elena@email.com</div>
+                                        <div class="contact-item"><i class="fas fa-map-marker-alt"></i> Villa Elena, Zambales</div>
                                     </div>
                                 </div>
-
-                                <!-- Hidden fields -->
-                                <input type="hidden" name="payment_method" id="h-payment-method">
-                                <input type="hidden" name="payment_amount" id="h-payment-amount">
-                                <input type="hidden" name="booking_type" id="h-booking-type">
-                                <input type="hidden" name="event_type" value="normal-booking">
-                            </form>
-
-                            <div class="btn-row">
-                                <button class="action-btn btn-primary" id="btn-next1" onclick="goToStep2()" disabled>
-                                    <span>Next Step</span>
-                                    <i class="fas fa-arrow-right"></i>
-                                </button>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <!-- ══════════════════════════════════════
-                     STEP 2 – Booking Summary
-                ══════════════════════════════════════ -->
-                <div class="step-panel" id="panel-2">
-                    <div class="booking-card">
-                        <div class="card-header">
-                            <h2>Booking Summary</h2>
-                            <p>Review your stay details and pricing before we proceed.</p>
+                        <!-- Confirm Buttons -->
+                        <div class="btn-row">
+                            <button class="action-btn btn-secondary" onclick="goToStep(2)">
+                                <i class="fas fa-arrow-left"></i>
+                                <span>Back</span>
+                            </button>
+                            <button class="action-btn btn-success" id="btn-confirm-cash" style="display:none;" onclick="submitCashBooking()">
+                                <i class="fas fa-check"></i>
+                                <span>Confirm Booking</span>
+                            </button>
+                            <button class="action-btn btn-gcash" id="btn-confirm-gcash" style="display:none;" onclick="submitGCashBooking()">
+                                <i class="fas fa-mobile-alt"></i>
+                                <span>Pay with GCash</span>
+                            </button>
                         </div>
-                        <div class="card-body" id="summary-body">
-                            <div class="spinner"></div>
-                        </div>
-                    </div>
 
-                    <div class="btn-row">
-                        <button class="action-btn btn-secondary" onclick="goToStep(1)">
-                            <i class="fas fa-arrow-left"></i>
-                            <span>Back</span>
-                        </button>
-                        <button class="action-btn btn-primary" onclick="goToStep3()">
-                            <span>Next Step</span>
-                            <i class="fas fa-arrow-right"></i>
+                        <button class="action-btn btn-danger-ghost" onclick="cancelBooking()">
+                            <i class="fas fa-times-circle"></i>
+                            <span>Cancel Booking</span>
                         </button>
                     </div>
-                </div>
 
-                <!-- ══════════════════════════════════════
-                     STEP 3 – Rules + Confirm
-                ══════════════════════════════════════ -->
-                <div class="step-panel" id="panel-3">
-
-                    <!-- Room Rules -->
-                    <div class="booking-card rules-card" id="room-rules-card" style="display:none;">
-                        <div class="rules-header">
-                            <div class="rules-icon room-icon"><i class="fas fa-bed"></i></div>
-                            <div>
-                                <h3>Room Guidelines</h3>
-                                <p>Rules that apply to your room booking.</p>
-                            </div>
-                        </div>
-                        <ul class="rules-list">
-                            <li><i class="fas fa-circle ri g"></i> Check-in starts at <strong>2:00 PM</strong>; check-out is by <strong>11:00 AM</strong>.</li>
-                            <li><i class="fas fa-circle ri y"></i> Bed linens and towels are provided — extra sets available on request.</li>
-                            <li><i class="fas fa-circle ri y"></i> No outside food or beverages are allowed inside the rooms.</li>
-                            <li><i class="fas fa-circle ri r"></i> Smoking is strictly prohibited inside the room and balcony.</li>
-                            <li><i class="fas fa-circle ri r"></i> Damages or misuse of room amenities will be charged to the guest.</li>
-                            <li><i class="fas fa-circle ri y"></i> Quiet hours are from <strong>10:00 PM – 7:00 AM</strong>.</li>
-                        </ul>
-                    </div>
-
-                    <!-- Cottage Rules -->
-                    <div class="booking-card rules-card" id="cottage-rules-card" style="display:none;">
-                        <div class="rules-header">
-                            <div class="rules-icon cottage-icon"><i class="fas fa-home"></i></div>
-                            <div>
-                                <h3>Cottage Guidelines</h3>
-                                <p>Rules that apply to your cottage booking.</p>
-                            </div>
-                        </div>
-                        <ul class="rules-list">
-                            <li><i class="fas fa-circle ri g"></i> Cottage access begins at <strong>9:00 AM</strong> and ends at <strong>5:00 PM</strong> (day use).</li>
-                            <li><i class="fas fa-circle ri y"></i> Entrance fee per guest is included in your total.</li>
-                            <li><i class="fas fa-circle ri y"></i> Cooking is allowed inside the cottage using provided facilities only.</li>
-                            <li><i class="fas fa-circle ri r"></i> Open flames or grills are not permitted inside or near the cottage.</li>
-                            <li><i class="fas fa-circle ri r"></i> Guests are responsible for cleaning up before departure.</li>
-                            <li><i class="fas fa-circle ri y"></i> Children must be accompanied by an adult at all times near the pool area.</li>
-                        </ul>
-                    </div>
-
-                    <!-- Cancellation + Contact -->
-                    <div class="booking-card rules-card">
-                        <div class="rules-header">
-                            <div class="rules-icon general-icon"><i class="fas fa-info-circle"></i></div>
-                            <div>
-                                <h3>Cancellation & Contact</h3>
-                                <p>Important details before you confirm.</p>
-                            </div>
-                        </div>
-                        <div class="card-body" style="padding-top:0;">
-                            <div class="cancel-notice">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                <p>Cancellations made <strong>less than 48 hours</strong> before check-in are non-refundable. Cancellations made 48 hours or more in advance will receive a full downpayment refund.</p>
-                            </div>
-
-                            <div style="margin-top:1rem;">
-                                <div class="section-label" style="margin-top:0;">Reach Us</div>
-                                <div class="contact-strip">
-                                    <div class="contact-item"><i class="fas fa-phone"></i> +63 (XXX) XXX-XXXX</div>
-                                    <div class="contact-item"><i class="fas fa-envelope"></i> villa.elena@email.com</div>
-                                    <div class="contact-item"><i class="fas fa-map-marker-alt"></i> Villa Elena, Zambales</div>
+                    <!-- ══════════════════════════════════════
+                         SUCCESS STATE
+                    ══════════════════════════════════════ -->
+                    <div class="step-panel" id="panel-success">
+                        <div class="booking-card">
+                            <div class="card-body">
+                                <div class="success-wrap">
+                                    <div class="success-icon"><i class="fas fa-check"></i></div>
+                                    <h3>Booking Confirmed!</h3>
+                                    <p>Your reservation at Villa Elena is all set.</p>
+                                    <div class="ref-box" id="ref-box"></div>
+                                    <div class="success-btns">
+                                        <a href="/" class="action-btn btn-secondary">
+                                            <i class="fas fa-home"></i>
+                                            <span>Home</span>
+                                        </a>
+                                        <a href="/my-bookings" class="action-btn btn-primary">
+                                            <i class="fas fa-calendar-check"></i>
+                                            <span>My Bookings</span>
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Confirm Buttons -->
-                    <div class="btn-row">
-                        <button class="action-btn btn-secondary" onclick="goToStep(2)">
-                            <i class="fas fa-arrow-left"></i>
-                            <span>Back</span>
-                        </button>
-                        <button class="action-btn btn-success" id="btn-confirm-cash" style="display:none;" onclick="submitCashBooking()">
-                            <i class="fas fa-check"></i>
-                            <span>Confirm Booking</span>
-                        </button>
-                        <button class="action-btn btn-gcash" id="btn-confirm-gcash" style="display:none;" onclick="submitGCashBooking()">
-                            <i class="fas fa-mobile-alt"></i>
-                            <span>Pay with GCash</span>
-                        </button>
-                    </div>
-
-                    <button class="action-btn btn-danger-ghost" onclick="cancelBooking()">
-                        <i class="fas fa-times-circle"></i>
-                        <span>Cancel Booking</span>
-                    </button>
-                </div>
-
-                <!-- ══════════════════════════════════════
-                     SUCCESS STATE
-                ══════════════════════════════════════ -->
-                <div class="step-panel" id="panel-success">
-                    <div class="booking-card">
-                        <div class="card-body">
-                            <div class="success-wrap">
-                                <div class="success-icon"><i class="fas fa-check"></i></div>
-                                <h3>Booking Confirmed!</h3>
-                                <p>Your reservation at Villa Elena is all set.</p>
-                                <div class="ref-box" id="ref-box"></div>
-                                <div class="success-btns">
-                                    <a href="/" class="action-btn btn-secondary">
-                                        <i class="fas fa-home"></i>
-                                        <span>Home</span>
-                                    </a>
-                                    <a href="/my-bookings" class="action-btn btn-primary">
-                                        <i class="fas fa-calendar-check"></i>
-                                        <span>My Bookings</span>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div><!-- /panels-container -->
+                </div><!-- /panels-container -->
+            </div><!-- /content-layout -->
 
         </div><!-- /main-content -->
     </div><!-- /booking-page-wrapper -->
@@ -1586,8 +1704,74 @@ let currentStep = 1;
 document.addEventListener('DOMContentLoaded', function () {
     Promise.all([loadEntranceFee(), loadBookingSummary()]).then(() => {
         prefillUserInfo();
+        validateForm(); // Initial validation check
     });
 });
+
+// ─── PHONE NUMBER VALIDATION ───
+function validatePhoneNumber(phone) {
+    // Must start with 09 and be exactly 11 digits
+    const phoneRegex = /^09\d{9}$/;
+    return phoneRegex.test(phone);
+}
+
+// ─── FORM VALIDATION ───
+function validateForm() {
+    const nameInput = document.querySelector('input[name="full_name"]');
+    const emailInput = document.querySelector('input[name="email"]');
+    const phoneInput = document.querySelector('input[name="phone"]');
+    
+    let isValid = true;
+    
+    // Validate name
+    if (!nameInput.value.trim()) {
+        isValid = false;
+    }
+    
+    // Validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailInput.value.trim() || !emailRegex.test(emailInput.value)) {
+        isValid = false;
+    }
+    
+    // Validate phone - must start with 09 and be 11 digits
+    const phoneValue = phoneInput.value.trim();
+    if (!phoneValue || !validatePhoneNumber(phoneValue)) {
+        isValid = false;
+        if (phoneValue && !validatePhoneNumber(phoneValue)) {
+            phoneInput.classList.add('error');
+        } else {
+            phoneInput.classList.remove('error');
+        }
+    } else {
+        phoneInput.classList.remove('error');
+    }
+    
+    // Validate payment method
+    if (!selectedPayMethod) {
+        isValid = false;
+    }
+    
+    // Validate payment amount
+    if (!selectedAmountType) {
+        isValid = false;
+    }
+    
+    // Update button state
+    document.getElementById('btn-next1').disabled = !isValid;
+    
+    return isValid;
+}
+
+function showFieldError(fieldName) {
+    const errorEl = document.getElementById(`error-${fieldName}`);
+    if (errorEl) {
+        errorEl.classList.add('show');
+        setTimeout(() => {
+            errorEl.classList.remove('show');
+        }, 3000);
+    }
+}
 
 // ─── LOAD ENTRANCE FEE ───
 async function loadEntranceFee() {
@@ -1627,7 +1811,7 @@ function loadBookingSummary() {
         .catch(e => console.error('Cart error:', e));
 }
 
-// ─── COMPUTE TOTALS (REMOVED TAX & SERVICE CHARGE) ───
+// ─── COMPUTE TOTALS ───
 function computeTotals() {
     daysCount = parseInt(cartData.daysCount) || 1;
     numGuests = parseInt(cartData.numGuests) || 1;
@@ -1670,7 +1854,6 @@ function computeTotals() {
         }
     });
 
-    // NO TAX OR SERVICE CHARGE - Direct total
     bookingTotal = roomSubtotal + cottageSubtotal + totalEntranceFees;
 
     cartData._roomSubtotal = roomSubtotal;
@@ -1699,9 +1882,40 @@ function prefillUserInfo() {
     const n = '{{ Auth::user()->name ?? "" }}';
     const e = '{{ Auth::user()->email ?? "" }}';
     const p = '{{ Auth::user()->phoneNumber ?? "" }}';
+    
     if (n) document.querySelector('input[name="full_name"]').value = n.trim();
     if (e) document.querySelector('input[name="email"]').value = e;
-    if (p) document.querySelector('input[name="phone"]').value = p;
+    
+    const phoneInput = document.getElementById('phone-input');
+    if (p && p.trim()) {
+        phoneInput.value = p;
+    }
+    
+    // Always make phone editable
+    phoneInput.readOnly = false;
+    
+    // Add input listener for phone validation and formatting
+    phoneInput.addEventListener('input', function(e) {
+        // Only allow numbers
+        this.value = this.value.replace(/\D/g, '');
+        
+        // Limit to 11 digits
+        if (this.value.length > 11) {
+            this.value = this.value.slice(0, 11);
+        }
+        
+        validateForm();
+    });
+    
+    phoneInput.addEventListener('blur', function() {
+        const phoneValue = this.value.trim();
+        if (phoneValue && !validatePhoneNumber(phoneValue)) {
+            this.classList.add('error');
+            showFieldError('phone');
+        } else {
+            this.classList.remove('error');
+        }
+    });
 }
 
 // ─── PAYMENT METHOD ───
@@ -1711,7 +1925,7 @@ function selectPayMethod(method) {
     document.getElementById('pay-gcash').classList.toggle('selected', method === 'gcash');
     document.getElementById('h-payment-method').value = method;
     document.getElementById('amount-section').style.display = 'block';
-    updateNextBtn();
+    validateForm();
 }
 
 // ─── AMOUNT SELECTION ───
@@ -1723,14 +1937,10 @@ function selectAmount(type) {
         ? Math.round(bookingTotal * 0.5 * 100) / 100
         : bookingTotal;
     document.getElementById('h-payment-amount').value = selectedAmount.toFixed(2);
-    updateNextBtn();
+    validateForm();
 }
 
-function updateNextBtn() {
-    document.getElementById('btn-next1').disabled = !(selectedPayMethod && selectedAmountType);
-}
-
-// ─── ENHANCED STEP NAVIGATION WITH SWIPE ANIMATION ───
+// ─── ENHANCED STEP NAVIGATION WITH SWIPE ANIMATION & VALIDATION ───
 function goToStep(n) {
     const oldStep = currentStep;
     const oldPanel = document.getElementById('panel-' + oldStep);
@@ -1779,18 +1989,27 @@ function goToStep(n) {
             icon.className = 'fas fa-check-circle';
         }
     }
-
-    // Activate connector lines between completed/active steps
-    const activateLines = (ids, cond) => ids.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.classList.toggle('active', cond);
-    });
-    activateLines(['line-1', 'line-1b'], n >= 2);
-    activateLines(['line-2', 'line-2b'], n >= 3);
 }
 
 function goToStep2() {
-    if (!selectedPayMethod || !selectedAmountType) return;
+    if (!validateForm()) {
+        const phoneInput = document.querySelector('input[name="phone"]');
+        const phoneValue = phoneInput.value.trim();
+        
+        // Show specific error messages
+        if (!selectedPayMethod) {
+            showFieldError('payment');
+            showToast('error', 'Please select a payment method');
+        } else if (!selectedAmountType) {
+            showFieldError('amount');
+            showToast('error', 'Please select a payment amount');
+        } else if (!phoneValue || !validatePhoneNumber(phoneValue)) {
+            showFieldError('phone');
+            showToast('error', 'Phone number must start with 09 and be exactly 11 digits');
+            phoneInput.focus();
+        }
+        return;
+    }
     renderSummary();
     goToStep(2);
 }
@@ -1803,7 +2022,7 @@ function goToStep3() {
     goToStep(3);
 }
 
-// ─── RENDER SUMMARY (WITH ENTRANCE FEE BREAKDOWN, NO TAX/SERVICE) ───
+// ─── RENDER SUMMARY ───
 function renderSummary() {
     const d = cartData;
     const checkIn  = new Date(d.checkInDate);
@@ -1914,10 +2133,20 @@ async function submitCashBooking() {
     if (!(await validateCartBeforeSubmit())) { resetBtn(btn, 'cash'); return; }
 
     const fd = new FormData(document.getElementById('bookingForm'));
+    
+    // Explicitly add and validate phone number
+    const phoneValue = document.getElementById('phone-input').value.trim();
+    if (!validatePhoneNumber(phoneValue)) {
+        showToast('error', 'Invalid phone number. Must start with 09 and be 11 digits.');
+        resetBtn(btn, 'cash');
+        return;
+    }
+    
+    fd.set('phone', phoneValue);
     fd.set('payment_amount', selectedAmount.toFixed(2));
     fd.set('payment_method', 'cash');
     fd.set('booking_type', document.getElementById('h-booking-type').value);
-    fd.append('event_type', 'normal-booking');
+    fd.set('event_type', 'normal-booking');
 
     try {
         const r = await fetch('/api/customer-bookings', {
@@ -1943,10 +2172,20 @@ async function submitGCashBooking() {
     if (!(await validateCartBeforeSubmit())) { resetBtn(btn, 'gcash'); return; }
 
     const fd = new FormData(document.getElementById('bookingForm'));
+    
+    // Explicitly add and validate phone number
+    const phoneValue = document.getElementById('phone-input').value.trim();
+    if (!validatePhoneNumber(phoneValue)) {
+        showToast('error', 'Invalid phone number. Must start with 09 and be 11 digits.');
+        resetBtn(btn, 'gcash');
+        return;
+    }
+    
+    fd.set('phone', phoneValue);
     fd.set('payment_amount', selectedAmount.toFixed(2));
     fd.set('payment_method', 'gcash');
     fd.set('booking_type', document.getElementById('h-booking-type').value);
-    fd.append('event_type', 'normal-booking');
+    fd.set('event_type', 'normal-booking');
 
     try {
         // PHASE 1 – Validate
