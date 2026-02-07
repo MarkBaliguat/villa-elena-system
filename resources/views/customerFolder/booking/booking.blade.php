@@ -47,6 +47,11 @@
             font-family: 'Dancing Script', cursive;
         }
 
+        /* Smooth scroll behavior */
+        html {
+            scroll-behavior: smooth;
+        }
+
         /* ─── MAIN CONTENT WRAPPER ─── */
         .booking-page-wrapper {
             background: transparent;
@@ -1250,6 +1255,7 @@
         @media (max-width: 1024px) {
             .content-layout {
                 flex-direction: column;
+                align-items: center;
             }
 
             .stepper {
@@ -1267,6 +1273,7 @@
                 align-items: center;
                 padding-bottom: 0;
                 flex: 1;
+                position: relative;
             }
 
             .step-item::before {
@@ -1277,7 +1284,7 @@
                 content: '';
                 position: absolute;
                 top: 24px;
-                left: 50px;
+                left: calc(50% + 25px);
                 width: calc(100% - 50px);
                 height: 3px;
                 background: linear-gradient(90deg, #E5E7EB, #D1D5DB);
@@ -1306,12 +1313,17 @@
             .step-desc {
                 display: none;
             }
+
+            .panels-container {
+                width: 100%;
+                max-width: 100%;
+            }
         }
 
         @media (max-width: 640px) {
             .main-content {
                 margin-top: 70px;
-                padding-top: 2rem;
+                padding: 2rem 1rem 3rem;
             }
             
             .row-2 {
@@ -1940,7 +1952,7 @@ function selectAmount(type) {
     validateForm();
 }
 
-// ─── ENHANCED STEP NAVIGATION WITH SWIPE ANIMATION & VALIDATION ───
+// ─── ENHANCED STEP NAVIGATION WITH SWIPE ANIMATION & SCROLL TO TOP ───
 function goToStep(n) {
     const oldStep = currentStep;
     const oldPanel = document.getElementById('panel-' + oldStep);
@@ -1989,6 +2001,12 @@ function goToStep(n) {
             icon.className = 'fas fa-check-circle';
         }
     }
+    
+    // Scroll to top smoothly
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
 }
 
 function goToStep2() {
@@ -2237,6 +2255,12 @@ function showSuccess(data) {
         <div class="ref-row"><span>Booking ID</span><span>${data.booking_id}</span></div>
         <div class="ref-row"><span>Status</span><span>${data.booking_status}</span></div>
     `;
+    
+    // Scroll to top on success
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
 }
 
 // ─── CANCEL ───
