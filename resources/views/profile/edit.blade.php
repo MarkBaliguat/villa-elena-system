@@ -10,24 +10,33 @@
     
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;500;600;700;800&display=swap');
         
         :root {
             --primary-black: #000000;
             --primary-yellow: #FFD700;
             --secondary-yellow: #FFA500;
-            --light-bg: #FFFBF0;
+            --yellow-dark: #F59E0B;
+            --light-bg: #FFFFFF;
             --card-bg: #FFFFFF;
             --text-dark: #1F2937;
             --text-medium: #6B7280;
             --text-light: #9CA3AF;
             --border-color: #E5E7EB;
+            --sidebar-bg: #FAFAFA;
+            --hover-bg: #FFF9E6;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: var(--light-bg);
-            color: var(--text-dark);
+            background-color: #F0F2F5;
+            color: #050505;
             overflow-x: hidden;
         }
         
@@ -37,167 +46,271 @@
         
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
-            width: 10px;
+            width: 6px;
+            height: 6px;
         }
         
         ::-webkit-scrollbar-track {
-            background: #f8f9fa;
+            background: #F3F4F6;
             border-radius: 10px;
         }
         
         ::-webkit-scrollbar-thumb {
             background: linear-gradient(to bottom, var(--primary-yellow), var(--secondary-yellow));
             border-radius: 10px;
-            border: 2px solid #f8f9fa;
         }
         
-        /* Animations */
-        .fade-in {
-            animation: fadeIn 0.5s ease-in-out;
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(to bottom, var(--secondary-yellow), var(--yellow-dark));
         }
         
-        .slide-up {
-            animation: slideUp 0.4s ease-out;
+        /* Main content spacing - INCREASED MARGINS */
+        .main-content {
+            margin-top: 120px;
+            margin-bottom: 80px;
+            min-height: calc(100vh - 200px);
+            background: #F0F2F5;
+        }
+
+        .page-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: #000000;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
         }
         
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .page-subtitle {
+            display: block;
+            color: #65676B;
+            font-size: 0.9375rem;
+            font-weight: 400;
+            margin-bottom: 24px;
         }
         
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* Layout Container */
+        .settings-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0;
+            display: flex;
+            gap: 0;
+            min-height: calc(100vh - 400px);
         }
         
-        /* Glass morphism */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-        
-        /* Gradients */
-        .gradient-sunflower {
-            background: linear-gradient(135deg, var(--primary-yellow), var(--secondary-yellow));
-        }
-        
-        .gradient-success {
-            background: linear-gradient(135deg, #10B981, #059669);
-        }
-        
-        .gradient-error {
-            background: linear-gradient(135deg, #EF4444, #DC2626);
-        }
-        
-        .gradient-dark {
-            background: linear-gradient(135deg, var(--primary-black), #2D3748);
-        }
-        
-        /* Button styling */
-        .btn-modern {
+        /* IMPROVED SIDEBAR STYLING */
+        .settings-sidebar {
+            width: 380px;
+            border-right: 1px solid #E4E6EB;
+            padding: 32px 20px;
+            position: sticky;
+            top: 140px;
+            height: fit-content;
+            background-color: #FFFFFF;
             border-radius: 12px;
-            font-weight: 600;
-            letter-spacing: 0.025em;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-right: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        
+        .sidebar-nav {
+            list-style: none;
+        }
+        
+        .nav-item {
+            margin: 0;
+        }
+        
+        /* IMPROVED NAV LINK - BLACK TEXT BY DEFAULT */
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 18px;
+            margin: 6px 0;
+            color: #000000 !important;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9375rem;
+            transition: all 0.25s ease;
+            border-radius: 10px;
             position: relative;
-            overflow: hidden;
             border: none;
-            cursor: pointer;
-            display: inline-flex;
+            background: transparent;
+        }
+        
+        .nav-link:hover {
+            background: #F7F8FA;
+            color: #000000 !important;
+            transform: translateX(4px);
+        }
+        
+        .nav-link.active {
+            background: linear-gradient(135deg, var(--primary-yellow), var(--secondary-yellow));
+            color: #000000 !important;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+            transform: translateX(0);
+        }
+        
+        .nav-link.active::before {
+            display: none;
+        }
+        
+        /* IMPROVED NAV ICON */
+        .nav-icon {
+            width: 40px;
+            height: 40px;
+            background: #F0F2F5;
+            border-radius: 10px;
+            display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            padding: 14px 32px;
+            font-size: 1.125rem;
+            flex-shrink: 0;
+            color: #000000 !important;
+            transition: all 0.25s ease;
         }
         
-        .btn-modern::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.6s ease;
+        .nav-icon i {
+            color: #000000 !important;
         }
         
-        .btn-modern:hover::after {
-            left: 100%;
+        .nav-link:hover .nav-icon {
+            background: #E4E6EB;
+            color: #000000 !important;
+            transform: scale(1.05);
         }
         
-        .btn-modern:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        .nav-link:hover .nav-icon i {
+            color: #000000 !important;
         }
         
-        /* Input styling */
-        .input-modern {
-            width: 100%;
-            padding: 14px 18px;
-            border: 2px solid var(--border-color);
+        .nav-link.active .nav-icon {
+            background: rgba(0, 0, 0, 0.15);
+            color: #000000 !important;
+        }
+        
+        .nav-link.active .nav-icon i {
+            color: #000000 !important;
+        }
+        
+        .nav-text {
+            flex: 1;
+            font-weight: 500;
+            color: #000000 !important;
+        }
+        
+        .nav-link.active .nav-text {
+            font-weight: 600;
+            color: #000000 !important;
+        }
+        
+        .nav-badge {
+            background: linear-gradient(135deg, #EF4444, #DC2626);
+            color: white;
+            font-size: 0.65rem;
+            padding: 3px 8px;
             border-radius: 12px;
-            font-size: 1rem;
-            font-family: 'Poppins', sans-serif;
-            transition: all 0.3s ease;
-            background: white;
+            font-weight: 700;
         }
         
-        .input-modern:focus {
-            border-color: var(--primary-yellow);
-            box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.15);
-            outline: none;
-            transform: translateY(-2px);
+        /* IMPROVED HEADER CONTENT IN SIDEBAR */
+        .header-content {
+            padding: 0 0 24px 0;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #E4E6EB;
         }
         
-        .input-modern:disabled {
-            background: #f7fafc;
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-
-        /* Password input with icon */
-        .password-wrapper {
-            position: relative;
-        }
-
-        .password-wrapper input {
-            padding-right: 50px;
-        }
-
-        .password-toggle {
-            position: absolute;
-            right: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: #6B7280;
-            transition: color 0.3s ease;
-            z-index: 10;
-        }
-
-        .password-toggle:hover {
-            color: var(--primary-yellow);
+        /* Content Area - Improved Design */
+        .settings-content {
+            flex: 1;
+            padding: 32px 24px;
+            background: transparent;
         }
         
-        /* Alert styling */
-        .alert-modern {
-            padding: 18px 22px;
-            border-radius: 16px;
-            margin-bottom: 24px;
+        .content-section {
+            display: none;
+            animation: fadeInUp 0.35s ease-out;
+            background: #FFFFFF;
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        
+        .content-section.active {
+            display: block;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Section Header - Modern Facebook Style */
+        .section-header {
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 2px solid #E4E6EB;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+        
+        .section-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-yellow), var(--secondary-yellow));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000000;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.25);
+            flex-shrink: 0;
+        }
+        
+        .section-info {
+            flex: 1;
+        }
+        
+        .section-title {
+            font-size: 1.625rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 6px;
+            line-height: 1.2;
+        }
+        
+        .section-description {
+            color: var(--text-medium);
+            font-size: 0.9375rem;
+            font-weight: 400;
+            line-height: 1.5;
+        }
+        
+        /* Alert Boxes - Facebook Style */
+        .alert-box {
+            padding: 14px 18px;
+            border-radius: 10px;
+            margin-bottom: 20px;
             display: flex;
             align-items: flex-start;
-            gap: 15px;
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            animation: slideIn 0.3s ease-out;
+            gap: 14px;
+            border: 1px solid;
+            animation: slideIn 0.25s ease-out;
         }
         
         @keyframes slideIn {
             from {
                 opacity: 0;
-                transform: translateY(-10px);
+                transform: translateY(-12px);
             }
             to {
                 opacity: 1;
@@ -206,223 +319,614 @@
         }
         
         .alert-warning {
-            background: linear-gradient(135deg, #FEF5E7, #FAE5D3);
-            border-left: 4px solid #F39C12;
+            background: #FFF3CD;
+            border-color: #FFE69C;
         }
         
         .alert-success {
-            background: linear-gradient(135deg, #D4EDDA, #C3E6CB);
-            border-left: 4px solid #28A745;
+            background: #D1E7DD;
+            border-color: #BADBCC;
         }
-
+        
         .alert-error {
-            background: linear-gradient(135deg, #FEE2E2, #FECACA);
-            border-left: 4px solid #DC2626;
+            background: #F8D7DA;
+            border-color: #F5C2C7;
         }
         
-        /* Main content spacing */
-        .main-content {
-            margin-top: 80px;
-            min-height: calc(100vh - 300px);
+        .alert-info {
+            background: #D1ECF1;
+            border-color: #BEE5EB;
         }
         
-        /* Profile avatar */
-        .profile-avatar {
-            width: 120px;
-            height: 120px;
-            background: linear-gradient(135deg, var(--primary-yellow), var(--secondary-yellow));
-            border-radius: 50%;
+        .alert-icon {
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+        
+        .alert-content h4 {
+            font-weight: 600;
+            margin-bottom: 4px;
+            font-size: 0.9375rem;
+        }
+        
+        .alert-content p {
+            font-size: 0.9375rem;
+            line-height: 1.5;
+            font-weight: 400;
+        }
+        
+        /* FIXED FORM ELEMENTS - Equal height and better design */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            margin-bottom: 28px;
+        }
+        
+        .form-group {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto;
-            box-shadow: 0 15px 35px rgba(255, 215, 0, 0.3);
-            position: relative;
+            flex-direction: column;
         }
         
-        .profile-avatar::before {
-            content: '';
-            position: absolute;
-            inset: -5px;
-            background: linear-gradient(135deg, var(--primary-yellow), var(--secondary-yellow));
-            border-radius: 50%;
-            z-index: -1;
-            opacity: 0.3;
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 0.3; }
-            50% { transform: scale(1.1); opacity: 0.5; }
-        }
-        
-        .profile-avatar i {
-            font-size: 3rem;
-            color: white;
-        }
-        
-        /* Form sections */
-        .form-section {
-            margin-bottom: 40px;
-            padding-bottom: 40px;
-            border-bottom: 2px solid #f0f0f0;
-        }
-        
-        .form-section:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-        
-        .section-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-        
-        .section-icon {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, var(--primary-yellow), var(--secondary-yellow));
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.5rem;
-            box-shadow: 0 8px 20px rgba(255, 215, 0, 0.3);
-        }
-        
-        .section-title {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: var(--text-dark);
-        }
-        
-        /* Error messages */
-        .error-message {
-            color: #e53e3e;
-            font-size: 0.875rem;
-            margin-top: 8px;
+        .form-label {
             display: flex;
             align-items: center;
             gap: 6px;
+            font-weight: 600;
+            font-size: 0.9375rem;
+            color: #050505;
+            margin-bottom: 8px;
+            letter-spacing: 0;
+            text-transform: none;
         }
         
-        /* Save feedback */
-        .save-feedback {
-            color: #48bb78;
-            font-size: 0.95rem;
-            font-weight: 600;
+        .form-label i {
+            display: none;
+        }
+        
+        /* FIXED INPUT - Same height for all inputs */
+        .form-input {
+            width: 100%;
+            height: 46px;
+            padding: 0 14px;
+            border: 1.5px solid #CED0D4;
+            border-radius: 8px;
+            font-size: 0.9375rem;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 400;
+            transition: all 0.2s ease;
+            background: #FFFFFF;
+            color: #050505;
+            line-height: 46px;
+        }
+        
+        .form-input:focus {
+            border-color: var(--primary-yellow);
+            box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.15);
+            outline: none;
+            background: #FFFFFF;
+        }
+        
+        .form-input:disabled,
+        .form-input[readonly] {
+            background: #F0F2F5;
+            cursor: not-allowed;
+            opacity: 0.6;
+            color: #65676B;
+        }
+        
+        .form-input::placeholder {
+            color: #65676B;
+            font-weight: 400;
+            font-size: 0.9375rem;
+        }
+        
+        /* Password Input Wrapper - Fixed height */
+        .password-wrapper {
+            position: relative;
+            height: 46px;
+        }
+        
+        .password-wrapper .form-input {
+            padding-right: 48px;
+            height: 46px;
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: var(--text-medium);
+            transition: all 0.3s ease;
+            font-size: 1.05rem;
+            z-index: 10;
+        }
+        
+        .password-toggle:hover {
+            color: var(--secondary-yellow);
+            transform: translateY(-50%) scale(1.15);
+        }
+        
+        /* Password Requirements Box - Facebook Style */
+        .requirements-box {
+            background: #F7F8FA;
+            border: 1.5px solid #E4E6EB;
+            border-radius: 10px;
+            padding: 18px;
+            margin-top: 20px;
+        }
+        
+        .requirements-title {
             display: flex;
             align-items: center;
-            gap: 8px;
-            animation: fadeIn 0.3s ease-out;
-            background: linear-gradient(135deg, #d4edda, #c3e6cb);
-            padding: 12px 20px;
-            border-radius: 10px;
-            border-left: 4px solid #28a745;
+            gap: 10px;
+            font-weight: 600;
+            color: #050505;
+            margin-bottom: 14px;
+            font-size: 0.9375rem;
         }
-
-        /* Password requirements */
-        .password-requirements {
-            background: linear-gradient(135deg, #F0F9FF, #E0F2FE);
-            border-left: 4px solid #3B82F6;
-            padding: 16px;
-            border-radius: 12px;
-            margin-top: 12px;
+        
+        .requirements-list {
+            display: grid;
+            gap: 10px;
         }
-
+        
         .requirement-item {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 0.875rem;
-            color: #1E40AF;
-            margin: 6px 0;
+            gap: 12px;
+            color: #65676B;
+            font-size: 0.9375rem;
+            font-weight: 400;
         }
-
+        
         .requirement-item i {
+            color: #65676B;
+            font-size: 0.8rem;
+        }
+        
+        /* Buttons - Improved Design */
+        .btn {
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9375rem;
+            letter-spacing: 0;
+            padding: 11px 20px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+            font-family: 'Poppins', sans-serif;
+            height: 44px;
+        }
+        
+        .btn::before {
+            display: none;
+        }
+        
+        .btn i,
+        .btn span {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(0.95);
+        }
+        
+        .btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-yellow), var(--secondary-yellow));
+            color: #000000;
+            box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
+        }
+        
+        .btn-primary:hover {
+            box-shadow: 0 4px 16px rgba(255, 215, 0, 0.35);
+        }
+        
+        .btn-success {
+            background: #42B72A;
+            color: white;
+            box-shadow: 0 2px 8px rgba(66, 183, 42, 0.2);
+        }
+        
+        .btn-success:hover {
+            background: #36A420;
+            box-shadow: 0 4px 16px rgba(66, 183, 42, 0.35);
+        }
+        
+        .btn-danger {
+            background: #E4E6EB;
+            color: #050505;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .btn-danger:hover {
+            background: #D8DADF;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+        }
+        
+        /* Success Feedback - Facebook Style */
+        .success-message {
+            background: #D1E7DD;
+            border: 1.5px solid #BADBCC;
+            border-radius: 8px;
+            padding: 10px 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+            color: #0F5132;
+            margin-left: 14px;
+            animation: slideIn 0.25s ease-out;
+            font-size: 0.9375rem;
+        }
+        
+        .success-message i {
+            font-size: 1.05rem;
+        }
+        
+        /* Error Messages */
+        .error-message {
+            color: #DC3545;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .error-message i {
             font-size: 0.75rem;
+        }
+        
+        /* Form Actions - Facebook Style */
+        .form-actions {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 2px solid #E4E6EB;
+        }
+        
+        /* Profile Avatar - More Compact */
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary-yellow), var(--secondary-yellow));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            box-shadow: 0 8px 24px rgba(255, 215, 0, 0.25);
+            margin-bottom: 20px;
+        }
+        
+        /* Full Width Form Group */
+        .form-group-full {
+            grid-column: 1 / -1;
+        }
+        
+        /* Responsive Design - Facebook Style */
+        @media (max-width: 1024px) {
+            .settings-container {
+                flex-direction: column;
+            }
+            
+            .settings-sidebar {
+                width: 100%;
+                position: static;
+                border-right: none;
+                border-bottom: none;
+                padding: 0;
+                background: transparent;
+                margin-right: 0;
+                margin-bottom: 0;
+                border-radius: 0;
+                box-shadow: none;
+            }
+            
+            .header-content {
+                padding: 0 20px 24px;
+                margin-bottom: 0;
+                border-bottom: none;
+                background: #FFFFFF;
+                border-radius: 12px 12px 0 0;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            }
+            
+            .sidebar-nav {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 0;
+                padding: 0;
+                background: #FFFFFF;
+                border-radius: 0 0 12px 12px;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+                margin-bottom: 20px;
+            }
+            
+            .nav-item {
+                flex-shrink: 1;
+            }
+            
+            .nav-link {
+                padding: 16px 20px;
+                border: none;
+                border-bottom: 1.5px solid #E4E6EB;
+                border-radius: 0;
+                white-space: nowrap;
+                margin: 0;
+                background: #FFFFFF;
+                color: #000000 !important;
+            }
+            
+            .nav-item:last-child .nav-link {
+                border-bottom: none;
+                border-radius: 0 0 12px 12px;
+            }
+            
+            .nav-link:hover {
+                background: #F7F8FA;
+                transform: none;
+            }
+            
+            .nav-link.active {
+                background: linear-gradient(135deg, var(--primary-yellow), var(--secondary-yellow));
+                color: #000000 !important;
+                border-color: transparent;
+                position: relative;
+            }
+            
+            .nav-link.active::after {
+                content: '';
+                position: absolute;
+                right: 20px;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 8px;
+                height: 8px;
+                background: #000000;
+                border-radius: 50%;
+            }
+            
+            .nav-link.active::before {
+                display: none;
+            }
+            
+            .nav-link.active .nav-icon {
+                background: rgba(0, 0, 0, 0.15);
+                color: #000000 !important;
+            }
+            
+            .nav-link.active .nav-icon i {
+                color: #000000 !important;
+            }
+            
+            .nav-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1.125rem;
+            }
+            
+            .settings-content {
+                padding: 0 20px 20px;
+            }
+            
+            .content-section {
+                padding: 24px;
+                border-radius: 12px;
+            }
+            
+            .page-title {
+                font-size: 1.625rem;
+                padding-top: 24px;
+            }
+            
+            .page-subtitle {
+                display: block;
+            }
+            
+            .main-content {
+                margin-top: 100px;
+                margin-bottom: 60px;
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .page-title {
+                font-size: 1.5rem;
+                padding-top: 20px;
+            }
+            
+            .page-subtitle {
+                font-size: 0.875rem;
+                margin-bottom: 20px;
+            }
+            
+            .section-title {
+                font-size: 1.375rem;
+            }
+            
+            .section-icon {
+                width: 52px;
+                height: 52px;
+                font-size: 1.375rem;
+            }
+            
+            .nav-text {
+                font-size: 0.9375rem;
+                font-weight: 500;
+            }
+            
+            .nav-link {
+                padding: 14px 16px;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
+            .success-message {
+                margin-left: 0;
+                margin-top: 12px;
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .settings-content {
+                padding: 0 16px 20px;
+            }
+            
+            .content-section {
+                padding: 20px;
+            }
+            
+            .section-header {
+                gap: 14px;
+                margin-bottom: 24px;
+                padding-bottom: 20px;
+            }
+            
+            .form-input,
+            .password-wrapper {
+                height: 48px;
+            }
+            
+            .form-input {
+                line-height: 48px;
+                font-size: 1rem;
+            }
+            
+            .main-content {
+                margin-top: 80px;
+                margin-bottom: 40px;
+            }
         }
     </style>
 </head>
 
-<body class="flex flex-col min-h-screen">
+<body>
     <!-- Import Navigation -->
     @include('customerFolder.partials.navbar')
     
     <!-- Main Content -->
-    <main class="main-content flex-grow">
-        <div class="container mx-auto px-4 py-8 max-w-5xl">
-            <!-- Page Header -->
-            <div class="text-center mb-12 slide-up">
-                <div class="profile-avatar mb-6">
-                    <i class="fas fa-user"></i>
+    <main class="main-content">
+
+        <!-- Settings Container -->
+        <div class="settings-container">
+            <!-- Left Sidebar Navigation -->
+            <aside class="settings-sidebar">
+                <div class="header-content">
+                    <h1 class="page-title">Profile Settings</h1>
+                    <p class="page-subtitle">Manage your account information and preferences</p>
                 </div>
-                <h1 class="text-5xl font-bold mb-4 cursive-font">Profile Settings</h1>
-                <p class="text-gray-600 text-lg max-w-2xl mx-auto">Manage your personal information and account preferences</p>
-                <div class="w-24 h-1 gradient-sunflower mx-auto mt-6 rounded-full"></div>
-            </div>
+                <nav>
+                    <ul class="sidebar-nav">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link active" data-section="personal-info">
+                                <span class="nav-icon">
+                                    <i class="fas fa-user-circle"></i>
+                                </span>
+                                <span class="nav-text">Personal Information</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-section="password">
+                                <span class="nav-icon">
+                                    <i class="fas fa-lock"></i>
+                                </span>
+                                <span class="nav-text">Password & Security</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </aside>
 
-            <!-- Profile Information Card -->
-            <div class="glass-card rounded-2xl p-8 mb-8 fade-in">
-                <!-- Verification Alert -->
-                @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
-                <div class="alert-modern alert-warning">
-                    <div class="flex-shrink-0">
-                        <i class="fas fa-exclamation-triangle text-2xl text-yellow-600"></i>
-                    </div>
-                    <div class="flex-1">
-                        <h4 class="font-bold text-yellow-800 mb-1">Email Verification Required</h4>
-                        <p class="text-yellow-700 text-sm mb-3">Your email address is unverified. Please verify to access all features.</p>
-                        <button form="send-verification" class="text-yellow-800 underline hover:no-underline font-semibold text-sm">
-                            <i class="fas fa-paper-plane mr-2"></i>Resend Verification Email
-                        </button>
-                    </div>
-                </div>
-                @endif
-
-                @if (session('status') === 'verification-link-sent')
-                <div class="alert-modern alert-success">
-                    <div class="flex-shrink-0">
-                        <i class="fas fa-check-circle text-2xl text-green-600"></i>
-                    </div>
-                    <div class="flex-1">
-                        <h4 class="font-bold text-green-800 mb-1">Verification Email Sent</h4>
-                        <p class="text-green-700 text-sm">A new verification link has been sent to your email address.</p>
-                    </div>
-                </div>
-                @endif
-
-                <form id="send-verification" method="post" action="{{ route('verification.send') }}">
-                    @csrf
-                </form>
-
-                <form method="post" action="{{ route('profile.update') }}" id="profile-form">
-                    @csrf
-                    @method('patch')
-
-                    <!-- Personal Information Section -->
-                    <div class="form-section">
-                        <div class="section-header">
-                            <div class="section-icon">
-                                <i class="fas fa-user-circle"></i>
-                            </div>
-                            <h2 class="section-title">Personal Information</h2>
+            <!-- Content Area -->
+            <div class="settings-content">
+                <!-- Personal Information Section -->
+                <section id="personal-info" class="content-section active">
+                    <!-- Verification Alert -->
+                    @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
+                    <div class="alert-box alert-warning">
+                        <i class="fas fa-exclamation-triangle alert-icon" style="color: #F39C12;"></i>
+                        <div class="alert-content">
+                            <h4 style="color: #DC7633;">Email Verification Required</h4>
+                            <p style="color: #A04000;">Your email address is unverified. Please verify to access all features.</p>
+                            <button form="send-verification" style="margin-top: 10px; text-decoration: underline; background: none; border: none; color: #F39C12; cursor: pointer; font-weight: 600; font-size: 0.85rem;">
+                                <i class="fas fa-paper-plane"></i> Resend Verification Email
+                            </button>
                         </div>
+                    </div>
+                    @endif
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">
-                                    <i class="fas fa-user mr-2 text-yellow-500"></i>Full Name
+                    @if (session('status') === 'verification-link-sent')
+                    <div class="alert-box alert-success">
+                        <i class="fas fa-check-circle alert-icon" style="color: #28A745;"></i>
+                        <div class="alert-content">
+                            <h4 style="color: #155724;">Verification Email Sent</h4>
+                            <p style="color: #0F4C1E;">A new verification link has been sent to your email address.</p>
+                        </div>
+                    </div>
+                    @endif
+
+                    <form id="send-verification" method="post" action="{{ route('verification.send') }}">
+                        @csrf
+                    </form>
+
+                    <div class="section-header">
+                        <span class="section-icon">
+                            <i class="fas fa-user-circle"></i>
+                        </span>
+                        <div class="section-info">
+                            <h2 class="section-title">Personal Information</h2>
+                            <p class="section-description">Update your personal details and contact information</p>
+                        </div>
+                    </div>
+
+                    <form method="post" action="{{ route('profile.update') }}" id="profile-form">
+                        @csrf
+                        @method('patch')
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-user"></i>
+                                    <span>Full Name</span>
                                 </label>
                                 <input 
                                     id="name" 
                                     name="name" 
                                     type="text" 
-                                    class="input-modern"
+                                    class="form-input"
                                     value="{{ old('name', $user->name) }}" 
                                     required 
                                     autofocus 
@@ -432,15 +936,16 @@
                                 <x-input-error class="error-message" :messages="$errors->get('name')" />
                             </div>
 
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">
-                                    <i class="fas fa-at mr-2 text-yellow-500"></i>Username
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-at"></i>
+                                    <span>Username</span>
                                 </label>
                                 <input 
                                     id="username" 
                                     name="username" 
                                     type="text" 
-                                    class="input-modern"
+                                    class="form-input"
                                     value="{{ old('username', $user->username) }}" 
                                     required 
                                     autocomplete="username"
@@ -449,218 +954,184 @@
                                 <x-input-error class="error-message" :messages="$errors->get('username')" />
                             </div>
 
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">
-                                    <i class="fas fa-envelope mr-2 text-yellow-500"></i>Email Address
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-envelope"></i>
+                                    <span>Email Address</span>
                                 </label>
                                 <input 
                                     id="email" 
                                     name="email" 
                                     type="email" 
-                                    class="input-modern"
+                                    class="form-input"
                                     value="{{ old('email', $user->email) }}" 
                                     required 
                                     autocomplete="email"
-                                    placeholder="your.email@example.com"                                  
+                                    placeholder="your.email@example.com"
                                     readonly
                                 />
                                 <x-input-error class="error-message" :messages="$errors->get('email')" />
                             </div>
 
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">
-                                    <i class="fas fa-phone mr-2 text-yellow-500"></i>Phone Number
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-phone"></i>
+                                    <span>Phone Number</span>
                                 </label>
                                 <input 
                                     id="phoneNumber" 
                                     name="phoneNumber" 
                                     type="tel" 
-                                    class="input-modern"
+                                    class="form-input"
                                     value="{{ old('phoneNumber', $user->phoneNumber) }}" 
-                                    placeholder="+63 912 345 6789"
+                                    placeholder="09XXXXXXXXX"
                                     autocomplete="tel"
+                                    maxlength="11"
                                 />
                                 <x-input-error class="error-message" :messages="$errors->get('phoneNumber')" />
                             </div>
                         </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i>
+                                <span>Save Changes</span>
+                            </button>
+
+                            @if (session('status') === 'profile-updated')
+                            <div class="success-message">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Profile updated successfully!</span>
+                            </div>
+                            @endif
+                        </div>
+                    </form>
+                </section>
+
+                <!-- Password & Security Section -->
+                <section id="password" class="content-section">
+                    <div class="section-header">
+                        <span class="section-icon">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                        <div class="section-info">
+                            <h2 class="section-title">Password & Security</h2>
+                            <p class="section-description">Update your password to keep your account secure</p>
+                        </div>
                     </div>
 
-                    <!-- Save Button -->
-                    <div class="flex flex-col sm:flex-row items-center gap-4">
-                        <button type="submit" class="btn-modern gradient-sunflower text-black w-full sm:w-auto">
-                            <i class="fas fa-save"></i>
-                            Save Changes
-                        </button>
-
-                        @if (session('status') === 'profile-updated')
-                        <div class="save-feedback">
-                            <i class="fas fa-check-circle text-xl"></i>
-                            <span>Profile updated successfully!</span>
+                    <div class="alert-box alert-info">
+                        <i class="fas fa-shield-alt alert-icon" style="color: #3B82F6;"></i>
+                        <div class="alert-content">
+                            <h4 style="color: #1E40AF;">Password Security</h4>
+                            <p style="color: #1E3A8A;">Ensure your account is using a strong password to stay secure.</p>
                         </div>
-                        @endif
                     </div>
-                </form>
-            </div>
 
-            <!-- Password Update Card -->
-            <div class="glass-card rounded-2xl p-8 mb-8 fade-in">
-                <form method="post" action="{{ route('password.update') }}" id="password-form">
-                    @csrf
-                    @method('put')
+                    <form method="post" action="{{ route('password.update') }}" id="password-form">
+                        @csrf
+                        @method('put')
 
-                    <div class="form-section">
-                        <div class="section-header">
-                            <div class="section-icon">
-                                <i class="fas fa-lock"></i>
-                            </div>
-                            <h2 class="section-title">Update Password</h2>
-                        </div>
-
-                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-xl mb-6 border-l-4 border-blue-500">
-                            <div class="flex items-start">
-                                <i class="fas fa-shield-alt text-blue-600 text-xl mr-3 mt-1"></i>
-                                <div>
-                                    <h4 class="font-bold text-blue-800 mb-1">Password Security</h4>
-                                    <p class="text-blue-700 text-sm">Ensure your account is using a long, random password to stay secure.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="space-y-6">
-                            <!-- Current Password -->
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">
-                                    <i class="fas fa-key mr-2 text-yellow-500"></i>Current Password
+                        <div class="form-grid">
+                            <div class="form-group form-group-full">
+                                <label class="form-label">
+                                    <i class="fas fa-key"></i>
+                                    <span>Current Password</span>
                                 </label>
                                 <div class="password-wrapper">
                                     <input 
                                         id="current_password" 
                                         name="current_password" 
                                         type="password" 
-                                        class="input-modern"
+                                        class="form-input"
                                         autocomplete="current-password"
-                                        placeholder="Enter current password"
+                                        placeholder="Enter your current password"
                                     />
                                     <i class="far fa-eye password-toggle" id="toggleCurrentPassword"></i>
                                 </div>
                                 <x-input-error class="error-message" :messages="$errors->updatePassword->get('current_password')" />
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <!-- New Password -->
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">
-                                        <i class="fas fa-lock mr-2 text-yellow-500"></i>New Password
-                                    </label>
-                                    <div class="password-wrapper">
-                                        <input 
-                                            id="password" 
-                                            name="password" 
-                                            type="password" 
-                                            class="input-modern"
-                                            autocomplete="new-password"
-                                            placeholder="Enter new password"
-                                        />
-                                        <i class="far fa-eye password-toggle" id="togglePassword"></i>
-                                    </div>
-                                    <x-input-error class="error-message" :messages="$errors->updatePassword->get('password')" />
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-lock"></i>
+                                    <span>New Password</span>
+                                </label>
+                                <div class="password-wrapper">
+                                    <input 
+                                        id="password" 
+                                        name="password" 
+                                        type="password" 
+                                        class="form-input"
+                                        autocomplete="new-password"
+                                        placeholder="Enter new password"
+                                    />
+                                    <i class="far fa-eye password-toggle" id="togglePassword"></i>
                                 </div>
-
-                                <!-- Confirm Password -->
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">
-                                        <i class="fas fa-check-circle mr-2 text-yellow-500"></i>Confirm Password
-                                    </label>
-                                    <div class="password-wrapper">
-                                        <input 
-                                            id="password_confirmation" 
-                                            name="password_confirmation" 
-                                            type="password" 
-                                            class="input-modern"
-                                            autocomplete="new-password"
-                                            placeholder="Confirm new password"
-                                        />
-                                        <i class="far fa-eye password-toggle" id="togglePasswordConfirmation"></i>
-                                    </div>
-                                    <x-input-error class="error-message" :messages="$errors->updatePassword->get('password_confirmation')" />
-                                </div>
+                                <x-input-error class="error-message" :messages="$errors->updatePassword->get('password')" />
                             </div>
 
-                            <!-- Password Requirements Info -->
-                            <div class="password-requirements">
-                                <h4 class="font-bold text-blue-800 mb-3 flex items-center gap-2">
-                                    <i class="fas fa-info-circle"></i>
-                                    Password Requirements
-                                </h4>
-                                <div class="space-y-2">
-                                    <div class="requirement-item">
-                                        <i class="fas fa-check-circle"></i>
-                                        <span>At least 8 characters long</span>
-                                    </div>
-                                    <div class="requirement-item">
-                                        <i class="fas fa-check-circle"></i>
-                                        <span>Contains both uppercase and lowercase letters</span>
-                                    </div>
-                                    <div class="requirement-item">
-                                        <i class="fas fa-check-circle"></i>
-                                        <span>Contains at least one number</span>
-                                    </div>
-                                    <div class="requirement-item">
-                                        <i class="fas fa-check-circle"></i>
-                                        <span>Contains at least one special character (!@#$%^&*)</span>
-                                    </div>
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Confirm Password</span>
+                                </label>
+                                <div class="password-wrapper">
+                                    <input 
+                                        id="password_confirmation" 
+                                        name="password_confirmation" 
+                                        type="password" 
+                                        class="form-input"
+                                        autocomplete="new-password"
+                                        placeholder="Confirm new password"
+                                    />
+                                    <i class="far fa-eye password-toggle" id="togglePasswordConfirmation"></i>
+                                </div>
+                                <x-input-error class="error-message" :messages="$errors->updatePassword->get('password_confirmation')" />
+                            </div>
+                        </div>
+
+                        <div class="requirements-box">
+                            <h4 class="requirements-title">
+                                <i class="fas fa-info-circle"></i>
+                                Password Requirements
+                            </h4>
+                            <div class="requirements-list">
+                                <div class="requirement-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>At least 8 characters long</span>
+                                </div>
+                                <div class="requirement-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Contains uppercase and lowercase letters</span>
+                                </div>
+                                <div class="requirement-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Contains at least one number (0-9)</span>
+                                </div>
+                                <div class="requirement-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Contains at least one special character (!@#$%^&*)</span>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="flex flex-col sm:flex-row items-center gap-4">
-                        <button type="submit" class="btn-modern gradient-success text-white w-full sm:w-auto">
-                            <i class="fas fa-sync-alt"></i>
-                            Update Password
-                        </button>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-sync-alt"></i>
+                                <span>Update Password</span>
+                            </button>
 
-                        @if (session('status') === 'password-updated')
-                        <div class="save-feedback">
-                            <i class="fas fa-check-circle text-xl"></i>
-                            <span>Password updated successfully!</span>
+                            @if (session('status') === 'password-updated')
+                            <div class="success-message">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Password updated successfully!</span>
+                            </div>
+                            @endif
                         </div>
-                        @endif
-                    </div>
-                </form>
-            </div>
-
-            <!-- Delete Account Card (Commented Out)
-            <div class="glass-card rounded-2xl p-8 fade-in border-l-4 border-red-500">
-                <div class="form-section">
-                    <div class="section-header">
-                        <div class="section-icon" style="background: linear-gradient(135deg, #EF4444, #DC2626);">
-                            <i class="fas fa-exclamation-triangle"></i>
-                        </div>
-                        <h2 class="section-title text-red-600">Danger Zone</h2>
-                    </div>
-
-                    <div class="alert-modern" style="background: linear-gradient(135deg, #FEE2E2, #FECACA); border-left-color: #DC2626;">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-exclamation-circle text-2xl text-red-600"></i>
-                        </div>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-red-800 mb-1">Permanent Account Deletion</h4>
-                            <p class="text-red-700 text-sm">Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.</p>
-                        </div>
-                    </div>
-
-                    <form method="post" action="{{ route('profile.destroy') }}" onsubmit="return confirm('⚠️ WARNING: This action cannot be undone!\n\nAre you absolutely sure you want to permanently delete your account?\n\nAll your data, bookings, and information will be lost forever.\n\nClick OK only if you are certain.');">
-                        @csrf
-                        @method('delete')
-
-                        <button type="submit" class="btn-modern gradient-error text-white">
-                            <i class="fas fa-trash-alt"></i>
-                            Delete Account Permanently
-                        </button>
                     </form>
-                </div>
-            </div> -->
+                </section>
+            </div>
         </div>
     </main>
 
@@ -668,10 +1139,32 @@
     @include('customerFolder.partials.footer')
 
     <script>
-        // Password visibility toggle functionality
+        // ========== TAB NAVIGATION ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('.content-section');
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    sections.forEach(s => s.classList.remove('active'));
+                    
+                    const targetSection = this.getAttribute('data-section');
+                    document.getElementById(targetSection).classList.add('active');
+                });
+            });
+        });
+
+        // ========== PASSWORD VISIBILITY TOGGLE ==========
         function togglePasswordVisibility(inputId, toggleId) {
             const passwordInput = document.getElementById(inputId);
             const toggleIcon = document.getElementById(toggleId);
+            
+            if (!passwordInput || !toggleIcon) return;
             
             toggleIcon.addEventListener('click', function() {
                 if (passwordInput.type === 'password') {
@@ -686,20 +1179,28 @@
             });
         }
 
-        // Initialize password toggles
         togglePasswordVisibility('current_password', 'toggleCurrentPassword');
         togglePasswordVisibility('password', 'togglePassword');
         togglePasswordVisibility('password_confirmation', 'togglePasswordConfirmation');
 
-        // Form validation for password update
+        // ========== PHONE NUMBER FORMATTING ==========
+        const phoneInput = document.getElementById('phoneNumber');
+        if (phoneInput) {
+            phoneInput.addEventListener('input', function(e) {
+                this.value = this.value.replace(/\D/g, '');
+                if (this.value.length > 11) {
+                    this.value = this.value.slice(0, 11);
+                }
+            });
+        }
+
+        // ========== FORM VALIDATION - PASSWORD UPDATE ==========
         document.getElementById('password-form').addEventListener('submit', function(e) {
             const currentPassword = document.getElementById('current_password').value;
             const newPassword = document.getElementById('password').value;
             const confirmPassword = document.getElementById('password_confirmation').value;
 
-            // Check if trying to update password
             if (newPassword || confirmPassword) {
-                // Validate current password is provided
                 if (!currentPassword) {
                     e.preventDefault();
                     alert('⚠️ Please enter your current password to update your password.');
@@ -707,7 +1208,6 @@
                     return false;
                 }
 
-                // Validate new password is provided
                 if (!newPassword) {
                     e.preventDefault();
                     alert('⚠️ Please enter a new password.');
@@ -715,7 +1215,6 @@
                     return false;
                 }
 
-                // Validate password confirmation
                 if (!confirmPassword) {
                     e.preventDefault();
                     alert('⚠️ Please confirm your new password.');
@@ -723,7 +1222,6 @@
                     return false;
                 }
 
-                // Check if passwords match
                 if (newPassword !== confirmPassword) {
                     e.preventDefault();
                     alert('⚠️ New password and confirmation password do not match!');
@@ -731,7 +1229,6 @@
                     return false;
                 }
 
-                // Validate password strength
                 if (newPassword.length < 8) {
                     e.preventDefault();
                     alert('⚠️ Password must be at least 8 characters long.');
@@ -769,11 +1266,12 @@
             }
         });
 
-        // Form validation for profile update
+        // ========== FORM VALIDATION - PROFILE UPDATE ==========
         document.getElementById('profile-form').addEventListener('submit', function(e) {
             const name = document.getElementById('name').value.trim();
             const username = document.getElementById('username').value.trim();
             const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phoneNumber').value.trim();
 
             if (!name) {
                 e.preventDefault();
@@ -796,7 +1294,6 @@
                 return false;
             }
 
-            // Email validation
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) {
                 e.preventDefault();
@@ -804,19 +1301,29 @@
                 document.getElementById('email').focus();
                 return false;
             }
+
+            if (phone && phone.length > 0) {
+                if (!/^09\d{9}$/.test(phone)) {
+                    e.preventDefault();
+                    alert('⚠️ Phone number must start with 09 and be exactly 11 digits.');
+                    document.getElementById('phoneNumber').focus();
+                    return false;
+                }
+            }
         });
 
-        // Auto-hide success messages after 5 seconds
+        // ========== AUTO-HIDE SUCCESS MESSAGES ==========
         setTimeout(function() {
-            const successMessages = document.querySelectorAll('.save-feedback');
+            const successMessages = document.querySelectorAll('.success-message');
             successMessages.forEach(function(message) {
-                message.style.transition = 'opacity 0.5s ease';
+                message.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
                 message.style.opacity = '0';
+                message.style.transform = 'translateY(-8px)';
                 setTimeout(function() {
                     message.remove();
-                }, 500);
+                }, 400);
             });
-        }, 5000);
+        }, 4000);
     </script>
 </body>
 </html>
