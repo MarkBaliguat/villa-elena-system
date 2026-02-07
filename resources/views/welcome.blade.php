@@ -83,14 +83,14 @@
         
         .hero-content h1 .cursive-font {
             display: block;
-            line-height: 1;      /* override inherited 1.2 */
-            margin-top: 0;       /* kill phantom space */
+            line-height: 1;    
+            margin-top: 0;       
         }
         
         .hero-content h1 .at {
-            display: block;          /* replaces <br> */
+            display: block;        
             margin: .2em 0;
-            font-size: 0.55em;       /* smaller than main line */
+            font-size: 0.55em;       
             font-weight: 400;
             opacity: 0.85;
         }
