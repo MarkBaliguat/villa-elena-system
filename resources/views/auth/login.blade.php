@@ -12,7 +12,7 @@
         
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #FFF4D5 0%, #ffffff 100%);
+            background: #ffffff;
             background-attachment: fixed;
         }
         
@@ -25,20 +25,85 @@
                 height: 200px;
             }
         }
+
+        /* Smooth animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .animate-container {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .animate-form > * {
+            animation: fadeInUp 0.5s ease-out backwards;
+        }
+
+        .animate-form > *:nth-child(1) { animation-delay: 0.1s; }
+        .animate-form > *:nth-child(2) { animation-delay: 0.2s; }
+        .animate-form > *:nth-child(3) { animation-delay: 0.3s; }
+        .animate-form > *:nth-child(4) { animation-delay: 0.4s; }
+        .animate-form > *:nth-child(5) { animation-delay: 0.5s; }
+        .animate-form > *:nth-child(6) { animation-delay: 0.6s; }
+
+        /* Enhanced input styles */
+        .input-enhanced {
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .input-enhanced:focus {
+            background: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Button hover effect */
+        .btn-primary {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        /* Image overlay animation */
+        .image-overlay {
+            animation: fadeIn 1s ease-out;
+        }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-4xl rounded-xl shadow-lg grid grid-cols-1 md:grid-cols-2 overflow-hidden">
+    <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl grid grid-cols-1 md:grid-cols-2 overflow-hidden animate-container">
         
         <!-- LEFT SIDE IMAGE - Hidden on mobile, shown on tablet and desktop -->
         <div 
             class="hidden md:block relative bg-cover bg-center"
             style="background-image: url('/images/contact-image.jpg');">
             
-            <div class="absolute inset-0 bg-black/40 flex flex-col justify-center items-center text-center px-6">
-                <p class="text-white text-sm mb-1">Welcome to</p>
-                <h1 class="text-5xl cursive-font text-white mb-2">Villa Elena</h1>
-                <p class="text-white font-semibold text-sm">
+            <div class="absolute inset-0 bg-gradient-to-br from-black/50 to-black/30 flex flex-col justify-center items-center text-center px-6 image-overlay">
+                <p class="text-white text-sm mb-1 opacity-90">Welcome to</p>
+                <h1 class="text-5xl cursive-font text-white mb-2 drop-shadow-lg">Villa Elena</h1>
+                <p class="text-white font-semibold text-sm opacity-90">
                     Family Resort & Agri-Tourism Farm
                 </p>
             </div>
@@ -48,11 +113,10 @@
         <div 
             class="md:hidden mobile-image relative bg-cover bg-center"
             style="background-image: url('/images/contact-image.jpg');">
-          
             
-            <div class="absolute inset-0 bg-black/40 flex flex-col justify-center items-center text-center px-6">
+            <div class="absolute inset-0 bg-gradient-to-br from-black/50 to-black/30 flex flex-col justify-center items-center text-center px-6">
                 <p class="text-white text-sm mb-1">Welcome to</p>
-                <h1 class="text-3xl cursive-font text-white mb-2">Villa Elena</h1>
+                <h1 class="text-3xl cursive-font text-white mb-2 drop-shadow-lg">Villa Elena</h1>
                 <p class="text-white font-semibold text-xs">
                     Family Resort & Agri-Tourism Farm
                 </p>
@@ -60,86 +124,94 @@
         </div>
 
         <!-- RIGHT SIDE LOGIN FORM -->
-        <div class="flex flex-col justify-center px-6 py-8 md:px-14 md:py-12">
-            <h2 class="text-2xl font-bold mb-6 md:mb-8 text-center">Log back in</h2>
+        <div class="flex flex-col justify-center px-6 py-8 md:px-14 md:py-12 bg-white">
+            <div class="animate-form">
+                <h2 class="text-2xl font-bold mb-6 md:mb-8 text-center text-gray-800">Log back in</h2>
 
-            <!-- FORM -->
-            <form method="POST" action="{{ route('login') }}">
-                @csrf
+                <!-- FORM -->
+                <form method="POST" action="{{ route('login') }}">
+                    @csrf
 
-                <!--Email -->
-                <div class="mb-4">
-                    <label class="text-sm font-medium">Email</label>
-                    <input 
-                        id="email" 
-                        type="email" 
-                        name="email"
-                        placeholder="Juandelacruz@gmail.com"
-                        value="{{ old('email') }}"
-                        required autofocus
-                        class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition @error('email') border-red-500 @enderror"
-                    />
-                    @error('email')
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <!-- Password -->
-                <div class="mb-2">
-                    <label class="text-sm font-medium">Password</label>
-                    <div class="relative">
+                    <!--Email -->
+                    <div class="mb-4">
+                        <label class="text-sm font-medium text-gray-700">Email</label>
                         <input 
-                            id="password" 
-                            type="password" 
-                            name="password"
-                            placeholder="••••••••••••••••"
-                            required
-                            class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition pr-10 @error('password') border-red-500 @enderror"
+                            id="email" 
+                            type="email" 
+                            name="email"
+                            placeholder="juandelacruz@gmail.com"
+                            value="{{ old('email') }}"
+                            required autofocus
+                            class="w-full mt-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent transition input-enhanced @error('email') border-red-500 @enderror"
                         />
-                        <button type="button" id="togglePassword" class="absolute right-3 top-3 text-gray-500 hover:text-gray-700 transition">
-                            <i class="far fa-eye"></i>
-                        </button>
+                        @error('email')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
                     </div>
-                    @error('password')
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
 
-                <!-- Remember Me & Forgot Password -->
-                <div class="flex justify-between items-center mb-6">
-                    <div class="flex items-center">
-                        <input 
-                            id="remember_me" 
-                            type="checkbox" 
-                            name="remember"
-                            class="h-4 w-4 text-black focus:ring-black border-gray-300 rounded"
-                        />
-                        <label for="remember_me" class="ml-2 text-sm text-gray-600">Remember me</label>
+                    <!-- Password -->
+                    <div class="mb-2">
+                        <label class="text-sm font-medium text-gray-700">Password</label>
+                        <div class="relative">
+                            <input 
+                                id="password" 
+                                type="password" 
+                                name="password"
+                                placeholder="••••••••••••••••"
+                                required
+                                class="w-full mt-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent transition pr-12 input-enhanced @error('password') border-red-500 @enderror"
+                            />
+                            <button type="button" id="togglePassword" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition mt-0.5">
+                                <i class="far fa-eye text-lg"></i>
+                            </button>
+                        </div>
+                        @error('password')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
                     </div>
-                    <a href="{{ route('password.request') }}" class="text-sm text-gray-600 hover:text-black transition">Forgot password?</a>
-                </div>
 
-                <!-- Login Button -->
-                <button 
-                    type="submit"
-                    class="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition font-medium">
-                    Log In
-                </button>
+                    <!-- Remember Me & Forgot Password -->
+                    <div class="flex justify-between items-center mb-6">
+                        <div class="flex items-center">
+                            <input 
+                                id="remember_me" 
+                                type="checkbox" 
+                                name="remember"
+                                class="h-4 w-4 text-black focus:ring-black border-gray-300 rounded cursor-pointer"
+                            />
+                            <label for="remember_me" class="ml-2 text-sm text-gray-600 cursor-pointer">Remember me</label>
+                        </div>
+                        <a href="{{ route('password.request') }}" class="text-sm text-gray-600 hover:text-black transition font-medium">Forgot password?</a>
+                    </div>
 
-                <!-- Sign Up Link -->
-                <p class="text-center text-sm mt-6 text-gray-600">
-                    Don't have an account?
-                    <a href="{{ route('register') }}" class="text-black font-semibold hover:underline transition">Create an account</a>
-                </p>
-            </form>
+                    <!-- Login Button -->
+                    <button 
+                        type="submit"
+                        class="w-full bg-black text-white py-3 rounded-xl hover:bg-gray-800 transition font-semibold text-base btn-primary">
+                        Log In
+                    </button>
+
+                    <!-- Sign Up Link -->
+                    <p class="text-center text-sm mt-6 text-gray-600">
+                        Don't have an account?
+                        <a href="{{ route('register') }}" class="text-black font-semibold hover:underline transition">Create an account</a>
+                    </p>
+                </form>
+            </div>
         </div>
     </div>
 
     <script>
-        // Toggle password visibility
+        // Toggle password visibility with smooth animation
         document.getElementById('togglePassword').addEventListener('click', function() {
             const passwordInput = document.getElementById('password');
             const icon = this.querySelector('i');
+            
+            // Add a little scale animation
+            this.style.transform = 'scale(0.9) translateY(-50%)';
+            setTimeout(() => {
+                this.style.transform = 'scale(1) translateY(-50%)';
+            }, 100);
             
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
@@ -161,6 +233,16 @@
                 e.preventDefault();
                 alert('Please fill in all required fields.');
             }
+        });
+
+        // Add subtle hover effect to inputs
+        document.querySelectorAll('.input-enhanced').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'translateY(-2px)';
+            });
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'translateY(0)';
+            });
         });
     </script>
 </body>
