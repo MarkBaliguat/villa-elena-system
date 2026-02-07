@@ -57,7 +57,7 @@
             height: 100vh;
             min-height: 700px;
             background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
-                        url('/images/main-photo.jpg');
+                        url('/images/pool-area.jpg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;

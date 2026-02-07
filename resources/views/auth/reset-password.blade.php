@@ -5,7 +5,7 @@
             <!-- LEFT SIDE IMAGE - Hidden on mobile, shown on tablet and desktop -->
             <div 
                 class="hidden md:block relative bg-cover bg-center"
-                style="background-image: url('/images/contact-image.jpg');">
+                style="background-image: url('/images/contact.jpg');">
                 
                 <div class="absolute inset-0 bg-gradient-to-br from-black/50 to-black/30 flex flex-col justify-center items-center text-center px-6 image-overlay">
                     <p class="text-white text-sm mb-1 opacity-90">Welcome to</p>
@@ -19,7 +19,7 @@
             <!-- MOBILE IMAGE - Only shown on mobile devices -->
             <div 
                 class="md:hidden relative bg-cover bg-center"
-                style="background-image: url('/images/contact-image.jpg'); height: 200px;">
+                style="background-image: url('/images/contact.jpg'); height: 200px;">
                 
                 <div class="absolute inset-0 bg-gradient-to-br from-black/50 to-black/30 flex flex-col justify-center items-center text-center px-6">
                     <p class="text-white text-sm mb-1">Welcome to</p>

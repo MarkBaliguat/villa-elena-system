@@ -10,31 +10,38 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
         
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #FFFBF0 0%, #FFF8E1 100%);
+            background: #FFFFFF;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 2rem;
+            padding: 1.5rem;
         }
         
         .success-container {
-            max-width: 600px;
+            max-width: 480px;
             width: 100%;
-            background: white;
-            border-radius: 24px;
-            padding: 3rem;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            background: #FFFFFF;
+            border-radius: 16px;
+            padding: 2.5rem 2rem;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
             text-align: center;
-            animation: slideUp 0.6s ease;
+            animation: fadeIn 0.4s ease;
+            border: 1px solid rgba(0, 0, 0, 0.04);
         }
         
-        @keyframes slideUp {
+        @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(30px);
+                transform: translateY(10px);
             }
             to {
                 opacity: 1;
@@ -43,60 +50,53 @@
         }
         
         .success-icon {
-            width: 120px;
-            height: 120px;
+            width: 72px;
+            height: 72px;
             background: linear-gradient(135deg, #10b981, #059669);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 2rem;
-            animation: scaleIn 0.5s ease 0.2s both;
+            margin: 0 auto 1.5rem;
+            animation: scaleIn 0.4s ease;
         }
         
         .success-icon i {
             color: white;
-            font-size: 4rem;
+            font-size: 2rem;
         }
         
         @keyframes scaleIn {
             from {
-                transform: scale(0);
+                transform: scale(0.8);
+                opacity: 0;
             }
             to {
                 transform: scale(1);
-            }
-        }
-        
-        .checkmark {
-            animation: checkmark 0.8s ease 0.4s both;
-        }
-        
-        @keyframes checkmark {
-            0% {
-                transform: scale(0) rotate(0deg);
-            }
-            50% {
-                transform: scale(1.2) rotate(180deg);
-            }
-            100% {
-                transform: scale(1) rotate(360deg);
+                opacity: 1;
             }
         }
         
         h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #1F2937;
-            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            color: #6B7280;
+            font-size: 0.9375rem;
+            margin-bottom: 2rem;
+            font-weight: 400;
         }
         
         .booking-details {
             background: #F9FAFB;
-            border-radius: 16px;
-            padding: 2rem;
-            margin: 2rem 0;
-            border: 2px solid #E5E7EB;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border: 1px solid #E5E7EB;
         }
         
         .detail-item {
@@ -104,102 +104,191 @@
             justify-content: space-between;
             align-items: center;
             padding: 0.75rem 0;
-            border-bottom: 1px dashed #D1D5DB;
+            border-bottom: 1px solid #E5E7EB;
         }
         
         .detail-item:last-child {
             border-bottom: none;
+            padding-bottom: 0;
+        }
+        
+        .detail-item:first-child {
+            padding-top: 0;
         }
         
         .detail-label {
             color: #6B7280;
-            font-weight: 500;
+            font-weight: 400;
+            font-size: 0.875rem;
         }
         
         .detail-value {
-            color: #1F2937;
+            color: #111827;
             font-weight: 600;
+            font-size: 0.875rem;
+        }
+        
+        .amount-paid {
+            color: #10b981 !important;
+            font-size: 1.125rem !important;
+            font-weight: 700 !important;
+        }
+        
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
         }
         
         .action-btn {
             display: inline-flex;
             align-items: center;
-            gap: 10px;
-            padding: 14px 32px;
-            border-radius: 12px;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 10px;
             font-weight: 600;
+            font-size: 0.9375rem;
             text-decoration: none;
-            transition: all 0.3s ease;
-            margin: 0.5rem;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
         }
         
         .btn-primary {
             background: linear-gradient(135deg, #FFD700, #FFA500);
-            color: #000;
+            color: #000000;
+            box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
         }
         
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(255, 215, 0, 0.3);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
         }
         
         .btn-secondary {
-            background: linear-gradient(135deg, #1F2937, #374151);
-            color: white;
+            background: #FFFFFF;
+            color: #374151;
+            border: 1.5px solid #E5E7EB;
         }
         
         .btn-secondary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            background: #F9FAFB;
+            border-color: #D1D5DB;
         }
         
         .loading {
             display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
+            width: 18px;
+            height: 18px;
+            border: 2.5px solid #E5E7EB;
             border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s linear infinite;
+            border-top-color: #10b981;
+            animation: spin 0.8s linear infinite;
         }
         
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+        
+        .loading-state {
+            text-align: center;
+            padding: 2rem 1rem;
+        }
+        
+        .loading-text {
+            color: #6B7280;
+            margin-top: 1rem;
+            font-size: 0.9375rem;
+            font-weight: 400;
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            background: #D1FAE5;
+            color: #065F46;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .payment-method-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .gcash-logo {
+            color: #007DFF;
+            font-size: 1.125rem;
+        }
+        
+        @media (max-width: 640px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .success-container {
+                padding: 2rem 1.5rem;
+            }
+            
+            h1 {
+                font-size: 1.375rem;
+            }
+            
+            .subtitle {
+                font-size: 0.875rem;
+            }
+            
+            .success-icon {
+                width: 64px;
+                height: 64px;
+            }
+            
+            .success-icon i {
+                font-size: 1.75rem;
+            }
+            
+            .booking-details {
+                padding: 1.25rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="success-container">
         <div class="success-icon">
-            <i class="fas fa-check checkmark"></i>
+            <i class="fas fa-check"></i>
         </div>
         
-        <h1>Payment Successful!</h1>
-        <p style="color: #6B7280; font-size: 1.1rem; margin-bottom: 2rem;">
-            Your GCash payment has been processed successfully.
-        </p>
+        <h1>Payment Successful</h1>
+        <p class="subtitle">Your GCash payment has been processed</p>
         
         <div class="booking-details" id="booking-info">
-            <div style="text-align: center; padding: 2rem;">
+            <div class="loading-state">
                 <div class="loading"></div>
-                <p style="color: #6B7280; margin-top: 1rem;">Verifying your payment and creating booking...</p>
+                <p class="loading-text">Verifying payment...</p>
             </div>
         </div>
         
-        <div style="margin-top: 2rem;">
+        <div class="action-buttons">
             <a href="{{ route('customer.bookings') }}" class="action-btn btn-primary">
                 <i class="fas fa-calendar-check"></i>
-                View My Bookings
+                <span>View My Bookings</span>
             </a>
             <a href="{{ route('home') }}" class="action-btn btn-secondary">
                 <i class="fas fa-home"></i>
-                Back to Home
+                <span>Back to Home</span>
             </a>
         </div>
     </div>
     
     <script>
-        // ✅ UPDATED: Get payment intent ID from URL
+        // ✅ Get payment intent ID from URL
         const urlParams = new URLSearchParams(window.location.search);
         const paymentIntentId = urlParams.get('payment_intent_id');
         
@@ -207,7 +296,7 @@
         console.log('Payment Intent ID:', paymentIntentId);
         
         if (paymentIntentId) {
-            // ✅ Call verify endpoint - This is where booking gets created in DB
+            // ✅ Call verify endpoint
             console.log('🔍 Calling verification endpoint...');
             
             fetch(`/payment/gcash/verify?payment_intent_id=${paymentIntentId}`, {
@@ -221,15 +310,13 @@
                 console.log('✅ Verification response:', data);
                 
                 if (data.success) {
-                    // ✅ Payment verified and booking created successfully
                     console.log('✅ Payment verified - Booking created');
                     displayBookingDetails(data.booking, data.payment);
-                    showNotification(' Payment successful! Booking confirmed.', 'success');
+                    showNotification('Payment successful! Booking confirmed.', 'success');
                     
                 } else {
-                    // ❌ Payment failed or verification error
                     console.error('❌ Verification failed:', data.message);
-                    showNotification('❌ Payment verification failed. Redirecting...', 'error');
+                    showNotification('Payment verification failed. Redirecting...', 'error');
                     
                     setTimeout(() => {
                         window.location.href = data.redirect_url || '/payment/gcash/failed';
@@ -249,7 +336,7 @@
             const bookingInfo = document.getElementById('booking-info');
             bookingInfo.innerHTML = `
                 <div class="detail-item">
-                    <span class="detail-label">Booking Reference</span>
+                    <span class="detail-label">Reference Number</span>
                     <span class="detail-value">${payment.paymentReference || 'N/A'}</span>
                 </div>
                 <div class="detail-item">
@@ -258,20 +345,24 @@
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Amount Paid</span>
-                    <span class="detail-value" style="color: #10b981; font-size: 1.25rem;">
-                        ₱${parseFloat(payment.amountPaid).toFixed(2)}
-                    </span>
+                    <span class="detail-value amount-paid">₱${parseFloat(payment.amountPaid).toFixed(2)}</span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Payment Method</span>
                     <span class="detail-value">
-                        <i class="fab fa-google-pay" style="color: #007DFF;"></i> GCash
+                        <span class="payment-method-badge">
+                            <i class="fab fa-google-pay gcash-logo"></i>
+                            <span>GCash</span>
+                        </span>
                     </span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Status</span>
-                    <span class="detail-value" style="color: #10b981;">
-                        <i class="fas fa-check-circle"></i> ${booking.bookingStatus.toUpperCase()}
+                    <span class="detail-value">
+                        <span class="status-badge">
+                            <i class="fas fa-check-circle"></i>
+                            <span>${booking.bookingStatus.toUpperCase()}</span>
+                        </span>
                     </span>
                 </div>
             `;
@@ -281,8 +372,8 @@
             const bookingInfo = document.getElementById('booking-info');
             bookingInfo.innerHTML = `
                 <div style="text-align: center; padding: 1rem;">
-                    <i class="fas fa-exclamation-triangle" style="color: #EF4444; font-size: 2rem; margin-bottom: 1rem;"></i>
-                    <p style="color: #EF4444; font-weight: 600;">${message}</p>
+                    <i class="fas fa-exclamation-circle" style="color: #EF4444; font-size: 2rem; margin-bottom: 0.75rem;"></i>
+                    <p style="color: #EF4444; font-weight: 500; font-size: 0.9375rem;">${message}</p>
                 </div>
             `;
         }
@@ -293,13 +384,30 @@
                 position: fixed;
                 top: 20px;
                 right: 20px;
-                padding: 1rem 2rem;
+                padding: 0.875rem 1.5rem;
                 border-radius: 10px;
                 color: white;
-                font-weight: 600;
+                font-weight: 500;
+                font-size: 0.9375rem;
                 z-index: 1000;
-                animation: slideIn 0.3s ease;
+                animation: slideInRight 0.3s ease;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             `;
+            
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideInRight {
+                    from {
+                        opacity: 0;
+                        transform: translateX(100px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateX(0);
+                    }
+                }
+            `;
+            document.head.appendChild(style);
             
             if (type === 'success') {
                 notification.style.backgroundColor = '#10b981';
@@ -312,7 +420,8 @@
             document.body.appendChild(notification);
             
             setTimeout(() => {
-                notification.remove();
+                notification.style.animation = 'slideInRight 0.3s ease reverse';
+                setTimeout(() => notification.remove(), 300);
             }, 3000);
         }
     </script>

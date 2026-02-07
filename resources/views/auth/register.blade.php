@@ -6,7 +6,7 @@
     <title>Villa Elena - Register</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" type="image/x-icon" href="{{ asset('images/sunflower1.png') }}">
-    <script src="https://cdn.tailwindcss.com"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;500;600;700&display=swap');
         
@@ -101,7 +101,7 @@
         <!-- LEFT SIDE IMAGE - Hidden on mobile, shown on tablet and desktop -->
         <div 
             class="hidden md:block relative bg-cover bg-center"
-            style="background-image: url('/images/contact-image.jpg');">
+            style="background-image: url('/images/contact.jpg');">
             
             <div class="absolute inset-0 bg-gradient-to-br from-black/50 to-black/30 flex flex-col justify-center items-center text-center px-6 image-overlay">
                 <p class="text-white text-sm mb-1 opacity-90">Welcome to</p>
@@ -115,7 +115,7 @@
         <!-- MOBILE IMAGE - Only shown on mobile devices -->
         <div 
             class="md:hidden mobile-image relative bg-cover bg-center"
-            style="background-image: url('/images/contact-image.jpg');">
+            style="background-image: url('/images/contact.jpg');">
             
             <div class="absolute inset-0 bg-gradient-to-br from-black/50 to-black/30 flex flex-col justify-center items-center text-center px-6">
                 <p class="text-white text-sm mb-1">Welcome to</p>

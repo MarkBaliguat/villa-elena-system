@@ -30,6 +30,8 @@
             scroll-behavior: smooth;
             background-color: var(--light-bg);
             color: var(--text-dark);
+            margin: 0;
+            padding: 0;
         }
         
         .cursive-font {
@@ -37,7 +39,7 @@
         }
         
         .main-content {
-            margin-top: 80px;
+            margin-top: 0;
             min-height: calc(100vh - 300px);
         }
 
@@ -47,7 +49,7 @@
             height: 70vh;
             min-height: 500px;
             background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5)), 
-                        url('/images/main-photo.jpg');
+                        url('/images/pool-area.jpg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -66,12 +68,12 @@
             width: 100%;
         }
 
-        /* Booking Card */
+        /* Booking Card - IMPROVED */
         .booking-card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
             border-radius: 20px;
-            padding: 2.5rem;
+            padding: 2rem;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
             border: 1px solid rgba(255, 255, 255, 0.3);
             margin-top: 3rem;
@@ -99,7 +101,7 @@
 
         .form-input {
             width: 100%;
-            padding: 14px 16px;
+            padding: 12px 14px;
             border: 2px solid var(--border-color);
             border-radius: 12px;
             font-size: 15px;
@@ -107,6 +109,7 @@
             background-color: white;
             color: var(--text-dark);
             font-family: 'Poppins', sans-serif;
+            height: 48px;
         }
 
         .form-input:focus {
@@ -119,11 +122,11 @@
             border-color: #D1D5DB;
         }
 
-        /* Search Button */
+        /* Search Button - ALIGNED */
         .search-btn {
             background: linear-gradient(135deg, var(--primary-black), #2D3748);
             color: white;
-            padding: 16px 32px;
+            padding: 12px 28px;
             border-radius: 12px;
             font-weight: 600;
             font-size: 16px;
@@ -131,6 +134,7 @@
             border: none;
             cursor: pointer;
             width: 100%;
+            height: 48px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -901,7 +905,7 @@
             }
             
             .booking-card {
-                padding: 2rem;
+                padding: 1.75rem;
             }
             
             .tab-btn {
@@ -920,10 +924,6 @@
         }
 
         @media (max-width: 768px) {
-            .main-content {
-                margin-top: 70px;
-            }
-            
             .hero-section {
                 height: 50vh;
                 min-height: 400px;
@@ -935,7 +935,7 @@
             }
             
             .booking-card {
-                padding: 1.75rem;
+                padding: 1.5rem;
                 margin-top: 2rem;
             }
             
@@ -1020,15 +1020,17 @@
             }
             
             .booking-card {
-                padding: 1.5rem;
+                padding: 1.25rem;
             }
             
             .form-input {
-                padding: 12px 14px;
+                padding: 10px 12px;
+                height: 44px;
             }
             
             .search-btn {
-                padding: 14px 24px;
+                padding: 10px 20px;
+                height: 44px;
             }
             
             .card-title {
@@ -1069,7 +1071,7 @@
                 <div class="booking-card fade-in" style="animation-delay: 0.4s;">
                     <h3 class="text-2xl font-semibold text-gray-900 mb-6 text-center">Book Your Stay</h3>
                     
-                    <form id="bookingForm" class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <form id="bookingForm" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                         @csrf
                         
                         <!-- Check-in Date -->
@@ -1088,13 +1090,13 @@
                         <div class="form-group">
                             <label class="form-label">Number of Guests</label>
                             <input type="number" name="guests" id="guest-number" class="form-input" value="1" min="1" max="20" required>
-                            <p class="text-xs text-gray-500 mt-2">Use arrow keys or scroll to adjust</p>
                         </div>
                         
                         <!-- Submit Button -->
-                        <div class="form-group flex items-end">
+                        <div class="form-group">
+                            <label class="form-label" style="opacity: 0;">Search</label>
                             <button type="button" id="searchBtn" class="search-btn">
-                                <i class="fas fa-search mr-2"></i>
+                                <i class="fas fa-search"></i>
                                 Search Rooms
                             </button>
                         </div>
@@ -1182,11 +1184,8 @@
             document.getElementById('check_in').min = today;
             document.getElementById('check_out').min = today;
             
-            // Set default check-out to tomorrow
-            const tomorrow = new Date();
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            document.getElementById('check_out').value = tomorrow.toISOString().split('T')[0];
-            currentCheckOut = tomorrow.toISOString().split('T')[0];
+            // DO NOT set default checkout date - leave it empty
+            // Removed the automatic checkout date setting
 
             // Set active tab
             const currentPath = window.location.pathname;
@@ -1644,7 +1643,7 @@
 
         // ==================== VIRTUAL TOUR FUNCTION ====================
         function openVirtualTour(virtualTourUrl) {
-            console.log('Opening virtual tour:', virtualTourUrl); // Debug log
+            console.log('Opening virtual tour:', virtualTourUrl);
             
             if (!virtualTourUrl || virtualTourUrl === 'null' || virtualTourUrl === 'undefined') {
                 showNotification('Virtual tour not available for this room', 'info');

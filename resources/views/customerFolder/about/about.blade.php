@@ -56,7 +56,7 @@
             height: 60vh;
             min-height: 500px;
             background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
-                        url('/images/main-photo.jpg');
+                        url('/images/pool-area.jpg');
             background-size: cover;
             background-position: center;
             display: flex;
@@ -536,12 +536,9 @@
         <!-- Mission & Vision Sections -->
         <section class="mission-vision-section">
             <!-- Sunflowers for Mission/Vision Section -->
-            <div class="sunflower-mission-left">
-                <img src="/images/sunflower3.png" alt="Sunflower" class="w-48" onerror="this.style.display='none'">
-            </div>
             
             <div class="sunflower-mission-right">
-                <img src="/images/sunflower4.png" alt="Sunflower" class="w-48" onerror="this.style.display='none'">
+                <img src="/images/mission-pic2.jpg" alt="Sunflower" class="w-48" onerror="this.style.display='none'">
             </div>
             
             <div class="container mx-auto px-4">
@@ -575,7 +572,7 @@
                         <div class="grid md:grid-cols-2 gap-12 items-center">
                             <!-- LANDSCAPE PHOTO FOR VISION -->
                             <div class="image-container landscape-image-container">
-                                <img src="/images/contact-image.jpg" 
+                                <img src="/images/contact.jpg" 
                                      alt="Villa Elena Vision" class="w-full h-full object-cover rounded-3xl">
                             </div>
                             <div class="mission-vision-card">
