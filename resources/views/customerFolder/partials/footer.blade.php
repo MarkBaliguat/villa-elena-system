@@ -35,7 +35,7 @@
                 
                 <!-- Address -->
                 <div class="mb-4">
-                    <p class="text-sm mb-2 flex items-center justify-center md:justify-start text-gray-600">
+                    <p class="text-sm mb-2 flex items-center justify-center text-gray-600">
                         <i class="fas fa-location-dot mr-2 text-yellow-500"></i>
                         Munoz, Philippines
                     </p>
@@ -158,7 +158,7 @@
                     <!-- Social Media -->
                     <div class="social-links mt-6">
                         <h5 class="text-sm font-medium mb-3 text-gray-800">Follow us on</h5>
-                        <div class="flex justify-center md:justify-start space-x-4">
+                        <div class="flex justify-center space-x-4">
                             <a href="https://www.facebook.com/VillaElenaFamilyResort" 
                                target="_blank" 
                                class="social-icon facebook hover-effect"
@@ -281,6 +281,8 @@
         height: 100%;
         display: flex;
         flex-direction: column;
+        text-align: center;
+        
     }
     
     /* First section (map) specific styling */
