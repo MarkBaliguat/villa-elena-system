@@ -4,7 +4,7 @@
         <div class="text-center mb-10 footer-logo">
             <h2 class="text-4xl cursive-font mb-3 text-gray-800">Villa Elena</h2>
             <p class="text-sm mb-4 tracking-widest text-gray-600">Family Resort & Agri-Tourism Farm</p>
-            <p class="italic mb-6 tagline text-gray-700">"Relax. Reconnect. Recharge at Villa Elena"</p>
+            <p class="italic mb-10 tagline text-gray-700">"Relax. Reconnect. Recharge."</p>
             
             <!-- Sunflower Animation -->
             <div class="sunflower-animation mx-auto mb-6">
@@ -259,8 +259,8 @@
     
     .center {
         position: absolute;
-        width: 29px;
-        height: 29px;
+        width: 27px;
+        height: 27px;
         background: linear-gradient(135deg, #8B4513, #A0522D);
         border-radius: 50%;
         top: 50%;
