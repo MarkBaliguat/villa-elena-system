@@ -236,8 +236,8 @@
         height: 15px;
         background: linear-gradient(135deg, #FFD700, #FFA500);
         border-radius: 50%;
-        top: 50%;
-        left: 50%;
+        top: 48%;
+        left: 52%;
         margin: -7.5px -15px;
         transform-origin: 15px 0;
     }
@@ -268,6 +268,7 @@
         position: relative;
         padding: 0 15px;
         min-width: 0;
+        margin-top: 40px;
     }
     
     .section-icon {
@@ -322,8 +323,9 @@
     
 
     .footer-link {
-        display: inline-flex;
+        display: flex;
         align-items: center;
+        justify-content: center; 
         text-decoration: none;
         transition: all 0.3s ease;
         padding: 8px 12px;
