@@ -1632,9 +1632,9 @@
                                 <div style="margin-top:1rem;">
                                     <div class="section-label" style="margin-top:0;">Reach Us</div>
                                     <div class="contact-strip">
-                                        <div class="contact-item"><i class="fas fa-phone"></i> +63 (XXX) XXX-XXXX</div>
-                                        <div class="contact-item"><i class="fas fa-envelope"></i> villa.elena@email.com</div>
-                                        <div class="contact-item"><i class="fas fa-map-marker-alt"></i> Villa Elena, Zambales</div>
+                                        <div class="contact-item"><i class="fas fa-phone"></i>0917-301-0790</div>
+                                        <div class="contact-item"><i class="fas fa-envelope"></i>ebs_sunflower@yahoo.com</div>
+                                        <div class="contact-item"><i class="fas fa-map-marker-alt"></i> Cabisuculan, Science City of Munoz</div>
                                     </div>
                                 </div>
                             </div>
