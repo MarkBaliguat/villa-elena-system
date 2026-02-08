@@ -458,7 +458,6 @@
         box-shadow: 0 10px 30px rgba(255, 215, 0, 0.6);
     }
     
-    /* MAP SPECIFIC STYLES */
     .map-container {
         position: relative;
         margin-top: auto;

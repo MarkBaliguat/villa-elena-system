@@ -160,7 +160,7 @@
 
         /* BOOKING SUMMARY SECTION */
         .summary-header {
-            background: linear-gradient(135deg, var(--sunflower) 0%, var(--sun-dark) 100%);
+            /* background: linear-gradient(135deg, var(--sunflower) 0%, var(--sun-dark) 100%); */
             padding: 1.5rem;
             text-align: center;
         }
@@ -168,7 +168,7 @@
         .summary-header h3 {
             font-size: 1.1rem;
             font-weight: 700;
-            color: var(--white-pure);
+            color: black;
             text-transform: uppercase;
             letter-spacing: 1.5px;
             display: flex;
@@ -322,7 +322,7 @@
             font-size: 1.05rem;
             font-weight: 700;
             color: var(--text);
-            background: linear-gradient(135deg, var(--green-light) 0%, #D4F1E0 100%);
+            /* background: linear-gradient(135deg, var(--green-light) 0%, #D4F1E0 100%); */
             border-radius: 12px;
             margin-top: 0.5rem;
         }
@@ -438,7 +438,7 @@
         }
 
         .items-header {
-            background: linear-gradient(135deg, var(--white-warm) 0%, var(--cream) 100%);
+            background: #FFFFFF;
             padding: 1.2rem 1.8rem;
             border-bottom: 2px solid var(--border);
             display: flex;
@@ -490,8 +490,8 @@
         }
 
         .item-card:hover {
-            background: var(--cream);
-            box-shadow: inset 0 0 0 1px var(--border);
+            /* background: var(--cream); */
+            box-shadow: inset 0 0 0 2px var(--border);
         }
 
         .item-card-inner {
@@ -921,7 +921,7 @@
         }
 
         .actions-header {
-            background: linear-gradient(135deg, var(--white-warm) 0%, var(--cream) 100%);
+            background: #FFFFFF;
             padding: 1.2rem 1.8rem;
             border-bottom: 2px solid var(--border);
         }
