@@ -386,13 +386,14 @@
             transform: translateY(-1px) scale(1.02);
         }
         
-        /* Our Story Section - FIXED TEXT VISIBILITY */
+        /* Our Story Section */
         .our-story-section {
             position: relative;
             overflow: hidden;
             padding: 80px 0;
-            background: linear-gradient(135deg, #ffffff 0%, #FFF9E6 100%);
+            background: linear-gradient(to top, #FFF9E6 0%,#FFF9E6 70%,#ffffff 100%);
         }
+        
         
         .our-story-content {
             position: relative;
@@ -409,7 +410,7 @@
             position: relative;
             overflow: hidden;
             padding: 80px 0;
-            background: linear-gradient(135deg, #FFF9E6 0%, #ffffff 100%);
+            background: linear-gradient(to bottom, #FFF9E6 0%,#FFF9E6 30%,#ffffff 100%);
         }
         
         /* Responsive Design */
@@ -482,7 +483,7 @@
         <div class="about-hero-content text-center text-white px-4">
             <h1 class="text-5xl md:text-6xl font-bold mb-6">About Villa Elena</h1>
                     <!-- <a href="{{ url('/virtual-tour/index.html') }}?panorama=22papaya.jpg" class="inline-block px-6 py-3 bg-[#ff6b35] hover:bg-[#ff824e] text-white rounded-sm text-lg font-medium transition-all duration-300">
-                        🔍 Go Directly to Test Panorama
+                        Go Directly to Test Panorama
                     </a> -->
             <p class="text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed">
                 A sanctuary where nature, family, and heartfelt hospitality come together
@@ -490,10 +491,10 @@
         </div>
     </section>
 
-    <main class="pt-8">
+    <main class="pt-0">
         <!-- About Us / Our Story Section with Sunflowers -->
         <section class="our-story-section section-animate">
-            <!-- Sunflowers for Our Story Section -->
+            <!-- Sunflowers -->
             <div class="sunflower-ourstory-left">
                 <img src="/images/sunflower1.png" alt="Sunflower" class="w-48" onerror="this.style.display='none'">
             </div>
@@ -511,7 +512,7 @@
                                  alt="Villa Elena Resort" class="w-full h-full object-cover rounded-3xl">
                         </div>
                         
-                        <!-- Our Story Content - IMPROVED VISIBILITY -->
+                        <!-- Our Story Content -->
                         <div class="our-story-content">
                             <h2 class="text-4xl font-bold mb-6 text-gray-800">Our Story</h2>
                             <div class="space-y-6">
@@ -536,10 +537,6 @@
         <!-- Mission & Vision Sections -->
         <section class="mission-vision-section">
             <!-- Sunflowers for Mission/Vision Section -->
-            
-            <div class="sunflower-mission-right">
-                <img src="/images/mission-pic2.jpg" alt="Sunflower" class="w-48" onerror="this.style.display='none'">
-            </div>
             
             <div class="container mx-auto px-4">
                 <div class="max-w-6xl mx-auto">
@@ -595,7 +592,7 @@
         </section>
 
         <!-- History Section -->
-        <section class="py-16">
+        <section class="py-16 bg-gradient-to-b from-white to-yellow-50">
             <div class="container mx-auto px-4">
                 <div class="max-w-6xl mx-auto">
                     <div class="text-center mb-16 section-animate">
@@ -669,7 +666,7 @@
         </section>
 
         <!-- Why Choose Villa Elena Section -->
-        <section class="py-16 bg-gradient-to-b from-white to-yellow-50">
+        <section class="py-16 bg-gradient-to-t from-white to-yellow-50">
             <div class="container mx-auto px-4">
                 <div class="text-center mb-16 section-animate">
                     <h2 class="text-4xl font-bold mb-4 text-gray-800">Why Choose Villa Elena?</h2>
