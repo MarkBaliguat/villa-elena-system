@@ -754,16 +754,16 @@
         <!-- CTA Section -->
         <section class="cta-about py-16 relative overflow-hidden">
             <div class="container mx-auto px-4 relative z-10">
-                <div class="max-w-4xl mx-auto text-center bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl p-12 border border-yellow-200 section-animate">
+                <div class="max-w-4xl mx-auto text-white text-center backdrop-blur-sm rounded-3xl p-12 section-animate">
                     <h2 class="text-4xl font-bold mb-6">Ready to Experience Villa Elena?</h2>
-                    <p class="text-gray-700 text-lg mb-8">
+                    <p class="text-white-700 text-lg mb-8">
                         Join thousands of satisfied guests who have made Villa Elena their preferred destination for luxury and relaxation.
                     </p>
                     <a href="{{ route('roomBooking') }}"  class="btn-about inline-block">
                         <i class="fas fa-calendar-check mr-2"></i>
                         Book Your Stay Now
                     </a>
-                    <p class="text-sm text-gray-600 mt-6">
+                    <p class="text-sm text-white-600 mt-6">
                         For special events and group bookings, contact us directly at 
                         <a href="tel:+639173010790" class="text-yellow-600 font-semibold">0917-301-0790</a>
                     </p>
