@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Villa Elena Admin</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -44,7 +44,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            min-width: 24px;
+            min-width: 30px;
             transition: margin-right 0.3s ease;
         }
         
@@ -208,9 +208,119 @@
             }
         }
         
-        /* RESPONSIVE ADDITIONS */
+        /* ===== HEADER STYLES - TOGGLE BETWEEN LOGO AND TEXT ===== */
         
-        /* Toggle button - NOW FULLY VISIBLE */
+        /* Full header */
+        .sidebar-header {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* EXPANDED header - with blue gradient, TEXT ONLY (NO LOGO) */
+        .sidebar.expanded .sidebar-header {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* COLLAPSED header - NO BORDER, LOGO ONLY */
+        .sidebar.collapsed .sidebar-header {
+            padding: 1rem 0.5rem;
+            background: white;
+            border-bottom: none;
+        }
+        
+        /* Logo container */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .logo-img {
+            transition: all 0.3s ease;
+            object-fit: contain;
+        }
+        
+        /* EXPANDED STATE - HIDE LOGO COMPLETELY */
+        .sidebar.expanded .logo-img {
+            opacity: 0;
+            width: 0;
+            height: 0;
+            margin-bottom: 0;
+            transform: scale(0);
+            visibility: hidden;
+        }
+        
+        /* COLLAPSED STATE - SHOW LOGO */
+        .sidebar.collapsed .logo-img {
+            opacity: 1;
+            width: 72px;
+            height: 72px;
+            margin-bottom: 0;
+            transform: scale(1);
+            visibility: visible;
+        }
+        
+        /* EXPANDED STATE - HIDE LOGO CONTAINER */
+        .sidebar.expanded .logo-container {
+            display: none;
+        }
+        
+        /* COLLAPSED STATE - SHOW LOGO CONTAINER */
+        .sidebar.collapsed .logo-container {
+            display: flex;
+        }
+        
+        /* Brand text container */
+        .brand-text {
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        /* EXPANDED STATE - SHOW FULL BRAND TEXT */
+        .sidebar.expanded .brand-text {
+            opacity: 1;
+            max-height: 120px;
+            visibility: visible;
+            display: block;
+        }
+        
+        /* COLLAPSED STATE - HIDE BRAND TEXT COMPLETELY */
+        .sidebar.collapsed .brand-text {
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            visibility: hidden;
+            display: none;
+        }
+        
+        .brand-title {
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar.expanded .brand-title {
+            font-size: 1.875rem;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+        
+        .brand-subtitle {
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar.expanded .brand-subtitle {
+            font-size: 0.75rem;
+            color: #bfdbfe;
+            letter-spacing: 0.05em;
+        }
+        
+        /* Toggle button */
         .toggle-btn {
             position: absolute;
             right: -18px;
@@ -249,8 +359,7 @@
         /* Hide text when collapsed */
         .nav-text,
         .section-title,
-        .user-info-text,
-        .brand-subtitle {
+        .user-info-text {
             transition: opacity 0.3s ease, width 0.3s ease;
             white-space: nowrap;
             overflow: hidden;
@@ -258,14 +367,9 @@
         
         .sidebar.collapsed .nav-text,
         .sidebar.collapsed .section-title,
-        .sidebar.collapsed .user-info-text,
-        .sidebar.collapsed .brand-subtitle {
+        .sidebar.collapsed .user-info-text {
             opacity: 0;
             width: 0;
-        }
-        
-        .sidebar.collapsed .brand-title {
-            font-size: 1.5rem;
         }
         
         /* Navigation items alignment - CENTER WHEN COLLAPSED */
@@ -297,10 +401,6 @@
         .sidebar.collapsed .nav-item-wrapper {
             width: fit-content;
             margin: 0 auto;
-        }
-        
-        .sidebar.collapsed .sidebar-header {
-            padding: 1rem;
         }
         
         /* ===== FIXED TOOLTIP STYLES - USING FIXED POSITIONING ===== */
@@ -338,21 +438,14 @@
             border-color: transparent #1f2937 transparent transparent;
         }
         
-        /* Show tooltip on hover when collapsed - PRIMARY USE CASE */
+        /* Show tooltip on hover when collapsed */
         .sidebar.collapsed .nav-item-wrapper:hover .nav-tooltip {
             opacity: 1 !important;
             visibility: visible !important;
             transform: translateX(0);
         }
         
-        /* BONUS: Show tooltip on hover even when expanded */
-        /* .sidebar.expanded .nav-item-wrapper:hover .nav-tooltip {
-            opacity: 1 !important;
-            visibility: visible !important;
-            transform: translateX(0);
-        } */
-        
-        /* NEW: Section indicator tooltips */
+        /* Section indicator tooltips */
         .section-indicator {
             position: relative;
             display: none;
@@ -486,7 +579,7 @@
             text-overflow: ellipsis;
         }
         
-        /* Footer padding - different for expanded and collapsed */
+        /* Footer padding */
         .sidebar-footer {
             padding: 1rem;
         }
@@ -497,7 +590,7 @@
             justify-content: center;
         }
         
-        /* Navigation scroll - NO HORIZONTAL SCROLLBAR, but hidden overflow */
+        /* Navigation scroll */
         nav {
             overflow-y: auto;
             overflow-x: hidden;
@@ -522,49 +615,57 @@
             background: #9ca3af;
         }
         
-        /* Navigation sections - remove unnecessary spacing */
+        /* Navigation sections */
         .nav-section {
             margin-bottom: 0.5rem;
         }
         
-        /* Center the header title when collapsed */
-        .sidebar.collapsed .sidebar-header {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
+        /* ===== RESPONSIVE BREAKPOINTS ===== */
+        
+        /* Tablet adjustments (medium screens) */
+        @media (max-width: 1024px) {
+            .sidebar.expanded {
+                width: 14rem; /* Slightly narrower on tablets */
+            }
         }
         
-        /* Mobile - same collapse behavior, no hamburger */
+        /* Mobile - ALWAYS COLLAPSED, SMALLER SIZE */
         @media (max-width: 768px) {
+            /* Force collapsed state and smaller width */
             .sidebar {
-                width: 5.5rem;
+                width: 4.5rem !important;
             }
             
             .sidebar.expanded {
-                width: 5.5rem;
+                width: 4.5rem !important;
             }
             
+            .sidebar.collapsed {
+                width: 4.5rem !important;
+            }
+            
+            /* Hide toggle button on mobile */
+            .toggle-btn {
+                display: none !important;
+            }
+            
+            /* Force all text hidden */
             .nav-text,
             .section-title,
-            .user-info-text,
-            .brand-subtitle {
-                opacity: 0;
-                width: 0;
+            .user-info-text {
+                opacity: 0 !important;
+                width: 0 !important;
+                display: none !important;
             }
             
-            .brand-title {
-                font-size: 1.5rem;
-            }
-            
+            /* Center all nav items */
             .nav-item-link {
-                justify-content: center;
-                padding: 0.75rem;
-                margin: 0 auto;
+                justify-content: center !important;
+                padding: 0.75rem 0.5rem !important;
+                margin: 0 auto !important;
+                width: fit-content !important;
             }
             
-            /* Center all nav items on mobile */
             nav > .nav-section > div {
                 display: flex;
                 flex-direction: column;
@@ -572,18 +673,14 @@
                 width: 100%;
             }
             
-            .sidebar-header {
-                padding: 1rem;
-            }
-            
+            /* User section - center logout */
             .user-section-container {
-                justify-content: center;
-                width: 100%;
+                justify-content: center !important;
+                width: 100% !important;
             }
             
-            /* Hide user info, show only logout centered */
             .user-section-container > .flex {
-                display: none;
+                display: none !important;
             }
             
             .user-section-container form {
@@ -593,69 +690,120 @@
             }
             
             .user-info-container {
-                display: none;
+                display: none !important;
+            }
+            
+            .user-avatar {
+                opacity: 0 !important;
+                transform: scale(0) !important;
+                width: 0 !important;
+                min-width: 0 !important;
+                height: 0 !important;
             }
             
             .logout-btn {
                 margin: 0 auto;
+                width: 32px;
+                height: 32px;
             }
             
             .icon-container {
-                margin-right: 0;
+                margin-right: 0 !important;
             }
             
-            /* Hide toggle button completely on mobile */
-            .toggle-btn {
-                display: none;
-            }
-            
-            /* Hide user avatar/initials on mobile */
-            .user-avatar {
-                opacity: 0;
-                transform: scale(0);
-                width: 0;
-                min-width: 0;
-                height: 0;
-            }
-            
-            /* Show section indicators on mobile */
+            /* Show section indicators */
             .section-indicator {
-                display: flex;
+                display: flex !important;
             }
             
-            /* Mobile tooltips - mas mabilis lumabas */
+            /* Mobile header - smaller logo */
+            .sidebar-header {
+                padding: 0.75rem 0.5rem !important;
+                background: white !important;
+                border-bottom: none !important;
+            }
+            
+            .logo-container {
+                display: flex !important;
+            }
+            
+            .logo-img {
+                opacity: 1 !important;
+                width: 56px !important;
+                height: 56px !important;
+                margin-bottom: 0 !important;
+                transform: scale(1) !important;
+                visibility: visible !important;
+            }
+            
+            .brand-text {
+                opacity: 0 !important;
+                max-height: 0 !important;
+                overflow: hidden !important;
+                visibility: hidden !important;
+                display: none !important;
+            }
+            
+            /* Mobile tooltips still work */
             .nav-item-wrapper:hover .nav-tooltip {
                 opacity: 1;
                 visibility: visible;
-                transform: translateY(-50%) translateX(0);
+            }
+        }
+        
+        /* Extra small mobile devices */
+        @media (max-width: 480px) {
+            .sidebar {
+                width: 4rem !important;
+            }
+            
+            .sidebar.expanded,
+            .sidebar.collapsed {
+                width: 4rem !important;
+            }
+            
+            .logo-img {
+                width: 48px !important;
+                height: 48px !important;
+            }
+            
+            .icon-container {
+                width: 20px !important;
+                min-width: 20px !important;
+            }
+            
+            .nav-item-link {
+                padding: 0.625rem 0.375rem !important;
             }
         }
     </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Sidebar -->
-    <div class="sidebar expanded" id="sidebar">
-        <!-- Toggle Button (Desktop only) - NOW FULLY VISIBLE -->
+    <!-- Sidebar - DEFAULT STATE: COLLAPSED (Logo Only) -->
+    <div class="sidebar collapsed" id="sidebar">
+        <!-- Toggle Button (Desktop only) -->
         <div class="toggle-btn" id="toggleBtn">
             <i class="fas fa-chevron-left"></i>
         </div>
 
-        <!-- Header -->
-        <div class="sidebar-header p-6 border-b bg-gradient-to-r from-blue-600 to-blue-800 text-center">
-            <h1 class="text-3xl cursive-font text-white mb-2 brand-title">Villa Elena</h1>
-            <p class="text-xs text-blue-100 tracking-wide brand-subtitle">Family Resort & Agri-Tourism Farm</p>
+        <!-- Header - Dynamic: COLLAPSED = Logo Only | EXPANDED = Text Only -->
+        <div class="sidebar-header">
+            <!-- Logo (SHOWN WHEN COLLAPSED, HIDDEN WHEN EXPANDED) -->
+            <div class="logo-container">
+               <img src="{{ asset('images/VillaElenaLogo.png') }}" alt="Villa Elena Logo" class="logo-img">
+            </div>
+            
+            <!-- Brand Text (HIDDEN WHEN COLLAPSED, SHOWN WHEN EXPANDED) -->
+            <div class="brand-text">
+                <h1 class="cursive-font brand-title">Villa Elena</h1>
+                <p class="brand-subtitle">Family Resort & Agri-Tourism Farm</p>
+            </div>
         </div>
 
         <!-- Navigation Items -->
         <nav class="flex-1 px-3 pb-2">
             <!-- Main Section -->
             <div class="nav-section mb-1 pt-3">
-                <!-- Section Indicator (shown when collapsed) -->
-                <!-- <div class="section-indicator">
-                    <div class="section-dot"></div>
-                    <div class="section-label-tooltip">Main</div>
-                </div> -->
-                
                 <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider px-3 mb-2 section-title">Main</p>
                 <div class="space-y-0.5">
                     <div class="nav-item-wrapper">
@@ -819,13 +967,19 @@
         const sidebar = document.getElementById('sidebar');
         const toggleBtn = document.getElementById('toggleBtn');
 
+        // Check if we're on mobile
+        function isMobile() {
+            return window.innerWidth <= 768;
+        }
+
         // Desktop toggle only - mobile stays collapsed
-        if (window.innerWidth > 768) {
-            // Load saved state from localStorage
+        if (!isMobile()) {
+            // DEFAULT STATE: Check if there's a saved state, otherwise stay collapsed
             const savedState = localStorage.getItem('sidebarState');
-            if (savedState === 'collapsed') {
-                sidebar.classList.remove('expanded');
-                sidebar.classList.add('collapsed');
+            // Only expand if explicitly saved as expanded
+            if (savedState === 'expanded') {
+                sidebar.classList.remove('collapsed');
+                sidebar.classList.add('expanded');
             }
 
             // Toggle and save state
@@ -846,6 +1000,27 @@
                 }));
             });
         }
+
+        // Handle window resize - force collapse on mobile
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                if (isMobile()) {
+                    // Force collapsed on mobile
+                    sidebar.classList.remove('expanded');
+                    sidebar.classList.add('collapsed');
+                } else {
+                    // Restore saved state on desktop
+                    const savedState = localStorage.getItem('sidebarState');
+                    if (savedState === 'expanded') {
+                        sidebar.classList.remove('collapsed');
+                        sidebar.classList.add('expanded');
+                    }
+                }
+                positionTooltips();
+            }, 250);
+        });
 
         // Tooltip positioning with fixed position
         function positionTooltips() {
