@@ -228,6 +228,7 @@
         width: 100%;
         height: 100%;
         animation: rotate 20s linear infinite;
+        inset: 0;
     }
     
     .petal {
@@ -236,10 +237,9 @@
         height: 15px;
         background: linear-gradient(135deg, #FFD700, #FFA500);
         border-radius: 50%;
-        top: 48%;
-        left: 52%;
+        top: 50%;
+        left: 50%;
         margin: -7.5px -15px;
-        transform-origin: 15px 0;
     }
     
     .petal:nth-child(1) { transform: rotate(0deg) translateX(30px); }
@@ -259,7 +259,7 @@
         border-radius: 50%;
         top: 50%;
         left: 50%;
-        transform: translate(-40%, -60%);
+        transform: translate(-50%, -50%);
         box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
     }
     
