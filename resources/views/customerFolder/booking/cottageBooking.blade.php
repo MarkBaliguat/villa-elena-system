@@ -455,7 +455,7 @@
             background: linear-gradient(135deg, var(--primary-yellow), var(--secondary-yellow));
             color: var(--primary-black);
             padding: 8px 20px;
-            border-radius: 20px;
+            border-radius: 9px;
             font-weight: 600;
             font-size: 0.85rem;
             box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
