@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Villa Elena Admin</title>
-<<<<<<< HEAD
-=======
     
     <!-- CRITICAL: Set sidebar state BEFORE page renders to prevent animation -->
     <script>
@@ -39,7 +37,6 @@
         });
     </script>
     
->>>>>>> 0c222f4 (VT changed image pic)
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -815,13 +812,8 @@
     </style>
 </head>
 <body class="bg-gray-50">
-<<<<<<< HEAD
-    <!-- Sidebar - DEFAULT STATE: COLLAPSED (Logo Only) -->
-    <div class="sidebar collapsed" id="sidebar">
-=======
     <!-- Sidebar - DEFAULT STATE: EXPANDED (Text Visible) -->
     <div class="sidebar expanded" id="sidebar">
->>>>>>> 0c222f4 (VT changed image pic)
         <!-- Toggle Button (Desktop only) -->
         <div class="toggle-btn" id="toggleBtn">
             <i class="fas fa-chevron-left"></i>
@@ -1012,19 +1004,6 @@
         function isMobile() {
             return window.innerWidth <= 768;
         }
-<<<<<<< HEAD
-
-        // Desktop toggle only - mobile stays collapsed
-        if (!isMobile()) {
-            // DEFAULT STATE: Check if there's a saved state, otherwise stay collapsed
-            const savedState = localStorage.getItem('sidebarState');
-            // Only expand if explicitly saved as expanded
-            if (savedState === 'expanded') {
-                sidebar.classList.remove('collapsed');
-                sidebar.classList.add('expanded');
-            }
-=======
->>>>>>> 0c222f4 (VT changed image pic)
 
         // Desktop toggle functionality
         if (!isMobile()) {
@@ -1057,18 +1036,12 @@
                     sidebar.classList.remove('expanded');
                     sidebar.classList.add('collapsed');
                 } else {
-<<<<<<< HEAD
-                    // Restore saved state on desktop
-                    const savedState = localStorage.getItem('sidebarState');
-                    if (savedState === 'expanded') {
-=======
                     // Restore saved state on desktop (default to expanded if no saved state)
                     const savedState = localStorage.getItem('sidebarState');
                     if (savedState === 'collapsed') {
                         sidebar.classList.remove('expanded');
                         sidebar.classList.add('collapsed');
                     } else {
->>>>>>> 0c222f4 (VT changed image pic)
                         sidebar.classList.remove('collapsed');
                         sidebar.classList.add('expanded');
                     }
