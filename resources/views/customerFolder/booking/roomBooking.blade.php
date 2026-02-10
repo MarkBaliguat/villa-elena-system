@@ -46,7 +46,7 @@
         /* Hero Section */
         .hero-section {
             position: relative;
-            height: 70vh;
+            height: 100vh;
             min-height: 500px;
             background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5)), 
                         url('/images/pool-area.jpg');
@@ -422,12 +422,12 @@
 
         .card-badge {
             position: absolute;
-            top: 25px;
-            right: 25px;
+            top: 30px;
+            right: 30px;
             background: linear-gradient(135deg, var(--primary-yellow), var(--secondary-yellow));
             color: var(--primary-black);
             padding: 8px 20px;
-            border-radius: 20px;
+            border-radius: 9px;
             font-weight: 600;
             font-size: 0.85rem;
             box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
@@ -896,7 +896,7 @@
 
         @media (max-width: 992px) {
             .hero-section {
-                height: 60vh;
+                height: 90vh;
                 min-height: 450px;
             }
             
@@ -925,7 +925,7 @@
 
         @media (max-width: 768px) {
             .hero-section {
-                height: 50vh;
+                height: 110vh;
                 min-height: 400px;
                 background-attachment: scroll;
             }
@@ -1011,8 +1011,8 @@
         @media (max-width: 576px) {
             .hero-section {
                 padding: 1rem;
-                height: auto;
                 min-height: 450px;
+                height: 110vh;
             }
             
             .section-title {

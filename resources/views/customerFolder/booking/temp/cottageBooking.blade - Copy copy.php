@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Villa Elena - Cottage Booking</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="icon" type="image/x-icon" href="{{ asset('images/sunflower1.png') }}">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script src="https://cdn.tailwindcss.com"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;500;600;700&display=swap');
@@ -30,8 +29,6 @@
             scroll-behavior: smooth;
             background-color: var(--light-bg);
             color: var(--text-dark);
-            margin: 0;
-            padding: 0;
         }
         
         .cursive-font {
@@ -39,17 +36,17 @@
         }
         
         .main-content {
-            margin-top: 0;
+            margin-top: 80px;
             min-height: calc(100vh - 300px);
         }
 
         /* Hero Section */
         .hero-section {
             position: relative;
-            height: 100vh;
+            height: 70vh;
             min-height: 500px;
             background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5)), 
-                        url('/images/pool-area.jpg');
+                        url('/images/main-photo.jpg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -68,12 +65,12 @@
             width: 100%;
         }
 
-        /* Booking Card - IMPROVED */
+        /* Booking Card */
         .booking-card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
             border-radius: 20px;
-            padding: 2rem;
+            padding: 2.5rem;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
             border: 1px solid rgba(255, 255, 255, 0.3);
             margin-top: 3rem;
@@ -101,7 +98,7 @@
 
         .form-input {
             width: 100%;
-            padding: 12px 14px;
+            padding: 14px 16px;
             border: 2px solid var(--border-color);
             border-radius: 12px;
             font-size: 15px;
@@ -109,7 +106,6 @@
             background-color: white;
             color: var(--text-dark);
             font-family: 'Poppins', sans-serif;
-            height: 48px;
         }
 
         .form-input:focus {
@@ -136,11 +132,11 @@
             gap: 6px;
             background: linear-gradient(135deg, var(--primary-yellow), var(--secondary-yellow));
             color: var(--primary-black);
-            padding: 4px 10px;
+            padding: 6px 12px;
             border-radius: 20px;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             font-weight: 600;
-            margin-top: 0.25rem;
+            margin-top: 0.5rem;
             animation: gentlePulse 2s ease-in-out infinite;
         }
 
@@ -149,11 +145,11 @@
             50% { opacity: 0.8; }
         }
 
-        /* Search Button - ALIGNED */
+        /* Search Button */
         .search-btn {
             background: linear-gradient(135deg, var(--primary-black), #2D3748);
             color: white;
-            padding: 12px 28px;
+            padding: 16px 32px;
             border-radius: 12px;
             font-weight: 600;
             font-size: 16px;
@@ -161,7 +157,6 @@
             border: none;
             cursor: pointer;
             width: 100%;
-            height: 48px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -208,8 +203,8 @@
             text-align: center;
             margin-bottom: 1rem;
             background: linear-gradient(135deg, var(--text-dark), #4B5563);
-            background-clip: text;
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             position: relative;
             display: inline-block;
@@ -295,219 +290,126 @@
             transform: scale(1.1);
         }
 
-        /* Accommodation Cards - Horizontal Layout */
+        /* Accommodation Cards */
         .accommodation-cards {
-            display: flex;
-            flex-direction: column;
-            gap: 3rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 2.5rem;
             margin-top: 2rem;
         }
 
         .accommodation-card {
             background: var(--card-bg);
-            border-radius: 24px;
+            border-radius: 20px;
             overflow: hidden;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
-            display: grid;
-            grid-template-columns: 45% 1fr;
-            gap: 0;
-            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
             border: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         .accommodation-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
             border-color: rgba(255, 215, 0, 0.3);
         }
 
-        /* Image Gallery Section */
         .card-image-container {
             position: relative;
+            height: 220px;
             overflow: hidden;
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.03), rgba(255, 165, 0, 0.03));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1.5rem;
         }
 
-        .image-gallery {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            min-height: 370px;
-        }
-
-        .gallery-main-image {
+        .card-image {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            border-radius: 16px;
-            cursor: pointer;
-            transition: transform 0.4s ease;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .gallery-main-image:hover {
-            transform: scale(1.02);
-        }
-
-        .gallery-thumbnails {
-            position: absolute;
-            bottom: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 8px;
-            padding: 10px 14px;
-            background: rgba(0, 0, 0, 0.65);
-            backdrop-filter: blur(10px);
-            border-radius: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .thumbnail {
-            width: 55px;
-            height: 55px;
-            object-fit: cover;
-            border-radius: 8px;
-            cursor: pointer;
-            opacity: 0.5;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-        }
-
-        .thumbnail:hover {
-            opacity: 0.8;
-            transform: scale(1.05);
-        }
-
-        .thumbnail.active {
-            opacity: 1;
-            border-color: var(--primary-yellow);
-            transform: scale(1.1);
-        }
-
-        .gallery-nav {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
-            color: white;
-            border: none;
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            z-index: 2;
-        }
-
-        .gallery-nav:hover {
-            background: rgba(0, 0, 0, 0.7);
-            transform: translateY(-50%) scale(1.1);
-        }
-
-        .gallery-nav.prev {
-            left: 15px;
-        }
-
-        .gallery-nav.next {
-            right: 15px;
+        .accommodation-card:hover .card-image {
+            transform: scale(1.08);
         }
 
         /* Image Placeholder Style */
         .card-image-placeholder {
             width: 100%;
             height: 100%;
-            min-height: 370px;
             background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 165, 0, 0.1));
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             color: var(--text-medium);
-            border-radius: 16px;
         }
 
         .card-image-placeholder i {
-            font-size: 4rem;
-            margin-bottom: 1rem;
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
             color: var(--primary-yellow);
-            opacity: 0.5;
         }
 
         .card-image-placeholder p {
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: 500;
         }
 
         .card-badge {
             position: absolute;
-            top: 25px;
-            right: 25px;
+            top: 20px;
+            right: 20px;
             background: linear-gradient(135deg, var(--primary-yellow), var(--secondary-yellow));
             color: var(--primary-black);
-            padding: 8px 20px;
+            padding: 6px 16px;
             border-radius: 20px;
             font-weight: 600;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
-            z-index: 3;
+            z-index: 1;
         }
 
-        /* Card Content Section */
         .card-content {
-            padding: 2.5rem 3rem;
+            padding: 1.75rem;
+            flex-grow: 1;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .card-header {
-            margin-bottom: 1.5rem;
         }
 
         .card-title {
-            font-size: 2.25rem;
+            font-size: 1.5rem;
             font-weight: 700;
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
             color: var(--text-dark);
-            line-height: 1.2;
+            line-height: 1.3;
         }
 
         .card-description {
             color: var(--text-medium);
-            margin-bottom: 1.5rem;
-            font-size: 1.05rem;
-            line-height: 1.7;
+            margin-bottom: 1.25rem;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            flex-grow: 1;
         }
 
         .card-features {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 2rem;
+            gap: 8px;
+            margin-bottom: 1.5rem;
         }
 
         .feature-tag {
             background: rgba(255, 215, 0, 0.1);
             color: var(--text-dark);
-            padding: 10px 18px;
-            border-radius: 10px;
-            font-size: 0.95rem;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
             font-weight: 500;
             border: 1px solid rgba(255, 215, 0, 0.2);
             transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 6px;
         }
 
         .feature-tag:hover {
@@ -515,38 +417,34 @@
             transform: translateY(-2px);
         }
 
-        .card-price-section {
-            margin-bottom: 2rem;
-        }
-
         .card-price {
-            font-size: 2.5rem;
+            font-size: 1.5rem;
             font-weight: 700;
             color: var(--text-dark);
-            margin-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
             display: flex;
-            align-items: baseline;
-            gap: 8px;
+            align-items: center;
+            gap: 5px;
         }
 
         .price-period {
-            font-size: 1.1rem;
+            font-size: 0.9rem;
             color: var(--text-medium);
             font-weight: 500;
         }
 
-        /* Button Section */
         .card-actions {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+            display: flex;
             gap: 12px;
+            margin-top: auto;
         }
 
         .action-btn {
-            padding: 16px 24px;
+            flex: 1;
+            padding: 14px 20px;
             border-radius: 12px;
             font-weight: 600;
-            font-size: 1rem;
+            font-size: 0.95rem;
             border: none;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -567,34 +465,6 @@
             transform: translateY(-1px);
         }
 
-        .btn-virtual-tour {
-            grid-column: 1 / -1;
-            background: linear-gradient(135deg, #FFFBF0, #FFF8E1);
-            color: var(--primary-black);
-            border: 2px solid var(--primary-yellow);
-            font-size: 1.05rem;
-        }
-
-        .btn-virtual-tour:hover {
-            background: linear-gradient(135deg, #FFF8E1, #FFECB3);
-            border-color: var(--secondary-yellow);
-        }
-
-        /* Disabled Virtual Tour Button Styling */
-        .btn-virtual-tour.virtual-tour-disabled {
-            background: linear-gradient(135deg, #F3F4F6, #E5E7EB);
-            color: #9CA3AF;
-            border: 2px solid #E5E7EB;
-            cursor: pointer;
-            opacity: 0.7;
-        }
-
-        .btn-virtual-tour.virtual-tour-disabled:hover {
-            background: linear-gradient(135deg, #E5E7EB, #D1D5DB);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
         .btn-cart {
             background: linear-gradient(135deg, var(--primary-yellow), var(--secondary-yellow));
             color: var(--primary-black);
@@ -611,126 +481,6 @@
 
         .btn-book:hover {
             background: linear-gradient(135deg, #2D3748, var(--primary-black));
-        }
-
-        /* Image Zoom Modal */
-        .image-zoom-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 10000;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(10px);
-        }
-
-        .image-zoom-modal.active {
-            display: flex;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .zoom-content {
-            position: relative;
-            max-width: 90%;
-            max-height: 90%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .zoom-image {
-            max-width: 100%;
-            max-height: 90vh;
-            object-fit: contain;
-            border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            animation: zoomIn 0.3s ease;
-        }
-
-        @keyframes zoomIn {
-            from { transform: scale(0.9); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
-        .zoom-nav {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            font-size: 1.5rem;
-        }
-
-        .zoom-nav:hover {
-            background: rgba(255, 255, 255, 0.25);
-            border-color: rgba(255, 215, 0, 0.8);
-            transform: translateY(-50%) scale(1.1);
-        }
-
-        .zoom-nav.prev {
-            left: 30px;
-        }
-
-        .zoom-nav.next {
-            right: 30px;
-        }
-
-        .zoom-close {
-            position: absolute;
-            top: 30px;
-            right: 30px;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            width: 55px;
-            height: 55px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            font-size: 1.5rem;
-        }
-
-        .zoom-close:hover {
-            background: rgba(255, 69, 58, 0.8);
-            border-color: rgba(255, 69, 58, 1);
-            transform: scale(1.1);
-        }
-
-        .zoom-counter {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(10px);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 25px;
-            font-size: 1rem;
-            font-weight: 500;
         }
 
         /* Loading Spinner */
@@ -872,13 +622,32 @@
             background: rgba(255, 255, 255, 0.1);
         }
 
+        /* Same Day Booking Highlight */
+        .same-day-highlight {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 165, 0, 0.1));
+            color: var(--text-dark);
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin-top: 1rem;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            animation: gentlePulse 3s ease-in-out infinite;
+        }
+
+        .same-day-highlight i {
+            color: var(--primary-yellow);
+            font-size: 1.2rem;
+        }
+
         /* Animations */
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
 
-        @keyframes fadeInUp {
+        @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
@@ -889,7 +658,7 @@
         }
 
         .fade-in {
-            animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         /* Custom Scrollbar */
@@ -913,18 +682,14 @@
 
         /* Responsive Design */
         @media (max-width: 1200px) {
-            .accommodation-card {
-                grid-template-columns: 50% 1fr;
-            }
-
-            .card-title {
-                font-size: 2rem;
+            .accommodation-cards {
+                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             }
         }
 
         @media (max-width: 992px) {
             .hero-section {
-                height: 90vh;
+                height: 60vh;
                 min-height: 450px;
             }
             
@@ -933,27 +698,22 @@
             }
             
             .booking-card {
-                padding: 1.75rem;
+                padding: 2rem;
             }
             
             .tab-btn {
                 padding: 14px 30px;
                 font-size: 1rem;
             }
-
-            .accommodation-card {
-                grid-template-columns: 1fr;
-                min-height: auto;
-            }
-
-            .card-content {
-                padding: 2rem;
-            }
         }
 
         @media (max-width: 768px) {
+            .main-content {
+                margin-top: 70px;
+            }
+            
             .hero-section {
-                height: 110vh;
+                height: 50vh;
                 min-height: 400px;
                 background-attachment: scroll;
             }
@@ -963,7 +723,7 @@
             }
             
             .booking-card {
-                padding: 1.5rem;
+                padding: 1.75rem;
                 margin-top: 2rem;
             }
             
@@ -979,43 +739,16 @@
             }
             
             .accommodation-cards {
+                grid-template-columns: 1fr;
                 gap: 2rem;
-            }
-
-            .card-title {
-                font-size: 1.75rem;
-            }
-
-            .card-price {
-                font-size: 2rem;
             }
             
             .card-actions {
-                grid-template-columns: 1fr;
+                flex-direction: column;
             }
-
-            .btn-virtual-tour {
-                grid-column: 1;
-            }
-
-            .zoom-nav {
-                width: 50px;
-                height: 50px;
-            }
-
-            .zoom-nav.prev {
-                left: 15px;
-            }
-
-            .zoom-nav.next {
-                right: 15px;
-            }
-
-            .zoom-close {
-                width: 45px;
-                height: 45px;
-                top: 15px;
-                right: 15px;
+            
+            .action-btn {
+                width: 100%;
             }
             
             .notification {
@@ -1024,22 +757,12 @@
                 max-width: none;
                 top: 80px;
             }
-
-            .gallery-thumbnails {
-                bottom: 10px;
-                padding: 8px 10px;
-            }
-
-            .thumbnail {
-                width: 45px;
-                height: 45px;
-            }
         }
 
         @media (max-width: 576px) {
             .hero-section {
                 padding: 1rem;
-                height: 110vh;
+                height: auto;
                 min-height: 450px;
             }
             
@@ -1048,37 +771,23 @@
             }
             
             .booking-card {
-                padding: 1.25rem;
+                padding: 1.5rem;
             }
             
             .form-input {
-                padding: 10px 12px;
-                height: 44px;
+                padding: 12px 14px;
             }
             
             .search-btn {
-                padding: 10px 20px;
-                height: 44px;
+                padding: 14px 24px;
             }
             
             .card-title {
-                font-size: 1.5rem;
+                font-size: 1.35rem;
             }
             
             .card-price {
-                font-size: 1.75rem;
-            }
-
-            .card-content {
-                padding: 1.5rem;
-            }
-
-            .image-gallery {
-                min-height: 280px;
-            }
-
-            .card-image-placeholder {
-                min-height: 280px;
+                font-size: 1.35rem;
             }
         }
     </style>
@@ -1095,11 +804,12 @@
                 <h1 class="text-4xl md:text-6xl font-bold mb-4 fade-in">Discover Our Cottages</h1>
                 <p class="text-xl md:text-2xl mb-8 fade-in" style="animation-delay: 0.2s;">Perfect for day trips and family gatherings</p>
                 
+
                 <!-- Booking Card -->
                 <div class="booking-card fade-in" style="animation-delay: 0.4s;">
                     <h3 class="text-2xl font-semibold text-gray-900 mb-6 text-center">Book Your Cottage</h3>
                     
-                    <form id="bookingForm" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <form id="bookingForm" class="grid grid-cols-1 md:grid-cols-4 gap-6">
                         @csrf
                         
                         <!-- Check-in Date -->
@@ -1122,13 +832,13 @@
                         <div class="form-group">
                             <label class="form-label">Number of Guests</label>
                             <input type="number" name="guests" id="guest-number" class="form-input" value="1" min="1" max="40" required>
+                            <p class="text-xs text-gray-500 mt-2">Use arrow keys or scroll to adjust</p>
                         </div>
                         
                         <!-- Submit Button -->
-                        <div class="form-group">
-                            <label class="form-label" style="opacity: 0;">Search</label>
+                        <div class="form-group flex items-end">
                             <button type="button" id="searchBtn" class="search-btn">
-                                <i class="fas fa-search"></i>
+                                <i class="fas fa-search mr-2"></i>
                                 Search Cottages
                             </button>
                         </div>
@@ -1176,23 +886,6 @@
         </section>
     </div>
 
-    <!-- Image Zoom Modal -->
-    <div id="imageZoomModal" class="image-zoom-modal">
-        <button class="zoom-close" onclick="closeZoomModal()">
-            <i class="fas fa-times"></i>
-        </button>
-        <div class="zoom-content">
-            <button class="zoom-nav prev" onclick="changeZoomImage(-1)">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <img id="zoomImage" class="zoom-image" src="" alt="Zoomed image">
-            <button class="zoom-nav next" onclick="changeZoomImage(1)">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-        </div>
-        <div class="zoom-counter" id="zoomCounter">1 / 3</div>
-    </div>
-
     <!-- Include Footer -->
     @include('customerFolder.partials.footer')
 
@@ -1207,8 +900,6 @@
         let cartItemCount = 0;
         let cartItems = [];
         let cartDates = { checkIn: '', checkOut: '' };
-        let currentZoomImages = [];
-        let currentZoomIndex = 0;
 
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize date inputs
@@ -1217,10 +908,13 @@
             const checkOutInput = document.getElementById('check_out');
             
             checkInInput.min = today;
-            // DO NOT set default date - leave empty
+            checkInInput.value = today;
+            currentCheckIn = today;
             
             // For cottages, check-out is always same as check-in (same day)
+            checkOutInput.value = today;
             checkOutInput.min = today;
+            currentCheckOut = today;
             
             // Disable check-out input (auto-set to same day)
             checkOutInput.disabled = true;
@@ -1266,18 +960,25 @@
                 if (e.key === 'ArrowUp') {
                     e.preventDefault();
                     let value = parseInt(this.value);
-                    if (value < 40) this.value = value + 1;
+                    if (value < 40) {
+                        this.value = value + 1;
+                    }
                 } else if (e.key === 'ArrowDown') {
                     e.preventDefault();
                     let value = parseInt(this.value);
-                    if (value > 1) this.value = value - 1;
+                    if (value > 1) {
+                        this.value = value - 1;
+                    }
                 }
             });
             
             guestNumberInput.addEventListener('input', function() {
                 let value = parseInt(this.value);
-                if (isNaN(value) || value < 1) value = 1;
-                else if (value > 40) value = 40;
+                if (isNaN(value) || value < 1) {
+                    value = 1;
+                } else if (value > 40) {
+                    value = 40;
+                }
                 this.value = value;
             });
             
@@ -1286,9 +987,13 @@
                 let value = parseInt(this.value);
                 
                 if (e.deltaY < 0) {
-                    if (value < 40) this.value = value + 1;
+                    if (value < 40) {
+                        this.value = value + 1;
+                    }
                 } else {
-                    if (value > 1) this.value = value - 1;
+                    if (value > 1) {
+                        this.value = value - 1;
+                    }
                 }
             });
 
@@ -1306,166 +1011,23 @@
                 }
             });
 
-            // Event delegation for virtual tour buttons (ACTIVE)
-            document.addEventListener('click', function(e) {
-                if (e.target.closest('.virtual-tour-btn')) {
-                    e.preventDefault();
-                    const button = e.target.closest('.virtual-tour-btn');
-                    const tourUrl = button.dataset.tourUrl;
-                    openVirtualTour(tourUrl);
-                }
-            });
-
-            // Event delegation for disabled virtual tour buttons (CLICKABLE with notification)
-            document.addEventListener('click', function(e) {
-                if (e.target.closest('.virtual-tour-disabled')) {
-                    e.preventDefault();
-                    showNotification('Virtual tour is not available for this cottage yet. Please check back later!', 'info', 4000);
-                }
-            });
-
             // Load initial cottages
             loadUnits('cottages');
             
             // Load cart count and items
             loadCartCount();
             loadCartItemsForValidation();
-
-            // Close zoom modal on ESC key
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') closeZoomModal();
-            });
         });
 
-        // ==================== IMAGE GALLERY FUNCTIONS ====================
-        function createImageGallery(images, unitId) {
-            if (!images || images.length === 0) {
-                return `
-                    <div class="card-image-placeholder">
-                        <i class="fas fa-home"></i>
-                        <p>No images available</p>
-                    </div>
-                `;
-            }
-
-            const mainImageUrl = images[0];
-            
-            let html = `
-                <div class="image-gallery" data-unit-id="${unitId}">
-                    <img src="${mainImageUrl}" alt="Unit image" class="gallery-main-image" onclick="openZoomModal(${unitId}, 0)">
-            `;
-
-            if (images.length > 1) {
-                html += `
-                    <button class="gallery-nav prev" onclick="changeGalleryImage(${unitId}, -1)">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <button class="gallery-nav next" onclick="changeGalleryImage(${unitId}, 1)">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                `;
-
-                html += '<div class="gallery-thumbnails">';
-                images.forEach((img, index) => {
-                    html += `
-                        <img src="${img}" 
-                             alt="Thumbnail ${index + 1}" 
-                             class="thumbnail ${index === 0 ? 'active' : ''}" 
-                             onclick="setGalleryImage(${unitId}, ${index})">
-                    `;
-                });
-                html += '</div>';
-            }
-
-            html += '</div>';
-            return html;
-        }
-
-        function changeGalleryImage(unitId, direction) {
-            const gallery = document.querySelector(`[data-unit-id="${unitId}"]`);
-            if (!gallery) return;
-
-            const thumbnails = gallery.querySelectorAll('.thumbnail');
-            if (thumbnails.length === 0) return;
-
-            let currentIndex = -1;
-            thumbnails.forEach((thumb, index) => {
-                if (thumb.classList.contains('active')) currentIndex = index;
-            });
-
-            let newIndex = currentIndex + direction;
-            if (newIndex < 0) newIndex = thumbnails.length - 1;
-            if (newIndex >= thumbnails.length) newIndex = 0;
-
-            setGalleryImage(unitId, newIndex);
-        }
-
-        function setGalleryImage(unitId, index) {
-            const gallery = document.querySelector(`[data-unit-id="${unitId}"]`);
-            if (!gallery) return;
-
-            const mainImage = gallery.querySelector('.gallery-main-image');
-            const thumbnails = gallery.querySelectorAll('.thumbnail');
-
-            if (index < 0 || index >= thumbnails.length) return;
-
-            mainImage.src = thumbnails[index].src;
-            mainImage.onclick = () => openZoomModal(unitId, index);
-
-            thumbnails.forEach(thumb => thumb.classList.remove('active'));
-            thumbnails[index].classList.add('active');
-        }
-
-        // ==================== ZOOM MODAL FUNCTIONS ====================
-        function openZoomModal(unitId, startIndex = 0) {
-            const gallery = document.querySelector(`[data-unit-id="${unitId}"]`);
-            if (!gallery) return;
-
-            const thumbnails = gallery.querySelectorAll('.thumbnail');
-            currentZoomImages = Array.from(thumbnails).map(thumb => thumb.src);
-            
-            if (currentZoomImages.length === 0) {
-                const mainImage = gallery.querySelector('.gallery-main-image');
-                if (mainImage) currentZoomImages = [mainImage.src];
-            }
-
-            currentZoomIndex = startIndex;
-            updateZoomModal();
-
-            const modal = document.getElementById('imageZoomModal');
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeZoomModal() {
-            const modal = document.getElementById('imageZoomModal');
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
-        }
-
-        function changeZoomImage(direction) {
-            currentZoomIndex += direction;
-            
-            if (currentZoomIndex < 0) currentZoomIndex = currentZoomImages.length - 1;
-            if (currentZoomIndex >= currentZoomImages.length) currentZoomIndex = 0;
-
-            updateZoomModal();
-        }
-
-        function updateZoomModal() {
-            const zoomImage = document.getElementById('zoomImage');
-            const zoomCounter = document.getElementById('zoomCounter');
-
-            if (currentZoomImages.length > 0) {
-                zoomImage.src = currentZoomImages[currentZoomIndex];
-                zoomCounter.textContent = `${currentZoomIndex + 1} / ${currentZoomImages.length}`;
-            }
-        }
-
-        // ==================== CART FUNCTIONS ====================
+        // Function to load cart count
         function loadCartCount() {
             fetch('/api/cart/items')
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     if (data.success && data.cart && data.items.length > 0) {
                         cartItemCount = data.items.length;
@@ -1475,24 +1037,35 @@
                         updateCartBadge(0);
                     }
                 })
-                .catch(error => console.error('Error loading cart count:', error));
+                .catch(error => {
+                    console.error('Error loading cart count:', error);
+                });
         }
 
+        // Function to load cart items for date validation
         function loadCartItemsForValidation() {
             fetch('/api/cart/items')
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     if (data.success && data.cart && data.items.length > 0) {
                         cartItems = data.items;
                         cartDates.checkIn = data.cart.checkInDate;
                         cartDates.checkOut = data.cart.checkOutDate;
                         
+                        // Update current dates from cart
                         currentCheckIn = cartDates.checkIn;
                         currentCheckOut = cartDates.checkOut;
                         
+                        // Update date inputs to match cart
                         document.getElementById('check_in').value = currentCheckIn;
                         document.getElementById('check_out').value = currentCheckOut;
                         
+                        // Show notification about existing cart items
                         if (data.items.length > 0) {
                             showNotification(
                                 `You have ${data.items.length} item(s) in your cart.`, 
@@ -1512,12 +1085,14 @@
                 });
         }
 
+        // Function to update cart badge in navbar
         function updateCartBadge(count) {
             const navbarCartBadge = document.getElementById('navbar-cart-badge');
             if (navbarCartBadge) {
                 if (count > 0) {
                     navbarCartBadge.textContent = count;
                     navbarCartBadge.style.display = 'flex';
+                    // Add animation
                     navbarCartBadge.style.animation = 'badgePop 0.3s ease';
                 } else {
                     navbarCartBadge.style.display = 'none';
@@ -1525,124 +1100,120 @@
             }
         }
 
-        // ==================== LOAD UNITS ====================
+        // Function to load units based on type
         function loadUnits(type) {
             const container = document.getElementById(`${type}-container`);
             const loading = document.getElementById(`${type}-loading`);
             
+            // Show loading and clear container
             if (container) {
                 container.innerHTML = '';
                 container.style.display = 'none';
             }
-            if (loading) loading.style.display = 'flex';
+            if (loading) {
+                loading.style.display = 'flex';
+            }
             
+            // Build query parameters
             const params = new URLSearchParams();
+            
             if (currentCheckIn) params.append('check_in', currentCheckIn);
             if (currentCheckOut) params.append('check_out', currentCheckOut);
             if (currentGuests) params.append('guests', currentGuests);
             
             fetch(`/api/available-cottages?${params}`)
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
                 .then(data => {
-                    if (loading) loading.style.display = 'none';
+                    if (loading) {
+                        loading.style.display = 'none';
+                    }
                     
                     if (data.success) {
                         renderUnits(data.cottages, container, type);
                     } else {
-                        renderEmptyState(container, 'No cottages available for the selected date.');
+                        renderEmptyState(container, 'No cottages available for the selected date. Please try a different date.');
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    if (loading) loading.style.display = 'none';
+                    if (loading) {
+                        loading.style.display = 'none';
+                    }
                     renderEmptyState(container, 'Error loading cottages. Please try again.');
                 });
         }
 
-        // ==================== RENDER UNITS ====================
+        // Render function with Add to Cart and Book Now buttons
         function renderUnits(units, container, type) {
             if (!units || units.length === 0) {
-                renderEmptyState(container, 'No ' + type + ' available for the selected date.');
+                renderEmptyState(container, 'No ' + type + ' available for the selected date. Please try a different date.');
                 return;
             }
             
             container.innerHTML = '';
-            container.style.display = 'flex';
+            container.style.display = 'grid';
             
             units.forEach(unit => {
-                // Parse images
-                let images = [];
+                // Use first image if available, otherwise use placeholder
+                let imageUrl = '';
+                
                 try {
                     if (unit.images) {
-                        const parsedImages = typeof unit.images === 'string' ? JSON.parse(unit.images) : unit.images;
-                        if (Array.isArray(parsedImages)) {
-                            images = parsedImages.map(img => {
-                                if (!img.startsWith('http')) return `/storage/${img}`;
-                                return img;
-                            }).filter(img => img);
+                        const images = typeof unit.images === 'string' ? JSON.parse(unit.images) : unit.images;
+                        if (Array.isArray(images) && images.length > 0 && images[0]) {
+                            imageUrl = images[0];
+                            // If it's a local path, convert to full URL
+                            if (!imageUrl.startsWith('http')) {
+                                imageUrl = `/storage/${imageUrl}`;
+                            }
                         }
                     }
                 } catch (e) {
                     console.error('Error parsing images:', e);
                 }
                 
-                // Virtual tour button - UPDATED with clickable disabled state
-                let virtualTourButton = '';
-                if (unit.has_virtual_tour && unit.virtual_tour_url) {
-                    virtualTourButton = `
-                        <button data-tour-url="${escapeHtml(unit.virtual_tour_url)}" 
-                                class="action-btn btn-virtual-tour virtual-tour-btn">
-                            <i class="fas fa-vr-cardboard"></i>
-                            View Virtual Tour
-                        </button>
-                    `;
-                } else {
-                    // NO disabled attribute - clickable with notification
-                    virtualTourButton = `
-                        <button class="action-btn btn-virtual-tour virtual-tour-disabled">
-                            <i class="fas fa-vr-cardboard"></i>
-                            No Virtual Tour Available
-                        </button>
-                    `;
-                }
-                
                 const card = document.createElement('div');
                 card.className = 'accommodation-card fade-in';
                 card.innerHTML = `
                     <div class="card-image-container">
-                        ${createImageGallery(images, unit.unitID)}
-                        <span class="card-badge">
-                            <i class="fas fa-check-circle mr-1"></i>
+                        ${imageUrl ? 
+                            `<img src="${imageUrl}" alt="${unit.unitName}" class="card-image">` :
+                            `<div class="card-image-placeholder">
+                                <i class="fas fa-home"></i>
+                                <p>No image available</p>
+                            </div>`
+                        }
+                        <div class="card-badge">
                             Available
-                        </span>
+                        </div>
                     </div>
                     <div class="card-content">
-                        <div class="card-header">
-                            <h3 class="card-title">${escapeHtml(unit.unitName)}</h3>
-                            <p class="card-description">${escapeHtml(unit.description || 'Perfect for day trips and family gatherings. Enjoy the outdoors in comfort and style.')}</p>
-                        </div>
-                        
+                        <h3 class="card-title">${unit.unitName}</h3>
+                        <p class="card-description">${unit.description || 'Perfect for day trips and family gatherings. Enjoy the outdoors in comfort and style.'}</p>
                         <div class="card-features">
                             <span class="feature-tag">
-                                <i class="fas fa-users"></i>
+                                <i class="fas fa-users mr-1"></i>
                                 ${unit.capacity} guests
                             </span>
                             <span class="feature-tag">
-                                <i class="fas fa-home"></i>
+                                <i class="fas fa-home mr-1"></i>
                                 ${unit.unitType}
                             </span>
-                            ${unit.has_virtual_tour ? '<span class="feature-tag"><i class="fas fa-vr-cardboard"></i> Virtual Tour Available</span>' : ''}
+                            <span class="feature-tag" style="background: rgba(16, 185, 129, 0.1); color: #065f46; border-color: rgba(16, 185, 129, 0.2);">
+                                <i class="fas fa-check-circle mr-1"></i>
+                                Available
+                            </span>
                         </div>
-                        
-                        <div class="card-price-section">
-                            <div class="card-price">
-                                ₱${parseInt(unit.unitRatePrice).toLocaleString()}
-                                <span class="price-period">/ day</span>
-                            </div>
+                        <div class="card-price">
+                            ₱${parseInt(unit.unitRatePrice).toLocaleString()}
+                            <span class="price-period">/ day</span>
                         </div>
-                        
                         <div class="card-actions">
-                            ${virtualTourButton}
                             <button onclick="addToCart(${unit.unitID}, this)" class="action-btn btn-cart">
                                 <i class="fas fa-cart-plus"></i>
                                 Add to Cart
@@ -1658,35 +1229,7 @@
             });
         }
 
-        // ==================== VIRTUAL TOUR FUNCTION ====================
-        function openVirtualTour(virtualTourUrl) {
-            console.log('Opening virtual tour:', virtualTourUrl);
-            
-            if (!virtualTourUrl || virtualTourUrl === 'null' || virtualTourUrl === 'undefined') {
-                showNotification('Virtual tour not available for this cottage', 'info');
-                return;
-            }
-            
-            // Open in new tab
-            const newWindow = window.open(virtualTourUrl, '_blank');
-            
-            if (newWindow) {
-                newWindow.focus();
-                showNotification('Opening virtual tour in new tab...', 'success', 2000);
-            } else {
-                showNotification('Please allow popups to view the virtual tour', 'warning');
-            }
-        }
-
-        // Helper function to escape HTML
-        function escapeHtml(text) {
-            if (!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        // ==================== OTHER FUNCTIONS ====================
+        // Render empty state
         function renderEmptyState(container, message) {
             container.style.display = 'block';
             container.innerHTML = `
@@ -1704,18 +1247,22 @@
             `;
         }
 
+        // Reset search function
         function resetSearch() {
-            document.getElementById('check_in').value = '';
-            document.getElementById('check_out').value = '';
+            const today = new Date().toISOString().split('T')[0];
+            
+            document.getElementById('check_in').value = today;
+            document.getElementById('check_out').value = today;
             document.getElementById('guest-number').value = 1;
             
-            currentCheckIn = '';
-            currentCheckOut = '';
+            currentCheckIn = today;
+            currentCheckOut = today;
             currentGuests = 1;
             
             loadUnits('cottages');
         }
 
+        // Add to Cart function for cottages
         function addToCart(unitId, button) {
             const checkIn = document.getElementById('check_in').value;
             const guests = document.getElementById('guest-number').value;
@@ -1725,9 +1272,12 @@
                 return;
             }
             
+            // For cottages, check-out is always same as check-in (same day)
             const effectiveCheckOut = checkIn;
+            
             const originalContent = button.innerHTML;
             
+            // Show loading on button
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
             button.disabled = true;
             
@@ -1750,16 +1300,24 @@
                     if (data.login_required) {
                         window.location.href = '/login';
                     } else {
+                        // Update cart counter
                         cartItemCount = data.cart_count;
                         updateCartBadge(cartItemCount);
+                        
+                        // Update cart items for validation
                         cartItems = data.items || [];
                         cartDates.checkIn = checkIn;
                         cartDates.checkOut = effectiveCheckOut;
+                        
+                        // Update current dates
                         currentCheckIn = checkIn;
                         currentCheckOut = effectiveCheckOut;
                         
+                        // Show success message
+                        const effectiveGuests = guests;
+                        
                         let message = 'Cottage added to cart successfully! ';
-                        message += `(Same-day booking: ${checkIn} for ${guests} guest${guests > 1 ? 's' : ''})`;
+                        message += `(Same-day booking: ${checkIn} for ${effectiveGuests} guest${effectiveGuests > 1 ? 's' : ''})`;
                         
                         if (data.calculation_breakdown) {
                             message += ` - ${data.calculation_breakdown.formula}`;
@@ -1767,6 +1325,7 @@
                         
                         showNotification(message, 'success');
                         
+                        // Update button to show success
                         button.innerHTML = '<i class="fas fa-check"></i> Added!';
                         setTimeout(() => {
                             button.innerHTML = originalContent;
@@ -1781,12 +1340,13 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                showNotification('Failed to add cottage to cart.', 'error');
+                showNotification('Failed to add cottage to cart. Please try again.', 'error');
                 button.innerHTML = originalContent;
                 button.disabled = false;
             });
         }
 
+        // Book Now function for cottages
         function bookNow(unitId, button) {
             const checkIn = document.getElementById('check_in').value;
             const guests = document.getElementById('guest-number').value;
@@ -1796,9 +1356,13 @@
                 return;
             }
             
+            // For cottages, check-out is always same as check-in (same day)
             const effectiveCheckOut = checkIn;
+            
+            // First add to cart, then redirect to booking page
             const originalContent = button.innerHTML;
             
+            // Show loading on button
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
             button.disabled = true;
             
@@ -1821,8 +1385,11 @@
                     if (data.login_required) {
                         window.location.href = '/login';
                     } else {
+                        // Update cart counter
                         cartItemCount = data.cart_count;
                         updateCartBadge(cartItemCount);
+                        
+                        // Redirect to booking page
                         window.location.href = "{{ route('booking.page') }}";
                     }
                 } else {
@@ -1833,12 +1400,13 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                showNotification('Failed to book cottage.', 'error');
+                showNotification('Failed to book cottage. Please try again.', 'error');
                 button.innerHTML = originalContent;
                 button.disabled = false;
             });
         }
 
+        // Notification system
         function showNotification(message, type = 'info', duration = 3000) {
             const container = document.getElementById('notification-container');
             const id = 'notification-' + Date.now();
@@ -1865,19 +1433,32 @@
             
             container.appendChild(notification);
             
-            setTimeout(() => notification.classList.add('show'), 10);
+            // Trigger animation
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
             
-            const autoRemove = setTimeout(() => closeNotification(id), duration);
+            // Auto remove after duration
+            const autoRemove = setTimeout(() => {
+                closeNotification(id);
+            }, duration);
+            
+            // Store timer ID for manual close
             notification.dataset.timer = autoRemove;
         }
 
         function closeNotification(id) {
             const notification = document.getElementById(id);
             if (notification) {
+                // Clear auto-remove timer
                 clearTimeout(notification.dataset.timer);
+                
+                // Remove show class and then remove element
                 notification.classList.remove('show');
                 setTimeout(() => {
-                    if (notification.parentElement) notification.remove();
+                    if (notification.parentElement) {
+                        notification.remove();
+                    }
                 }, 500);
             }
         }
