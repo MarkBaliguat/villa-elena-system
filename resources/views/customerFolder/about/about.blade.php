@@ -605,7 +605,7 @@
                     <div class="grid md:grid-cols-2 gap-12 items-center section-animate">
                         <div>
                             <div class="mb-8">
-                                <h3 class="text-3xl font-bold mb-6 flex items-center text-gray-800">
+                                <h3 class="text-3xl font-bold mb-8 flex items-center text-gray-800">
                                     <span class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white p-3 rounded-full mr-4">
                                         <i class="fas fa-history"></i>
                                     </span>
@@ -652,9 +652,9 @@
                         </div>
                     </div>
                     
-                    <div class="mt-12 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-3xl p-8 border border-yellow-200 section-animate">
+                    <div class="mt-20 section-animate">
                         <div class="text-center">
-                            <i class="fas fa-heart text-4xl text-yellow-600 mb-4"></i>
+                            <i class="fas fa-heart text-4xl text-yellow-500 mb-4"></i>
                             <p class="text-gray-700 text-lg italic">
                                 VILLA ELENA stands on the farmland where Elena and Alejandro 
                                 shared their first year of married life together—a testament to love, family, and enduring legacy.

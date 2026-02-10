@@ -397,8 +397,8 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 50px;
-        height: 50px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
         font-size: 1.3rem;
         transition: all 0.3s ease;
