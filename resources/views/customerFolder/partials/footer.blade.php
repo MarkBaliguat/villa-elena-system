@@ -139,7 +139,6 @@
                                 <p class="text-sm font-medium text-gray-800 truncate">0917 301 0790</p>
                                 <p class="text-xs text-gray-500">Call us directly</p>
                             </div>
-                            <i class="fas fa-chevron-right ml-2 opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 flex-shrink-0"></i>
                         </a>
                         
                        
