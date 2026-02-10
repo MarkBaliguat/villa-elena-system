@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" type="image/x-icon" href="{{ asset('images/sunflower1.png') }}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <title>Special Events - Villa Elena</title>
     <style>
@@ -637,7 +638,7 @@
                 });
         }
 
-        // ✅ FIXED: Display bookings in table with REAL-TIME balance calculation
+        // Display bookings in table
         function displayBookings(bookings) {
             const tbody = document.getElementById('bookingsTableBody');
 
@@ -654,23 +655,11 @@
 
             tbody.innerHTML = bookings.map(booking => {
                 const eventDate = booking.checkin_date ? booking.checkin_date : 'N/A';
-                
-                // ✅ REAL-TIME BALANCE CALCULATION (client-side verification)
                 const totalPrice = parseFloat(booking.total_price) || 0;
                 const totalPaid = parseFloat(booking.total_paid) || 0;
                 const totalRefunded = parseFloat(booking.total_refunded) || 0;
                 const netPaid = totalPaid - totalRefunded;
                 const calculatedBalance = Math.max(0, totalPrice - netPaid);
-                
-                console.log('Booking calculation:', {
-                    bookingID: booking.bookingID,
-                    totalPrice,
-                    totalPaid,
-                    totalRefunded,
-                    netPaid,
-                    calculatedBalance,
-                    serverBalance: booking.remaining_balance
-                });
                 
                 return `
                 <tr class="border-b border-gray-100 table-row-hover">
@@ -726,7 +715,7 @@
             }).join('');
         }
 
-        // ✅ FIXED: Display event cards with REAL-TIME balance calculation
+        // Display event cards
         function displayEventCards(bookings) {
             const container = document.getElementById('eventsCardsContainer');
 
@@ -737,8 +726,6 @@
 
             container.innerHTML = bookings.map(booking => {
                 const eventDate = booking.checkin_date ? booking.checkin_date : 'N/A';
-                
-                // ✅ REAL-TIME BALANCE CALCULATION
                 const totalPrice = parseFloat(booking.total_price) || 0;
                 const totalPaid = parseFloat(booking.total_paid) || 0;
                 const totalRefunded = parseFloat(booking.total_refunded) || 0;
@@ -829,7 +816,6 @@
 
             let html = '';
 
-            // Previous
             if (currentPage > 1) {
                 html += `<button onclick="loadBookings(getCurrentStatus(), getCurrentSearch(), ${currentPage - 1})" 
                     class="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">
@@ -841,14 +827,12 @@
             let end = Math.min(totalPages, start + maxVisible - 1);
             if (end - start + 1 < maxVisible) start = Math.max(1, end - maxVisible + 1);
 
-            // First + ellipsis
             if (start > 1) {
                 html += `<button onclick="loadBookings(getCurrentStatus(), getCurrentSearch(), 1)" 
                     class="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">1</button>`;
                 if (start > 2) html += `<span class="px-3 py-2 text-sm text-gray-400">...</span>`;
             }
 
-            // Pages
             for (let i = start; i <= end; i++) {
                 if (i === currentPage) {
                     html += `<button class="px-3 py-2 text-sm border border-blue-500 bg-blue-500 text-white rounded-lg transition">${i}</button>`;
@@ -858,14 +842,12 @@
                 }
             }
 
-            // Last + ellipsis
             if (end < totalPages) {
                 if (end < totalPages - 1) html += `<span class="px-3 py-2 text-sm text-gray-400">...</span>`;
                 html += `<button onclick="loadBookings(getCurrentStatus(), getCurrentSearch(), ${totalPages})" 
                     class="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">${totalPages}</button>`;
             }
 
-            // Next
             if (currentPage < totalPages) {
                 html += `<button onclick="loadBookings(getCurrentStatus(), getCurrentSearch(), ${currentPage + 1})" 
                     class="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">
@@ -909,32 +891,75 @@
             }
         }
 
-        // Delete event
+        // ============================================
+        // DELETE EVENT - WITH SWEETALERT2 (NO LOADING)
+        // ============================================
         function deleteEvent(bookingId) {
-            if (!confirm('Are you sure you want to delete this special event?')) return;
-
-            fetch(`/admin/special-events/${bookingId}`, {
-                method: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': csrfToken }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Special event deleted successfully!');
-                    loadBookings(getCurrentStatus(), getCurrentSearch(), currentPage);
-                } else {
-                    alert('Error: ' + (data.message || 'Failed to delete special event'));
+            // ✅ SWEETALERT CONFIRMATION
+            Swal.fire({
+                icon: 'warning',
+                title: 'Delete Special Event?',
+                text: 'Are you sure you want to delete this special event? This action cannot be undone!',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Yes, delete it',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Proceed with deletion
+                    fetch(`/admin/special-events/${bookingId}`, {
+                        method: 'DELETE',
+                        headers: { 'X-CSRF-TOKEN': csrfToken }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // ✅ SWEETALERT SUCCESS (NO LOADING)
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Deleted!',
+                                text: 'Special event has been deleted successfully',
+                                confirmButtonColor: '#16a34a'
+                            });
+                            
+                            // Reload bookings immediately
+                            loadBookings(getCurrentStatus(), getCurrentSearch(), currentPage);
+                        } else {
+                            // ✅ SWEETALERT ERROR (NO LOADING)
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Delete Failed',
+                                text: data.message || 'Failed to delete special event',
+                                confirmButtonColor: '#7c3aed'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        // ✅ SWEETALERT ERROR (NO LOADING)
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Connection Error',
+                            text: 'Error deleting special event',
+                            confirmButtonColor: '#7c3aed'
+                        });
+                    });
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error deleting special event');
             });
         }
 
-        // Export to CSV - WITH REAL-TIME BALANCE
+        // Export to CSV
         function exportToCSV() {
-            if (allBookings.length === 0) { alert('No data to export'); return; }
+            if (allBookings.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'No Data',
+                    text: 'No data available to export',
+                    confirmButtonColor: '#7c3aed'
+                });
+                return;
+            }
 
             const headers = ['Guest Name','Email','Phone','Event Name','Event Date','Start Time','End Time','Guests','Venue','Total Price','Amount Paid','Amount Refunded','Remaining Balance','Status','Payment Status','Special Requirements'];
             const rows = allBookings.map(b => {
@@ -968,9 +993,17 @@
             document.body.removeChild(link);
         }
 
-        // Print table - WITH REAL-TIME BALANCE
+        // Print table
         function printTable() {
-            if (allBookings.length === 0) { alert('No data to print'); return; }
+            if (allBookings.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'No Data',
+                    text: 'No data available to print',
+                    confirmButtonColor: '#7c3aed'
+                });
+                return;
+            }
 
             const printWindow = window.open('', '_blank');
             const printContent = `
@@ -1025,9 +1058,17 @@
             setTimeout(() => { printWindow.print(); printWindow.close(); }, 500);
         }
 
-        // Export to PDF - WITH REAL-TIME BALANCE
+        // Export to PDF
         function exportToPDF() {
-            if (allBookings.length === 0) { alert('No data to export'); return; }
+            if (allBookings.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'No Data',
+                    text: 'No data available to export',
+                    confirmButtonColor: '#7c3aed'
+                });
+                return;
+            }
 
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
@@ -1158,7 +1199,12 @@
             const paymentModal = document.getElementById('paymentModal');
             if (!paymentModal) {
                 console.error('Payment modal not found in DOM');
-                alert('Payment modal is not available. Please check if the payment modal is properly included.');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Modal Not Found',
+                    text: 'Payment modal is not available. Please check if the payment modal is properly included.',
+                    confirmButtonColor: '#7c3aed'
+                });
                 return;
             }
             paymentModal.classList.remove('hidden');
@@ -1253,12 +1299,22 @@
                         console.log('Formatted event details:', { date: eventDate, startTime: startTime, endTime: endTime });
                         openEditModal();
                     } else {
-                        alert('Error loading special event: ' + (data.message || 'Unknown error'));
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error Loading Event',
+                            text: data.message || 'Unknown error occurred',
+                            confirmButtonColor: '#7c3aed'
+                        });
                     }
                 })
                 .catch(error => {
                     console.error('Error loading special event:', error);
-                    alert('Error loading special event details');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Connection Error',
+                        text: 'Error loading special event details',
+                        confirmButtonColor: '#7c3aed'
+                    });
                 });
         }
     </script>
