@@ -152,9 +152,13 @@
                         class="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition">
                     Cancel
                 </button>
-                <button type="submit"
-                        class="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition">
-                    Update Booking
+                <button type="submit" id="updateBookingBtn"
+                        class="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed">
+                    <span id="updateText">Update Booking</span>
+                    <span id="updateSpinner" class="hidden">
+                        <i class="fas fa-spinner fa-spin mr-2"></i>
+                        Updating...
+                    </span>
                 </button>
             </div>
         </form>
@@ -163,7 +167,7 @@
 
 <script>
 // ============================================
-// EDIT BOOKING MODAL SCRIPTS - WITH CONFLICT CHECKING
+// EDIT BOOKING MODAL SCRIPTS - WITH ASYNC CLOSE + SWEETALERT2
 // ============================================
 
 let originalName = '';
@@ -173,6 +177,31 @@ let isEmailLocked = false;
 let originalBookingType = '';
 let originalUnitId = '';
 let originalBookingId = '';
+
+// Show/hide loading state for update button
+function showUpdateLoading() {
+    const updateBtn = document.getElementById('updateBookingBtn');
+    const updateText = document.getElementById('updateText');
+    const updateSpinner = document.getElementById('updateSpinner');
+    
+    if (updateBtn && updateText && updateSpinner) {
+        updateBtn.disabled = true;
+        updateText.classList.add('hidden');
+        updateSpinner.classList.remove('hidden');
+    }
+}
+
+function hideUpdateLoading() {
+    const updateBtn = document.getElementById('updateBookingBtn');
+    const updateText = document.getElementById('updateText');
+    const updateSpinner = document.getElementById('updateSpinner');
+    
+    if (updateBtn && updateText && updateSpinner) {
+        updateBtn.disabled = false;
+        updateText.classList.remove('hidden');
+        updateSpinner.classList.add('hidden');
+    }
+}
 
 function openEditModal() {
     document.getElementById('editBookingModal').classList.remove('hidden');
@@ -187,30 +216,44 @@ function openEditModal() {
     }, 100);
 }
 
+// ✅ PROMISE-BASED MODAL CLOSE (ensures modal closes BEFORE SweetAlert shows)
 function closeEditModal() {
-    document.getElementById('editBookingModal').classList.add('hidden');
-    document.getElementById('editBookingModal').classList.remove('flex');
-    
-    // Clear phone validation styling
-    const phoneInput = document.getElementById('edit_phone');
-    if (phoneInput) {
-        phoneInput.classList.remove('border-red-500', 'border-green-500');
-        const errorDiv = phoneInput.parentNode.querySelector('.phone-error');
-        if (errorDiv) errorDiv.remove();
-    }
-    
-    // Reset field states
-    resetFieldProtection();
-    
-    // Hide additional fields
-    document.getElementById('cancellation_fields').classList.add('hidden');
-    document.getElementById('completed_note').classList.add('hidden');
-    
-    // Clear conflict messages
-    clearEditConflictMessage();
-    
-    // Remove event listener
-    document.removeEventListener('click', handleEditOutsideClick);
+    return new Promise((resolve) => {
+        const modal = document.getElementById('editBookingModal');
+        
+        // Start close animation
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        
+        // Clear phone validation styling
+        const phoneInput = document.getElementById('edit_phone');
+        if (phoneInput) {
+            phoneInput.classList.remove('border-red-500', 'border-green-500');
+            const errorDiv = phoneInput.parentNode.querySelector('.phone-error');
+            if (errorDiv) errorDiv.remove();
+        }
+        
+        // Reset field states
+        resetFieldProtection();
+        
+        // Hide additional fields
+        document.getElementById('cancellation_fields').classList.add('hidden');
+        document.getElementById('completed_note').classList.add('hidden');
+        
+        // Clear conflict messages
+        clearEditConflictMessage();
+        
+        // Hide loading state
+        hideUpdateLoading();
+        
+        // Remove event listener
+        document.removeEventListener('click', handleEditOutsideClick);
+        
+        // ✅ Wait for CSS animation to complete (300ms)
+        setTimeout(() => {
+            resolve(); // Modal is now fully closed
+        }, 300);
+    });
 }
 
 // Handle outside click for edit modal
@@ -253,7 +296,17 @@ function checkIfFieldHasValue(inputElement, fieldType) {
             // Revert to original value
             inputElement.value = originalName;
             
-            // Show warning
+            // ✅ SWEETALERT WARNING
+            Swal.fire({
+                icon: 'warning',
+                title: 'Field Locked',
+                text: 'Guest name cannot be changed once booking is created',
+                confirmButtonColor: '#f59e0b',
+                timer: 2000,
+                timerProgressBar: true
+            });
+            
+            // Show inline warning
             document.getElementById('name-change-warning').classList.remove('hidden');
             
             // Highlight field temporarily
@@ -270,7 +323,17 @@ function checkIfFieldHasValue(inputElement, fieldType) {
             // Revert to original value
             inputElement.value = originalEmail;
             
-            // Show warning
+            // ✅ SWEETALERT WARNING
+            Swal.fire({
+                icon: 'warning',
+                title: 'Field Locked',
+                text: 'Email address cannot be changed once booking is created',
+                confirmButtonColor: '#f59e0b',
+                timer: 2000,
+                timerProgressBar: true
+            });
+            
+            // Show inline warning
             document.getElementById('email-change-warning').classList.remove('hidden');
             
             // Highlight field temporarily
@@ -560,12 +623,22 @@ function editBooking(bookingId) {
                 
                 openEditModal();
             } else {
-                alert('Error loading booking: ' + (data.message || 'Unknown error'));
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: data.message || 'Failed to load booking details',
+                    confirmButtonColor: '#dc2626'
+                });
             }
         })
         .catch(error => {
             console.error('Error loading booking:', error);
-            alert('Error loading booking details');
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: 'Error loading booking details',
+                confirmButtonColor: '#dc2626'
+            });
         });
 }
 
@@ -613,35 +686,63 @@ function applyFieldProtection() {
     }
 }
 
-// Update booking
-document.getElementById('editBookingForm').addEventListener('submit', function(e) {
+// ✅ UPDATE BOOKING WITH ASYNC MODAL CLOSE + SWEETALERT2
+document.getElementById('editBookingForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
     // Check if there's a conflict before submitting
     const conflictMessage = document.getElementById('edit-conflict-message');
     if (conflictMessage && (conflictMessage.textContent.includes('already booked') || conflictMessage.textContent.includes('Special Event Conflict'))) {
-        alert('Please resolve the date conflict before updating the booking.');
+        Swal.fire({
+            icon: 'error',
+            title: 'Date Conflict',
+            text: 'Please resolve the date conflict before updating the booking.',
+            confirmButtonColor: '#dc2626'
+        });
         return;
     }
     
     // Validate phone numbers before submission
     if (!validateFormPhoneNumbers()) {
-        alert('Please fix the phone number validation errors before submitting.');
+        Swal.fire({
+            icon: 'warning',
+            title: 'Invalid Phone Number',
+            text: 'Please fix the phone number validation errors before submitting.',
+            confirmButtonColor: '#f59e0b'
+        });
         return;
     }
     
     const bookingId = document.getElementById('edit_booking_id').value;
     const newStatus = document.getElementById('edit_booking_status').value;
     
-    // Show confirmation for status changes
+    // ✅ SWEETALERT CONFIRMATION for status changes
     if (newStatus === 'cancelled') {
-        if (!confirm('Are you sure you want to cancel this booking? This will send a cancellation email to the guest.')) {
-            return;
-        }
+        const result = await Swal.fire({
+            icon: 'warning',
+            title: 'Cancel Booking?',
+            text: 'This will send a cancellation email to the guest. Are you sure?',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, cancel booking',
+            cancelButtonText: 'No, go back'
+        });
+        
+        if (!result.isConfirmed) return;
     } else if (newStatus === 'completed') {
-        if (!confirm('Are you sure you want to mark this booking as completed? This will send a thank you email to the guest.')) {
-            return;
-        }
+        const result = await Swal.fire({
+            icon: 'question',
+            title: 'Mark as Completed?',
+            text: 'This will send a thank you email to the guest. Are you sure?',
+            showCancelButton: true,
+            confirmButtonColor: '#16a34a',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, mark as completed',
+            cancelButtonText: 'No, go back'
+        });
+        
+        if (!result.isConfirmed) return;
     }
     
     const formData = new FormData(this);
@@ -667,10 +768,15 @@ document.getElementById('editBookingForm').addEventListener('submit', function(e
         data.phone = data.phone.replace(/\D/g, '');
     }
 
-    // Validate dates
+    // ✅ SWEETALERT VALIDATION: Dates
     if (originalBookingType === 'day-use') {
         if (data.checkout_date && data.checkout_date !== data.checkin_date) {
-            alert('For day-use bookings, check-out date must be the same as check-in date');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Invalid Dates',
+                text: 'For day-use bookings, check-out date must be the same as check-in date',
+                confirmButtonColor: '#f59e0b'
+            });
             return;
         }
         data.checkout_date = data.checkin_date;
@@ -678,37 +784,85 @@ document.getElementById('editBookingForm').addEventListener('submit', function(e
 
     if (originalBookingType === 'overnight') {
         if (!data.checkout_date) {
-            alert('Check-out date is required for overnight bookings');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Missing Check-out Date',
+                text: 'Check-out date is required for overnight bookings',
+                confirmButtonColor: '#f59e0b'
+            });
             return;
         }
         if (data.checkout_date === data.checkin_date) {
-            alert('For overnight bookings, check-out date must be after check-in date');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Invalid Dates',
+                text: 'For overnight bookings, check-out date must be after check-in date',
+                confirmButtonColor: '#f59e0b'
+            });
             return;
         }
     }
 
-    fetch(`/admin/bookings/${bookingId}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': csrfToken
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Update response:', data);
-        if (data.success) {
-            alert('Booking updated successfully! Email notification sent to guest.');
-            closeEditModal();
-            loadBookings(getCurrentStatus(), getCurrentSearch(), currentPage);
+    // Show loading state
+    showUpdateLoading();
+
+    try {
+        const response = await fetch(`/admin/bookings/${bookingId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        console.log('Update response:', result);
+        
+        // Hide loading state
+        hideUpdateLoading();
+        
+        if (result.success) {
+            // ✅ CLOSE MODAL FIRST (wait 300ms for animation)
+            await closeEditModal();
+            
+            // ✅ THEN SHOW SWEETALERT
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Booking updated successfully! Email notification sent to guest.',
+                confirmButtonColor: '#16a34a',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                // Reload bookings after user closes SweetAlert
+                loadBookings(getCurrentStatus(), getCurrentSearch(), currentPage);
+            });
         } else {
-            alert('Error: ' + (data.message || 'Failed to update booking'));
+            // ✅ ERROR: CLOSE MODAL FIRST
+            await closeEditModal();
+            
+            // ✅ THEN SHOW ERROR SWEETALERT
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: result.message || 'Failed to update booking',
+                confirmButtonColor: '#dc2626'
+            });
         }
-    })
-    .catch(error => {
+    } catch (error) {
         console.error('Error:', error);
-        alert('Error updating booking');
-    });
+        hideUpdateLoading();
+        
+        // ✅ ERROR: CLOSE MODAL FIRST
+        await closeEditModal();
+        
+        // ✅ THEN SHOW ERROR SWEETALERT
+        Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: 'Error updating booking',
+            confirmButtonColor: '#dc2626'
+        });
+    }
 });
 </script>

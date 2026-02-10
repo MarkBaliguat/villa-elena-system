@@ -8,9 +8,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" type="image/x-icon" href="{{ asset('images/sunflower1.png') }}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-    <title>Reservations - Villa Elena</title>
+    <title>Special Events - Villa Elena</title>
     <style>
         /* ===== SIDEBAR RESPONSIVE LAYOUT ===== */
         .page-container {
@@ -92,7 +91,7 @@
         #bookingsTable th:nth-child(5), #bookingsTable td:nth-child(5) { min-width: 100px; }
         #bookingsTable th:nth-child(6), #bookingsTable td:nth-child(6) { min-width: 130px; }
 
-        /* Allow wrapping on booking details column */
+        /* Allow wrapping on event details column */
         #bookingsTable td:nth-child(2) {
             white-space: normal;
         }
@@ -145,17 +144,17 @@
         }
 
         /* ===== MOBILE CARD VIEW ===== */
-        .booking-card {
+        .event-card {
             display: none;
             background: white;
             border-radius: 0.5rem;
             padding: 1rem;
             margin-bottom: 1rem;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            border-left: 4px solid #3b82f6;
+            border-left: 4px solid #7c3aed;
         }
 
-        .booking-card .card-header {
+        .event-card .card-header {
             display: flex;
             justify-content: space-between;
             align-items: start;
@@ -164,18 +163,18 @@
             border-bottom: 1px solid #e5e7eb;
         }
 
-        .booking-card .card-body {
+        .event-card .card-body {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 0.75rem;
         }
 
-        .booking-card .card-item {
+        .event-card .card-item {
             display: flex;
             flex-direction: column;
         }
 
-        .booking-card .card-label {
+        .event-card .card-label {
             font-size: 0.75rem;
             color: #6b7280;
             font-weight: 600;
@@ -183,12 +182,12 @@
             margin-bottom: 0.25rem;
         }
 
-        .booking-card .card-value {
+        .event-card .card-value {
             font-size: 0.875rem;
             color: #111827;
         }
 
-        .booking-card .card-actions {
+        .event-card .card-actions {
             display: flex;
             gap: 0.5rem;
             margin-top: 0.75rem;
@@ -196,7 +195,7 @@
             border-top: 1px solid #e5e7eb;
         }
 
-        .booking-card .card-actions button {
+        .event-card .card-actions button {
             flex: 1;
             padding: 0.5rem;
             border-radius: 0.375rem;
@@ -211,7 +210,7 @@
             transition: opacity 0.2s;
         }
 
-        .booking-card .card-actions button:hover {
+        .event-card .card-actions button:hover {
             opacity: 0.85;
         }
 
@@ -219,7 +218,7 @@
         .btn-card-payment { background: #16a34a; color: white; }
         .btn-card-delete { background: #dc2626; color: white; }
 
-        .booking-card:hover {
+        .event-card:hover {
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             transform: translateY(-2px);
             transition: all 0.3s ease;
@@ -251,7 +250,7 @@
                 display: none;
             }
 
-            .booking-card {
+            .event-card {
                 display: block;
             }
 
@@ -287,7 +286,7 @@
                 padding: 1rem !important;
             }
 
-            .booking-card .card-body {
+            .event-card .card-body {
                 grid-template-columns: 1fr;
             }
 
@@ -320,11 +319,11 @@
                 padding: 0.75rem !important;
             }
 
-            .booking-card {
+            .event-card {
                 padding: 0.75rem;
             }
 
-            .booking-card .card-actions {
+            .event-card .card-actions {
                 flex-direction: column;
             }
 
@@ -361,8 +360,8 @@
             <div class="mb-6">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2">
                     <div>
-                        <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Reservations</h1>
-                        <p class="text-gray-500 text-sm mt-1">Manage all bookings and reservations</p>
+                        <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Events Reservations</h1>
+                        <p class="text-gray-500 text-sm mt-1">Manage all Special Events</p>
                     </div>
                     <div class="flex items-center gap-4">
                         <span class="text-xs md:text-sm text-gray-600" id="currentDate"></span>
@@ -371,20 +370,20 @@
             </div>
 
             {{-- Include Modals --}}
-            @include('adminFolder.reservation.modals.add-booking-modal')
-            @include('adminFolder.reservation.modals.edit-booking-modal')
-            @include('adminFolder.reservation.modals.payment-refund-modal')
+            @include('adminFolder.special-events.modals.add-event-modal')
+            @include('adminFolder.special-events.modals.edit-event-modal')
+            @include('adminFolder.special-events.modals.payment-refund-modal')
 
             {{-- Filters and Add Button --}}
             <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
 
                 {{-- Top Row: Title + Add Button --}}
                 <div class="header-row">
-                    <h2 class="text-xl font-semibold text-gray-800">Active Reservations</h2>
+                    <h2 class="text-xl font-semibold text-gray-800">Active Event Reservations</h2>
                     <div class="action-buttons">
-                        <button onclick="openModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium flex items-center gap-2 transition">
+                        <button onclick="openModal()" class="bg-violet-600 hover:bg-violet-700 text-white px-6 py-2.5 rounded-lg font-medium flex items-center gap-2 transition">
                             <i class="fas fa-plus"></i>
-                            Add Booking
+                            Add Special Event
                         </button>
                     </div>
                 </div>
@@ -398,14 +397,16 @@
                                 type="text" 
                                 name="search"
                                 id="searchInput"
-                                placeholder="Search by guest name, email, or phone" 
-                                class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Search events..." 
+                                class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
                             >
                         </div>
-                        <select id="statusFilter" class="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                        <select id="statusFilter" class="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 bg-white">
                             <option value="all">All Status</option>
                             <option value="pending">Pending</option>
                             <option value="confirmed">Confirmed</option>
+                            <option value="cancelled">Cancelled</option>
+                            <option value="completed">Completed</option>
                         </select>
                         <button type="button" onclick="clearFilters()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2.5 rounded-lg font-medium">
                             Clear
@@ -437,9 +438,9 @@
                         <thead>
                             <tr class="border-b border-gray-200">
                                 <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600 uppercase">Guest Info</th>
-                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600 uppercase">Booking Details</th>
+                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600 uppercase">Event Details</th>
                                 <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600 uppercase">Payment</th>
-                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600 uppercase">Units</th>
+                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600 uppercase">Venue</th>
                                 <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600 uppercase">Status</th>
                                 <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600 uppercase">Actions</th>
                             </tr>
@@ -448,7 +449,7 @@
                             <tr>
                                 <td colspan="6" class="text-center py-8 text-gray-500">
                                     <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
-                                    <p>Loading bookings...</p>
+                                    <p>Loading special events...</p>
                                 </td>
                             </tr>
                         </tbody>
@@ -456,7 +457,7 @@
                 </div>
 
                 {{-- Mobile Card View --}}
-                <div id="bookingsCardsContainer">
+                <div id="eventsCardsContainer">
                     <!-- Cards generated here for mobile -->
                 </div>
 
@@ -491,13 +492,9 @@
         document.addEventListener('DOMContentLoaded', () => {
             const savedState = localStorage.getItem('sidebarState');
             const mainContent = document.getElementById('mainContent');
-            // Default to expanded unless explicitly collapsed
             if (savedState === 'collapsed') {
                 mainContent.classList.remove('ml-64');
                 mainContent.classList.add('ml-24');
-            } else {
-                mainContent.classList.remove('ml-24');
-                mainContent.classList.add('ml-64');
             }
         });
         // ============================================
@@ -509,7 +506,7 @@
 
         // Pagination variables
         let currentPage = 1;
-        const perPage = 2;
+        const perPage = 10;
         let totalBookings = 0;
         let allBookings = [];
 
@@ -597,20 +594,20 @@
         // Load bookings
         function loadBookings(status = 'all', search = '', page = 1) {
             const tbody = document.getElementById('bookingsTableBody');
-            const cardsContainer = document.getElementById('bookingsCardsContainer');
+            const cardsContainer = document.getElementById('eventsCardsContainer');
 
             const loadingRow = `
                 <tr>
                     <td colspan="6" class="text-center py-8 text-gray-500">
                         <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
-                        <p>Loading bookings...</p>
+                        <p>Loading special events...</p>
                     </td>
                 </tr>`;
 
             tbody.innerHTML = loadingRow;
             cardsContainer.innerHTML = `<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-gray-500"></i></div>`;
 
-            let url = `/admin/bookings?`;
+            let url = `/admin/special-events?`;
             if (status !== 'all') url += `status=${status}&`;
             if (search) url += `search=${search}&`;
             url += `page=${page}&per_page=${perPage}`;
@@ -624,23 +621,23 @@
                         currentPage = page;
 
                         displayBookings(data.data);
-                        displayBookingCards(data.data);
+                        displayEventCards(data.data);
                         updatePagination(data.total || data.data.length, page);
                         updateShowingText(data.data.length, page, data.total || data.data.length);
                     } else {
-                        const errorMsg = `<tr><td colspan="6" class="text-center py-8 text-red-500">Error loading bookings</td></tr>`;
+                        const errorMsg = `<tr><td colspan="6" class="text-center py-8 text-red-500">Error loading special events</td></tr>`;
                         tbody.innerHTML = errorMsg;
-                        cardsContainer.innerHTML = `<div class="text-center py-8 text-red-500">Error loading bookings</div>`;
+                        cardsContainer.innerHTML = `<div class="text-center py-8 text-red-500">Error loading special events</div>`;
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-red-500">Error loading bookings</td></tr>`;
-                    cardsContainer.innerHTML = `<div class="text-center py-8 text-red-500">Error loading bookings</div>`;
+                    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-red-500">Error loading special events</td></tr>`;
+                    cardsContainer.innerHTML = `<div class="text-center py-8 text-red-500">Error loading special events</div>`;
                 });
         }
 
-        // ✅ FIXED: Display bookings in table with REAL-TIME balance calculation
+        // Display bookings in table (Desktop) - REMOVED NET PAID
         function displayBookings(bookings) {
             const tbody = document.getElementById('bookingsTableBody');
 
@@ -649,30 +646,14 @@
                     <tr>
                         <td colspan="6" class="text-center py-8 text-gray-500">
                             <i class="fas fa-inbox text-4xl mb-2"></i>
-                            <p>No bookings found</p>
+                            <p>No special events found</p>
                         </td>
                     </tr>`;
                 return;
             }
 
             tbody.innerHTML = bookings.map(booking => {
-                // ✅ REAL-TIME BALANCE CALCULATION (client-side verification)
-                const totalPrice = parseFloat(booking.total_price) || 0;
-                const totalPaid = parseFloat(booking.total_paid) || 0;
-                const totalRefunded = parseFloat(booking.total_refunded) || 0;
-                const netPaid = totalPaid - totalRefunded;
-                const calculatedBalance = Math.max(0, totalPrice - netPaid);
-                
-                console.log('Booking calculation:', {
-                    bookingID: booking.bookingID,
-                    totalPrice,
-                    totalPaid,
-                    totalRefunded,
-                    netPaid,
-                    calculatedBalance,
-                    serverBalance: booking.remaining_balance
-                });
-                
+                const eventDate = booking.checkin_date ? booking.checkin_date : 'N/A';
                 return `
                 <tr class="border-b border-gray-100 table-row-hover">
                     <td class="py-4 px-4">
@@ -684,19 +665,20 @@
                     </td>
                     <td class="py-4 px-4">
                         <div>
-                            <p class="text-sm"><span class="font-medium">Type:</span> ${booking.booking_type}</p>
-                            <p class="text-sm"><span class="font-medium">Check-in:</span> ${booking.checkin_date}</p>
-                            <p class="text-sm"><span class="font-medium">Check-out:</span> ${booking.checkout_date || 'N/A'}</p>
+                            <p class="font-medium text-violet-700">${booking.event_name || 'Special Event'}</p>
+                            <p class="text-sm"><span class="font-medium">Event Date:</span> ${eventDate}</p>
+                            <p class="text-sm"><span class="font-medium">Time:</span> ${booking.event_start_time || '08:00'} - ${booking.event_end_time || '17:00'}</p>
                             <p class="text-sm"><span class="font-medium">Guests:</span> ${booking.num_guests}</p>
-                            <p class="text-sm"><span class="font-medium">Price:</span> ₱${totalPrice.toFixed(2)}</p>
+                            <p class="text-sm"><span class="font-medium">Price:</span> ₱${parseFloat(booking.total_price).toFixed(2)}</p>
+                            ${booking.special_requirements ? `<p class="text-sm mt-1"><span class="font-medium">Notes:</span> ${booking.special_requirements}</p>` : ''}
                         </div>
                     </td>
                     <td class="py-4 px-4">
                         <div class="space-y-1">
-                            <p class="text-sm"><span class="font-medium">Total:</span> ₱${totalPrice.toFixed(2)}</p>
-                            <p class="text-sm"><span class="font-medium">Paid:</span> <span class="text-green-600 font-semibold">₱${totalPaid.toFixed(2)}</span></p>
-                            <p class="text-sm"><span class="font-medium">Refunded:</span> <span class="text-orange-600">₱${totalRefunded.toFixed(2)}</span></p>
-                            <p class="text-sm"><span class="font-medium">Balance:</span> <span class="${calculatedBalance === 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}">₱${calculatedBalance.toFixed(2)}</span></p>
+                            <p class="text-sm"><span class="font-medium">Total:</span> ₱${parseFloat(booking.total_price).toFixed(2)}</p>
+                            <p class="text-sm"><span class="font-medium">Paid:</span> ₱${parseFloat(booking.total_paid || 0).toFixed(2)}</p>
+                            <p class="text-sm"><span class="font-medium">Refunded:</span> ₱${parseFloat(booking.total_refunded || 0).toFixed(2)}</p>
+                            <p class="text-sm"><span class="font-medium">Balance:</span> ₱${parseFloat(booking.remaining_balance || booking.total_price).toFixed(2)}</p>
                             ${booking.payment_status ? `<p class="text-xs ${getPaymentStatusColor(booking.payment_status)}">${booking.payment_status.toUpperCase()}</p>` : ''}
                         </div>
                     </td>
@@ -710,25 +692,24 @@
                     </td>
                     <td class="py-4 px-4">
                         <div class="flex gap-2">
-                            <button onclick="editBooking(${booking.bookingID})" class="text-blue-600 hover:text-blue-800" title="Edit">
+                            <button onclick="editEvent(${booking.bookingID})" class="text-blue-600 hover:text-blue-800" title="Edit">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button onclick="openPaymentModal(${booking.bookingID})" class="text-green-600 hover:text-green-800" title="Payment Management">
+                            <button onclick="openSpecialEventPaymentModal(${booking.bookingID})" class="text-green-600 hover:text-green-800" title="Payment Management">
                                 <i class="fas fa-credit-card"></i>
                             </button>
-                            <button onclick="deleteBooking(${booking.bookingID})" class="text-red-600 hover:text-red-800" title="Delete">
+                            <button onclick="deleteEvent(${booking.bookingID})" class="text-red-600 hover:text-red-800" title="Delete">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
                     </td>
-                </tr>
-                `;
+                </tr>`;
             }).join('');
         }
 
-        // ✅ FIXED: Display bookings as cards with REAL-TIME balance calculation
-        function displayBookingCards(bookings) {
-            const container = document.getElementById('bookingsCardsContainer');
+        // Display event cards (Mobile) - REMOVED NET PAID
+        function displayEventCards(bookings) {
+            const container = document.getElementById('eventsCardsContainer');
 
             if (bookings.length === 0) {
                 container.innerHTML = '';
@@ -736,19 +717,14 @@
             }
 
             container.innerHTML = bookings.map(booking => {
-                // ✅ REAL-TIME BALANCE CALCULATION
-                const totalPrice = parseFloat(booking.total_price) || 0;
-                const totalPaid = parseFloat(booking.total_paid) || 0;
-                const totalRefunded = parseFloat(booking.total_refunded) || 0;
-                const netPaid = totalPaid - totalRefunded;
-                const calculatedBalance = Math.max(0, totalPrice - netPaid);
-                
+                const eventDate = booking.checkin_date ? booking.checkin_date : 'N/A';
                 return `
-                <div class="booking-card">
+                <div class="event-card">
                     <div class="card-header">
                         <div>
                             <h3 class="font-semibold text-gray-900 text-lg">${booking.guest_name}</h3>
-                            <p class="text-sm text-gray-500">${booking.email}</p>
+                            <p class="text-sm text-violet-700 font-medium mt-1">${booking.event_name || 'Special Event'}</p>
+                            <p class="text-sm text-gray-500 mt-1">${booking.email}</p>
                             <p class="text-sm text-gray-500">${booking.phone}</p>
                         </div>
                         <span class="status-badge ${getStatusColor(booking.booking_status)}">
@@ -757,60 +733,60 @@
                     </div>
                     <div class="card-body">
                         <div class="card-item">
-                            <span class="card-label">Booking Type</span>
-                            <span class="card-value">${booking.booking_type}</span>
+                            <span class="card-label">Event Date</span>
+                            <span class="card-value">${eventDate}</span>
                         </div>
                         <div class="card-item">
-                            <span class="card-label">Check-in</span>
-                            <span class="card-value">${booking.checkin_date}</span>
-                        </div>
-                        <div class="card-item">
-                            <span class="card-label">Check-out</span>
-                            <span class="card-value">${booking.checkout_date || 'N/A'}</span>
+                            <span class="card-label">Time</span>
+                            <span class="card-value">${booking.event_start_time || '08:00'} - ${booking.event_end_time || '17:00'}</span>
                         </div>
                         <div class="card-item">
                             <span class="card-label">Guests</span>
                             <span class="card-value">${booking.num_guests}</span>
                         </div>
                         <div class="card-item">
-                            <span class="card-label">Units</span>
+                            <span class="card-label">Venue</span>
                             <span class="card-value">${booking.units}</span>
                         </div>
                         <div class="card-item">
                             <span class="card-label">Total Price</span>
-                            <span class="card-value font-semibold text-blue-600">₱${totalPrice.toFixed(2)}</span>
+                            <span class="card-value font-semibold text-violet-600">₱${parseFloat(booking.total_price).toFixed(2)}</span>
                         </div>
                         <div class="card-item">
                             <span class="card-label">Amount Paid</span>
-                            <span class="card-value text-green-600 font-semibold">₱${totalPaid.toFixed(2)}</span>
+                            <span class="card-value text-green-600">₱${parseFloat(booking.total_paid || 0).toFixed(2)}</span>
                         </div>
                         <div class="card-item">
                             <span class="card-label">Refunded</span>
-                            <span class="card-value text-orange-600">₱${totalRefunded.toFixed(2)}</span>
+                            <span class="card-value text-orange-600">₱${parseFloat(booking.total_refunded || 0).toFixed(2)}</span>
                         </div>
                         <div class="card-item">
                             <span class="card-label">Balance</span>
-                            <span class="card-value ${calculatedBalance === 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}">₱${calculatedBalance.toFixed(2)}</span>
+                            <span class="card-value font-semibold text-red-600">₱${parseFloat(booking.remaining_balance || booking.total_price).toFixed(2)}</span>
                         </div>
                         ${booking.payment_status ? `
                         <div class="card-item">
                             <span class="card-label">Payment Status</span>
                             <span class="card-value ${getPaymentStatusColor(booking.payment_status)} font-semibold">${booking.payment_status.toUpperCase()}</span>
                         </div>` : ''}
+                        ${booking.special_requirements ? `
+                        <div class="card-item" style="grid-column: 1 / -1;">
+                            <span class="card-label">Special Notes</span>
+                            <span class="card-value">${booking.special_requirements}</span>
+                        </div>` : ''}
                     </div>
                     <div class="card-actions">
-                        <button class="btn-card-edit" onclick="editBooking(${booking.bookingID})">
+                        <button class="btn-card-edit" onclick="editEvent(${booking.bookingID})">
                             <i class="fas fa-edit"></i> Edit
                         </button>
-                        <button class="btn-card-payment" onclick="openPaymentModal(${booking.bookingID})">
+                        <button class="btn-card-payment" onclick="openSpecialEventPaymentModal(${booking.bookingID})">
                             <i class="fas fa-credit-card"></i> Payment
                         </button>
-                        <button class="btn-card-delete" onclick="deleteBooking(${booking.bookingID})">
+                        <button class="btn-card-delete" onclick="deleteEvent(${booking.bookingID})">
                             <i class="fas fa-trash"></i> Delete
                         </button>
                     </div>
-                </div>
-                `;
+                </div>`;
             }).join('');
         }
 
@@ -890,6 +866,8 @@
             switch(status.toLowerCase()) {
                 case 'confirmed': return 'bg-green-100 text-green-800';
                 case 'pending':   return 'bg-yellow-100 text-yellow-800';
+                case 'cancelled': return 'bg-red-100 text-red-800';
+                case 'completed': return 'bg-blue-100 text-blue-800';
                 default:          return 'bg-gray-100 text-gray-800';
             }
         }
@@ -904,99 +882,46 @@
             }
         }
 
-        // ============================================
-        // DELETE BOOKING WITH SWEETALERT2
-        // ============================================
-        async function deleteBooking(bookingId) {
-            // ✅ SWEETALERT CONFIRMATION
-            const confirmResult = await Swal.fire({
-                icon: 'warning',
-                title: 'Delete Booking?',
-                text: 'Are you sure you want to delete this booking? This action cannot be undone!',
-                showCancelButton: true,
-                confirmButtonColor: '#dc2626',
-                cancelButtonColor: '#6b7280',
-                confirmButtonText: 'Yes, delete it',
-                cancelButtonText: 'Cancel'
-            });
-            
-            if (!confirmResult.isConfirmed) return;
-            
-            // ✅ SHOW LOADING SWEETALERT
-            Swal.fire({
-                title: 'Deleting...',
-                text: 'Please wait while we delete the booking',
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
+        // Delete event
+        function deleteEvent(bookingId) {
+            if (!confirm('Are you sure you want to delete this special event?')) return;
 
-            try {
-                const response = await fetch(`/admin/bookings/${bookingId}`, {
-                    method: 'DELETE',
-                    headers: { 
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                const data = await response.json();
-                
+            fetch(`/admin/special-events/${bookingId}`, {
+                method: 'DELETE',
+                headers: { 'X-CSRF-TOKEN': csrfToken }
+            })
+            .then(response => response.json())
+            .then(data => {
                 if (data.success) {
-                    // ✅ SUCCESS SWEETALERT
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Deleted!',
-                        text: 'Booking has been deleted successfully.',
-                        confirmButtonColor: '#16a34a',
-                        confirmButtonText: 'OK'
-                    }).then(() => {
-                        // Reload bookings after user closes SweetAlert
-                        loadBookings(getCurrentStatus(), getCurrentSearch(), currentPage);
-                    });
+                    alert('Special event deleted successfully!');
+                    loadBookings(getCurrentStatus(), getCurrentSearch(), currentPage);
                 } else {
-                    // ✅ ERROR SWEETALERT
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error!',
-                        text: data.message || 'Failed to delete booking',
-                        confirmButtonColor: '#dc2626'
-                    });
+                    alert('Error: ' + (data.message || 'Failed to delete special event'));
                 }
-            } catch (error) {
+            })
+            .catch(error => {
                 console.error('Error:', error);
-                
-                // ✅ ERROR SWEETALERT
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error!',
-                    text: 'An error occurred while deleting the booking',
-                    confirmButtonColor: '#dc2626'
-                });
-            }
+                alert('Error deleting special event');
+            });
         }
 
-        // Export to CSV
+        // Export to CSV - REMOVED NET PAID
         function exportToCSV() {
             if (allBookings.length === 0) { alert('No data to export'); return; }
 
-            const headers = ['Guest Name','Email','Phone','Booking Type','Check-in','Check-out','Guests','Units','Total Price','Amount Paid','Amount Refunded','Remaining Balance','Status','Payment Status','Special Requirements'];
+            const headers = ['Guest Name','Email','Phone','Event Name','Event Date','Start Time','End Time','Guests','Venue','Total Price','Amount Paid','Amount Refunded','Remaining Balance','Status','Payment Status','Special Requirements'];
             const rows = allBookings.map(b => {
-                const totalPrice = parseFloat(b.total_price) || 0;
-                const totalPaid = parseFloat(b.total_paid) || 0;
-                const totalRefunded = parseFloat(b.total_refunded) || 0;
-                const calculatedBalance = Math.max(0, totalPrice - (totalPaid - totalRefunded));
-                
+                const eventDate = b.checkin_date ? b.checkin_date : 'N/A';
                 return [
-                    `"${b.guest_name}"`,`"${b.email}"`,`"${b.phone}"`,`"${b.booking_type}"`,
-                    `"${b.checkin_date}"`,`"${b.checkout_date || 'N/A'}"`,`"${b.num_guests}"`,`"${b.units}"`,
-                    `"₱${totalPrice.toFixed(2)}"`,
-                    `"₱${totalPaid.toFixed(2)}"`,
-                    `"₱${totalRefunded.toFixed(2)}"`,
-                    `"₱${calculatedBalance.toFixed(2)}"`,
-                    `"${b.booking_status}"`,`"${b.payment_status || 'No Payment'}"`,`"${b.special_requirements || 'N/A'}"`
+                    `"${b.guest_name}"`,`"${b.email}"`,`"${b.phone}"`,`"${b.event_name || 'Special Event'}"`,
+                    `"${eventDate}"`,`"${b.event_start_time || '08:00'}"`,`"${b.event_end_time || '17:00'}"`,
+                    `"${b.num_guests}"`,`"${b.units}"`,
+                    `"₱${parseFloat(b.total_price).toFixed(2)}"`,
+                    `"₱${parseFloat(b.total_paid || 0).toFixed(2)}"`,
+                    `"₱${parseFloat(b.total_refunded || 0).toFixed(2)}"`,
+                    `"₱${parseFloat(b.remaining_balance || b.total_price).toFixed(2)}"`,
+                    `"${b.booking_status}"`,`"${b.payment_status || 'No Payment'}"`,
+                    `"${b.special_requirements || 'N/A'}"`
                 ];
             });
 
@@ -1004,53 +929,52 @@
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.setAttribute('href', URL.createObjectURL(blob));
-            link.setAttribute('download', `active_reservations_${new Date().toISOString().split('T')[0]}.csv`);
+            link.setAttribute('download', `special_events_${new Date().toISOString().split('T')[0]}.csv`);
             link.style.visibility = 'hidden';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         }
 
-        // Print table
+        // Print table - REMOVED NET PAID
         function printTable() {
             if (allBookings.length === 0) { alert('No data to print'); return; }
 
             const printWindow = window.open('', '_blank');
             const printContent = `
                 <!DOCTYPE html><html><head>
-                    <title>Active Reservations Report - Villa Elena</title>
+                    <title>Special Events Report - Villa Elena</title>
                     <style>
                         body { font-family: Arial, sans-serif; margin: 20px; }
-                        h1 { color: #2d3748; text-align: center; margin-bottom: 20px; }
+                        h1 { color: #7c3aed; text-align: center; margin-bottom: 20px; }
                         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
                         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 11px; }
                         th { background-color: #f8f9fa; font-weight: bold; }
                         .status-confirmed { background-color: #d1fae5; color: #065f46; }
                         .status-pending { background-color: #fef3c7; color: #92400e; }
+                        .status-cancelled { background-color: #fee2e2; color: #991b1b; }
+                        .status-completed { background-color: #dbeafe; color: #1e40af; }
                         .print-date { text-align: right; margin-bottom: 20px; color: #6b7280; }
                     </style>
                 </head><body>
-                    <h1>Active Reservations Report - Villa Elena</h1>
+                    <h1>Special Events Report - Villa Elena</h1>
                     <div class="print-date">Printed on: ${new Date().toLocaleString()}</div>
                     <table><thead><tr>
-                        <th>Guest Name</th><th>Email</th><th>Phone</th><th>Type</th>
-                        <th>Check-in</th><th>Check-out</th><th>Guests</th><th>Units</th>
+                        <th>Guest Name</th><th>Email</th><th>Phone</th><th>Event Name</th>
+                        <th>Event Date</th><th>Time</th><th>Guests</th><th>Venue</th>
                         <th>Total</th><th>Paid</th><th>Refunded</th><th>Balance</th><th>Status</th>
                     </tr></thead><tbody>
                         ${allBookings.map(b => {
-                            const totalPrice = parseFloat(b.total_price) || 0;
-                            const totalPaid = parseFloat(b.total_paid) || 0;
-                            const totalRefunded = parseFloat(b.total_refunded) || 0;
-                            const calculatedBalance = Math.max(0, totalPrice - (totalPaid - totalRefunded));
-                            
+                            const eventDate = b.checkin_date ? b.checkin_date : 'N/A';
                             return `<tr>
                                 <td>${b.guest_name}</td><td>${b.email}</td><td>${b.phone}</td>
-                                <td>${b.booking_type}</td><td>${b.checkin_date}</td><td>${b.checkout_date || 'N/A'}</td>
+                                <td>${b.event_name || 'Special Event'}</td><td>${eventDate}</td>
+                                <td>${b.event_start_time || '08:00'} - ${b.event_end_time || '17:00'}</td>
                                 <td>${b.num_guests}</td><td>${b.units}</td>
-                                <td>₱${totalPrice.toFixed(2)}</td>
-                                <td>₱${totalPaid.toFixed(2)}</td>
-                                <td>₱${totalRefunded.toFixed(2)}</td>
-                                <td>₱${calculatedBalance.toFixed(2)}</td>
+                                <td>₱${parseFloat(b.total_price).toFixed(2)}</td>
+                                <td>₱${parseFloat(b.total_paid || 0).toFixed(2)}</td>
+                                <td>₱${parseFloat(b.total_refunded || 0).toFixed(2)}</td>
+                                <td>₱${parseFloat(b.remaining_balance || b.total_price).toFixed(2)}</td>
                                 <td><span class="status-${b.booking_status}">${b.booking_status.toUpperCase()}</span></td>
                             </tr>`;
                         }).join('')}
@@ -1064,7 +988,7 @@
             setTimeout(() => { printWindow.print(); printWindow.close(); }, 500);
         }
 
-        // Export to PDF
+        // Export to PDF - REMOVED NET PAID
         function exportToPDF() {
             if (allBookings.length === 0) { alert('No data to export'); return; }
 
@@ -1073,25 +997,22 @@
 
             doc.setFontSize(16);
             doc.setTextColor(40, 40, 40);
-            doc.text('Active Reservations Report - Villa Elena', 14, 15);
+            doc.text('Special Events Report - Villa Elena', 14, 15);
             doc.setFontSize(10);
             doc.setTextColor(100, 100, 100);
             doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 22);
 
-            const headers = ['Guest','Email','Phone','Type','Check-in','Check-out','Guests','Units','Total','Paid','Refunded','Balance','Status'];
+            const headers = ['Guest','Email','Phone','Event','Date','Time','Guests','Venue','Total','Paid','Refunded','Balance','Status'];
             const rows = allBookings.map(b => {
-                const totalPrice = parseFloat(b.total_price) || 0;
-                const totalPaid = parseFloat(b.total_paid) || 0;
-                const totalRefunded = parseFloat(b.total_refunded) || 0;
-                const calculatedBalance = Math.max(0, totalPrice - (totalPaid - totalRefunded));
-                
+                const eventDate = b.checkin_date ? b.checkin_date : 'N/A';
                 return [
-                    b.guest_name, b.email, b.phone, b.booking_type,
-                    b.checkin_date, b.checkout_date || 'N/A', b.num_guests, b.units,
-                    `₱${totalPrice.toFixed(2)}`,
-                    `₱${totalPaid.toFixed(2)}`,
-                    `₱${totalRefunded.toFixed(2)}`,
-                    `₱${calculatedBalance.toFixed(2)}`,
+                    b.guest_name, b.email, b.phone, b.event_name || 'Event',
+                    eventDate, `${b.event_start_time || '08:00'}-${b.event_end_time || '17:00'}`,
+                    b.num_guests, b.units,
+                    `₱${parseFloat(b.total_price).toFixed(2)}`,
+                    `₱${parseFloat(b.total_paid || 0).toFixed(2)}`,
+                    `₱${parseFloat(b.total_refunded || 0).toFixed(2)}`,
+                    `₱${parseFloat(b.remaining_balance || b.total_price).toFixed(2)}`,
                     b.booking_status.toUpperCase()
                 ];
             });
@@ -1099,11 +1020,11 @@
             doc.autoTable({
                 head: [headers], body: rows, startY: 30,
                 styles: { fontSize: 7, cellPadding: 2 },
-                headStyles: { fillColor: [59, 130, 246] },
+                headStyles: { fillColor: [124, 58, 237] },
                 alternateRowStyles: { fillColor: [249, 250, 251] }
             });
 
-            doc.save(`active_reservations_${new Date().toISOString().split('T')[0]}.pdf`);
+            doc.save(`special_events_${new Date().toISOString().split('T')[0]}.pdf`);
         }
 
         // Filter and search listeners
@@ -1125,9 +1046,179 @@
 
         // Load on page load
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('=== RESERVATIONS PAGE LOADED ===');
+            console.log('=== SPECIAL EVENTS PAGE LOADED ===');
             loadBookings('all', '', 1);
         });
+
+        // ============================================
+        // MODAL FUNCTIONS
+        // ============================================
+
+        // Add Modal
+        function openModal() {
+            document.getElementById('addBookingModal').classList.remove('hidden');
+            document.getElementById('addBookingModal').classList.add('flex');
+            setupPhoneValidation('phone');
+            setTimeout(() => {
+                document.addEventListener('click', handleOutsideClick);
+            }, 100);
+        }
+
+        function closeModal() {
+            document.getElementById('addBookingModal').classList.add('hidden');
+            document.getElementById('addBookingModal').classList.remove('flex');
+            const phoneInput = document.getElementById('phone');
+            if (phoneInput) {
+                phoneInput.classList.remove('border-red-500', 'border-green-500');
+                const errorDiv = phoneInput.parentNode.querySelector('.phone-error');
+                if (errorDiv) errorDiv.remove();
+            }
+            document.removeEventListener('click', handleOutsideClick);
+        }
+
+        function handleOutsideClick(event) {
+            const modal = document.getElementById('addBookingModal');
+            const modalContent = modal.querySelector('.bg-white');
+            if (!modalContent.contains(event.target)) closeModal();
+        }
+
+        // Edit Modal
+        function openEditModal() {
+            document.getElementById('editBookingModal').classList.remove('hidden');
+            document.getElementById('editBookingModal').classList.add('flex');
+            setupPhoneValidation('edit_phone');
+            setTimeout(() => {
+                document.addEventListener('click', handleEditOutsideClick);
+            }, 100);
+        }
+
+        function closeEditModal() {
+            document.getElementById('editBookingModal').classList.add('hidden');
+            document.getElementById('editBookingModal').classList.remove('flex');
+            const phoneInput = document.getElementById('edit_phone');
+            if (phoneInput) {
+                phoneInput.classList.remove('border-red-500', 'border-green-500');
+                const errorDiv = phoneInput.parentNode.querySelector('.phone-error');
+                if (errorDiv) errorDiv.remove();
+            }
+            document.removeEventListener('click', handleEditOutsideClick);
+        }
+
+        function handleEditOutsideClick(event) {
+            const modal = document.getElementById('editBookingModal');
+            const modalContent = modal.querySelector('.bg-white');
+            if (!modalContent.contains(event.target)) closeEditModal();
+        }
+
+        // Payment Modal
+        function openSpecialEventPaymentModal(bookingId) {
+            console.log('Opening payment modal for special event:', bookingId);
+            const paymentModal = document.getElementById('paymentModal');
+            if (!paymentModal) {
+                console.error('Payment modal not found in DOM');
+                alert('Payment modal is not available. Please check if the payment modal is properly included.');
+                return;
+            }
+            paymentModal.classList.remove('hidden');
+            paymentModal.classList.add('flex');
+            document.getElementById('payment_booking_id').value = bookingId;
+            document.getElementById('paymentForm').reset();
+            document.getElementById('refundForm').reset();
+            loadSpecialEventForPayment(bookingId);
+            setTimeout(() => {
+                document.addEventListener('click', handlePaymentOutsideClick);
+            }, 100);
+        }
+
+        function closePaymentModal() {
+            const paymentModal = document.getElementById('paymentModal');
+            if (paymentModal) {
+                paymentModal.classList.add('hidden');
+                paymentModal.classList.remove('flex');
+                document.getElementById('paymentForm').reset();
+                document.getElementById('refundForm').reset();
+                document.removeEventListener('click', handlePaymentOutsideClick);
+            }
+        }
+
+        function handlePaymentOutsideClick(event) {
+            const modal = document.getElementById('paymentModal');
+            if (modal) {
+                const modalContent = modal.querySelector('.bg-white');
+                if (!modalContent.contains(event.target)) closePaymentModal();
+            }
+        }
+
+        // Format date for input
+        function formatDateForInput(dateString) {
+            if (!dateString) return '';
+            try {
+                if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) return dateString;
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) {
+                    console.error('Invalid date:', dateString);
+                    return '';
+                }
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            } catch (error) {
+                console.error('Error formatting date:', error);
+                return '';
+            }
+        }
+
+        // Format time for input
+        function formatTimeForInput(timeString) {
+            if (!timeString) return '';
+            if (timeString.match(/^\d{2}:\d{2}$/)) return timeString;
+            if (timeString.match(/^\d{2}:\d{2}:\d{2}$/)) return timeString.substring(0, 5);
+            if (timeString.toLowerCase().includes('am') || timeString.toLowerCase().includes('pm')) {
+                const timeParts = timeString.match(/(\d{1,2}):(\d{2})/);
+                if (timeParts) return `${timeParts[1].padStart(2, '0')}:${timeParts[2]}`;
+            }
+            return timeString;
+        }
+
+        // Edit event
+        function editEvent(bookingId) {
+            console.log('Editing special event ID:', bookingId);
+            fetch(`/admin/special-events/${bookingId}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Edit special event response:', data);
+                    if (data.success) {
+                        const booking = data.data;
+                        document.getElementById('edit_booking_id').value = booking.bookingID;
+                        document.getElementById('edit_guest_name').value = booking.guest_name;
+                        document.getElementById('edit_email').value = booking.email;
+                        document.getElementById('edit_phone').value = booking.phone;
+                        document.getElementById('edit_event_name').value = booking.event_name || '';
+                        document.getElementById('edit_booking_status').value = booking.booking_status;
+                        document.getElementById('edit_num_guests').value = booking.num_guests;
+                        document.getElementById('edit_total_price').value = parseFloat(booking.total_price).toFixed(2);
+                        document.getElementById('edit_special_requirements').value = booking.special_requirements || '';
+                        const eventDate = formatDateForInput(booking.checkin_date);
+                        document.getElementById('edit_checkin_date').value = eventDate;
+                        const startTime = formatTimeForInput(booking.event_start_time);
+                        const endTime = formatTimeForInput(booking.event_end_time);
+                        document.getElementById('edit_event_start_time').value = startTime;
+                        document.getElementById('edit_event_end_time').value = endTime;
+                        console.log('Formatted event details:', { date: eventDate, startTime: startTime, endTime: endTime });
+                        openEditModal();
+                    } else {
+                        alert('Error loading special event: ' + (data.message || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading special event:', error);
+                    alert('Error loading special event details');
+                });
+        }
     </script>
 </body>
 </html>

@@ -146,7 +146,7 @@
 
 <script>
 // ============================================
-// ADD BOOKING MODAL SCRIPTS - ENHANCED CONFLICT CHECKING
+// ADD BOOKING MODAL SCRIPTS - WITH ASYNC CLOSE + SWEETALERT2
 // ============================================
 
 let currentEntranceFee = 0;
@@ -156,7 +156,6 @@ let hasSpecialEventConflict = false;
 function validateEmail(email) {
     const lowerEmail = email.toLowerCase().trim();
     
-    // Check if empty
     if (!lowerEmail) {
         return {
             isValid: false,
@@ -165,7 +164,6 @@ function validateEmail(email) {
         };
     }
     
-    // Check if it's a @gmail.com email
     if (!lowerEmail.endsWith('@gmail.com')) {
         return {
             isValid: false,
@@ -174,7 +172,6 @@ function validateEmail(email) {
         };
     }
     
-    // Check if original email had uppercase letters
     if (email !== lowerEmail) {
         return {
             isValid: false,
@@ -183,7 +180,6 @@ function validateEmail(email) {
         };
     }
     
-    // Basic email format validation
     const emailRegex = /^[a-z0-9._%+-]+@gmail\.com$/;
     if (!emailRegex.test(lowerEmail)) {
         return {
@@ -200,12 +196,11 @@ function validateEmail(email) {
     };
 }
 
-// Setup email auto-lowercase (without showing error messages)
+// Setup email auto-lowercase
 function setupEmailAutoLowercase() {
     const emailInput = document.querySelector('input[name="email"]');
     if (!emailInput) return;
     
-    // Auto-convert to lowercase as user types
     emailInput.addEventListener('input', function() {
         const email = this.value;
         
@@ -230,8 +225,6 @@ function showEmailError(message) {
         errorDiv.classList.remove('hidden');
         emailInput.classList.add('border-red-500');
         emailInput.classList.remove('border-green-500');
-        
-        // Focus on email input
         emailInput.focus();
     }
 }
@@ -256,7 +249,6 @@ function validateFormEmail() {
     const emailInput = document.querySelector('input[name="email"]');
     const email = emailInput.value.trim();
     
-    // Clear previous error
     clearEmailError();
     
     if (!email) {
@@ -269,12 +261,10 @@ function validateFormEmail() {
     
     const validation = validateEmail(email);
     
-    // Auto-correct if possible
     if (!validation.isValid && validation.correctedEmail) {
         emailInput.value = validation.correctedEmail;
     }
     
-    // Show error if invalid
     if (!validation.isValid) {
         showEmailError(validation.message);
     }
@@ -308,51 +298,51 @@ function hideSubmitLoading() {
     }
 }
 
-// Modal functions
+// ✅ PROMISE-BASED MODAL CLOSE (ensures modal closes BEFORE SweetAlert shows)
+function closeModal() {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('addBookingModal');
+        
+        // Start close animation
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        
+        // Reset form and states
+        document.getElementById('bookingForm').reset();
+        clearConflictMessage();
+        clearUnitNotes();
+        clearEmailError();
+        hideSubmitLoading();
+        hasSpecialEventConflict = false;
+        
+        const phoneInput = document.getElementById('phone');
+        if (phoneInput) {
+            phoneInput.classList.remove('border-red-500', 'border-green-500');
+            const errorDiv = phoneInput.parentNode.querySelector('.phone-error');
+            if (errorDiv) errorDiv.remove();
+        }
+        
+        document.removeEventListener('click', handleOutsideClick);
+        
+        // ✅ Wait for CSS animation to complete (300ms)
+        setTimeout(() => {
+            resolve(); // Modal is now fully closed
+        }, 300);
+    });
+}
+
 function openModal() {
     document.getElementById('addBookingModal').classList.remove('hidden');
     document.getElementById('addBookingModal').classList.add('flex');
     initializeBookingForm();
     loadAvailableUnits();
     
-    // Setup email auto-lowercase only
     setupEmailAutoLowercase();
-    
-    // Setup phone validation for add form
     setupPhoneValidation('phone');
     
-    // Add event listener for outside click
     setTimeout(() => {
         document.addEventListener('click', handleOutsideClick);
     }, 100);
-}
-
-function closeModal() {
-    document.getElementById('addBookingModal').classList.add('hidden');
-    document.getElementById('addBookingModal').classList.remove('flex');
-    document.getElementById('bookingForm').reset();
-    clearConflictMessage();
-    clearUnitNotes();
-    
-    // Clear email error
-    clearEmailError();
-    
-    // Reset button loading state
-    hideSubmitLoading();
-    
-    // Reset special event conflict flag
-    hasSpecialEventConflict = false;
-    
-    // Clear phone validation styling
-    const phoneInput = document.getElementById('phone');
-    if (phoneInput) {
-        phoneInput.classList.remove('border-red-500', 'border-green-500');
-        const errorDiv = phoneInput.parentNode.querySelector('.phone-error');
-        if (errorDiv) errorDiv.remove();
-    }
-    
-    // Remove event listener
-    document.removeEventListener('click', handleOutsideClick);
 }
 
 // Handle outside click
@@ -369,18 +359,15 @@ function initializeBookingForm() {
     const checkoutInput = document.getElementById('checkout_date');
     const checkinInput = document.getElementById('checkin_date');
     
-    // Set today as minimum date
     const today = new Date().toISOString().split('T')[0];
     checkinInput.min = today;
     checkoutInput.min = today;
     
-    // Initialize booking type state
     if (bookingType.value === 'day-use') {
         checkoutInput.disabled = true;
         checkoutWrapper.style.opacity = '0.5';
         checkoutInput.removeAttribute('required');
         
-        // Set checkout to checkin if checkin is already set
         if (checkinInput.value) {
             checkoutInput.value = checkinInput.value;
         }
@@ -399,9 +386,14 @@ document.getElementById('booking_type').addEventListener('change', function() {
     const checkinInput = document.getElementById('checkin_date');
     const unitType = document.getElementById('unit_type').value;
     
-    // VALIDATION: Cottage cannot be used for overnight
+    // ✅ SWEETALERT VALIDATION
     if (unitType === 'cottage' && this.value === 'overnight') {
-        alert('Cottage units are only available for day-use bookings');
+        Swal.fire({
+            icon: 'warning',
+            title: 'Invalid Selection',
+            text: 'Cottage units are only available for day-use bookings',
+            confirmButtonColor: '#f59e0b'
+        });
         this.value = 'day-use';
         return;
     }
@@ -411,7 +403,6 @@ document.getElementById('booking_type').addEventListener('change', function() {
         checkoutWrapper.style.opacity = '0.5';
         checkoutInput.disabled = true;
         
-        // Set checkout date to same as checkin for day-use
         if (checkinInput.value) {
             checkoutInput.value = checkinInput.value;
         }
@@ -419,15 +410,12 @@ document.getElementById('booking_type').addEventListener('change', function() {
         checkoutInput.setAttribute('required', 'required');
         checkoutWrapper.style.opacity = '1';
         checkoutInput.disabled = false;
-        
-        // Clear checkout date when switching to overnight
         checkoutInput.value = '';
     }
     
     clearConflictMessage();
     loadAvailableUnits();
-    updateTotalPrice(); // Update price when booking type changes
-    // Check conflict after a short delay
+    updateTotalPrice();
     setTimeout(checkDateConflict, 100);
 });
 
@@ -437,18 +425,15 @@ document.getElementById('checkin_date').addEventListener('change', function() {
     const bookingType = document.getElementById('booking_type').value;
     const checkoutInput = document.getElementById('checkout_date');
     
-    // Update checkout min date to checkin date
     checkoutInput.min = this.value;
     
-    // For day-use, automatically set checkout to same date
     if (bookingType === 'day-use' && this.value) {
         checkoutInput.value = this.value;
     }
     
     clearConflictMessage();
     loadAvailableUnits();
-    updateTotalPrice(); // Update price when dates change
-    // Check conflict after a short delay
+    updateTotalPrice();
     setTimeout(checkDateConflict, 100);
 });
 
@@ -456,8 +441,7 @@ document.getElementById('checkin_date').addEventListener('change', function() {
 document.getElementById('checkout_date').addEventListener('change', function() {
     console.log('Checkout date changed to:', this.value);
     clearConflictMessage();
-    updateTotalPrice(); // Update price when dates change
-    // Check conflict after a short delay
+    updateTotalPrice();
     setTimeout(checkDateConflict, 100);
 });
 
@@ -529,7 +513,6 @@ function checkDateConflict() {
         return;
     }
 
-    // For day-use, use checkin date as checkout date
     const finalCheckoutDate = (bookingType === 'day-use') ? checkinDate : (checkoutDate || checkinDate);
 
     console.log('Final Checkout Date:', finalCheckoutDate);
@@ -558,7 +541,6 @@ function checkDateConflict() {
             const submitBtn = document.getElementById('submitBookingBtn');
             const conflictMessage = document.getElementById('conflict-message') || createConflictMessage();
             
-            // Format dates for display
             const checkinFormatted = new Date(checkinDate).toLocaleDateString('en-US', { 
                 month: 'short', 
                 day: 'numeric', 
@@ -639,14 +621,13 @@ function checkDateConflict() {
         })
         .catch(error => {
             console.error('❌ Error checking availability:', error);
-            // Don't block submission if there's an error checking availability
             const submitBtn = document.getElementById('submitBookingBtn');
             submitBtn.disabled = false;
             submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
         });
 }
 
-// ENHANCED: Load available units with special event notes
+// Load available units with special event notes
 function loadAvailableUnits() {
     const unitType = document.getElementById('unit_type').value;
     const checkinDate = document.getElementById('checkin_date').value;
@@ -659,7 +640,6 @@ function loadAvailableUnits() {
     console.log('Checkout Date:', checkoutDate);
     console.log('Booking Type:', bookingType);
 
-    // VALIDATION: Cottage cannot be used for overnight
     if (unitType === 'cottage' && bookingType === 'overnight') {
         const unitSelect = document.getElementById('unit_id');
         unitSelect.innerHTML = '<option value="">Cottage units are only available for day-use bookings</option>';
@@ -671,7 +651,6 @@ function loadAvailableUnits() {
     let url = `/admin/bookings/units/available?unit_type=${unitType}`;
     
     if (checkinDate) {
-        // For day-use, use checkin date as checkout date
         const finalCheckoutDate = (bookingType === 'day-use') ? checkinDate : (checkoutDate || checkinDate);
         url += `&checkin_date=${checkinDate}&checkout_date=${finalCheckoutDate}&booking_type=${bookingType}`;
     }
@@ -688,7 +667,6 @@ function loadAvailableUnits() {
                 const currentUnitId = unitSelect.value;
                 const submitBtn = document.getElementById('submitBookingBtn');
                 
-                // Store entrance fee for price calculation
                 if (data.entrance_fee) {
                     currentEntranceFee = parseFloat(data.entrance_fee);
                     document.getElementById('entrance_fee_value').textContent = '₱' + currentEntranceFee.toFixed(2);
@@ -708,7 +686,6 @@ function loadAvailableUnits() {
                     }
                     console.log('No units available');
                     
-                    // Disable submit button when no units available
                     if (submitBtn) {
                         submitBtn.disabled = true;
                         submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
@@ -723,11 +700,9 @@ function loadAvailableUnits() {
                         `;
                     });
                     
-                    // Show success message
                     showUnitNotes(`${data.data.length} unit(s) available for selected dates`, 'success');
                     hasSpecialEventConflict = false;
                     
-                    // Try to restore previous selection if still available
                     if (currentUnitId) {
                         const optionExists = Array.from(unitSelect.options).some(option => option.value === currentUnitId);
                         if (optionExists) {
@@ -735,16 +710,13 @@ function loadAvailableUnits() {
                         }
                     }
                     
-                    // Enable submit button when units are available
                     if (submitBtn) {
                         submitBtn.disabled = false;
                         submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                     }
                 }
                 
-                // Update total price
                 updateTotalPrice();
-                // Check conflict after units are loaded
                 setTimeout(checkDateConflict, 100);
             }
         })
@@ -810,14 +782,12 @@ function updateTotalPrice() {
         const unitType = unitTypeSelect.value;
         const bookingType = bookingTypeSelect.value;
         
-        // Update guest count display
         guestCount.textContent = numGuests;
         
         let totalPrice = 0;
         let entranceFeeAmount = 0;
         let daysCount = 1;
         
-        // Calculate days count for overnight bookings
         if (bookingType === 'overnight') {
             daysCount = calculateDaysCount();
         }
@@ -832,16 +802,13 @@ function updateTotalPrice() {
         });
         
         if (unitType === 'cottage') {
-            // COTTAGE: (entrance fee * number of guests) + cottage price
             entranceFeeAmount = currentEntranceFee * numGuests;
             totalPrice = entranceFeeAmount + unitPrice;
             
-            // Update displays
             unitPriceDisplay.textContent = '₱' + unitPrice.toFixed(2);
             entranceFeeTotal.textContent = '₱' + entranceFeeAmount.toFixed(2);
             totalPriceDisplay.textContent = '₱' + totalPrice.toFixed(2);
         } else {
-            // ROOM: Different calculation based on booking type
             if (bookingType === 'day-use') {
                 if (numGuests === 1) {
                     totalPrice = unitPrice * 2;
@@ -855,7 +822,6 @@ function updateTotalPrice() {
                 unitPriceDisplay.textContent = '₱' + unitPrice.toFixed(2) + ' × ' + numGuests + ' guests × ' + daysCount + ' days';
             }
             
-            // No entrance fee for rooms
             entranceFeeTotal.textContent = '₱0.00';
             totalPriceDisplay.textContent = '₱' + totalPrice.toFixed(2);
         }
@@ -864,7 +830,6 @@ function updateTotalPrice() {
         return;
     }
     
-    // Reset displays if no unit selected
     unitPriceDisplay.textContent = '₱0.00';
     entranceFeeTotal.textContent = '₱0.00';
     totalPriceDisplay.textContent = '₱0.00';
@@ -875,11 +840,9 @@ function updateTotalPrice() {
 document.getElementById('unit_type').addEventListener('change', function() {
     console.log('Unit type changed to:', this.value);
     
-    // VALIDATION: If switching to cottage and booking type is overnight, change to day-use
     const bookingType = document.getElementById('booking_type').value;
     if (this.value === 'cottage' && bookingType === 'overnight') {
         document.getElementById('booking_type').value = 'day-use';
-        // Trigger booking type change to update UI
         document.getElementById('booking_type').dispatchEvent(new Event('change'));
     }
     
@@ -887,26 +850,35 @@ document.getElementById('unit_type').addEventListener('change', function() {
     loadAvailableUnits();
 });
 
-// Create booking
+// ✅ CREATE BOOKING WITH ASYNC MODAL CLOSE + SWEETALERT2
 document.getElementById('bookingForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
     // Validate email first
     const emailValidation = validateFormEmail();
     if (!emailValidation.isValid) {
-        // Error message already shown by validateFormEmail()
         return;
     }
     
-    // Prevent submission if there's a special event conflict
+    // ✅ SWEETALERT VALIDATION: Special event conflict
     if (hasSpecialEventConflict) {
-        alert('Cannot create booking due to special event conflict. Please choose different dates.');
+        Swal.fire({
+            icon: 'error',
+            title: 'Special Event Conflict',
+            text: 'Cannot create booking due to special event conflict. Please choose different dates.',
+            confirmButtonColor: '#dc2626'
+        });
         return;
     }
     
     // Validate phone numbers before submission
     if (!validateFormPhoneNumbers()) {
-        alert('Please fix the phone number validation errors before submitting.');
+        Swal.fire({
+            icon: 'warning',
+            title: 'Invalid Phone Number',
+            text: 'Please fix the phone number validation errors before submitting.',
+            confirmButtonColor: '#f59e0b'
+        });
         return;
     }
     
@@ -915,38 +887,63 @@ document.getElementById('bookingForm').addEventListener('submit', async function
 
     console.log('Submitting booking:', data);
 
-    // Validate cottage cannot be used for overnight
+    // ✅ SWEETALERT VALIDATION: Cottage overnight
     const unitType = document.getElementById('unit_type').value;
     if (unitType === 'cottage' && data.booking_type === 'overnight') {
-        alert('Cottage units are only available for day-use bookings');
+        Swal.fire({
+            icon: 'warning',
+            title: 'Invalid Booking Type',
+            text: 'Cottage units are only available for day-use bookings',
+            confirmButtonColor: '#f59e0b'
+        });
         return;
     }
 
-    // Validate day-use booking
+    // ✅ SWEETALERT VALIDATION: Day-use checkout date
     if (data.booking_type === 'day-use') {
         if (data.checkout_date && data.checkout_date !== data.checkin_date) {
-            alert('For day-use bookings, check-out date must be the same as check-in date');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Invalid Dates',
+                text: 'For day-use bookings, check-out date must be the same as check-in date',
+                confirmButtonColor: '#f59e0b'
+            });
             return;
         }
         data.checkout_date = data.checkin_date;
     }
 
-    // Validate overnight booking
+    // ✅ SWEETALERT VALIDATION: Overnight checkout date
     if (data.booking_type === 'overnight') {
         if (!data.checkout_date) {
-            alert('Check-out date is required for overnight bookings');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Missing Check-out Date',
+                text: 'Check-out date is required for overnight bookings',
+                confirmButtonColor: '#f59e0b'
+            });
             return;
         }
         if (data.checkout_date === data.checkin_date) {
-            alert('For overnight bookings, check-out date must be after check-in date');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Invalid Dates',
+                text: 'For overnight bookings, check-out date must be after check-in date',
+                confirmButtonColor: '#f59e0b'
+            });
             return;
         }
     }
 
-    // Check if there's still a conflict before submitting
+    // ✅ SWEETALERT VALIDATION: Date conflict
     const conflictMessage = document.getElementById('conflict-message');
     if (conflictMessage && conflictMessage.textContent.includes('already booked')) {
-        alert('Please resolve the date conflict before submitting the booking.');
+        Swal.fire({
+            icon: 'error',
+            title: 'Date Conflict',
+            text: 'Please resolve the date conflict before submitting the booking.',
+            confirmButtonColor: '#dc2626'
+        });
         return;
     }
 
@@ -976,20 +973,50 @@ document.getElementById('bookingForm').addEventListener('submit', async function
         const result = await response.json();
         console.log('Booking response:', result);
         
+        // Hide loading state
+        hideSubmitLoading();
+        
         if (result.success) {
-            alert('Booking created successfully!');
-            closeModal();
-            loadBookings(getCurrentStatus(), getCurrentSearch(), currentPage);
+            // ✅ CLOSE MODAL FIRST (wait 300ms for animation)
+            await closeModal();
+            
+            // ✅ THEN SHOW SWEETALERT
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Booking created successfully!',
+                confirmButtonColor: '#16a34a',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                // Reload bookings after user closes SweetAlert
+                loadBookings(getCurrentStatus(), getCurrentSearch(), currentPage);
+            });
         } else {
-            alert('Error: ' + (result.message || 'Failed to create booking'));
-            // Hide loading state on error
-            hideSubmitLoading();
+            // ✅ ERROR: CLOSE MODAL FIRST
+            await closeModal();
+            
+            // ✅ THEN SHOW ERROR SWEETALERT
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: result.message || 'Failed to create booking',
+                confirmButtonColor: '#dc2626'
+            });
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('Error creating booking');
-        // Hide loading state on error
         hideSubmitLoading();
+        
+        // ✅ ERROR: CLOSE MODAL FIRST
+        await closeModal();
+        
+        // ✅ THEN SHOW ERROR SWEETALERT
+        Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: 'Error creating booking',
+            confirmButtonColor: '#dc2626'
+        });
     }
 });
 </script>

@@ -103,9 +103,13 @@
                     </div>
                     
                     <div class="col-span-2">
-                        <button type="submit"
-                                class="w-full px-4 py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition">
-                            Add Payment
+                        <button type="submit" id="regularPaymentButton"
+                                class="w-full px-4 py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed">
+                            <span id="regularPaymentText">Add Payment</span>
+                            <span id="regularPaymentSpinner" class="hidden">
+                                <i class="fas fa-spinner fa-spin mr-2"></i>
+                                Processing Payment...
+                            </span>
                         </button>
                     </div>
                 </form>
@@ -147,9 +151,13 @@
                     </div>
                     
                     <div class="col-span-2">
-                        <button type="submit"
-                                class="w-full px-4 py-2.5 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition">
-                            Process Refund
+                        <button type="submit" id="regularRefundButton"
+                                class="w-full px-4 py-2.5 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed">
+                            <span id="regularRefundText">Process Refund</span>
+                            <span id="regularRefundSpinner" class="hidden">
+                                <i class="fas fa-spinner fa-spin mr-2"></i>
+                                Processing Refund...
+                            </span>
                         </button>
                     </div>
                 </form>
@@ -175,7 +183,67 @@
 
 <script>
 // ============================================
-// PAYMENT & REFUND MODAL SCRIPTS
+// PAYMENT & REFUND MODAL SCRIPTS - WITH ASYNC CLOSE + SWEETALERT2
+// ============================================
+
+// ============================================
+// REGULAR PAYMENT BUTTON LOADING FUNCTIONS
+// ============================================
+
+function showRegularPaymentLoading() {
+    const paymentBtn = document.getElementById('regularPaymentButton');
+    const paymentText = document.getElementById('regularPaymentText');
+    const paymentSpinner = document.getElementById('regularPaymentSpinner');
+    
+    if (paymentBtn && paymentText && paymentSpinner) {
+        paymentBtn.disabled = true;
+        paymentText.classList.add('hidden');
+        paymentSpinner.classList.remove('hidden');
+    }
+}
+
+function hideRegularPaymentLoading() {
+    const paymentBtn = document.getElementById('regularPaymentButton');
+    const paymentText = document.getElementById('regularPaymentText');
+    const paymentSpinner = document.getElementById('regularPaymentSpinner');
+    
+    if (paymentBtn && paymentText && paymentSpinner) {
+        paymentBtn.disabled = false;
+        paymentText.classList.remove('hidden');
+        paymentSpinner.classList.add('hidden');
+    }
+}
+
+// ============================================
+// REGULAR REFUND BUTTON LOADING FUNCTIONS
+// ============================================
+
+function showRegularRefundLoading() {
+    const refundBtn = document.getElementById('regularRefundButton');
+    const refundText = document.getElementById('regularRefundText');
+    const refundSpinner = document.getElementById('regularRefundSpinner');
+    
+    if (refundBtn && refundText && refundSpinner) {
+        refundBtn.disabled = true;
+        refundText.classList.add('hidden');
+        refundSpinner.classList.remove('hidden');
+    }
+}
+
+function hideRegularRefundLoading() {
+    const refundBtn = document.getElementById('regularRefundButton');
+    const refundText = document.getElementById('regularRefundText');
+    const refundSpinner = document.getElementById('regularRefundSpinner');
+    
+    if (refundBtn && refundText && refundSpinner) {
+        refundBtn.disabled = false;
+        refundText.classList.remove('hidden');
+        refundSpinner.classList.add('hidden');
+    }
+}
+
+// ============================================
+// MODAL FUNCTIONS
 // ============================================
 
 function openPaymentModal(bookingId) {
@@ -187,6 +255,10 @@ function openPaymentModal(bookingId) {
     document.getElementById('paymentForm').reset();
     document.getElementById('refundForm').reset();
     
+    // Reset loading states
+    hideRegularPaymentLoading();
+    hideRegularRefundLoading();
+    
     // Load booking details for payment
     loadBookingForPayment(bookingId);
     
@@ -196,14 +268,31 @@ function openPaymentModal(bookingId) {
     }, 100);
 }
 
+// ✅ PROMISE-BASED MODAL CLOSE (ensures modal closes BEFORE SweetAlert shows)
 function closePaymentModal() {
-    document.getElementById('paymentModal').classList.add('hidden');
-    document.getElementById('paymentModal').classList.remove('flex');
-    document.getElementById('paymentForm').reset();
-    document.getElementById('refundForm').reset();
-    
-    // Remove event listener
-    document.removeEventListener('click', handlePaymentOutsideClick);
+    return new Promise((resolve) => {
+        const modal = document.getElementById('paymentModal');
+        
+        // Start close animation
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        
+        // Reset forms
+        document.getElementById('paymentForm').reset();
+        document.getElementById('refundForm').reset();
+        
+        // Reset loading states
+        hideRegularPaymentLoading();
+        hideRegularRefundLoading();
+        
+        // Remove event listener
+        document.removeEventListener('click', handlePaymentOutsideClick);
+        
+        // ✅ Wait for CSS animation to complete (300ms)
+        setTimeout(() => {
+            resolve(); // Modal is now fully closed
+        }, 300);
+    });
 }
 
 // Handle outside click for payment modal
@@ -269,6 +358,13 @@ function loadBookingForPayment(bookingId) {
         })
         .catch(error => {
             console.error('Error loading booking for payment:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: 'Failed to load booking information',
+                confirmButtonColor: '#dc2626'
+            });
+            
             // Set safe defaults on error
             const paymentAmountInput = document.getElementById('payment_amount');
             paymentAmountInput.max = 0;
@@ -457,24 +553,40 @@ document.getElementById('refund_amount').addEventListener('input', function() {
     }
 });
 
-// Add payment functionality
-document.getElementById('paymentForm').addEventListener('submit', function(e) {
+// ============================================
+// ADD PAYMENT WITH ASYNC MODAL CLOSE + SWEETALERT2
+// ============================================
+
+document.getElementById('paymentForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
     const bookingId = document.getElementById('payment_booking_id').value;
     const paymentAmount = parseFloat(document.getElementById('payment_amount').value);
     const remainingBalance = parseFloat(document.getElementById('payment_remaining_balance').value);
     
-    // Validate payment amount
+    // ✅ SWEETALERT VALIDATION: Payment amount
     if (paymentAmount <= 0) {
-        alert('Payment amount must be greater than 0!');
+        Swal.fire({
+            icon: 'warning',
+            title: 'Invalid Amount',
+            text: 'Payment amount must be greater than 0!',
+            confirmButtonColor: '#f59e0b'
+        });
         return;
     }
     
     if (paymentAmount > remainingBalance) {
-        alert('Payment amount cannot exceed remaining balance!');
+        Swal.fire({
+            icon: 'warning',
+            title: 'Amount Exceeds Balance',
+            text: `Payment amount cannot exceed remaining balance of ₱${remainingBalance.toFixed(2)}`,
+            confirmButtonColor: '#f59e0b'
+        });
         return;
     }
+    
+    // Show loading state
+    showRegularPaymentLoading();
     
     // Create payment data object with correct field names
     const data = {
@@ -487,54 +599,115 @@ document.getElementById('paymentForm').addEventListener('submit', function(e) {
 
     console.log('Adding payment:', data);
 
-    fetch(`/admin/bookings/${bookingId}/payments`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': csrfToken
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Payment response:', data);
-        if (data.success) {
-            alert('Payment added successfully!');
-            // Reload payment data
-            loadBookingForPayment(bookingId);
-            loadBookings(getCurrentStatus(), getCurrentSearch(), currentPage);
+    try {
+        const response = await fetch(`/admin/bookings/${bookingId}/payments`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        console.log('Payment response:', result);
+        
+        // ALWAYS hide loading first
+        hideRegularPaymentLoading();
+        
+        if (result.success) {
+            // ✅ CLOSE MODAL FIRST (wait 300ms for animation)
+            await closePaymentModal();
+            
+            // ✅ THEN SHOW SWEETALERT SUCCESS
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Payment added successfully!',
+                confirmButtonColor: '#16a34a',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                // Reload bookings after user closes SweetAlert
+                loadBookings(getCurrentStatus(), getCurrentSearch(), currentPage);
+            });
         } else {
-            alert('Error: ' + (data.message || 'Failed to add payment'));
+            // ✅ ERROR: CLOSE MODAL FIRST
+            await closePaymentModal();
+            
+            // ✅ THEN SHOW ERROR SWEETALERT
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: result.message || 'Failed to add payment',
+                confirmButtonColor: '#dc2626'
+            });
         }
-    })
-    .catch(error => {
+    } catch (error) {
+        // ALWAYS hide loading on error
+        hideRegularPaymentLoading();
         console.error('Error:', error);
-        alert('Error adding payment');
-    });
+        
+        // ✅ ERROR: CLOSE MODAL FIRST
+        await closePaymentModal();
+        
+        // ✅ THEN SHOW ERROR SWEETALERT
+        Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: 'Error adding payment',
+            confirmButtonColor: '#dc2626'
+        });
+    }
 });
 
-// Process refund functionality
-document.getElementById('refundForm').addEventListener('submit', function(e) {
+// ============================================
+// PROCESS REFUND WITH ASYNC MODAL CLOSE + SWEETALERT2
+// ============================================
+
+document.getElementById('refundForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
     const bookingId = document.getElementById('payment_booking_id').value;
     const refundAmount = parseFloat(document.getElementById('refund_amount').value);
     const refundableAmount = parseFloat(document.getElementById('payment_refundable_amount').value);
     
-    // Validate refund amount
+    // ✅ SWEETALERT VALIDATION: Refund amount
     if (refundAmount <= 0) {
-        alert('Refund amount must be greater than 0!');
+        Swal.fire({
+            icon: 'warning',
+            title: 'Invalid Amount',
+            text: 'Refund amount must be greater than 0!',
+            confirmButtonColor: '#f59e0b'
+        });
         return;
     }
     
     if (refundAmount > refundableAmount) {
-        alert('Refund amount cannot exceed refundable amount!');
+        Swal.fire({
+            icon: 'warning',
+            title: 'Amount Exceeds Limit',
+            text: `Refund amount cannot exceed refundable amount of ₱${refundableAmount.toFixed(2)}`,
+            confirmButtonColor: '#f59e0b'
+        });
         return;
     }
     
-    if (!confirm(`Are you sure you want to process a refund of ₱${refundAmount.toFixed(2)}?`)) {
-        return;
-    }
+    // ✅ SWEETALERT CONFIRMATION
+    const confirmResult = await Swal.fire({
+        icon: 'warning',
+        title: 'Process Refund?',
+        text: `Are you sure you want to process a refund of ₱${refundAmount.toFixed(2)}?`,
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Yes, process refund',
+        cancelButtonText: 'Cancel'
+    });
+    
+    if (!confirmResult.isConfirmed) return;
+    
+    // Show loading state
+    showRegularRefundLoading();
     
     // Create refund data object
     const data = {
@@ -546,32 +719,64 @@ document.getElementById('refundForm').addEventListener('submit', function(e) {
 
     console.log('Processing refund:', data);
 
-    fetch(`/admin/bookings/${bookingId}/refund`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': csrfToken
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Refund response:', data);
-        if (data.success) {
-            alert('Refund processed successfully!');
-            // Reset refund form
-            document.getElementById('refundForm').reset();
-            document.getElementById('refund_date').value = "{{ date('Y-m-d') }}";
-            // Reload payment data
-            loadBookingForPayment(bookingId);
-            loadBookings(getCurrentStatus(), getCurrentSearch(), currentPage);
+    try {
+        const response = await fetch(`/admin/bookings/${bookingId}/refund`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        console.log('Refund response:', result);
+        
+        // ALWAYS hide loading first
+        hideRegularRefundLoading();
+        
+        if (result.success) {
+            // ✅ CLOSE MODAL FIRST (wait 300ms for animation)
+            await closePaymentModal();
+            
+            // ✅ THEN SHOW SWEETALERT SUCCESS
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Refund processed successfully!',
+                confirmButtonColor: '#16a34a',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                // Reload bookings after user closes SweetAlert
+                loadBookings(getCurrentStatus(), getCurrentSearch(), currentPage);
+            });
         } else {
-            alert('Error: ' + (data.message || 'Failed to process refund'));
+            // ✅ ERROR: CLOSE MODAL FIRST
+            await closePaymentModal();
+            
+            // ✅ THEN SHOW ERROR SWEETALERT
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: result.message || 'Failed to process refund',
+                confirmButtonColor: '#dc2626'
+            });
         }
-    })
-    .catch(error => {
+    } catch (error) {
+        // ALWAYS hide loading on error
+        hideRegularRefundLoading();
         console.error('Error:', error);
-        alert('Error processing refund');
-    });
+        
+        // ✅ ERROR: CLOSE MODAL FIRST
+        await closePaymentModal();
+        
+        // ✅ SWEETALERT ERROR
+        Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: 'Error processing refund',
+            confirmButtonColor: '#dc2626'
+        });
+    }
 });
 </script>

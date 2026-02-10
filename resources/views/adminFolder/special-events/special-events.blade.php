@@ -637,7 +637,7 @@
                 });
         }
 
-        // Display bookings in table (Desktop) - REMOVED NET PAID
+        // ✅ FIXED: Display bookings in table with REAL-TIME balance calculation
         function displayBookings(bookings) {
             const tbody = document.getElementById('bookingsTableBody');
 
@@ -654,6 +654,24 @@
 
             tbody.innerHTML = bookings.map(booking => {
                 const eventDate = booking.checkin_date ? booking.checkin_date : 'N/A';
+                
+                // ✅ REAL-TIME BALANCE CALCULATION (client-side verification)
+                const totalPrice = parseFloat(booking.total_price) || 0;
+                const totalPaid = parseFloat(booking.total_paid) || 0;
+                const totalRefunded = parseFloat(booking.total_refunded) || 0;
+                const netPaid = totalPaid - totalRefunded;
+                const calculatedBalance = Math.max(0, totalPrice - netPaid);
+                
+                console.log('Booking calculation:', {
+                    bookingID: booking.bookingID,
+                    totalPrice,
+                    totalPaid,
+                    totalRefunded,
+                    netPaid,
+                    calculatedBalance,
+                    serverBalance: booking.remaining_balance
+                });
+                
                 return `
                 <tr class="border-b border-gray-100 table-row-hover">
                     <td class="py-4 px-4">
@@ -669,16 +687,16 @@
                             <p class="text-sm"><span class="font-medium">Event Date:</span> ${eventDate}</p>
                             <p class="text-sm"><span class="font-medium">Time:</span> ${booking.event_start_time || '08:00'} - ${booking.event_end_time || '17:00'}</p>
                             <p class="text-sm"><span class="font-medium">Guests:</span> ${booking.num_guests}</p>
-                            <p class="text-sm"><span class="font-medium">Price:</span> ₱${parseFloat(booking.total_price).toFixed(2)}</p>
+                            <p class="text-sm"><span class="font-medium">Price:</span> ₱${totalPrice.toFixed(2)}</p>
                             ${booking.special_requirements ? `<p class="text-sm mt-1"><span class="font-medium">Notes:</span> ${booking.special_requirements}</p>` : ''}
                         </div>
                     </td>
                     <td class="py-4 px-4">
                         <div class="space-y-1">
-                            <p class="text-sm"><span class="font-medium">Total:</span> ₱${parseFloat(booking.total_price).toFixed(2)}</p>
-                            <p class="text-sm"><span class="font-medium">Paid:</span> ₱${parseFloat(booking.total_paid || 0).toFixed(2)}</p>
-                            <p class="text-sm"><span class="font-medium">Refunded:</span> ₱${parseFloat(booking.total_refunded || 0).toFixed(2)}</p>
-                            <p class="text-sm"><span class="font-medium">Balance:</span> ₱${parseFloat(booking.remaining_balance || booking.total_price).toFixed(2)}</p>
+                            <p class="text-sm"><span class="font-medium">Total:</span> ₱${totalPrice.toFixed(2)}</p>
+                            <p class="text-sm"><span class="font-medium">Paid:</span> <span class="text-green-600 font-semibold">₱${totalPaid.toFixed(2)}</span></p>
+                            <p class="text-sm"><span class="font-medium">Refunded:</span> <span class="text-orange-600">₱${totalRefunded.toFixed(2)}</span></p>
+                            <p class="text-sm"><span class="font-medium">Balance:</span> <span class="${calculatedBalance === 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}">₱${calculatedBalance.toFixed(2)}</span></p>
                             ${booking.payment_status ? `<p class="text-xs ${getPaymentStatusColor(booking.payment_status)}">${booking.payment_status.toUpperCase()}</p>` : ''}
                         </div>
                     </td>
@@ -703,11 +721,12 @@
                             </button>
                         </div>
                     </td>
-                </tr>`;
+                </tr>
+                `;
             }).join('');
         }
 
-        // Display event cards (Mobile) - REMOVED NET PAID
+        // ✅ FIXED: Display event cards with REAL-TIME balance calculation
         function displayEventCards(bookings) {
             const container = document.getElementById('eventsCardsContainer');
 
@@ -718,6 +737,14 @@
 
             container.innerHTML = bookings.map(booking => {
                 const eventDate = booking.checkin_date ? booking.checkin_date : 'N/A';
+                
+                // ✅ REAL-TIME BALANCE CALCULATION
+                const totalPrice = parseFloat(booking.total_price) || 0;
+                const totalPaid = parseFloat(booking.total_paid) || 0;
+                const totalRefunded = parseFloat(booking.total_refunded) || 0;
+                const netPaid = totalPaid - totalRefunded;
+                const calculatedBalance = Math.max(0, totalPrice - netPaid);
+                
                 return `
                 <div class="event-card">
                     <div class="card-header">
@@ -750,19 +777,19 @@
                         </div>
                         <div class="card-item">
                             <span class="card-label">Total Price</span>
-                            <span class="card-value font-semibold text-violet-600">₱${parseFloat(booking.total_price).toFixed(2)}</span>
+                            <span class="card-value font-semibold text-violet-600">₱${totalPrice.toFixed(2)}</span>
                         </div>
                         <div class="card-item">
                             <span class="card-label">Amount Paid</span>
-                            <span class="card-value text-green-600">₱${parseFloat(booking.total_paid || 0).toFixed(2)}</span>
+                            <span class="card-value text-green-600 font-semibold">₱${totalPaid.toFixed(2)}</span>
                         </div>
                         <div class="card-item">
                             <span class="card-label">Refunded</span>
-                            <span class="card-value text-orange-600">₱${parseFloat(booking.total_refunded || 0).toFixed(2)}</span>
+                            <span class="card-value text-orange-600">₱${totalRefunded.toFixed(2)}</span>
                         </div>
                         <div class="card-item">
                             <span class="card-label">Balance</span>
-                            <span class="card-value font-semibold text-red-600">₱${parseFloat(booking.remaining_balance || booking.total_price).toFixed(2)}</span>
+                            <span class="card-value ${calculatedBalance === 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}">₱${calculatedBalance.toFixed(2)}</span>
                         </div>
                         ${booking.payment_status ? `
                         <div class="card-item">
@@ -905,21 +932,26 @@
             });
         }
 
-        // Export to CSV - REMOVED NET PAID
+        // Export to CSV - WITH REAL-TIME BALANCE
         function exportToCSV() {
             if (allBookings.length === 0) { alert('No data to export'); return; }
 
             const headers = ['Guest Name','Email','Phone','Event Name','Event Date','Start Time','End Time','Guests','Venue','Total Price','Amount Paid','Amount Refunded','Remaining Balance','Status','Payment Status','Special Requirements'];
             const rows = allBookings.map(b => {
                 const eventDate = b.checkin_date ? b.checkin_date : 'N/A';
+                const totalPrice = parseFloat(b.total_price) || 0;
+                const totalPaid = parseFloat(b.total_paid) || 0;
+                const totalRefunded = parseFloat(b.total_refunded) || 0;
+                const calculatedBalance = Math.max(0, totalPrice - (totalPaid - totalRefunded));
+                
                 return [
                     `"${b.guest_name}"`,`"${b.email}"`,`"${b.phone}"`,`"${b.event_name || 'Special Event'}"`,
                     `"${eventDate}"`,`"${b.event_start_time || '08:00'}"`,`"${b.event_end_time || '17:00'}"`,
                     `"${b.num_guests}"`,`"${b.units}"`,
-                    `"₱${parseFloat(b.total_price).toFixed(2)}"`,
-                    `"₱${parseFloat(b.total_paid || 0).toFixed(2)}"`,
-                    `"₱${parseFloat(b.total_refunded || 0).toFixed(2)}"`,
-                    `"₱${parseFloat(b.remaining_balance || b.total_price).toFixed(2)}"`,
+                    `"₱${totalPrice.toFixed(2)}"`,
+                    `"₱${totalPaid.toFixed(2)}"`,
+                    `"₱${totalRefunded.toFixed(2)}"`,
+                    `"₱${calculatedBalance.toFixed(2)}"`,
                     `"${b.booking_status}"`,`"${b.payment_status || 'No Payment'}"`,
                     `"${b.special_requirements || 'N/A'}"`
                 ];
@@ -936,7 +968,7 @@
             document.body.removeChild(link);
         }
 
-        // Print table - REMOVED NET PAID
+        // Print table - WITH REAL-TIME BALANCE
         function printTable() {
             if (allBookings.length === 0) { alert('No data to print'); return; }
 
@@ -966,15 +998,20 @@
                     </tr></thead><tbody>
                         ${allBookings.map(b => {
                             const eventDate = b.checkin_date ? b.checkin_date : 'N/A';
+                            const totalPrice = parseFloat(b.total_price) || 0;
+                            const totalPaid = parseFloat(b.total_paid) || 0;
+                            const totalRefunded = parseFloat(b.total_refunded) || 0;
+                            const calculatedBalance = Math.max(0, totalPrice - (totalPaid - totalRefunded));
+                            
                             return `<tr>
                                 <td>${b.guest_name}</td><td>${b.email}</td><td>${b.phone}</td>
                                 <td>${b.event_name || 'Special Event'}</td><td>${eventDate}</td>
                                 <td>${b.event_start_time || '08:00'} - ${b.event_end_time || '17:00'}</td>
                                 <td>${b.num_guests}</td><td>${b.units}</td>
-                                <td>₱${parseFloat(b.total_price).toFixed(2)}</td>
-                                <td>₱${parseFloat(b.total_paid || 0).toFixed(2)}</td>
-                                <td>₱${parseFloat(b.total_refunded || 0).toFixed(2)}</td>
-                                <td>₱${parseFloat(b.remaining_balance || b.total_price).toFixed(2)}</td>
+                                <td>₱${totalPrice.toFixed(2)}</td>
+                                <td>₱${totalPaid.toFixed(2)}</td>
+                                <td>₱${totalRefunded.toFixed(2)}</td>
+                                <td>₱${calculatedBalance.toFixed(2)}</td>
                                 <td><span class="status-${b.booking_status}">${b.booking_status.toUpperCase()}</span></td>
                             </tr>`;
                         }).join('')}
@@ -988,7 +1025,7 @@
             setTimeout(() => { printWindow.print(); printWindow.close(); }, 500);
         }
 
-        // Export to PDF - REMOVED NET PAID
+        // Export to PDF - WITH REAL-TIME BALANCE
         function exportToPDF() {
             if (allBookings.length === 0) { alert('No data to export'); return; }
 
@@ -1005,14 +1042,19 @@
             const headers = ['Guest','Email','Phone','Event','Date','Time','Guests','Venue','Total','Paid','Refunded','Balance','Status'];
             const rows = allBookings.map(b => {
                 const eventDate = b.checkin_date ? b.checkin_date : 'N/A';
+                const totalPrice = parseFloat(b.total_price) || 0;
+                const totalPaid = parseFloat(b.total_paid) || 0;
+                const totalRefunded = parseFloat(b.total_refunded) || 0;
+                const calculatedBalance = Math.max(0, totalPrice - (totalPaid - totalRefunded));
+                
                 return [
                     b.guest_name, b.email, b.phone, b.event_name || 'Event',
                     eventDate, `${b.event_start_time || '08:00'}-${b.event_end_time || '17:00'}`,
                     b.num_guests, b.units,
-                    `₱${parseFloat(b.total_price).toFixed(2)}`,
-                    `₱${parseFloat(b.total_paid || 0).toFixed(2)}`,
-                    `₱${parseFloat(b.total_refunded || 0).toFixed(2)}`,
-                    `₱${parseFloat(b.remaining_balance || b.total_price).toFixed(2)}`,
+                    `₱${totalPrice.toFixed(2)}`,
+                    `₱${totalPaid.toFixed(2)}`,
+                    `₱${totalRefunded.toFixed(2)}`,
+                    `₱${calculatedBalance.toFixed(2)}`,
                     b.booking_status.toUpperCase()
                 ];
             });
