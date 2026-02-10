@@ -84,12 +84,14 @@
         .page-title {
             font-size: 2.8rem;
             font-weight: 800;
-            background: linear-gradient(135deg, #F59E0B, #D97706, #B45309);
+            /* background: linear-gradient(135deg, #F59E0B, #D97706, #B45309); */
+            /* background: linear-gradient(0deg, var(--booking-text-dark), var(--booking-text-medium)); */
+            background:#1F2937;
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
             display: inline-block;
-            text-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+            /* text-shadow: 0 4px 12px rgba(245, 158, 11, 0.2); */
             letter-spacing: -0.5px;
         }
 
@@ -344,7 +346,7 @@
 
         .card-header {
             padding: 2rem 2.5rem 0.5rem;
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.05), transparent);
+            background: linear-gradient(180deg, rgba(255, 215, 0, 0.05), transparent);
         }
 
         .card-header h2 {
