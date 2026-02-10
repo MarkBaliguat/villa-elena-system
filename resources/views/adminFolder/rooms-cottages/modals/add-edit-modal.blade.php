@@ -60,18 +60,18 @@
                     </label>
                     <select name="virtualTourPanorama" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">No Virtual Tour</option>
-                        <optgroup label="Main Resort Areas">
+                        <!-- <optgroup label="Main Resort Areas">
                             <option value="4centro.jpg">Centro - Main Plaza</option>
                             <option value="1lobbyandfountain.jpg">Lobby & Fountain Entrance</option>
                             <option value="2joypavillionandevelyncottage.jpg">Joy Pavilion Area</option>
-                        </optgroup>
-                        <optgroup label="Swimming Pools">
+                        </optgroup> -->
+                        <!-- <optgroup label="Swimming Pools">
                             <option value="5frontpool.jpg">Main Front Pool</option>
                             <option value="8poolviewsadaan~2.jpg">Pool View Sadaan</option>
                             <option value="14backpool.jpg">Back Pool Relaxation</option>
                             <option value="15backpoolview.jpg">Back Pool View</option>
                             <option value="17poolviewsadaanan.jpg">Pool View Sadaanan</option>
-                        </optgroup>
+                        </optgroup> -->
                         <optgroup label="Accommodations - Cottages">
                             <option value="3tonicottageandihawan.jpg">Toni Cottage</option>
                             <option value="6arcelicottageandhardin.jpg">Arceli Cottage</option>
@@ -80,41 +80,47 @@
                             <option value="villaelenafront.jpg">Villa Elena Front</option>
                             <option value="villaelenaparking.jpg">Villa Elena Parking</option>
                         </optgroup>
-                        <optgroup label="Nature & Gardens">
+                        <!-- <optgroup label="Nature & Gardens">
                             <option value="7hardin.jpg">Hardin - Garden Area</option>
                             <option value="11backresortandcr.jpg">Back Resort Nature Trail</option>
                             <option value="13backside.jpg">Backside Scenic View</option>
                             <option value="22papaya.jpg">Papaya Garden</option>
-                        </optgroup>
-                        <optgroup label="Sunflower House - Ground Floor">
-                            <option value="10sunflowerhouse.jpg">Sunflower House</option>
-                            <option value="12sunflowerhouseandwellnesscenter.jpg">Sunflower Wellness Center</option>
-                            <option value="33sunflowerhousesala.jpg">Sunflower House Sala</option>
-                            <option value="34sunflowerhousecenter.jpg">Sunflower House Center</option>
-                            <option value="35sunflowerhousekusina.jpg">Sunflower House Kitchen</option>
+                        </optgroup> -->
+                        <optgroup label="Special Units">
+                            <!-- <option value="10sunflowerhouse.jpg">Sunflower House</option>
+                            <option value="12sunflowerhouseandwellnesscenter.jpg">Sunflower Wellness Center</option> -->
+                            <!-- <option value="33sunflowerhousesala.jpg">Sunflower House Sala</option> -->
+                            <!-- <option value="34sunflowerhousecenter.jpg">Sunflower House Center</option>
+                            <option value="35sunflowerhousekusina.jpg">Sunflower House Kitchen</option> -->
                             <option value="36sunflowerhousefunctionhall.jpg">Sunflower House Function Hall</option>
-                            <option value="51wellnesscenter.jpg">Wellness Center</option>
+                            <option value="4centro.jpg">Resort FrontSide</option>
+                            <option value="13backside.jpg">Resort Backside</option>
+                            <option value="5frontpool.jpg">Front Pool</option>
+                            <option value="14backpool.jpg">Back Pool</option>
+                              
+                            <!-- <option value="51wellnesscenter.jpg">Wellness Center</option> -->
                         </optgroup>
                         <optgroup label="Sunflower House - Ground Floor Rooms">
                             <option value="37sunflowerhouseroom1ulit.jpg">Sunflower House Room 1</option>
-                            <option value="38sunflowerhouselobbypapuntangroom2.jpg">Sunflower House Lobby</option>
+                            <!-- <option value="38sunflowerhouselobbypapuntangroom2.jpg">Sunflower House Lobby</option> -->
                             <option value="39sunflowerhouseroom2.jpg">Sunflower House Room 2</option>
                             <option value="40sunflowerhouseroom3.jpg">Sunflower House Room 3</option>
                             <option value="41sunflowerhouseroom4ulit.jpg">Sunflower House Room 4</option>
                             <option value="42sunflowerhouseroom5.jpg">Sunflower House Room 5</option>
                         </optgroup>
                         <optgroup label="Sunflower House - 2nd Floor">
-                            <option value="43sunflowerhouselobby2ndfloor.jpg">Sunflower House 2nd Floor Lobby</option>
+                            <!-- <option value="43sunflowerhouselobby2ndfloor.jpg">Sunflower House 2nd Floor Lobby</option> -->
                             <option value="44sunflowerhouseroom6.jpg">Sunflower House Room 6</option>
                             <option value="45sunflowerhouseroom7.jpg">Sunflower House Room 7</option>
                             <option value="46sunflowerhouseroom8siguro.jpg">Sunflower House Room 8</option>
                             <option value="47sunflowerhouseroom9siguro.jpg">Sunflower House Room 9</option>
-                            <option value="48sunflowerhouselobby2ndfloorpart2retake.jpg">Sunflower House 2nd Floor Part 2</option>
+                            <option value="52room10.jpg">Sunflower House Room 10</option>
+                            <!-- <option value="48sunflowerhouselobby2ndfloorpart2retake.jpg">Sunflower House 2nd Floor Part 2</option> -->
                             <option value="49sunflowerhouseroom11ulit.jpg">Sunflower House Room 11</option>
-                            <option value="50sunflowerhousebalconyview.jpg">Sunflower House Balcony View</option>
-                            <option value="52room10.jpg">Room 10</option>
+                            <!-- <option value="50sunflowerhousebalconyview.jpg">Sunflower House Balcony View</option> -->
+                           
                         </optgroup>
-                        <optgroup label="Agri-Tourism Farm">
+                        <!-- <optgroup label="Agri-Tourism Farm">
                             <option value="18farmentrance.jpg">Farm Entrance</option>
                             <option value="19farmentranceotherside.jpg">Farm Entrance Other Side</option>
                             <option value="20entranceandjoybridge.jpg">Joy Bridge Entrance</option>
@@ -133,7 +139,7 @@
                             <option value="30campsite3.jpg">Campsite 3</option>
                             <option value="31campsite4.jpg">Campsite 4</option>
                             <option value="32pavillion2.jpg">Pavilion 2</option>
-                        </optgroup>
+                        </optgroup> -->
                     </select>
                     <p class="text-xs text-gray-500 mt-1">Select which panorama to show for this unit's virtual tour</p>
                 </div>
