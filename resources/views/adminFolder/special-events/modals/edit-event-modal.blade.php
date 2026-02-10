@@ -123,7 +123,7 @@
 
 <script>
 // ============================================
-// EDIT SPECIAL EVENT MODAL SCRIPTS - COMPLETE FIXED VERSION
+// EDIT SPECIAL EVENT MODAL SCRIPTS - NO LOADING EFFECT ON SWEETALERT
 // ============================================
 
 function openEditModal() {
@@ -234,7 +234,7 @@ function formatTimeForInput(timeString) {
     return '08:00'; // Fallback to default time
 }
 
-// Edit special event function - COMPLETE FIXED VERSION
+// Edit special event function - NO LOADING ON SWEETALERT
 function editEvent(bookingId) {
     console.log('Editing special event ID:', bookingId);
     
@@ -332,22 +332,39 @@ function editEvent(bookingId) {
                 
                 openEditModal();
             } else {
-                alert('Error loading special event: ' + (data.message || 'Unknown error'));
+                // ✅ SWEETALERT - Error loading event (NO LOADING)
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error Loading Event',
+                    text: data.message || 'Unknown error occurred',
+                    confirmButtonColor: '#7c3aed'
+                });
             }
         })
         .catch(error => {
             console.error('Error loading special event:', error);
-            alert('Error loading special event details: ' + error.message);
+            // ✅ SWEETALERT - Network error (NO LOADING)
+            Swal.fire({
+                icon: 'error',
+                title: 'Connection Error',
+                text: 'Failed to load event details: ' + error.message,
+                confirmButtonColor: '#7c3aed'
+            });
         });
 }
 
-// Update special event
+// Update special event - NO LOADING ON SWEETALERT
 document.getElementById('editBookingForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
     // Validate phone numbers before submission
     if (!validateFormPhoneNumbers()) {
-        alert('Please fix the phone number validation errors before submitting.');
+        Swal.fire({
+            icon: 'warning',
+            title: 'Invalid Phone Number',
+            text: 'Please fix the phone number validation errors before submitting.',
+            confirmButtonColor: '#7c3aed'
+        });
         return;
     }
     
@@ -355,7 +372,12 @@ document.getElementById('editBookingForm').addEventListener('submit', function(e
     const startTime = document.getElementById('edit_event_start_time').value;
     const endTime = document.getElementById('edit_event_end_time').value;
     if (startTime >= endTime) {
-        alert('Event end time must be after start time');
+        Swal.fire({
+            icon: 'warning',
+            title: 'Invalid Time',
+            text: 'Event end time must be after start time',
+            confirmButtonColor: '#7c3aed'
+        });
         return;
     }
     
@@ -379,6 +401,9 @@ document.getElementById('editBookingForm').addEventListener('submit', function(e
     // Remove booking_id from data before sending
     delete data.booking_id;
 
+    // ✅ CLOSE MODAL IMMEDIATELY
+    closeEditModal();
+
     fetch(`/admin/special-events/${bookingId}`, {
         method: 'PUT',
         headers: {
@@ -391,16 +416,35 @@ document.getElementById('editBookingForm').addEventListener('submit', function(e
     .then(data => {
         console.log('Update response:', data);
         if (data.success) {
-            alert('Special event updated successfully!');
-            closeEditModal();
+            // ✅ SWEETALERT - Success (NO LOADING)
+            Swal.fire({
+                icon: 'success',
+                title: 'Event Updated!',
+                text: 'Special event has been updated successfully',
+                confirmButtonColor: '#7c3aed'
+            });
+            
+            // Reload bookings immediately
             loadBookings(getCurrentStatus(), getCurrentSearch(), currentPage);
         } else {
-            alert('Error: ' + (data.message || 'Failed to update special event'));
+            // ✅ SWEETALERT - Update error (NO LOADING)
+            Swal.fire({
+                icon: 'error',
+                title: 'Update Failed',
+                text: data.message || 'Failed to update special event',
+                confirmButtonColor: '#7c3aed'
+            });
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Error updating special event: ' + error.message);
+        // ✅ SWEETALERT - Network error (NO LOADING)
+        Swal.fire({
+            icon: 'error',
+            title: 'Connection Error',
+            text: 'Error updating special event: ' + error.message,
+            confirmButtonColor: '#7c3aed'
+        });
     });
 });
 
@@ -468,5 +512,5 @@ window.editEvent = editEvent;
 window.closeEditModal = closeEditModal;
 window.openEditModal = openEditModal;
 
-console.log('Edit Special Event Modal loaded successfully');
+console.log('Edit Special Event Modal - No Loading Effect on SweetAlert loaded successfully');
 </script>

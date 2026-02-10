@@ -1,4 +1,4 @@
-<!-- Add Special Event Modal with Enhanced Conflict Checking -->
+<!-- Add Special Event Modal with Enhanced Conflict Checking and SweetAlert2 -->
 <div id="addBookingModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div class="p-6 border-b border-gray-200">
@@ -154,7 +154,7 @@
 
 <script>
 // ============================================
-// ENHANCED SPECIAL EVENTS BOOKING WITH LOADING BUTTON
+// ENHANCED SPECIAL EVENTS BOOKING WITH SWEETALERT2
 // ============================================
 
 let currentDateConflict = false;
@@ -315,7 +315,48 @@ function validateFormEmail() {
     return validation;
 }
 
-// Modal functions
+// ✅ PROMISE-BASED MODAL CLOSE (ensures modal closes BEFORE SweetAlert shows)
+function closeModal() {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('addBookingModal');
+        
+        // Start close animation
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        
+        // Reset form and states
+        document.getElementById('bookingForm').reset();
+        hideDateConflictWarning();
+        document.getElementById('unitAvailabilityStatus').innerHTML = '';
+        document.getElementById('submitButton').disabled = false;
+        currentDateConflict = false;
+        
+        // Reset time fields
+        document.querySelector('input[name="event_start_time"]').value = '08:00';
+        document.querySelector('input[name="event_end_time"]').value = '17:00';
+        
+        // Clear email error
+        clearEmailError();
+        
+        // Reset loading button state
+        hideSubmitLoading();
+        
+        const phoneInput = document.getElementById('phone');
+        if (phoneInput) {
+            phoneInput.classList.remove('border-red-500', 'border-green-500');
+            const errorDiv = phoneInput.parentNode.querySelector('.phone-error');
+            if (errorDiv) errorDiv.remove();
+        }
+        
+        document.removeEventListener('click', handleOutsideClick);
+        
+        // ✅ Wait for CSS animation to complete (300ms)
+        setTimeout(() => {
+            resolve(); // Modal is now fully closed
+        }, 300);
+    });
+}
+
 function openModal() {
     document.getElementById('addBookingModal').classList.remove('hidden');
     document.getElementById('addBookingModal').classList.add('flex');
@@ -330,37 +371,6 @@ function openModal() {
     setTimeout(() => {
         document.addEventListener('click', handleOutsideClick);
     }, 100);
-}
-
-function closeModal() {
-    document.getElementById('addBookingModal').classList.add('hidden');
-    document.getElementById('addBookingModal').classList.remove('flex');
-    document.getElementById('bookingForm').reset();
-    
-    // Reset conflict warnings
-    hideDateConflictWarning();
-    document.getElementById('unitAvailabilityStatus').innerHTML = '';
-    document.getElementById('submitButton').disabled = false;
-    currentDateConflict = false;
-    
-    // Reset time fields
-    document.querySelector('input[name="event_start_time"]').value = '08:00';
-    document.querySelector('input[name="event_end_time"]').value = '17:00';
-    
-    // Clear email error
-    clearEmailError();
-    
-    // Reset loading button state
-    hideSubmitLoading();
-    
-    const phoneInput = document.getElementById('phone');
-    if (phoneInput) {
-        phoneInput.classList.remove('border-red-500', 'border-green-500');
-        const errorDiv = phoneInput.parentNode.querySelector('.phone-error');
-        if (errorDiv) errorDiv.remove();
-    }
-    
-    document.removeEventListener('click', handleOutsideClick);
 }
 
 function handleOutsideClick(event) {
@@ -573,8 +583,8 @@ function updateTotalPrice() {
     totalPriceInput.value = '0.00';
 }
 
-// ENHANCED: Create special event booking with unit conflict check
-document.getElementById('bookingForm').addEventListener('submit', function(e) {
+// ✅ CREATE SPECIAL EVENT BOOKING WITH SWEETALERT2
+document.getElementById('bookingForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
     // Validate email first
@@ -586,14 +596,62 @@ document.getElementById('bookingForm').addEventListener('submit', function(e) {
     // Get unit and date
     const unitId = document.getElementById('unit_id').value;
     const checkinDate = document.getElementById('checkin_date').value;
+    const eventName = document.querySelector('select[name="event_name"]').value;
+    const eventStartTime = document.querySelector('input[name="event_start_time"]').value;
+    const eventEndTime = document.querySelector('input[name="event_end_time"]').value;
     
-    if (!unitId) {
-        alert('Please select an event venue');
+    // ✅ SWEETALERT VALIDATION: Event type
+    if (!eventName) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Missing Event Type',
+            text: 'Please select an event type',
+            confirmButtonColor: '#f59e0b'
+        });
         return;
     }
     
+    // ✅ SWEETALERT VALIDATION: Event venue
+    if (!unitId) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Missing Venue',
+            text: 'Please select an event venue',
+            confirmButtonColor: '#f59e0b'
+        });
+        return;
+    }
+    
+    // ✅ SWEETALERT VALIDATION: Event date
     if (!checkinDate) {
-        alert('Please select an event date');
+        Swal.fire({
+            icon: 'warning',
+            title: 'Missing Date',
+            text: 'Please select an event date',
+            confirmButtonColor: '#f59e0b'
+        });
+        return;
+    }
+    
+    // ✅ SWEETALERT VALIDATION: Event time
+    if (eventStartTime >= eventEndTime) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Invalid Time',
+            text: 'Event end time must be after start time',
+            confirmButtonColor: '#f59e0b'
+        });
+        return;
+    }
+    
+    // ✅ SWEETALERT VALIDATION: Phone number
+    if (!validateFormPhoneNumbers()) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Invalid Phone Number',
+            text: 'Please fix the phone number validation errors before submitting.',
+            confirmButtonColor: '#f59e0b'
+        });
         return;
     }
     
@@ -601,48 +659,38 @@ document.getElementById('bookingForm').addEventListener('submit', function(e) {
     showSubmitLoading();
     
     // Final unit availability check
-    fetch(`/admin/special-events/check-date-availability?checkin_date=${checkinDate}&unit_id=${unitId}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success && data.has_conflict) {
-                hideSubmitLoading();
-                alert('Cannot create special event: ' + data.message);
-                return;
-            }
+    try {
+        const availabilityResponse = await fetch(`/admin/special-events/check-date-availability?checkin_date=${checkinDate}&unit_id=${unitId}`);
+        const availabilityData = await availabilityResponse.json();
+        
+        if (availabilityData.success && availabilityData.has_conflict) {
+            hideSubmitLoading();
             
-            // Continue with submission if no unit conflict
-            submitBookingForm();
-        })
-        .catch(error => {
-            console.error('Error checking unit availability:', error);
-            submitBookingForm(); // Fallback: submit anyway
-        });
+            // ✅ SWEETALERT ERROR: Venue conflict
+            Swal.fire({
+                icon: 'error',
+                title: 'Venue Not Available',
+                text: availabilityData.message,
+                confirmButtonColor: '#dc2626'
+            });
+            return;
+        }
+        
+        // Continue with submission if no unit conflict
+        await submitBookingForm();
+        
+    } catch (error) {
+        console.error('Error checking unit availability:', error);
+        // Fallback: submit anyway
+        await submitBookingForm();
+    }
 });
 
-function submitBookingForm() {
-    if (!validateFormPhoneNumbers()) {
-        hideSubmitLoading();
-        alert('Please fix the phone number validation errors before submitting.');
-        return;
-    }
-    
+async function submitBookingForm() {
     const formData = new FormData(document.getElementById('bookingForm'));
     const data = Object.fromEntries(formData);
 
     console.log('Submitting special event booking:', data);
-
-    // Additional validation
-    if (!data.event_name) {
-        hideSubmitLoading();
-        alert('Please select an event type');
-        return;
-    }
-
-    if (data.event_start_time >= data.event_end_time) {
-        hideSubmitLoading();
-        alert('Event end time must be after start time');
-        return;
-    }
 
     // Clean phone number
     if (data.phone) {
@@ -654,39 +702,69 @@ function submitBookingForm() {
         data.email = data.email.toLowerCase().trim();
     }
 
-    // Use special events endpoint
-    fetch('/admin/special-events', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': csrfToken
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Special event booking response:', data);
-        if (data.success) {
-            alert('Special event created successfully!');
-            closeModal();
-            loadBookings(getCurrentStatus(), getCurrentSearch(), currentPage);
-        } else {
-            hideSubmitLoading();
-            let errorMessage = 'Failed to create special event';
-            if (data.message) {
-                errorMessage = data.message;
-            }
-            if (data.errors) {
-                errorMessage += '\n' + Object.values(data.errors).flat().join('\n');
-            }
-            alert('Error: ' + errorMessage);
-        }
-    })
-    .catch(error => {
+    try {
+        const response = await fetch('/admin/special-events', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        console.log('Special event booking response:', result);
+        
+        // Hide loading state
         hideSubmitLoading();
+        
+        if (result.success) {
+            // ✅ CLOSE MODAL FIRST (wait 300ms for animation)
+            await closeModal();
+            
+            // ✅ THEN SHOW SUCCESS SWEETALERT
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Special event created successfully!',
+                confirmButtonColor: '#7c3aed',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                // Reload bookings after user closes SweetAlert
+                loadBookings(getCurrentStatus(), getCurrentSearch(), currentPage);
+            });
+        } else {
+            // ✅ ERROR: CLOSE MODAL FIRST
+            await closeModal();
+            
+            // ✅ THEN SHOW ERROR SWEETALERT
+            let errorMessage = result.message || 'Failed to create special event';
+            if (result.errors) {
+                errorMessage += '\n' + Object.values(result.errors).flat().join('\n');
+            }
+            
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: errorMessage,
+                confirmButtonColor: '#dc2626'
+            });
+        }
+    } catch (error) {
         console.error('Error:', error);
-        alert('Error creating special event: ' + error.message);
-    });
+        hideSubmitLoading();
+        
+        // ✅ ERROR: CLOSE MODAL FIRST
+        await closeModal();
+        
+        // ✅ THEN SHOW ERROR SWEETALERT
+        Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: 'Error creating special event: ' + error.message,
+            confirmButtonColor: '#dc2626'
+        });
+    }
 }
 
 // Phone validation functions

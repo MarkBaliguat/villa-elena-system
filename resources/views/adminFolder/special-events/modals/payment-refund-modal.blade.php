@@ -103,10 +103,10 @@
                     </div>
                     
                     <div class="col-span-2">
-                        <button type="submit" id="paymentButton"
+                        <button type="submit" id="specialEventPaymentButton"
                                 class="w-full px-4 py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed">
-                            <span id="paymentText">Add Payment</span>
-                            <span id="paymentSpinner" class="hidden">
+                            <span id="specialEventPaymentText">Add Payment</span>
+                            <span id="specialEventPaymentSpinner" class="hidden">
                                 <i class="fas fa-spinner fa-spin mr-2"></i>
                                 Processing Payment...
                             </span>
@@ -151,10 +151,10 @@
                     </div>
                     
                     <div class="col-span-2">
-                        <button type="submit" id="refundButton"
+                        <button type="submit" id="specialEventRefundButton"
                                 class="w-full px-4 py-2.5 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed">
-                            <span id="refundText">Process Refund</span>
-                            <span id="refundSpinner" class="hidden">
+                            <span id="specialEventRefundText">Process Refund</span>
+                            <span id="specialEventRefundSpinner" class="hidden">
                                 <i class="fas fa-spinner fa-spin mr-2"></i>
                                 Processing Refund...
                             </span>
@@ -183,17 +183,17 @@
 
 <script>
 // ============================================
-// SPECIAL EVENTS PAYMENT & REFUND MODAL SCRIPTS
+// SPECIAL EVENTS PAYMENT & REFUND MODAL SCRIPTS - NO LOADING EFFECT ON SWEETALERT
 // ============================================
 
 // ============================================
-// PAYMENT BUTTON LOADING FUNCTIONS
+// SPECIAL EVENT PAYMENT BUTTON LOADING FUNCTIONS
 // ============================================
 
-function showPaymentLoading() {
-    const paymentBtn = document.getElementById('paymentButton');
-    const paymentText = document.getElementById('paymentText');
-    const paymentSpinner = document.getElementById('paymentSpinner');
+function showSpecialEventPaymentLoading() {
+    const paymentBtn = document.getElementById('specialEventPaymentButton');
+    const paymentText = document.getElementById('specialEventPaymentText');
+    const paymentSpinner = document.getElementById('specialEventPaymentSpinner');
     
     if (paymentBtn && paymentText && paymentSpinner) {
         paymentBtn.disabled = true;
@@ -202,10 +202,10 @@ function showPaymentLoading() {
     }
 }
 
-function hidePaymentLoading() {
-    const paymentBtn = document.getElementById('paymentButton');
-    const paymentText = document.getElementById('paymentText');
-    const paymentSpinner = document.getElementById('paymentSpinner');
+function hideSpecialEventPaymentLoading() {
+    const paymentBtn = document.getElementById('specialEventPaymentButton');
+    const paymentText = document.getElementById('specialEventPaymentText');
+    const paymentSpinner = document.getElementById('specialEventPaymentSpinner');
     
     if (paymentBtn && paymentText && paymentSpinner) {
         paymentBtn.disabled = false;
@@ -215,13 +215,13 @@ function hidePaymentLoading() {
 }
 
 // ============================================
-// REFUND BUTTON LOADING FUNCTIONS
+// SPECIAL EVENT REFUND BUTTON LOADING FUNCTIONS
 // ============================================
 
-function showRefundLoading() {
-    const refundBtn = document.getElementById('refundButton');
-    const refundText = document.getElementById('refundText');
-    const refundSpinner = document.getElementById('refundSpinner');
+function showSpecialEventRefundLoading() {
+    const refundBtn = document.getElementById('specialEventRefundButton');
+    const refundText = document.getElementById('specialEventRefundText');
+    const refundSpinner = document.getElementById('specialEventRefundSpinner');
     
     if (refundBtn && refundText && refundSpinner) {
         refundBtn.disabled = true;
@@ -230,10 +230,10 @@ function showRefundLoading() {
     }
 }
 
-function hideRefundLoading() {
-    const refundBtn = document.getElementById('refundButton');
-    const refundText = document.getElementById('refundText');
-    const refundSpinner = document.getElementById('refundSpinner');
+function hideSpecialEventRefundLoading() {
+    const refundBtn = document.getElementById('specialEventRefundButton');
+    const refundText = document.getElementById('specialEventRefundText');
+    const refundSpinner = document.getElementById('specialEventRefundSpinner');
     
     if (refundBtn && refundText && refundSpinner) {
         refundBtn.disabled = false;
@@ -258,8 +258,8 @@ function openSpecialEventPaymentModal(bookingId) {
     document.getElementById('refundForm').reset();
     
     // Reset loading states
-    hidePaymentLoading();
-    hideRefundLoading();
+    hideSpecialEventPaymentLoading();
+    hideSpecialEventRefundLoading();
     
     // Load booking details for payment
     loadSpecialEventForPayment(bookingId);
@@ -271,14 +271,19 @@ function openSpecialEventPaymentModal(bookingId) {
 }
 
 function closeSpecialEventPaymentModal() {
-    document.getElementById('paymentModal').classList.add('hidden');
-    document.getElementById('paymentModal').classList.remove('flex');
+    const modal = document.getElementById('paymentModal');
+    
+    // Start close animation
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    
+    // Reset forms
     document.getElementById('paymentForm').reset();
     document.getElementById('refundForm').reset();
     
     // Reset loading states
-    hidePaymentLoading();
-    hideRefundLoading();
+    hideSpecialEventPaymentLoading();
+    hideSpecialEventRefundLoading();
     
     // Remove event listener
     document.removeEventListener('click', handlePaymentOutsideClick);
@@ -354,12 +359,22 @@ function loadSpecialEventForPayment(bookingId) {
                 loadSpecialEventPaymentHistory(bookingId);
             } else {
                 console.error('Error loading special event:', data.message);
-                alert('Error loading special event details: ' + data.message);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error Loading Details',
+                    text: data.message || 'Failed to load event details',
+                    confirmButtonColor: '#7c3aed'
+                });
             }
         })
         .catch(error => {
             console.error('Error loading special event for payment:', error);
-            alert('Error loading special event details');
+            Swal.fire({
+                icon: 'error',
+                title: 'Connection Error',
+                text: 'Error loading special event details',
+                confirmButtonColor: '#7c3aed'
+            });
         });
 }
 
@@ -566,29 +581,39 @@ document.getElementById('refund_amount').addEventListener('input', function() {
 });
 
 // ============================================
-// ADD PAYMENT WITH LOADING EFFECT - FIXED
+// ADD PAYMENT - NO LOADING ON SWEETALERT
 // ============================================
 
-document.getElementById('paymentForm').addEventListener('submit', function(e) {
+document.getElementById('paymentForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
     const bookingId = document.getElementById('payment_booking_id').value;
     const paymentAmount = parseFloat(document.getElementById('payment_amount').value);
     const remainingBalance = parseFloat(document.getElementById('payment_remaining_balance').value);
     
-    // Validate payment amount
+    // ✅ SWEETALERT VALIDATION: Payment amount
     if (paymentAmount <= 0) {
-        alert('Payment amount must be greater than 0!');
+        Swal.fire({
+            icon: 'warning',
+            title: 'Invalid Amount',
+            text: 'Payment amount must be greater than 0!',
+            confirmButtonColor: '#7c3aed'
+        });
         return;
     }
     
     if (paymentAmount > remainingBalance) {
-        alert('Payment amount cannot exceed remaining balance!');
+        Swal.fire({
+            icon: 'warning',
+            title: 'Amount Exceeds Balance',
+            text: `Payment amount cannot exceed remaining balance of ₱${remainingBalance.toFixed(2)}`,
+            confirmButtonColor: '#7c3aed'
+        });
         return;
     }
     
     // Show loading state
-    showPaymentLoading();
+    showSpecialEventPaymentLoading();
     
     // Create payment data object with correct field names
     const data = {
@@ -601,73 +626,114 @@ document.getElementById('paymentForm').addEventListener('submit', function(e) {
 
     console.log('Adding payment to special event:', data);
 
-    // Use special events payment endpoint
-    fetch(`/admin/special-events/${bookingId}/payments`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Special event payment response:', data);
+    try {
+        const response = await fetch(`/admin/special-events/${bookingId}/payments`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify(data)
+        });
         
-        // ALWAYS hide loading first - CRITICAL FIX
-        hidePaymentLoading();
+        const result = await response.json();
+        console.log('Special event payment response:', result);
         
-        if (data.success) {
-            alert('Payment added successfully!');
-            // Reset payment form
-            document.getElementById('paymentForm').reset();
-            document.getElementById('payment_date').value = "{{ date('Y-m-d') }}";
-            // Reload payment data
-            loadSpecialEventForPayment(bookingId);
-            // Reload the bookings table
+        // ✅ HIDE LOADING FIRST
+        hideSpecialEventPaymentLoading();
+        
+        // ✅ CLOSE MODAL IMMEDIATELY
+        closeSpecialEventPaymentModal();
+        
+        if (result.success) {
+            // ✅ SHOW SWEETALERT WITHOUT LOADING
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Payment added successfully!',
+                confirmButtonColor: '#16a34a',
+                confirmButtonText: 'OK'
+            });
+            
+            // Reload bookings immediately
             if (typeof loadBookings === 'function') {
                 loadBookings(getCurrentStatus(), getCurrentSearch(), currentPage);
             }
         } else {
-            alert('Error: ' + (data.message || 'Failed to add payment'));
+            // ✅ SHOW ERROR WITHOUT LOADING
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: result.message || 'Failed to add payment',
+                confirmButtonColor: '#7c3aed'
+            });
         }
-    })
-    .catch(error => {
-        // ALWAYS hide loading on error
-        hidePaymentLoading();
+    } catch (error) {
+        // ✅ HIDE LOADING ON ERROR
+        hideSpecialEventPaymentLoading();
         console.error('Error:', error);
-        alert('Error adding payment');
-    });
+        
+        // ✅ CLOSE MODAL
+        closeSpecialEventPaymentModal();
+        
+        // ✅ SHOW ERROR WITHOUT LOADING
+        Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: 'Error adding payment',
+            confirmButtonColor: '#7c3aed'
+        });
+    }
 });
 
 // ============================================
-// PROCESS REFUND WITH LOADING EFFECT - FIXED
+// PROCESS REFUND - NO LOADING ON SWEETALERT
 // ============================================
 
-document.getElementById('refundForm').addEventListener('submit', function(e) {
+document.getElementById('refundForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
     const bookingId = document.getElementById('payment_booking_id').value;
     const refundAmount = parseFloat(document.getElementById('refund_amount').value);
     const refundableAmount = parseFloat(document.getElementById('payment_refundable_amount').value);
     
-    // Validate refund amount
+    // ✅ SWEETALERT VALIDATION: Refund amount
     if (refundAmount <= 0) {
-        alert('Refund amount must be greater than 0!');
+        Swal.fire({
+            icon: 'warning',
+            title: 'Invalid Amount',
+            text: 'Refund amount must be greater than 0!',
+            confirmButtonColor: '#7c3aed'
+        });
         return;
     }
     
     if (refundAmount > refundableAmount) {
-        alert('Refund amount cannot exceed refundable amount!');
+        Swal.fire({
+            icon: 'warning',
+            title: 'Amount Exceeds Limit',
+            text: `Refund amount cannot exceed refundable amount of ₱${refundableAmount.toFixed(2)}`,
+            confirmButtonColor: '#7c3aed'
+        });
         return;
     }
     
-    if (!confirm(`Are you sure you want to process a refund of ₱${refundAmount.toFixed(2)}?`)) {
-        return;
-    }
+    // ✅ SWEETALERT CONFIRMATION
+    const confirmResult = await Swal.fire({
+        icon: 'warning',
+        title: 'Process Refund?',
+        text: `Are you sure you want to process a refund of ₱${refundAmount.toFixed(2)}?`,
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Yes, process refund',
+        cancelButtonText: 'Cancel'
+    });
+    
+    if (!confirmResult.isConfirmed) return;
     
     // Show loading state
-    showRefundLoading();
+    showSpecialEventRefundLoading();
     
     // Create refund data object
     const data = {
@@ -679,43 +745,64 @@ document.getElementById('refundForm').addEventListener('submit', function(e) {
 
     console.log('Processing refund for special event:', data);
 
-    // Use special events refund endpoint
-    fetch(`/admin/special-events/${bookingId}/refund`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Special event refund response:', data);
+    try {
+        const response = await fetch(`/admin/special-events/${bookingId}/refund`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify(data)
+        });
         
-        // ALWAYS hide loading first - CRITICAL FIX
-        hideRefundLoading();
+        const result = await response.json();
+        console.log('Special event refund response:', result);
         
-        if (data.success) {
-            alert('Refund processed successfully!');
-            // Reset refund form
-            document.getElementById('refundForm').reset();
-            document.getElementById('refund_date').value = "{{ date('Y-m-d') }}";
-            // Reload payment data
-            loadSpecialEventForPayment(bookingId);
-            // Reload the bookings table
+        // ✅ HIDE LOADING FIRST
+        hideSpecialEventRefundLoading();
+        
+        // ✅ CLOSE MODAL IMMEDIATELY
+        closeSpecialEventPaymentModal();
+        
+        if (result.success) {
+            // ✅ SHOW SWEETALERT WITHOUT LOADING
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Refund processed successfully!',
+                confirmButtonColor: '#16a34a',
+                confirmButtonText: 'OK'
+            });
+            
+            // Reload bookings immediately
             if (typeof loadBookings === 'function') {
                 loadBookings(getCurrentStatus(), getCurrentSearch(), currentPage);
             }
         } else {
-            alert('Error: ' + (data.message || 'Failed to process refund'));
+            // ✅ SHOW ERROR WITHOUT LOADING
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: result.message || 'Failed to process refund',
+                confirmButtonColor: '#7c3aed'
+            });
         }
-    })
-    .catch(error => {
-        // ALWAYS hide loading on error
-        hideRefundLoading();
+    } catch (error) {
+        // ✅ HIDE LOADING ON ERROR
+        hideSpecialEventRefundLoading();
         console.error('Error:', error);
-        alert('Error processing refund');
-    });
+        
+        // ✅ CLOSE MODAL
+        closeSpecialEventPaymentModal();
+        
+        // ✅ SHOW ERROR WITHOUT LOADING
+        Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: 'Error processing refund',
+            confirmButtonColor: '#7c3aed'
+        });
+    }
 });
 
 // ============================================
@@ -737,10 +824,10 @@ function getCurrentSearch() {
 window.openSpecialEventPaymentModal = openSpecialEventPaymentModal;
 window.closeSpecialEventPaymentModal = closeSpecialEventPaymentModal;
 window.loadSpecialEventForPayment = loadSpecialEventForPayment;
-window.showPaymentLoading = showPaymentLoading;
-window.hidePaymentLoading = hidePaymentLoading;
-window.showRefundLoading = showRefundLoading;
-window.hideRefundLoading = hideRefundLoading;
+window.showSpecialEventPaymentLoading = showSpecialEventPaymentLoading;
+window.hideSpecialEventPaymentLoading = hideSpecialEventPaymentLoading;
+window.showSpecialEventRefundLoading = showSpecialEventRefundLoading;
+window.hideSpecialEventRefundLoading = hideSpecialEventRefundLoading;
 
-console.log('Special Events Payment Modal with Loading Effects loaded successfully');
+console.log('Special Events Payment Modal - No Loading Effect on SweetAlert loaded successfully');
 </script>
