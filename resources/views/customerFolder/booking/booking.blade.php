@@ -27,6 +27,7 @@
             --booking-border-color: #E5E7EB;
             --booking-green: #10B981;
             --booking-green-dark: #059669;
+            --booking-green-light: rgb(171, 249, 223);
             --booking-red: #EF4444;
             --booking-red-dark: #DC2626;
             --booking-red-light: rgba(239, 68, 68, 0.1);
@@ -613,20 +614,27 @@
             background: linear-gradient(135deg, #FFFFFF, #FAFAFA);
             overflow: hidden;
         }
-
         .amount-chip::before {
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(135deg, var(--booking-purple-light), transparent);
+            /* background: linear-gradient(135deg, var(--booking-purple-light), transparent); */
+            background: linear-gradient(135deg, var(--booking-green-light), transparent);
             opacity: 0;
             transition: opacity 0.4s;
+            z-index: 0;
+        }
+        .chip-label,
+        .chip-amount,
+        .chip-note {
+            position: relative;
+            z-index: 1;
         }
 
         .amount-chip:hover {
-            border-color: var(--booking-purple);
+            border-color: var(--booking-green);
             transform: translateY(-6px) scale(1.02);
-            box-shadow: 0 12px 28px rgba(139, 92, 246, 0.25);
+            box-shadow: 0 6px 14px rgb(43, 195, 63);
         }
 
         .amount-chip:hover::before {
@@ -634,9 +642,9 @@
         }
 
         .amount-chip.selected {
-            border-color: var(--booking-purple);
-            background: linear-gradient(135deg, var(--booking-purple-light), rgba(139, 92, 246, 0.05));
-            box-shadow: 0 0 0 4px var(--booking-purple-light), 0 8px 24px rgba(139, 92, 246, 0.3);
+            border-color: var(--booking-green);
+            background: linear-gradient(135deg, var(--booking-purple-light), rgba(43, 195, 246, 0.05));
+            box-shadow: 0 0 0 4px var(--booking-purple-light), 0 8px 24px rgba(43, 195, 63, 0.3);
             transform: scale(1.05);
         }
 
@@ -680,7 +688,7 @@
         .chip-amount {
             font-size: 1.4rem;
             font-weight: 800;
-            background: linear-gradient(135deg, var(--booking-purple), #7C3AED);
+            background: linear-gradient(135deg, var(--booking-text-dark), #1F2937);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;

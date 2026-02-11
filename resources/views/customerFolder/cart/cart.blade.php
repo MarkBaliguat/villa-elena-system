@@ -983,7 +983,7 @@
 
         /* Professional Button Colors */
         .btn-rooms {
-            background: linear-gradient(135deg, var(--dark) 0%, var(--dark-hover) 100%);
+            background: #1F2937;
             color: var(--white-pure);
         }
         .btn-rooms:hover { 
