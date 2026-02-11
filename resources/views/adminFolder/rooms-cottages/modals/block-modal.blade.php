@@ -23,18 +23,54 @@
                 {{-- Block dates section (hidden for unblock) --}}
                 <div id="blockDatesSection">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Block Start Date</label>
-                        <input type="date" name="blockStartDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Block Start Date <span class="text-red-500">*</span>
+                        </label>
+                        <input 
+                            type="date" 
+                            name="blockStartDate" 
+                            id="blockStartDate"
+                            required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Block End Date</label>
-                        <input type="date" name="blockEndDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Block End Date <span class="text-red-500">*</span>
+                        </label>
+                        <input 
+                            type="date" 
+                            name="blockEndDate" 
+                            id="blockEndDate"
+                            required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Block Reason</label>
-                        <textarea name="blockReason" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Reason for blocking..."></textarea>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Block Reason <span class="text-red-500">*</span>
+                        </label>
+                        <select 
+                            name="blockReason" 
+                            id="blockReason"
+                            required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                        >
+                            <option value="">Select a reason...</option>
+                            <option value="Maintenance">Maintenance</option>
+                            <option value="Repairs">Repairs</option>
+                            <option value="Renovation">Renovation</option>
+                            <option value="Deep Cleaning">Deep Cleaning</option>
+                            <option value="Pest Control">Pest Control</option>
+                            <option value="Equipment Issues">Equipment Issues</option>
+                            <option value="Safety Inspection">Safety Inspection</option>
+                            <option value="Owner Use">Owner Use</option>
+                            <option value="Seasonal Closure">Seasonal Closure</option>
+                            <option value="Special Event">Special Event</option>
+                            <option value="Other">Other</option>
+                        </select>
                     </div>
                 </div>
 
@@ -74,7 +110,12 @@
  */
 function openBlockModal() {
     if (selectedUnits.size === 0) {
-        alert('Please select at least one unit.');
+        Swal.fire({
+            icon: 'warning',
+            title: 'No Units Selected',
+            text: 'Please select at least one unit.',
+            confirmButtonColor: '#3b82f6'
+        });
         return;
     }
     
@@ -91,7 +132,12 @@ function openBlockModal() {
         setupBlockMode();
     } else {
         // Mixed selection
-        alert('Please select only blocked units to unblock, or only available units to block.');
+        Swal.fire({
+            icon: 'warning',
+            title: 'Mixed Selection',
+            text: 'Please select only blocked units to unblock, or only available units to block.',
+            confirmButtonColor: '#3b82f6'
+        });
         return;
     }
     
@@ -147,9 +193,9 @@ function setupBlockMode() {
     unblockConfirmSection.classList.add('hidden');
     
     // Set required attributes
-    document.querySelector('input[name="blockStartDate"]').required = true;
-    document.querySelector('input[name="blockEndDate"]').required = true;
-    document.querySelector('textarea[name="blockReason"]').required = true;
+    document.getElementById('blockStartDate').required = true;
+    document.getElementById('blockEndDate').required = true;
+    document.getElementById('blockReason').required = true;
     
     blockForm.action = '{{ route("admin.units.block-dates") }}';
 }
@@ -171,10 +217,10 @@ function setupUnblockMode() {
     blockDatesSection.classList.add('hidden');
     unblockConfirmSection.classList.remove('hidden');
     
-    // Remove required attributes
-    document.querySelector('input[name="blockStartDate"]').required = false;
-    document.querySelector('input[name="blockEndDate"]').required = false;
-    document.querySelector('textarea[name="blockReason"]').required = false;
+    // Remove required attributes for unblock mode
+    document.getElementById('blockStartDate').required = false;
+    document.getElementById('blockEndDate').required = false;
+    document.getElementById('blockReason').required = false;
     
     blockForm.action = '{{ route("admin.units.unblock-dates") }}';
 }
@@ -259,32 +305,36 @@ function validateBlockForm(e) {
     
     // Only validate dates if in block mode
     if (!blockDatesSection.classList.contains('hidden')) {
-        const startDate = document.querySelector('#blockModal input[name="blockStartDate"]').value;
-        const endDate = document.querySelector('#blockModal input[name="blockEndDate"]').value;
-        const reason = document.querySelector('#blockModal textarea[name="blockReason"]').value.trim();
+        const startDate = document.getElementById('blockStartDate').value;
+        const endDate = document.getElementById('blockEndDate').value;
+        const reason = document.getElementById('blockReason').value;
         
-        if (!startDate || !endDate) {
-            alert('Please select both start and end dates.');
-            e.preventDefault();
-            return false;
+        if (!startDate || !endDate || !reason) {
+            // Let HTML5 validation handle this
+            return true;
         }
         
-        if (new Date(startDate) > new Date(endDate)) {
-            alert('End date must be after or equal to start date.');
+        // Additional validation: check if end date is before start date
+        if (new Date(endDate) < new Date(startDate)) {
             e.preventDefault();
-            return false;
-        }
-        
-        if (!reason) {
-            alert('Please provide a reason for blocking.');
-            e.preventDefault();
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Date Range',
+                text: 'End date must be after or equal to start date.',
+                confirmButtonColor: '#3b82f6'
+            });
             return false;
         }
     }
     
     if (selectedUnits.size === 0) {
-        alert('No units selected.');
         e.preventDefault();
+        Swal.fire({
+            icon: 'warning',
+            title: 'No Units Selected',
+            text: 'Please select at least one unit.',
+            confirmButtonColor: '#3b82f6'
+        });
         return false;
     }
     
@@ -304,7 +354,7 @@ function handleBlockFormSubmit(e) {
     const originalText = submitBtn.innerHTML;
     submitBtn.disabled = true;
     
-    const isUnblocking = !document.getElementById('blockDatesSection').classList.contains('hidden') === false;
+    const isUnblocking = document.getElementById('unblockConfirmSection').classList.contains('hidden') === false;
     submitBtn.innerHTML = isUnblocking 
         ? '<i class="fas fa-spinner fa-spin mr-2"></i>Unblocking...'
         : '<i class="fas fa-spinner fa-spin mr-2"></i>Blocking...';
@@ -317,8 +367,8 @@ function handleBlockFormSubmit(e) {
  */
 function initializeBlockDateInputs() {
     const today = new Date().toISOString().split('T')[0];
-    const startDateInput = document.querySelector('#blockModal input[name="blockStartDate"]');
-    const endDateInput = document.querySelector('#blockModal input[name="blockEndDate"]');
+    const startDateInput = document.getElementById('blockStartDate');
+    const endDateInput = document.getElementById('blockEndDate');
     
     if (startDateInput) {
         startDateInput.min = today;

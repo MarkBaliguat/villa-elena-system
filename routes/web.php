@@ -128,7 +128,7 @@ Route::middleware(['auth', 'role:manager,staff'])->prefix('admin')->group(functi
         Route::post('/units', [UnitsController::class, 'store'])->name('admin.units.store');
         Route::get('/units/{id}/edit', [UnitsController::class, 'edit'])->name('admin.units.edit');
         Route::put('/units/{id}', [UnitsController::class, 'update'])->name('admin.units.update');
-        Route::delete('/units/{id}', [UnitsController::class, 'destroy'])->name('admin.units.destroy');
+        Route::delete('/units/{id}', [UnitsController::class, 'destroy'])->name('admin.units.destroy') ->middleware('role:manager');
         Route::post('/units/{id}/delete-image', [UnitsController::class, 'deleteImage'])->name('admin.units.delete-image');
     });
 

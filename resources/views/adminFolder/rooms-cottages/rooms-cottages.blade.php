@@ -252,7 +252,7 @@
                                 class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             >
                         </div>
-                        <select name="status" id="statusFilter" class="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                        <select name="status" id="statusFilter" class="px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
                             <option value="">All Status</option>
                             <option value="available" {{ request('status') == 'available' ? 'selected' : '' }}>Available</option>
                             <option value="blocked" {{ request('status') == 'blocked' ? 'selected' : '' }}>Blocked</option>
@@ -431,7 +431,7 @@
     </script>
     @endif
 
-    <script>
+  <script>
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
 
         // ============================================
@@ -702,13 +702,71 @@
         }
 
         // ============================================
-        // ✅ SWEETALERT - Delete Confirmation
+        // ✅ IMPROVED DELETE CONFIRMATION WITH VALIDATION
         // ============================================
         async function confirmDelete(unitId, unitName) {
+            // First, check if unit has active bookings
+            try {
+                const checkResponse = await fetch(`/admin/units/${unitId}/booking-status`, {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                const checkData = await checkResponse.json();
+                
+                if (!checkData.can_delete) {
+                    // Show detailed error about why it can't be deleted
+                    let bookingDetails = '';
+                    
+                    if (checkData.active_bookings_count > 0) {
+                        bookingDetails = `<div class="text-left mt-4 bg-red-50 p-3 rounded">
+                            <p class="font-semibold text-red-800 mb-2">Active Bookings Found:</p>
+                            <ul class="text-sm text-red-700 space-y-1">`;
+                        
+                        checkData.bookings.forEach(booking => {
+                            const dateInfo = booking.check_in 
+                                ? `${booking.check_in} to ${booking.check_out}`
+                                : `${booking.event_start} to ${booking.event_end}`;
+                            
+                            bookingDetails += `<li>• ${booking.status.toUpperCase()} - ${booking.guest_name} (${dateInfo})</li>`;
+                        });
+                        
+                        bookingDetails += `</ul></div>`;
+                    }
+                    
+                    await Swal.fire({
+                        icon: 'error',
+                        title: 'Cannot Delete Unit',
+                        html: `
+                            <p>Cannot delete <strong>${unitName}</strong></p>
+                            <p class="text-sm text-gray-600 mt-2">This unit has ${checkData.active_bookings_count} active booking(s).</p>
+                            ${bookingDetails}
+                            <p class="text-sm text-gray-600 mt-3">Please wait until all bookings are completed or cancelled.</p>
+                        `,
+                        confirmButtonColor: '#3b82f6',
+                        confirmButtonText: 'Understood'
+                    });
+                    
+                    return;
+                }
+                
+            } catch (error) {
+                console.error('Error checking booking status:', error);
+                // Continue with delete if check fails (fallback to server-side validation)
+            }
+            
+            // Proceed with delete confirmation
             const result = await Swal.fire({
                 icon: 'warning',
                 title: 'Delete Unit?',
-                html: `Are you sure you want to delete <strong>${unitName}</strong>?<br><span class="text-sm text-gray-600">This action cannot be undone.</span>`,
+                html: `
+                    Are you sure you want to delete <strong>${unitName}</strong>?
+                    <br>
+                    <span class="text-sm text-gray-600">This action cannot be undone.</span>
+                `,
                 showCancelButton: true,
                 confirmButtonColor: '#dc2626',
                 cancelButtonColor: '#6b7280',
@@ -717,6 +775,16 @@
             });
 
             if (result.isConfirmed) {
+                // Show loading
+                Swal.fire({
+                    title: 'Deleting...',
+                    text: 'Please wait',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
                 // Create and submit form
                 const form = document.createElement('form');
                 form.method = 'POST';

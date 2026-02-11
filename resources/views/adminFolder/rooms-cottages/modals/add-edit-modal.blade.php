@@ -175,18 +175,37 @@
                 
                 <div id="blockDatesSection" class="hidden space-y-4 border-t pt-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Block Start Date</label>
-                        <input type="date" name="blockStartDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Block Start Date <span class="text-red-500">*</span>
+                        </label>
+                        <input type="date" name="blockStartDate" id="addEditBlockStartDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Block End Date</label>
-                        <input type="date" name="blockEndDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Block End Date <span class="text-red-500">*</span>
+                        </label>
+                        <input type="date" name="blockEndDate" id="addEditBlockEndDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Block Reason</label>
-                        <textarea name="blockReason" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Reason for blocking..."></textarea>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Block Reason <span class="text-red-500">*</span>
+                        </label>
+                        <select name="blockReason" id="addEditBlockReason" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                            <option value="">Select a reason...</option>
+                            <option value="Maintenance">Maintenance</option>
+                            <option value="Repairs">Repairs</option>
+                            <option value="Renovation">Renovation</option>
+                            <option value="Deep Cleaning">Deep Cleaning</option>
+                            <option value="Pest Control">Pest Control</option>
+                            <option value="Equipment Issues">Equipment Issues</option>
+                            <option value="Safety Inspection">Safety Inspection</option>
+                            <option value="Owner Use">Owner Use</option>
+                            <option value="Seasonal Closure">Seasonal Closure</option>
+                            <option value="Special Event">Special Event</option>
+                            <option value="Other">Other</option>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -240,6 +259,7 @@ function openAddModal() {
     document.getElementById('specialEventField').classList.add('hidden');
     resetImageSections();
     resetSubmitButton();
+    initializeBlockDateInputs();
     document.getElementById('unitModal').classList.remove('hidden');
 }
 
@@ -279,12 +299,18 @@ function openEditModal(unitId) {
         toggleSpecialEventField(unit.unitType || 'room');
         toggleBlockDates(unit.unitStatus || 'available');
         resetSubmitButton();
+        initializeBlockDateInputs();
         
         document.getElementById('unitModal').classList.remove('hidden');
     })
     .catch(error => {
         console.error('Error fetching unit data:', error);
-        alert('Error loading unit data. Please try again.');
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Error loading unit data. Please try again.',
+            confirmButtonColor: '#3b82f6'
+        });
     });
 }
 
@@ -301,7 +327,7 @@ function populateFormFields(unit) {
     document.querySelector('input[name="for_special_events"]').checked = unit.for_special_events || false;
     document.querySelector('input[name="blockStartDate"]').value = unit.blockStartDate || '';
     document.querySelector('input[name="blockEndDate"]').value = unit.blockEndDate || '';
-    document.querySelector('textarea[name="blockReason"]').value = unit.blockReason || '';
+    document.querySelector('select[name="blockReason"]').value = unit.blockReason || '';
     document.querySelector('select[name="virtualTourPanorama"]').value = unit.virtualTourPanorama || '';
 }
 
@@ -368,38 +394,65 @@ function createImageDeleteButton(image, imgContainer) {
  * Handles image deletion
  */
 function handleImageDelete(image, imgContainer) {
-    if (!confirm('Are you sure you want to delete this image?')) {
-        return;
-    }
-    
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    const deleteUrl = `/admin/units/${currentEditingUnit}/delete-image`;
-    
-    fetch(deleteUrl, {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': csrfToken,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        },
-        body: JSON.stringify({ image_path: image })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            imgContainer.remove();
+    Swal.fire({
+        icon: 'warning',
+        title: 'Delete Image?',
+        text: 'Are you sure you want to delete this image?',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Yes, Delete',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const deleteUrl = `/admin/units/${currentEditingUnit}/delete-image`;
             
-            const existingImagesGrid = document.getElementById('existingImagesGrid');
-            if (existingImagesGrid.children.length === 0) {
-                document.getElementById('existingImages').classList.add('hidden');
-            }
-        } else {
-            alert('Error deleting image');
+            fetch(deleteUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ image_path: image })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    imgContainer.remove();
+                    
+                    const existingImagesGrid = document.getElementById('existingImagesGrid');
+                    if (existingImagesGrid.children.length === 0) {
+                        document.getElementById('existingImages').classList.add('hidden');
+                    }
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Deleted!',
+                        text: 'Image has been deleted.',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Error deleting image',
+                        confirmButtonColor: '#3b82f6'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting image:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error deleting image',
+                    confirmButtonColor: '#3b82f6'
+                });
+            });
         }
-    })
-    .catch(error => {
-        console.error('Error deleting image:', error);
-        alert('Error deleting image');
     });
 }
 
@@ -443,12 +496,22 @@ function setupImagePreview() {
  */
 function validateImageFile(file) {
     if (file.size > 2 * 1024 * 1024) {
-        alert('File ' + file.name + ' is too large. Maximum size is 2MB.');
+        Swal.fire({
+            icon: 'warning',
+            title: 'File Too Large',
+            text: `File ${file.name} is too large. Maximum size is 2MB.`,
+            confirmButtonColor: '#3b82f6'
+        });
         return false;
     }
     
     if (!file.type.match('image.*')) {
-        alert('File ' + file.name + ' is not an image.');
+        Swal.fire({
+            icon: 'warning',
+            title: 'Invalid File Type',
+            text: `File ${file.name} is not an image.`,
+            confirmButtonColor: '#3b82f6'
+        });
         return false;
     }
     
@@ -493,10 +556,20 @@ function createPreviewContainer(src, index, fileName) {
  */
 function toggleBlockDates(status) {
     const blockDatesSection = document.getElementById('blockDatesSection');
+    const blockStartDate = document.getElementById('addEditBlockStartDate');
+    const blockEndDate = document.getElementById('addEditBlockEndDate');
+    const blockReason = document.getElementById('addEditBlockReason');
+    
     if (status === 'blocked') {
         blockDatesSection.classList.remove('hidden');
+        blockStartDate.required = true;
+        blockEndDate.required = true;
+        blockReason.required = true;
     } else {
         blockDatesSection.classList.add('hidden');
+        blockStartDate.required = false;
+        blockEndDate.required = false;
+        blockReason.required = false;
     }
 }
 
@@ -559,15 +632,78 @@ function closeModal() {
 }
 
 /**
+ * Sets minimum date for block date inputs to today
+ */
+function initializeBlockDateInputs() {
+    const today = new Date().toISOString().split('T')[0];
+    const startDateInput = document.getElementById('addEditBlockStartDate');
+    const endDateInput = document.getElementById('addEditBlockEndDate');
+    
+    if (startDateInput) {
+        startDateInput.min = today;
+    }
+    
+    if (endDateInput) {
+        endDateInput.min = today;
+    }
+    
+    // Update end date minimum when start date changes
+    if (startDateInput && endDateInput) {
+        startDateInput.addEventListener('change', function() {
+            endDateInput.min = this.value || today;
+            
+            // Clear end date if it's before the new start date
+            if (endDateInput.value && endDateInput.value < this.value) {
+                endDateInput.value = '';
+            }
+        });
+    }
+}
+
+/**
+ * Validates the form before submission
+ */
+function validateUnitForm(e) {
+    const status = document.querySelector('select[name="unitStatus"]').value;
+    
+    if (status === 'blocked') {
+        const startDate = document.getElementById('addEditBlockStartDate').value;
+        const endDate = document.getElementById('addEditBlockEndDate').value;
+        const reason = document.getElementById('addEditBlockReason').value;
+        
+        if (!startDate || !endDate || !reason) {
+            // Let HTML5 validation handle this
+            return true;
+        }
+        
+        // Additional validation: check if end date is before start date
+        if (new Date(endDate) < new Date(startDate)) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Date Range',
+                text: 'End date must be after or equal to start date.',
+                confirmButtonColor: '#3b82f6'
+            });
+            return false;
+        }
+    }
+    
+    showSubmitLoading();
+    return true;
+}
+
+/**
  * Handles form submission with loading state
  */
 function handleFormSubmit(event) {
-    showSubmitLoading();
+    return validateUnitForm(event);
 }
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
     setupImagePreview();
+    initializeBlockDateInputs();
     
     const unitForm = document.getElementById('unitForm');
     if (unitForm) {
