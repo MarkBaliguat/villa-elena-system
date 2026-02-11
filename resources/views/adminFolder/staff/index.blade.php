@@ -7,11 +7,12 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="icon" type="image/x-icon" href="{{ asset('images/sunflower1.png') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         /* Main Content Responsive Layout */
         #mainContent {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            margin-left: 16rem; /* Initial margin for expanded sidebar */
+            margin-left: 16rem;
             width: calc(100% - 16rem);
         }
 
@@ -25,7 +26,6 @@
             width: calc(100% - 16rem);
         }
 
-        /* Responsive adjustments for mobile/tablet */
         @media (max-width: 768px) {
             #mainContent {
                 margin-left: 5.5rem !important;
@@ -40,7 +40,6 @@
             }
         }
 
-        /* Table responsive container */
         .table-container {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
@@ -64,7 +63,6 @@
             background: #555;
         }
 
-        /* Mobile card view - hidden by default, shown on mobile */
         .staff-card {
             display: none;
         }
@@ -144,13 +142,9 @@
     </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Sidebar -->
     @include('adminFolder.partials.sidebar')
     
-
-    <!-- Main Content -->
     <div class="ml-64 p-8" id="mainContent">
-        <!-- Header -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 md:mb-8">
             <div>
                 <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Staff Management</h1>
@@ -161,20 +155,6 @@
             </div>
         </div>
 
-        <!-- Success/Error Messages -->
-        @if(session('success'))
-            <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6 text-sm md:text-base">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm md:text-base">
-                {{ session('error') }}
-            </div>
-        @endif
-
-        <!-- Add New Staff Button -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
             <div class="text-sm text-gray-600">
                 Showing {{ $staff->count() }} staff member(s)
@@ -234,16 +214,10 @@
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         @if($member->userID != auth()->id())
-                                            <form action="{{ route('admin.staff.destroy', $member->userID) }}" 
-                                                  method="POST" 
-                                                  class="inline"
-                                                  onsubmit="return confirm('Are you sure you want to delete this staff member?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:text-red-900 transition-colors p-2 rounded hover:bg-red-50">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
+                                            <button onclick="confirmDelete('{{ $member->userID }}', '{{ $member->name }}')" 
+                                                    class="text-red-600 hover:text-red-900 transition-colors p-2 rounded hover:bg-red-50">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
                                         @endif
                                     </div>
                                 </td>
@@ -307,17 +281,11 @@
                             Edit
                         </a>
                         @if($member->userID != auth()->id())
-                            <form action="{{ route('admin.staff.destroy', $member->userID) }}" 
-                                  method="POST" 
-                                  class="flex-1"
-                                  onsubmit="return confirm('Are you sure you want to delete this staff member?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="w-full bg-red-50 hover:bg-red-100 text-red-600 py-2 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors text-sm">
-                                    <i class="fas fa-trash"></i>
-                                    Delete
-                                </button>
-                            </form>
+                            <button onclick="confirmDelete('{{ $member->userID }}', '{{ $member->name }}')"
+                                    class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 py-2 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors text-sm">
+                                <i class="fas fa-trash"></i>
+                                Delete
+                            </button>
                         @endif
                     </div>
                 </div>
@@ -368,9 +336,37 @@
         </div>
     </div>
 
+    {{-- ✅ SHOW SUCCESS/ERROR MESSAGES --}}
+    @if(session('success'))
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: "{{ session('success') }}",
+                confirmButtonColor: '#3b82f6'
+            });
+        });
+    </script>
+    @endif
+
+    @if(session('error'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: "{{ session('error') }}",
+                confirmButtonColor: '#3b82f6'
+            });
+        });
+    </script>
+    @endif
+
+    <script>
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
+
         // ===== SIDEBAR RESPONSIVE SCRIPT =====
-        // Listen for sidebar toggle events
         window.addEventListener('sidebarToggled', (event) => {
             const mainContent = document.getElementById('mainContent');
             if (event.detail.collapsed) {
@@ -382,31 +378,26 @@
             }
         });
 
-        // Check initial sidebar state on load AND handle responsive behavior
         document.addEventListener('DOMContentLoaded', () => {
             const savedState = localStorage.getItem('sidebarState');
             const mainContent = document.getElementById('mainContent');
             
-            // Apply saved state only on desktop
             if (window.innerWidth > 768) {
                 if (savedState === 'collapsed') {
                     mainContent.classList.remove('ml-64');
                     mainContent.classList.add('ml-24');
                 }
             } else {
-                // On mobile/tablet, always use collapsed spacing
                 mainContent.classList.remove('ml-64');
                 mainContent.classList.add('ml-24');
             }
         });
 
-        // Handle window resize - adjust spacing based on screen size
         window.addEventListener('resize', () => {
             const mainContent = document.getElementById('mainContent');
             const savedState = localStorage.getItem('sidebarState');
             
             if (window.innerWidth > 768) {
-                // Desktop: respect saved state
                 if (savedState === 'collapsed') {
                     mainContent.classList.remove('ml-64');
                     mainContent.classList.add('ml-24');
@@ -415,12 +406,47 @@
                     mainContent.classList.add('ml-64');
                 }
             } else {
-                // Mobile/tablet: always collapsed spacing
                 mainContent.classList.remove('ml-64');
                 mainContent.classList.add('ml-24');
             }
         });
         // ===== END SIDEBAR RESPONSIVE SCRIPT =====
+
+        // ✅ SWEETALERT - Delete Confirmation
+        async function confirmDelete(userId, userName) {
+            const result = await Swal.fire({
+                icon: 'warning',
+                title: 'Delete Staff Member?',
+                html: `Are you sure you want to delete <strong>${userName}</strong>?<br><span class="text-sm text-gray-600">This action cannot be undone.</span>`,
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Yes, Delete',
+                cancelButtonText: 'Cancel'
+            });
+
+            if (result.isConfirmed) {
+                // Create and submit form
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/admin/staff/${userId}`;
+                
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = '_token';
+                csrfInput.value = csrfToken;
+                
+                const methodInput = document.createElement('input');
+                methodInput.type = 'hidden';
+                methodInput.name = '_method';
+                methodInput.value = 'DELETE';
+                
+                form.appendChild(csrfInput);
+                form.appendChild(methodInput);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
     </script>
 </body>
 </html>

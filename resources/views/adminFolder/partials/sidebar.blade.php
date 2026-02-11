@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <title>Villa Elena Admin</title>
     
     <!-- CRITICAL: Set sidebar state BEFORE page renders to prevent animation -->
@@ -971,10 +972,11 @@
                     </div>
                 </div>
 
-                <!-- Modern Logout Button with Tooltip -->
-                <form method="POST" action="{{ route('logout') }}">
+                <!-- Modern Logout Button with SweetAlert -->
+                <form method="POST" action="{{ route('logout') }}" id="logoutForm">
                     @csrf
-                    <button type="submit" 
+                    <button type="button" 
+                        onclick="confirmLogout()"
                         class="logout-btn flex items-center justify-center group relative">
                         <!-- Pulse Dot -->
                         <div class="pulse-dot"></div>
@@ -997,6 +999,43 @@
     </div>
 
     <script>
+        // SweetAlert Logout Confirmation
+        function confirmLogout() {
+            Swal.fire({
+                title: 'Logout Confirmation',
+                text: "Are you sure you want to logout?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Yes, Logout',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true,
+                customClass: {
+                    popup: 'rounded-2xl',
+                    confirmButton: 'rounded-lg px-6 py-2.5 font-semibold',
+                    cancelButton: 'rounded-lg px-6 py-2.5 font-semibold'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Show loading state
+                    Swal.fire({
+                        title: 'Logging out...',
+                        text: 'Please wait',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                    
+                    // Submit the logout form
+                    document.getElementById('logoutForm').submit();
+                }
+            });
+        }
+
         const sidebar = document.getElementById('sidebar');
         const toggleBtn = document.getElementById('toggleBtn');
 

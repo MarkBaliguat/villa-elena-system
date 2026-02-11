@@ -7,12 +7,13 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="icon" type="image/x-icon" href="{{ asset('images/sunflower1.png') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <title>Villa Elena - Pricing Management </title>
     <style>
         /* Main Content Responsive Layout */
         #mainContent {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            margin-left: 16rem; /* Initial margin for expanded sidebar */
+            margin-left: 16rem;
             width: calc(100% - 16rem);
         }
 
@@ -26,7 +27,6 @@
             width: calc(100% - 16rem);
         }
 
-        /* Responsive adjustments for mobile/tablet */
         @media (max-width: 768px) {
             #mainContent {
                 margin-left: 5.5rem !important;
@@ -42,12 +42,8 @@
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         @keyframes slideUp {
@@ -69,7 +65,6 @@
             animation: slideUp 0.3s ease-out;
         }
 
-        /* Smooth scrollbar for modal */
         #updateModal > div {
             scrollbar-width: thin;
             scrollbar-color: rgba(59, 130, 246, 0.5) transparent;
@@ -86,11 +81,6 @@
         #updateModal > div::-webkit-scrollbar-thumb {
             background-color: rgba(59, 130, 246, 0.5);
             border-radius: 20px;
-        }
-
-        /* Notification fade out */
-        .notification-message {
-            transition: opacity 0.3s ease-out;
         }
     </style>
 </head>
@@ -113,34 +103,17 @@
                     </div>
                 </div>
             </div>
-            
-            <!-- Success/Error Messages -->
-            @if(session('success'))
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 notification-message">
-                    {{ session('success') }}
-                </div>
-            @endif
-
-            @if(session('error'))
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 notification-message">
-                    {{ session('error') }}
-                </div>
-            @endif
 
             <!-- Current Price Card -->
             <div class="bg-white rounded-lg shadow-sm p-4 md:p-6 mb-6">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                     <h2 class="text-lg md:text-xl font-semibold text-gray-800">Current Entrance Fee</h2>
                     @if($entranceFee && auth()->user()->role === 'manager')
-                    <form action="{{ route('admin.pricing.entrance-fee.deactivate') }}" method="POST" onsubmit="return confirmDeactivation()">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" 
-                                class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-all duration-200 ease-in-out hover:shadow-sm">
-                            <i class="fas fa-power-off mr-2 text-red-500"></i>
-                            Deactivate Fee
-                        </button>
-                    </form>
+                    <button onclick="confirmDeactivation()" 
+                            class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-all duration-200 ease-in-out hover:shadow-sm">
+                        <i class="fas fa-power-off mr-2 text-red-500"></i>
+                        Deactivate Fee
+                    </button>
                     @endif
                 </div>
                 
@@ -201,13 +174,11 @@
             <!-- Floating Action Button (Manager Only) -->
             @if(auth()->user()->role === 'manager' && $entranceFee)
             <div class="fixed bottom-6 right-6 md:bottom-8 md:right-8 group z-40">
-                <!-- Main FAB Button -->
                 <button onclick="openUpdateModal()" 
                         class="w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 hover:rotate-90 group">
                     <i class="fas fa-edit text-lg md:text-xl"></i>
                 </button>
                 
-                <!-- Tooltip -->
                 <div class="hidden md:block absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
                     <div class="bg-gray-900 text-white text-sm px-4 py-2 rounded-lg whitespace-nowrap shadow-lg">
                         Update Entrance Fee
@@ -220,7 +191,6 @@
             <!-- Modal Overlay -->
             <div id="updateModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 animate-fadeIn">
                 <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-slideUp">
-                    <!-- Modal Header -->
                     <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 md:p-6 rounded-t-2xl">
                         <div class="flex justify-between items-center">
                             <div class="flex items-center gap-3">
@@ -240,13 +210,11 @@
                         </div>
                     </div>
 
-                    <!-- Modal Body -->
                     <div class="p-4 md:p-6">
-                        <form action="{{ route('admin.pricing.entrance-fee.update') }}" method="POST">
+                        <form id="updateFeeForm" action="{{ route('admin.pricing.entrance-fee.update') }}" method="POST">
                             @csrf
                             
                             <div class="space-y-4 md:space-y-6">
-                                <!-- Fee Name -->
                                 <div>
                                     <label for="feeName" class="block text-sm font-semibold text-gray-700 mb-2">
                                         Fee Name <span class="text-red-500">*</span>
@@ -264,15 +232,8 @@
                                                required
                                                readonly>
                                     </div>
-                                    @error('feeName')
-                                        <p class="text-red-500 text-sm mt-1 flex items-center gap-1">
-                                            <i class="fas fa-exclamation-circle"></i>
-                                            {{ $message }}
-                                        </p>
-                                    @enderror
                                 </div>
 
-                                <!-- Amount -->
                                 <div>
                                     <label for="amount" class="block text-sm font-semibold text-gray-700 mb-2">
                                         Amount (PHP) <span class="text-red-500">*</span>
@@ -289,15 +250,8 @@
                                                placeholder="0.00"
                                                required>
                                     </div>
-                                    @error('amount')
-                                        <p class="text-red-500 text-sm mt-1 flex items-center gap-1">
-                                            <i class="fas fa-exclamation-circle"></i>
-                                            {{ $message }}
-                                        </p>
-                                    @enderror
                                 </div>
 
-                                <!-- Important Note -->
                                 <div class="bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-200 rounded-xl p-3 md:p-4">
                                     <div class="flex items-start gap-3">
                                         <div class="w-8 h-8 md:w-10 md:h-10 bg-yellow-100 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -318,7 +272,6 @@
                                 </div>
                             </div>
 
-                            <!-- Modal Footer -->
                             <div class="flex flex-col sm:flex-row gap-3 mt-6 md:mt-8 pt-4 md:pt-6 border-t-2 border-gray-100">
                                 <button type="button" 
                                         onclick="closeUpdateModal()"
@@ -340,9 +293,37 @@
         </div>
     </div>
 
+    {{-- ✅ SEPARATE SCRIPT TAG FOR SESSION MESSAGES --}}
+    @if(session('success'))
     <script>
-        // ===== SIDEBAR RESPONSIVE SCRIPT =====
-        // Listen for sidebar toggle events
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: "{{ session('success') }}",
+                confirmButtonColor: '#3b82f6'
+            });
+        });
+    </script>
+    @endif
+
+    @if(session('error'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: "{{ session('error') }}",
+                confirmButtonColor: '#3b82f6'
+            });
+        });
+    </script>
+    @endif
+
+    <script>
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+        // ===== SIDEBAR RESPONSIVE =====
         window.addEventListener('sidebarToggled', (event) => {
             const mainContent = document.getElementById('mainContent');
             if (event.detail.collapsed) {
@@ -354,31 +335,26 @@
             }
         });
 
-        // Check initial sidebar state on load AND handle responsive behavior
         document.addEventListener('DOMContentLoaded', () => {
             const savedState = localStorage.getItem('sidebarState');
             const mainContent = document.getElementById('mainContent');
             
-            // Apply saved state only on desktop
             if (window.innerWidth > 768) {
                 if (savedState === 'collapsed') {
                     mainContent.classList.remove('ml-64');
                     mainContent.classList.add('ml-24');
                 }
             } else {
-                // On mobile/tablet, always use collapsed spacing
                 mainContent.classList.remove('ml-64');
                 mainContent.classList.add('ml-24');
             }
         });
 
-        // Handle window resize - adjust spacing based on screen size
         window.addEventListener('resize', () => {
             const mainContent = document.getElementById('mainContent');
             const savedState = localStorage.getItem('sidebarState');
             
             if (window.innerWidth > 768) {
-                // Desktop: respect saved state
                 if (savedState === 'collapsed') {
                     mainContent.classList.remove('ml-64');
                     mainContent.classList.add('ml-24');
@@ -387,12 +363,10 @@
                     mainContent.classList.add('ml-64');
                 }
             } else {
-                // Mobile/tablet: always collapsed spacing
                 mainContent.classList.remove('ml-64');
                 mainContent.classList.add('ml-24');
             }
         });
-        // ===== END SIDEBAR RESPONSIVE SCRIPT =====
 
         // Set current date
         document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
@@ -413,35 +387,66 @@
             document.body.style.overflow = 'auto';
         }
 
-        // Close modal on outside click
         document.getElementById('updateModal')?.addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeUpdateModal();
-            }
+            if (e.target === this) closeUpdateModal();
         });
 
-        // Close modal on ESC key
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeUpdateModal();
-            }
+            if (e.key === 'Escape') closeUpdateModal();
         });
 
-        // Auto-hide success/error messages
-        setTimeout(() => {
-            const messages = document.querySelectorAll('.notification-message');
-            messages.forEach(message => {
-                message.style.opacity = '0';
-                setTimeout(() => message.remove(), 300);
+        // ✅ DEACTIVATION WITH SWEETALERT
+        async function confirmDeactivation() {
+            const result = await Swal.fire({
+                icon: 'warning',
+                title: 'Deactivate Entrance Fee?',
+                text: 'Are you sure you want to deactivate the current entrance fee? This will remove the fee from all new bookings.',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Yes, Deactivate',
+                cancelButtonText: 'Cancel'
             });
-        }, 3000);
 
-        // Confirmation for deactivation
-        function confirmDeactivation() {
-            return confirm('Are you sure you want to deactivate the current entrance fee? This will remove the fee from all new bookings.');
+            if (result.isConfirmed) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = "{{ route('admin.pricing.entrance-fee.deactivate') }}";
+                
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = '_token';
+                csrfInput.value = csrfToken;
+                
+                const methodInput = document.createElement('input');
+                methodInput.type = 'hidden';
+                methodInput.name = '_method';
+                methodInput.value = 'DELETE';
+                
+                form.appendChild(csrfInput);
+                form.appendChild(methodInput);
+                document.body.appendChild(form);
+                form.submit();
+            }
         }
 
-        // Format number input on blur
+        // ✅ FORM VALIDATION
+        document.getElementById('updateFeeForm')?.addEventListener('submit', function(e) {
+            const amount = document.getElementById('amount').value;
+
+            if (!amount || parseFloat(amount) <= 0) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Invalid Amount',
+                    text: 'Please enter a valid amount greater than 0',
+                    confirmButtonColor: '#3b82f6'
+                });
+                return false;
+            }
+        });
+
+        // Format number
         document.getElementById('amount')?.addEventListener('blur', function() {
             if (this.value) {
                 this.value = parseFloat(this.value).toFixed(2);

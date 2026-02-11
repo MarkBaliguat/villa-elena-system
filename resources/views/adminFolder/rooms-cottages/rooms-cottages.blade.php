@@ -218,13 +218,6 @@
                 </div>
             </div>
 
-            {{-- Success Message --}}
-            @if(session('success'))
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                    {{ session('success') }}
-                </div>
-            @endif
-
             {{-- Action Buttons and Filters --}}
             <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
 
@@ -366,13 +359,9 @@
                                     <button class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium transition edit-btn" data-unit-id="{{ $unit->unitID }}">
                                         Edit
                                     </button>
-                                    <form action="{{ route('admin.units.destroy', $unit->unitID) }}" method="POST" class="flex-1" onsubmit="return confirm('Are you sure you want to delete this unit?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-medium transition">
-                                            Delete
-                                        </button>
-                                    </form>
+                                    <button onclick="confirmDelete('{{ $unit->unitID }}', '{{ $unit->unitName }}')" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-medium transition">
+                                        Delete
+                                    </button>
                                 </div>
                                 @else
                                 <div class="text-center text-gray-500 text-sm py-2">
@@ -415,7 +404,36 @@
         </div>
     </div>
 
+    {{-- ✅ SHOW SUCCESS/ERROR MESSAGES --}}
+    @if(session('success'))
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: "{{ session('success') }}",
+                confirmButtonColor: '#3b82f6'
+            });
+        });
+    </script>
+    @endif
+
+    @if(session('error'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: "{{ session('error') }}",
+                confirmButtonColor: '#3b82f6'
+            });
+        });
+    </script>
+    @endif
+
+    <script>
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
+
         // ============================================
         // SIDEBAR RESPONSIVE
         // ============================================
@@ -681,6 +699,44 @@
             document.getElementById('statusFilter').value = '';
             document.getElementById('typeFilter').value = '';
             performSearch();
+        }
+
+        // ============================================
+        // ✅ SWEETALERT - Delete Confirmation
+        // ============================================
+        async function confirmDelete(unitId, unitName) {
+            const result = await Swal.fire({
+                icon: 'warning',
+                title: 'Delete Unit?',
+                html: `Are you sure you want to delete <strong>${unitName}</strong>?<br><span class="text-sm text-gray-600">This action cannot be undone.</span>`,
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Yes, Delete',
+                cancelButtonText: 'Cancel'
+            });
+
+            if (result.isConfirmed) {
+                // Create and submit form
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/admin/units/${unitId}`;
+                
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = '_token';
+                csrfInput.value = csrfToken;
+                
+                const methodInput = document.createElement('input');
+                methodInput.type = 'hidden';
+                methodInput.name = '_method';
+                methodInput.value = 'DELETE';
+                
+                form.appendChild(csrfInput);
+                form.appendChild(methodInput);
+                document.body.appendChild(form);
+                form.submit();
+            }
         }
 
         // ============================================
