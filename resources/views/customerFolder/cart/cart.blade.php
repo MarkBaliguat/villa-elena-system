@@ -121,12 +121,13 @@
         .page-title {
             font-size: 2.8rem;
             font-weight: 800;
-             background: linear-gradient(135deg, #F59E0B, #D97706, #B45309);
+             /* background: linear-gradient(135deg, #F59E0B, #D97706, #B45309); */
+             background: #1F2937;
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
             display: inline-block;
-            text-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+            /* text-shadow: 0 4px 12px rgba(245, 158, 11, 0.2); */
             letter-spacing: -0.5px;
         }
 
@@ -168,7 +169,7 @@
         .summary-header h3 {
             font-size: 1.1rem;
             font-weight: 700;
-            color: black;
+            color: #1F2937;
             text-transform: uppercase;
             letter-spacing: 1.5px;
             display: flex;
@@ -183,6 +184,7 @@
 
         .summary-content {
             padding: 1.5rem;
+            padding-top: 0;
             background: var(--white-pure);
         }
 
@@ -1837,7 +1839,7 @@ function renderCart(cart, items, container) {
                 <div class="sidebar-card">
                     <!-- Booking Summary Section -->
                     <div class="summary-header">
-                        <h3><i class="fas fa-calendar-check"></i> Booking Summary</h3>
+                        <h3>Booking Summary</h3>
                     </div>
                     <div class="summary-content">
                         <div class="summary-item">
@@ -1866,11 +1868,7 @@ function renderCart(cart, items, container) {
                             <i class="fas ${cartUnitType==='room'?'fa-bed':'fa-home'}"></i>
                             <div class="summary-item-content">
                                 <div class="summary-label">Booking Type</div>
-                                <div class="summary-value">
-                                    <span class="booking-type-badge ${cartUnitType}">
-                                        <i class="fas ${cartUnitType==='room'?'fa-bed':'fa-home'}"></i>
-                                        ${cartUnitType==='room'?'Room':'Cottage'}
-                                    </span>
+                                <div class="summary-value">${cartUnitType==='room'?'Room':'Cottage'}                                   
                                 </div>
                             </div>
                         </div>` : ''}
@@ -1881,12 +1879,12 @@ function renderCart(cart, items, container) {
 
                     <!-- Price Summary Section -->
                     <div class="price-section-title">
-                        <h4><i class="fas fa-receipt"></i> Price Summary</h4>
+                        <h4>Price Summary</h4>
                     </div>
                     <div class="price-content">
                         ${breakdownRows}
                         <div class="price-total">
-                            <span><i class="fas fa-wallet row-icon"></i> Total Amount</span>
+                            <span></i> Total Amount</span>
                             <span>₱${grandTotal.toFixed(2)}</span>
                         </div>
                     </div>
