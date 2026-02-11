@@ -436,15 +436,15 @@ class CartController extends Controller
             }
 
             // 4. Check if cart has mixed unit types
-            $unitTypes = $cart->items->pluck('unit.unitType')->unique()->toArray();
-            if (count($unitTypes) > 1 && in_array('room', $unitTypes) && in_array('cottage', $unitTypes)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Cannot have both rooms and cottages in the same booking',
-                    'has_mixed_items' => true,
-                    'validation_errors' => ['You cannot have both rooms and cottages in the same booking.']
-                ], 400);
-            }
+            // $unitTypes = $cart->items->pluck('unit.unitType')->unique()->toArray();
+            // if (count($unitTypes) > 1 && in_array('room', $unitTypes) && in_array('cottage', $unitTypes)) {
+            //     return response()->json([
+            //         'success' => false,
+            //         'message' => 'Cannot have both rooms and cottages in the same booking',
+            //         'has_mixed_items' => true,
+            //         'validation_errors' => ['You cannot have both rooms and cottages in the same booking.']
+            //     ], 400);
+            // }
 
             // 5. Check if cottage booking has active entrance fee
             $hasCottage = $cart->items->where('unit.unitType', 'cottage')->count() > 0;

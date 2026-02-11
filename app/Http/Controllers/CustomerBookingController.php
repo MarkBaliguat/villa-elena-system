@@ -307,15 +307,15 @@ class CustomerBookingController extends Controller
                 ], 400);
             }
 
-            $unitTypes = $cart->items->pluck('unit.unitType')->unique()->toArray();
-            if (count($unitTypes) > 1 && in_array('room', $unitTypes) && in_array('cottage', $unitTypes)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Cannot have both rooms and cottages in the same booking',
-                    'has_mixed_items' => true,
-                    'validation_errors' => ['You cannot have both rooms and cottages in the same booking.']
-                ], 400);
-            }
+            // $unitTypes = $cart->items->pluck('unit.unitType')->unique()->toArray();
+            // if (count($unitTypes) > 1 && in_array('room', $unitTypes) && in_array('cottage', $unitTypes)) {
+            //     return response()->json([
+            //         'success' => false,
+            //         'message' => 'Cannot have both rooms and cottages in the same booking',
+            //         'has_mixed_items' => true,
+            //         'validation_errors' => ['You cannot have both rooms and cottages in the same booking.']
+            //     ], 400);
+            // }
 
             $hasCottage = $cart->items->where('unit.unitType', 'cottage')->count() > 0;
             if ($hasCottage) {
@@ -528,15 +528,15 @@ class CustomerBookingController extends Controller
             }
 
             // ========== VALIDATION 4: Mixed Unit Types ==========
-            Log::info('VALIDATION 4: Checking for mixed unit types...');
-            $unitTypes = $cart->items->pluck('unit.unitType')->unique()->toArray();
-            if (count($unitTypes) > 1 && in_array('room', $unitTypes) && in_array('cottage', $unitTypes)) {
-                Log::error('Mixed unit types in cart');
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Cannot have both rooms and cottages in the same booking.'
-                ], 400);
-            }
+            // Log::info('VALIDATION 4: Checking for mixed unit types...');
+            // $unitTypes = $cart->items->pluck('unit.unitType')->unique()->toArray();
+            // if (count($unitTypes) > 1 && in_array('room', $unitTypes) && in_array('cottage', $unitTypes)) {
+            //     Log::error('Mixed unit types in cart');
+            //     return response()->json([
+            //         'success' => false,
+            //         'message' => 'Cannot have both rooms and cottages in the same booking.'
+            //     ], 400);
+            // }
 
             // ========== VALIDATION 5: Entrance Fee (for Cottages) ==========
             Log::info('VALIDATION 5: Checking entrance fee requirement...');

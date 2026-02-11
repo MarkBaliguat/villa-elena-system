@@ -253,13 +253,6 @@
             color: var(--green-dark);
         }
 
-        /* ✅ NEW: Mixed booking badge */
-        .booking-type-badge.mixed {
-            background: linear-gradient(135deg, var(--blue-light), var(--green-light));
-            color: var(--dark);
-            border: 2px solid var(--border);
-        }
-
         /* PRICE SUMMARY SECTION - INSIDE SAME CARD */
         .price-divider {
             height: 2px;
@@ -1634,7 +1627,7 @@ document.addEventListener('keydown', function(e) {
 });
 
 /* ═══════════════════════════════
-   RENDER CART - NEW LAYOUT (✅ FIXED FOR MIXED CART)
+   RENDER CART - NEW LAYOUT
 ═══════════════════════════════ */
 function renderCart(cart, items, container) {
     const days     = cart.daysCount > 0 ? cart.daysCount : 1;
@@ -1647,10 +1640,7 @@ function renderCart(cart, items, container) {
     let totalEntranceFee = 0;
     
     const hasCottageInCart = cartUnitType === 'cottage' || cartUnitType === 'mixed';
-    
-    // ✅ FIX: Allow checkout if no cottage OR if cottage has entrance fee
-    // OLD: const canProceed = !(hasCottageInCart && !hasActiveEntranceFee) && cartUnitType !== 'mixed';
-    const canProceed = !(hasCottageInCart && !hasActiveEntranceFee); // ✅ REMOVED mixed cart restriction
+    const canProceed = !(hasCottageInCart && !hasActiveEntranceFee) && cartUnitType !== 'mixed';
 
     // ─── Items HTML with Gallery Support ───
     const itemsHTML = items.map((item, i) => {
@@ -1758,9 +1748,6 @@ function renderCart(cart, items, container) {
 
     // ─── Warning banners ───
     let warnings = '';
-    
-    // ✅ COMMENTED OUT: Old mixed cart warning
-    /*
     if (cartUnitType === 'mixed') {
         const roomCount    = items.filter(i => i.unit?.unitType === 'room').length;
         const cottageCount = items.filter(i => i.unit?.unitType === 'cottage').length;
@@ -1780,11 +1767,7 @@ function renderCart(cart, items, container) {
                 </div>
             </div>
         </div>`;
-    } else 
-    */
-    
-    // ✅ ONLY show warning if cottage without entrance fee
-    if (hasCottageInCart && !hasActiveEntranceFee) {
+    } else if (hasCottageInCart && !hasActiveEntranceFee) {
         warnings = `
         <div class="warning-banner red">
             <div class="w-icon"><i class="fas fa-exclamation-circle"></i></div>
@@ -1831,30 +1814,20 @@ function renderCart(cart, items, container) {
 
     // ─── Checkout button ───
     let checkoutBtn = '';
-    
-    // ✅ SIMPLIFIED: Only check entrance fee, not mixed cart
-    /*
-    // OLD CODE:
-    if (canProceed) {
-        checkoutBtn = `...`;
-    } else if (cartUnitType === 'mixed') {
-        checkoutBtn = `...`;
-    } else {
-        checkoutBtn = `...`;
-    }
-    */
-    
-    // ✅ NEW CODE:
     if (canProceed) {
         checkoutBtn = `
         <button onclick="proceedToCheckout()" class="btn btn-checkout checkout-button">
             <i class="fas fa-lock"></i> Proceed to Secure Checkout
         </button>`;
+    } else if (cartUnitType === 'mixed') {
+        checkoutBtn = `
+        <button class="btn btn-warning btn-disabled">
+            <i class="fas fa-exclamation-circle"></i> Fix Cart to Continue
+        </button>`;
     } else {
-        // Only case now is missing entrance fee
         checkoutBtn = `
         <button class="btn btn-error btn-disabled">
-            <i class="fas fa-ban"></i> Entrance Fee Required for Cottages
+            <i class="fas fa-ban"></i> Entrance Fee Required
         </button>`;
     }
 
@@ -1890,18 +1863,15 @@ function renderCart(cart, items, container) {
                                 <div class="summary-value">${guests} Guest${guests>1?'s':''}</div>
                             </div>
                         </div>
-                        ${/* ✅ UPDATED: Show booking type for all cases including mixed */ ''}
+                        ${cartUnitType && cartUnitType !== 'mixed' ? `
                         <div class="summary-item">
-                            <i class="fas ${cartUnitType==='room'?'fa-bed':cartUnitType==='cottage'?'fa-home':'fa-hotel'}"></i>
+                            <i class="fas ${cartUnitType==='room'?'fa-bed':'fa-home'}"></i>
                             <div class="summary-item-content">
                                 <div class="summary-label">Booking Type</div>
-                                <div class="summary-value">
-                                    ${cartUnitType==='room'?'Rooms Only':
-                                      cartUnitType==='cottage'?'Cottages Only':
-                                      'Mixed (Rooms + Cottages)'}
+                                <div class="summary-value">${cartUnitType==='room'?'Room':'Cottage'}                                   
                                 </div>
                             </div>
-                        </div>
+                        </div>` : ''}
                     </div>
 
                     <!-- Divider -->
@@ -2106,7 +2076,6 @@ function removeAllUnavail(ids) {
     .catch(() => showNotification('Some items could not be removed.', 'error'));
 }
 
-// ✅ KEEP THESE FUNCTIONS (still useful for individual cleanup)
 function removeAllRooms() {
     if (!confirm('Remove all room items from your cart?')) return;
     fetch('/api/cart/items', { headers: { 'Accept':'application/json', 'X-CSRF-TOKEN': csrfToken() } })
