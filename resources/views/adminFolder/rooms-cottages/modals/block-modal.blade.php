@@ -72,6 +72,16 @@
                             <option value="Other">Other</option>
                         </select>
                     </div>
+
+                    <!-- {{-- Warning about booking conflicts --}}
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-blue-500 mt-1 mr-2"></i>
+                            <p class="text-xs text-blue-700">
+                                The system will check if there are any confirmed or pending bookings during the selected dates. Units with existing bookings cannot be blocked.
+                            </p>
+                        </div>
+                    </div> -->
                 </div>
 
                 {{-- Unblock confirmation section (hidden for block) --}}
@@ -357,7 +367,7 @@ function handleBlockFormSubmit(e) {
     const isUnblocking = document.getElementById('unblockConfirmSection').classList.contains('hidden') === false;
     submitBtn.innerHTML = isUnblocking 
         ? '<i class="fas fa-spinner fa-spin mr-2"></i>Unblocking...'
-        : '<i class="fas fa-spinner fa-spin mr-2"></i>Blocking...';
+        : '<i class="fas fa-spinner fa-spin mr-2"></i>Checking bookings...';
     
     console.log('Processing units:', Array.from(selectedUnits));
 }

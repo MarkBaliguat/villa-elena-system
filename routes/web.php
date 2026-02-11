@@ -130,6 +130,8 @@ Route::middleware(['auth', 'role:manager,staff'])->prefix('admin')->group(functi
         Route::put('/units/{id}', [UnitsController::class, 'update'])->name('admin.units.update');
         Route::delete('/units/{id}', [UnitsController::class, 'destroy'])->name('admin.units.destroy') ->middleware('role:manager');
         Route::post('/units/{id}/delete-image', [UnitsController::class, 'deleteImage'])->name('admin.units.delete-image');
+        Route::get('/units/{id}/booking-status', [UnitsController::class, 'checkBookingStatus'])->name('admin.units.booking-status');
+    
     });
 
     // Booking Routes (Admin)
