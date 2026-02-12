@@ -686,7 +686,8 @@
             </div>
         </div>
     </section>
-
+ 
+    
     <!-- Tour Section -->
     <section class="tour-section section-animate">
         <div class="tour-content text-center text-white">
