@@ -207,7 +207,8 @@
             font-weight: 700;
             text-align: center;
             margin-bottom: 1rem;
-            background: linear-gradient(135deg, var(--text-dark), #4B5563);
+            /* background: linear-gradient(135deg, var(--text-dark), #4B5563); */
+            background: #1F2937;
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -450,8 +451,8 @@
 
         .card-badge {
             position: absolute;
-            top: 25px;
-            right: 25px;
+            top: 30px;
+            right: 30px;
             background: linear-gradient(135deg, var(--primary-yellow), var(--secondary-yellow));
             color: var(--primary-black);
             padding: 8px 20px;

@@ -180,7 +180,8 @@
             font-weight: 700;
             text-align: center;
             margin-bottom: 1rem;
-            background: linear-gradient(135deg, var(--text-dark), #4B5563);
+            /* background: linear-gradient(135deg, var(--text-dark), #4B5563); */
+            background: #1F2937;
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
