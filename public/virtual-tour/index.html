@@ -165,12 +165,7 @@
                 padding: 38px 0 32px;
                 text-align: center;
                 flex-shrink: 0;
-                background: linear-gradient(
-                    180deg,
-                    #0a1628 0%,
-                    #0f1e2e 40%,
-                    #111111 100%
-                );
+                background: #111111;
                 border-bottom: 1px solid rgba(180, 160, 80, 0.18);
                 overflow: hidden;
             }
@@ -180,22 +175,7 @@
                 content: "";
                 position: absolute;
                 inset: 0;
-                background:
-                    radial-gradient(
-                        ellipse 120% 60% at 50% 0%,
-                        rgba(30, 70, 90, 0.45) 0%,
-                        transparent 70%
-                    ),
-                    radial-gradient(
-                        ellipse 80% 40% at 20% 100%,
-                        rgba(20, 50, 70, 0.2) 0%,
-                        transparent 60%
-                    ),
-                    radial-gradient(
-                        ellipse 60% 50% at 80% 80%,
-                        rgba(25, 60, 80, 0.15) 0%,
-                        transparent 60%
-                    );
+                background: #111111;
                 pointer-events: none;
             }
 
@@ -3327,7 +3307,7 @@
             function switchPanorama(panoramaName) {
                 overlay.style.pointerEvents = "auto";
                 overlay.style.opacity = "1";
-                overlay.textContent = "Loading...";
+                overlay.textContent = "Entering...";
 
                 const newTexture = new THREE.TextureLoader().load(
                     `panoramas/${panoramaName}`,
