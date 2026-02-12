@@ -727,6 +727,9 @@ class BookingController extends Controller
                 'checkin_date' => 'required|date',
                 'checkout_date' => 'nullable|date|after_or_equal:checkin_date',
                 'num_guests' => 'required|integer|min:1',
+                'unit_id' => 'required|exists:units,unitID',
+                'unit_type' => 'required|in:room,cottage',
+                'booking_type' => 'required|in:day-use,overnight',
                 'total_price' => 'required|numeric|min:0',
                 'special_requirements' => 'nullable|string',
                 'cancellation_reason' => 'nullable|string',
@@ -737,18 +740,25 @@ class BookingController extends Controller
             // ✅ Convert email to lowercase
             $validated['email'] = strtolower(trim($validated['email']));
 
+            // ✅ STANDARDIZED DATE FORMAT
+            $checkInDate = Carbon::parse($validated['checkin_date'])->format('Y-m-d');
+            $checkOutDate = $validated['checkout_date'] ? 
+                Carbon::parse($validated['checkout_date'])->format('Y-m-d') : $checkInDate;
+
             DB::beginTransaction();
 
-            $booking = Booking::with('cart.user', 'cart.cartItems.unit')->findOrFail($id);
+            $booking = Booking::with('cart.user', 'cart.cartItems.unit', 'payments')->findOrFail($id);
             
-            // Store old status for comparison
+            // Store old status and unit for comparison
             $oldStatus = $booking->bookingStatus;
             $newStatus = $validated['booking_status'];
-            
+            $oldUnitId = $booking->cart->cartItems->first()->unitID;
+            $newUnitId = $validated['unit_id'];
+
             // ✅ TRACK CANCELLATION DATA
             if ($newStatus === 'cancelled' && $oldStatus !== 'cancelled') {
                 $booking->cancelledAt = now();
-                $booking->cancelledBy = Auth::id(); // Get current admin user ID
+                $booking->cancelledBy = Auth::id();
                 $booking->cancellationReason = $validated['cancellation_reason'] ?? null;
                 
                 Log::info('Booking cancelled', [
@@ -757,16 +767,141 @@ class BookingController extends Controller
                     'cancelled_at' => now(),
                     'reason' => $validated['cancellation_reason']
                 ]);
+
+                // ✅ AUTO-PROCESS REFUND IF CANCELLATION HAS REFUND AMOUNT
+                if (!empty($validated['refund_amount']) && $validated['refund_amount'] > 0 && !empty($validated['refund_method'])) {
+                    // Calculate current net paid to validate refund amount
+                    $paymentSummary = $this->calculatePaymentSummary($booking);
+                    $currentNetPaid = $paymentSummary['net_paid'];
+
+                    if ($validated['refund_amount'] > $currentNetPaid) {
+                        DB::rollBack();
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Refund amount exceeds net paid amount. Available for refund: ₱' . number_format($currentNetPaid, 2)
+                        ], 422);
+                    }
+
+                    $newNetPaid = $currentNetPaid - $validated['refund_amount'];
+                    $newRemainingBalance = max(0, $booking->totalPrice - $newNetPaid);
+                    $refundDate = Carbon::now()->format('Y-m-d');
+
+                    Payment::create([
+                        'bookingID' => $id,
+                        'paymentReference' => 'REF-' . time(),
+                        'paymentMethod' => $validated['refund_method'],
+                        'paymentType' => 'refund',
+                        'amountPaid' => $validated['refund_amount'],
+                        'remainingBalance' => $newRemainingBalance,
+                        'paymentDate' => $refundDate,
+                        'paymentStatus' => 'completed',
+                        'isRefunded' => true,
+                        'refundDate' => $refundDate,
+                        'refundAmount' => $validated['refund_amount'],
+                        'refundReason' => $validated['cancellation_reason'] ?? 'Booking cancelled'
+                    ]);
+
+                    Log::info('Refund processed on cancellation', [
+                        'booking_id' => $id,
+                        'refund_amount' => $validated['refund_amount'],
+                        'refund_method' => $validated['refund_method'],
+                        'new_net_paid' => $newNetPaid,
+                        'new_remaining_balance' => $newRemainingBalance
+                    ]);
+                }
             }
-            
-            // Check for special event conflicts before updating
+
+            // ✅ VALIDATE UNIT TYPE AND BOOKING TYPE COMPATIBILITY
+            if ($validated['unit_type'] === 'cottage' && $validated['booking_type'] === 'overnight') {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cottage units are only available for day-use bookings'
+                ], 422);
+            }
+
+            // ✅ VALIDATE DAY-USE CHECKOUT DATE
+            if ($validated['booking_type'] === 'day-use') {
+                if ($checkOutDate !== $checkInDate) {
+                    DB::rollBack();
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'For day-use bookings, check-out date must be the same as check-in date'
+                    ], 422);
+                }
+            }
+
+            // ✅ VALIDATE OVERNIGHT CHECKOUT DATE
+            if ($validated['booking_type'] === 'overnight') {
+                if (!$validated['checkout_date']) {
+                    DB::rollBack();
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Check-out date is required for overnight bookings'
+                    ], 422);
+                }
+                if ($checkOutDate === $checkInDate) {
+                    DB::rollBack();
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'For overnight bookings, check-out date must be after check-in date'
+                    ], 422);
+                }
+            }
+
+            // ✅ HANDLE UNIT CHANGE
+            if ($newUnitId != $oldUnitId) {
+                $newUnit = Unit::find($newUnitId);
+
+                if (!$newUnit) {
+                    DB::rollBack();
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Selected unit not found'
+                    ], 422);
+                }
+
+                // Verify unit type matches
+                if ($newUnit->unitType !== $validated['unit_type']) {
+                    DB::rollBack();
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Selected unit does not match the unit type'
+                    ], 422);
+                }
+
+                // Check if new unit is blocked
+                $unitBlocked = $this->isUnitBlocked($newUnit, $checkInDate, $checkOutDate);
+                if ($unitBlocked) {
+                    $blockStart = $newUnit->blockStartDate ? Carbon::parse($newUnit->blockStartDate)->format('M d, Y') : null;
+                    $blockEnd = $newUnit->blockEndDate ? Carbon::parse($newUnit->blockEndDate)->format('M d, Y') : null;
+
+                    DB::rollBack();
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Selected unit ({$newUnit->unitName}) is blocked from {$blockStart} to {$blockEnd}",
+                        'conflict_type' => 'unit_blocked'
+                    ], 422);
+                }
+
+                Log::info('Unit changed for booking', [
+                    'booking_id' => $id,
+                    'old_unit_id' => $oldUnitId,
+                    'new_unit_id' => $newUnitId,
+                    'old_unit_name' => Unit::find($oldUnitId)->unitName ?? 'Unknown',
+                    'new_unit_name' => $newUnit->unitName
+                ]);
+            }
+
+            // ✅ CHECK FOR SPECIAL EVENT CONFLICTS (only for active bookings)
             if (in_array($newStatus, ['confirmed', 'pending'])) {
                 $specialEventConflict = $this->checkSpecialEventConflict(
-                    $validated['checkin_date'],
-                    $validated['checkout_date']
+                    $checkInDate,
+                    $checkOutDate
                 );
 
                 if ($specialEventConflict['has_conflict']) {
+                    DB::rollBack();
                     return response()->json([
                         'success' => false,
                         'message' => $specialEventConflict['message'],
@@ -775,43 +910,77 @@ class BookingController extends Controller
                 }
             }
 
-            // Check for normal booking conflicts (exclude current booking)
-            $normalConflict = $this->checkNormalBookingConflict(
-                $booking->cart->cartItems->first()->unitID,
-                $validated['checkin_date'],
-                $validated['checkout_date'],
-                $booking->bookingType,
-                $id
-            );
+            // ✅ CHECK FOR NORMAL BOOKING CONFLICTS (use new unit ID)
+            if (in_array($newStatus, ['confirmed', 'pending'])) {
+                $normalConflict = $this->checkNormalBookingConflict(
+                    $newUnitId,
+                    $checkInDate,
+                    $checkOutDate,
+                    $validated['booking_type'],
+                    $id, // Exclude current booking
+                    false // Don't check block dates (already checked above)
+                );
 
-            if ($normalConflict) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Cannot update booking. There is a conflict with existing bookings.',
-                    'conflict_type' => 'normal_booking'
-                ], 422);
+                if ($normalConflict) {
+                    $unit = Unit::find($newUnitId);
+                    $unitName = $unit ? $unit->unitName : 'Selected unit';
+                    $checkinFormatted = Carbon::parse($checkInDate)->format('M d, Y');
+                    $checkoutFormatted = Carbon::parse($checkOutDate)->format('M d, Y');
+
+                    $message = $validated['booking_type'] === 'day-use'
+                        ? "Unit ({$unitName}) is already booked for {$checkinFormatted}. Please choose different dates or another unit."
+                        : "Unit ({$unitName}) is already booked from {$checkinFormatted} to {$checkoutFormatted}. Please choose different dates or another unit.";
+
+                    DB::rollBack();
+                    return response()->json([
+                        'success' => false,
+                        'message' => $message,
+                        'conflict_type' => 'normal_booking'
+                    ], 422);
+                }
             }
 
+            // ✅ UPDATE USER INFORMATION
             $booking->cart->user->update([
                 'name' => $validated['guest_name'],
                 'email' => $validated['email'],
                 'phoneNumber' => $validated['phone']
             ]);
 
-            // ✅ STANDARDIZED DATE FORMAT FOR CART UPDATE
-            $checkInDate = Carbon::parse($validated['checkin_date'])->format('Y-m-d');
-            $checkOutDate = $validated['checkout_date'] ? 
-                Carbon::parse($validated['checkout_date'])->format('Y-m-d') : $checkInDate;
+            // ✅ CALCULATE DAYS COUNT
+            if ($validated['booking_type'] === 'day-use') {
+                $daysCount = 1;
+            } else {
+                $daysCount = max(1, Carbon::parse($checkOutDate)->diffInDays(Carbon::parse($checkInDate)));
+            }
 
+            // ✅ UPDATE CART INFORMATION
             $isActive = !in_array($newStatus, ['completed', 'cancelled']);
 
             $booking->cart->update([
                 'checkInDate' => $checkInDate,
                 'checkOutDate' => $checkOutDate,
                 'numGuests' => $validated['num_guests'],
+                'daysCount' => $daysCount,
                 'is_active' => $isActive
             ]);
 
+            // ✅ UPDATE CART ITEM (UNIT) IF CHANGED
+            if ($newUnitId != $oldUnitId) {
+                $cartItem = $booking->cart->cartItems->first();
+                $cartItem->update([
+                    'unitID' => $newUnitId,
+                    'subtotalPrice' => $validated['total_price']
+                ]);
+            } else {
+                // Update subtotal price even if unit didn't change (price may differ due to guest/date changes)
+                $cartItem = $booking->cart->cartItems->first();
+                $cartItem->update([
+                    'subtotalPrice' => $validated['total_price']
+                ]);
+            }
+
+            // ✅ UPDATE BOOKING INFORMATION
             $booking->update([
                 'totalPrice' => $validated['total_price'],
                 'bookingStatus' => $newStatus,
@@ -820,16 +989,14 @@ class BookingController extends Controller
 
             DB::commit();
 
-            // ✅ SEND STATUS CHANGE EMAILS
+            // ✅ SEND STATUS CHANGE EMAILS (after successful commit)
             if ($oldStatus !== $newStatus) {
                 try {
                     if ($newStatus === 'completed') {
-                        // Send booking completed email
                         Mail::to($validated['email'])->send(new BookingCompletedEmail($booking));
                         Log::info("Booking completed email sent to {$validated['email']} for booking #{$booking->bookingID}");
                     } 
                     elseif ($newStatus === 'cancelled') {
-                        // Send booking cancelled email
                         $cancellationReason = $validated['cancellation_reason'] ?? null;
                         $refundAmount = $validated['refund_amount'] ?? 0;
                         $refundMethod = $validated['refund_method'] ?? null;
@@ -851,9 +1018,16 @@ class BookingController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Booking updated successfully',
-                'data' => $booking->fresh()->load('cart.user', 'cart.cartItems.unit')
+                'data' => $booking->fresh()->load('cart.user', 'cart.cartItems.unit', 'payments')
             ]);
 
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $e->errors()
+            ], 422);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error updating booking: ' . $e->getMessage());
