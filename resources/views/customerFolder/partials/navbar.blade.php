@@ -98,11 +98,11 @@
     <a href="{{ url('/') }}" class="nav-link hover-effect">
         <i class="fas fa-home mr-2"></i>Home
     </a>
-    <a href="{{ route('about') }}" class="nav-link hover-effect">
-        <i class="fas fa-info-circle mr-2"></i>About
-    </a>
     <a href="{{ url('/virtual-tour/index.html') }}" class="nav-link hover-effect">
         <i class="fas fa-vr-cardboard mr-2"></i>Virtual Tour
+    </a>
+        <a href="{{ route('roomBooking') }}" class="nav-link hover-effect">
+        <i class="fas fa-calendar-check mr-2"></i>Book Now
     </a>
     <a href="{{ url('/#activities') }}" class="nav-link hover-effect">
         <i class="fas fa-hiking mr-2"></i>Activities
@@ -113,9 +113,10 @@
     <a href="{{ url('/#contact') }}" class="nav-link hover-effect">
         <i class="fas fa-phone-alt mr-2"></i>Contact Us
     </a>
-    <a href="{{ route('roomBooking') }}" class="nav-link hover-effect">
-        <i class="fas fa-calendar-check mr-2"></i>Book Now
+        <a href="{{ route('about') }}" class="nav-link hover-effect">
+        <i class="fas fa-info-circle mr-2"></i>About
     </a>
+
     
     <!-- Mobile Auth Links - ALWAYS SHOWS IN MOBILE MENU -->
     @auth
