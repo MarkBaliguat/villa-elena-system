@@ -77,13 +77,18 @@
             transition: all 0.3s ease;
         }
 
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
         }
 
-        .btn-primary:active {
+        .btn-primary:active:not(:disabled) {
             transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
         }
 
         /* Image overlay animation */
@@ -129,7 +134,7 @@
                 <h2 class="text-2xl font-bold mb-6 md:mb-8 text-center text-gray-800">Log back in</h2>
 
                 <!-- FORM -->
-                <form method="POST" action="{{ route('login') }}">
+                <form method="POST" action="{{ route('login') }}" id="loginForm">
                     @csrf
 
                     <!--Email -->
@@ -187,8 +192,15 @@
                     <!-- Login Button -->
                     <button 
                         type="submit"
+                        id="loginButton"
                         class="w-full bg-black text-white py-3 rounded-xl hover:bg-gray-800 transition font-semibold text-base btn-primary">
-                        Log In
+                        <span id="buttonText">Log In</span>
+                        <span id="buttonLoader" class="hidden">
+                            <svg class="animate-spin h-5 w-5 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </span>
                     </button>
 
                     <!-- Sign Up Link -->
@@ -200,6 +212,9 @@
             </div>
         </div>
     </div>
+
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         // Toggle password visibility with smooth animation
@@ -224,15 +239,37 @@
             }
         });
         
-        // Form validation
-        document.querySelector('form').addEventListener('submit', function(e) {
+        // Form validation and loading state
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             
             if (!email || !password) {
                 e.preventDefault();
-                alert('Please fill in all required fields.');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Incomplete Form',
+                    text: 'Please fill in all required fields.',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#000000',
+                    showClass: {
+                        popup: 'animate__animated animate__fadeInDown'
+                    },
+                    hideClass: {
+                        popup: 'animate__animated animate__fadeOutUp'
+                    }
+                });
+                return;
             }
+
+            // Show loading state
+            const button = document.getElementById('loginButton');
+            const buttonText = document.getElementById('buttonText');
+            const buttonLoader = document.getElementById('buttonLoader');
+            
+            button.disabled = true;
+            buttonText.classList.add('hidden');
+            buttonLoader.classList.remove('hidden');
         });
 
         // Add subtle hover effect to inputs
@@ -244,6 +281,74 @@
                 this.parentElement.style.transform = 'translateY(0)';
             });
         });
+
+        // Remove loading state when page loads (in case of errors)
+        document.addEventListener('DOMContentLoaded', function() {
+            const button = document.getElementById('loginButton');
+            const buttonText = document.getElementById('buttonText');
+            const buttonLoader = document.getElementById('buttonLoader');
+            
+            button.disabled = false;
+            buttonText.classList.remove('hidden');
+            buttonLoader.classList.add('hidden');
+        });
     </script>
+
+    <!-- SweetAlert for Login Errors -->
+    @if ($errors->any())
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Login Failed',
+                text: '{{ $errors->first() }}',
+                confirmButtonText: 'Try Again',
+                confirmButtonColor: '#000000',
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp'
+                }
+            });
+        </script>
+    @endif
+
+    <!-- SweetAlert for Success Messages (if any) -->
+    @if (session('status'))
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: "{{ session('status') }}",
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#10b981',
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp'
+                }
+            });
+        </script>
+    @endif
+
+    <!-- SweetAlert for Password Reset Success -->
+    @if (session('success'))
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: "{{ session('success') }}",
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#10b981',
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp'
+                }
+            });
+        </script>
+    @endif
 </body>
 </html>

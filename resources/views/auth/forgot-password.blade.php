@@ -33,16 +33,13 @@
             <!-- RIGHT SIDE FORM -->
             <div class="flex flex-col justify-center px-6 py-8 md:px-14 md:py-12 bg-white">
                 <div class="animate-form">
-                    <!-- Session Status -->
-                    <x-auth-session-status class="mb-4" :status="session('status')" />
-
                     <h2 class="text-2xl font-bold mb-4 text-center text-gray-800">Reset Password</h2>
                     
                     <div class="mb-6 text-sm text-gray-600 text-center leading-relaxed">
                         Forgot your password? No problem. Just enter your email address and we'll send you a password reset link.
                     </div>
 
-                    <form method="POST" action="{{ route('password.email') }}">
+                    <form method="POST" action="{{ route('password.email') }}" id="resetPasswordForm">
                         @csrf
 
                         <!-- Email Address -->
@@ -52,20 +49,26 @@
                                 id="email" 
                                 type="email" 
                                 name="email" 
-                                :value="old('email')" 
+                                value="{{ old('email') }}" 
                                 required 
                                 autofocus
                                 placeholder="juandelacruz@gmail.com"
                                 class="w-full mt-1 px-3 py-2 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent transition input-enhanced @error('email') border-red-500 @enderror"
                             />
-                            <x-input-error :messages="$errors->get('email')" class="mt-2" />
                         </div>
 
-                        <!-- Submit Button -->
+                        <!-- Submit Button with Loading Effect -->
                         <button 
                             type="submit" 
+                            id="resetButton"
                             class="w-full bg-black text-white py-2.5 rounded-xl hover:bg-gray-800 transition font-semibold text-base btn-primary">
-                            Send Password Reset Link
+                            <span id="buttonText">Send Password Reset Link</span>
+                            <span id="buttonLoader" class="hidden">
+                                <svg class="animate-spin h-5 w-5 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </span>
                         </button>
 
                         <!-- Back to Login Link -->
@@ -83,6 +86,79 @@
             </div>
         </div>
     </div>
+
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Button Loading Effect Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('resetPasswordForm');
+            const button = document.getElementById('resetButton');
+            const buttonText = document.getElementById('buttonText');
+            const buttonLoader = document.getElementById('buttonLoader');
+
+            form.addEventListener('submit', function() {
+                // Show loading state
+                button.disabled = true;
+                buttonText.classList.add('hidden');
+                buttonLoader.classList.remove('hidden');
+            });
+        });
+    </script>
+
+    <!-- SweetAlert Notification Script -->
+    @if (session('status'))
+    <script>
+        // Remove loading state when page loads with success message
+        document.addEventListener('DOMContentLoaded', function() {
+            const button = document.getElementById('resetButton');
+            const buttonText = document.getElementById('buttonText');
+            const buttonLoader = document.getElementById('buttonLoader');
+            
+            button.disabled = false;
+            buttonText.classList.remove('hidden');
+            buttonLoader.classList.add('hidden');
+        });
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: "{{ session('status') }}",
+            confirmButtonColor: '#000000',
+            confirmButtonText: 'OK'
+        });
+    </script>
+    @endif
+
+    @if ($errors->any())
+    <script>
+        // Remove loading state when page loads with error
+        document.addEventListener('DOMContentLoaded', function() {
+            const button = document.getElementById('resetButton');
+            const buttonText = document.getElementById('buttonText');
+            const buttonLoader = document.getElementById('buttonLoader');
+            
+            button.disabled = false;
+            buttonText.classList.remove('hidden');
+            buttonLoader.classList.add('hidden');
+        });
+
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            html: `
+                <ul style="text-align: left; padding-left: 20px; list-style: disc;">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            `,
+            confirmButtonColor: '#000000',
+            confirmButtonText: 'OK'
+        });
+    </script>
+    @endif
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;500;600;700&display=swap');
@@ -158,6 +234,11 @@
         /* Image overlay animation */
         .image-overlay {
             animation: fadeIn 1s ease-out;
+        }
+
+        /* SweetAlert custom styling */
+        .swal2-popup {
+            font-family: 'Poppins', sans-serif !important;
         }
 
         @media (max-width: 768px) {

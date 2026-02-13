@@ -39,7 +39,7 @@
                         Please enter your new password below. Make sure it's strong and secure.
                     </div>
 
-                    <form method="POST" action="{{ route('password.store') }}" class="space-y-4">
+                    <form method="POST" action="{{ route('password.store') }}" id="resetPasswordForm" class="space-y-4">
                         @csrf
 
                         <!-- Password Reset Token -->
@@ -54,7 +54,6 @@
                             required 
                             autocomplete="username"
                         />
-                        <x-input-error :messages="$errors->get('email')" class="mt-2" />
 
                         <!-- Password -->
                         <div>
@@ -76,7 +75,6 @@
                                     <i id="password-icon" class="far fa-eye"></i>
                                 </button>
                             </div>
-                            <x-input-error :messages="$errors->get('password')" class="mt-2" />
                         </div>
 
                         <!-- Confirm Password -->
@@ -99,7 +97,6 @@
                                     <i id="password_confirmation-icon" class="far fa-eye"></i>
                                 </button>
                             </div>
-                            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
                         </div>
 
                         <!-- Password Requirements -->
@@ -127,11 +124,18 @@
                             </ul>
                         </div>
 
-                        <!-- Submit Button -->
+                        <!-- Submit Button with Loading Effect -->
                         <button 
                             type="submit" 
+                            id="resetButton"
                             class="w-full bg-black text-white py-2.5 rounded-xl hover:bg-gray-800 transition font-semibold text-base btn-primary">
-                            Reset Password
+                            <span id="buttonText">Reset Password</span>
+                            <span id="buttonLoader" class="hidden">
+                                <svg class="animate-spin h-5 w-5 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </span>
                         </button>
 
                         <!-- Back to Login Link -->
@@ -149,6 +153,107 @@
             </div>
         </div>
     </div>
+
+    <!-- Font Awesome CDN for Eye Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Button Loading Effect Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('resetPasswordForm');
+            const button = document.getElementById('resetButton');
+            const buttonText = document.getElementById('buttonText');
+            const buttonLoader = document.getElementById('buttonLoader');
+
+            form.addEventListener('submit', function() {
+                // Show loading state
+                button.disabled = true;
+                buttonText.classList.add('hidden');
+                buttonLoader.classList.remove('hidden');
+            });
+        });
+
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const icon = document.getElementById(fieldId + '-icon');
+            
+            // Add scale animation
+            icon.parentElement.style.transform = 'scale(0.9) translateY(-50%)';
+            setTimeout(() => {
+                icon.parentElement.style.transform = 'scale(1) translateY(-50%)';
+            }, 100);
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                field.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
+
+    <!-- SweetAlert Notification Script -->
+    @if (session('status'))
+    <script>
+        // Remove loading state when page loads with success message
+        document.addEventListener('DOMContentLoaded', function() {
+            const button = document.getElementById('resetButton');
+            const buttonText = document.getElementById('buttonText');
+            const buttonLoader = document.getElementById('buttonLoader');
+            
+            button.disabled = false;
+            buttonText.classList.remove('hidden');
+            buttonLoader.classList.add('hidden');
+        });
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Password Reset Successful!',
+            text: 'Your password has been reset successfully. You can now login with your new password.',
+            confirmButtonColor: '#000000',
+            confirmButtonText: 'Go to Login'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "{{ route('login') }}";
+            }
+        });
+    </script>
+    @endif
+
+    @if ($errors->any())
+    <script>
+        // Remove loading state when page loads with error
+        document.addEventListener('DOMContentLoaded', function() {
+            const button = document.getElementById('resetButton');
+            const buttonText = document.getElementById('buttonText');
+            const buttonLoader = document.getElementById('buttonLoader');
+            
+            button.disabled = false;
+            buttonText.classList.remove('hidden');
+            buttonLoader.classList.add('hidden');
+        });
+
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            html: `
+                <ul style="text-align: left; padding-left: 20px; list-style: disc;">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            `,
+            confirmButtonColor: '#000000',
+            confirmButtonText: 'OK'
+        });
+    </script>
+    @endif
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;500;600;700&display=swap');
@@ -226,33 +331,15 @@
             animation: fadeIn 1s ease-out;
         }
 
+        /* SweetAlert custom styling */
+        .swal2-popup {
+            font-family: 'Poppins', sans-serif !important;
+        }
+
         @media (max-width: 768px) {
             .mobile-image {
                 height: 200px;
             }
         }
     </style>
-
-    <script>
-        function togglePassword(fieldId) {
-            const field = document.getElementById(fieldId);
-            const icon = document.getElementById(fieldId + '-icon');
-            
-            // Add scale animation
-            icon.parentElement.style.transform = 'scale(0.9) translateY(-50%)';
-            setTimeout(() => {
-                icon.parentElement.style.transform = 'scale(1) translateY(-50%)';
-            }, 100);
-            
-            if (field.type === 'password') {
-                field.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                field.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
-        }
-    </script>
 </x-guest-layout>

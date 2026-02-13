@@ -12,6 +12,7 @@
         <link rel="icon" type="image/x-icon" href="{{ asset('images/sunflower1.png') }}">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
         <!-- Tailwind CSS CDN -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])

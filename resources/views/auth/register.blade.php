@@ -80,13 +80,18 @@
             transition: all 0.3s ease;
         }
 
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
         }
 
-        .btn-primary:active {
+        .btn-primary:active:not(:disabled) {
             transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
         }
 
         /* Image overlay animation */
@@ -132,7 +137,7 @@
                 <h2 class="text-2xl font-bold mb-5 text-center text-gray-800">Create Account</h2>
 
                 <!-- FORM -->
-                <form method="POST" action="{{ route('register') }}">
+                <form method="POST" action="{{ route('register') }}" id="registerForm">
                     @csrf
 
                     <!-- Name -->
@@ -145,7 +150,7 @@
                             placeholder="Juan Dela Cruz"
                             value="{{ old('name') }}"
                             required autofocus
-                            class="w-full mt-1 px-3 py-2 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent transition input-enhanced"
+                            class="w-full mt-1 px-3 py-2 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent transition input-enhanced @error('name') border-red-500 @enderror"
                         />
                         @error('name')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -162,7 +167,7 @@
                             placeholder="juandelacruz"
                             value="{{ old('username') }}"
                             required
-                            class="w-full mt-1 px-3 py-2 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent transition input-enhanced"
+                            class="w-full mt-1 px-3 py-2 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent transition input-enhanced @error('username') border-red-500 @enderror"
                         />
                         @error('username')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -179,7 +184,7 @@
                             placeholder="juandelacruz@gmail.com"
                             value="{{ old('email') }}"
                             required
-                            class="w-full mt-1 px-3 py-2 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent transition input-enhanced"
+                            class="w-full mt-1 px-3 py-2 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent transition input-enhanced @error('email') border-red-500 @enderror"
                         />
                         @error('email')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -196,7 +201,7 @@
                                 name="password"
                                 placeholder="••••••••••••••••"
                                 required
-                                class="w-full mt-1 px-3 py-2 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent transition pr-10 input-enhanced"
+                                class="w-full mt-1 px-3 py-2 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent transition pr-10 input-enhanced @error('password') border-red-500 @enderror"
                             />
                             <button type="button" id="togglePassword" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition mt-0.5">
                                 <i class="far fa-eye"></i>
@@ -217,7 +222,7 @@
                                 name="password_confirmation"
                                 placeholder="••••••••••••••••"
                                 required
-                                class="w-full mt-1 px-3 py-2 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent transition pr-10 input-enhanced"
+                                class="w-full mt-1 px-3 py-2 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent transition pr-10 input-enhanced @error('password_confirmation') border-red-500 @enderror"
                             />
                             <button type="button" id="toggleConfirmPassword" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition mt-0.5">
                                 <i class="far fa-eye"></i>
@@ -231,8 +236,15 @@
                     <!-- Register Button -->
                     <button 
                         type="submit"
+                        id="registerButton"
                         class="w-full bg-black text-white py-2.5 rounded-xl hover:bg-gray-800 transition font-semibold text-base btn-primary">
-                        Register
+                        <span id="buttonText">Register</span>
+                        <span id="buttonLoader" class="hidden">
+                            <svg class="animate-spin h-5 w-5 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </span>
                     </button>
 
                     <!-- Login Link -->
@@ -244,6 +256,9 @@
             </div>
         </div>
     </div>
+
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         // Toggle password visibility with smooth animation
@@ -290,8 +305,8 @@
             }
         });
         
-        // Form validation
-        document.querySelector('form').addEventListener('submit', function(e) {
+        // Form validation and loading state
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
             const name = document.getElementById('name').value;
             const username = document.getElementById('username').value;
             const email = document.getElementById('email').value;
@@ -300,15 +315,48 @@
             
             if (!name || !username || !email || !password || !passwordConfirmation) {
                 e.preventDefault();
-                alert('Please fill in all required fields.');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Incomplete Form',
+                    text: 'Please fill in all required fields.',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#000000',
+                    showClass: {
+                        popup: 'animate__animated animate__fadeInDown'
+                    },
+                    hideClass: {
+                        popup: 'animate__animated animate__fadeOutUp'
+                    }
+                });
                 return;
             }
             
             if (password !== passwordConfirmation) {
                 e.preventDefault();
-                alert('Passwords do not match.');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Password Mismatch',
+                    text: 'Passwords do not match. Please try again.',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#000000',
+                    showClass: {
+                        popup: 'animate__animated animate__fadeInDown'
+                    },
+                    hideClass: {
+                        popup: 'animate__animated animate__fadeOutUp'
+                    }
+                });
                 return;
             }
+
+            // Show loading state
+            const button = document.getElementById('registerButton');
+            const buttonText = document.getElementById('buttonText');
+            const buttonLoader = document.getElementById('buttonLoader');
+            
+            button.disabled = true;
+            buttonText.classList.add('hidden');
+            buttonLoader.classList.remove('hidden');
         });
 
         // Add subtle hover effect to inputs
@@ -320,6 +368,80 @@
                 this.parentElement.style.transform = 'translateY(0)';
             });
         });
+
+        // Remove loading state when page loads (in case of errors)
+        document.addEventListener('DOMContentLoaded', function() {
+            const button = document.getElementById('registerButton');
+            const buttonText = document.getElementById('buttonText');
+            const buttonLoader = document.getElementById('buttonLoader');
+            
+            button.disabled = false;
+            buttonText.classList.remove('hidden');
+            buttonLoader.classList.add('hidden');
+        });
     </script>
+
+    <!-- SweetAlert for Registration Errors -->
+    @if ($errors->any())
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Registration Failed',
+                html: `
+                    <div class="text-left">
+                        @foreach ($errors->all() as $error)
+                            <p class="text-sm mb-1">• {{ $error }}</p>
+                        @endforeach
+                    </div>
+                `,
+                confirmButtonText: 'Try Again',
+                confirmButtonColor: '#000000',
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp'
+                }
+            });
+        </script>
+    @endif
+
+    <!-- SweetAlert for Success Messages -->
+    @if (session('status'))
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: "{{ session('status') }}",
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#10b981',
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp'
+                }
+            });
+        </script>
+    @endif
+
+    <!-- SweetAlert for Registration Success -->
+    @if (session('success'))
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Account Created!',
+                text: "{{ session('success') }}",
+                confirmButtonText: 'Continue',
+                confirmButtonColor: '#10b981',
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp'
+                }
+            });
+        </script>
+    @endif
 </body>
 </html>
