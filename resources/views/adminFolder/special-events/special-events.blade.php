@@ -1270,53 +1270,53 @@
         }
 
         // Edit event
-        function editEvent(bookingId) {
-            console.log('Editing special event ID:', bookingId);
-            fetch(`/admin/special-events/${bookingId}`)
-                .then(response => {
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Edit special event response:', data);
-                    if (data.success) {
-                        const booking = data.data;
-                        document.getElementById('edit_booking_id').value = booking.bookingID;
-                        document.getElementById('edit_guest_name').value = booking.guest_name;
-                        document.getElementById('edit_email').value = booking.email;
-                        document.getElementById('edit_phone').value = booking.phone;
-                        document.getElementById('edit_event_name').value = booking.event_name || '';
-                        document.getElementById('edit_booking_status').value = booking.booking_status;
-                        document.getElementById('edit_num_guests').value = booking.num_guests;
-                        document.getElementById('edit_total_price').value = parseFloat(booking.total_price).toFixed(2);
-                        document.getElementById('edit_special_requirements').value = booking.special_requirements || '';
-                        const eventDate = formatDateForInput(booking.checkin_date);
-                        document.getElementById('edit_checkin_date').value = eventDate;
-                        const startTime = formatTimeForInput(booking.event_start_time);
-                        const endTime = formatTimeForInput(booking.event_end_time);
-                        document.getElementById('edit_event_start_time').value = startTime;
-                        document.getElementById('edit_event_end_time').value = endTime;
-                        console.log('Formatted event details:', { date: eventDate, startTime: startTime, endTime: endTime });
-                        openEditModal();
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error Loading Event',
-                            text: data.message || 'Unknown error occurred',
-                            confirmButtonColor: '#7c3aed'
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading special event:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Connection Error',
-                        text: 'Error loading special event details',
-                        confirmButtonColor: '#7c3aed'
-                    });
-                });
-        }
+        // function editEvent(bookingId) {
+        //     console.log('Editing special event ID:', bookingId);
+        //     fetch(`/admin/special-events/${bookingId}`)
+        //         .then(response => {
+        //             if (!response.ok) throw new Error('Network response was not ok');
+        //             return response.json();
+        //         })
+        //         .then(data => {
+        //             console.log('Edit special event response:', data);
+        //             if (data.success) {
+        //                 const booking = data.data;
+        //                 document.getElementById('edit_booking_id').value = booking.bookingID;
+        //                 document.getElementById('edit_guest_name').value = booking.guest_name;
+        //                 document.getElementById('edit_email').value = booking.email;
+        //                 document.getElementById('edit_phone').value = booking.phone;
+        //                 document.getElementById('edit_event_name').value = booking.event_name || '';
+        //                 document.getElementById('edit_booking_status').value = booking.booking_status;
+        //                 document.getElementById('edit_num_guests').value = booking.num_guests;
+        //                 document.getElementById('edit_total_price').value = parseFloat(booking.total_price).toFixed(2);
+        //                 document.getElementById('edit_special_requirements').value = booking.special_requirements || '';
+        //                 const eventDate = formatDateForInput(booking.checkin_date);
+        //                 document.getElementById('edit_checkin_date').value = eventDate;
+        //                 const startTime = formatTimeForInput(booking.event_start_time);
+        //                 const endTime = formatTimeForInput(booking.event_end_time);
+        //                 document.getElementById('edit_event_start_time').value = startTime;
+        //                 document.getElementById('edit_event_end_time').value = endTime;
+        //                 console.log('Formatted event details:', { date: eventDate, startTime: startTime, endTime: endTime });
+        //                 openEditModal();
+        //             } else {
+        //                 Swal.fire({
+        //                     icon: 'error',
+        //                     title: 'Error Loading Event',
+        //                     text: data.message || 'Unknown error occurred',
+        //                     confirmButtonColor: '#7c3aed'
+        //                 });
+        //             }
+        //         })
+        //         .catch(error => {
+        //             console.error('Error loading special event:', error);
+        //             Swal.fire({
+        //                 icon: 'error',
+        //                 title: 'Connection Error',
+        //                 text: 'Error loading special event details',
+        //                 confirmButtonColor: '#7c3aed'
+        //             });
+        //         });
+        // }
     </script>
 </body>
 </html>

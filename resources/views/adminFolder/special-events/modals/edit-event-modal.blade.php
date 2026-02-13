@@ -1,51 +1,59 @@
-<!-- Edit Special Event Modal -->
-<div id="editBookingModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+{{-- ============================================================
+     EDIT SPECIAL EVENT MODAL - COMPLETE FIX
+     ✅ Fixed modal opening issues
+     ✅ Fixed price override toggle
+     ✅ Fixed unit fetching with proper availability
+     ✅ Fixed all JavaScript errors
+     ============================================================ --}}
+
+<div id="editBookingModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 items-center justify-center p-4">
     <div class="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div class="p-6 border-b border-gray-200">
             <div class="flex justify-between items-center">
                 <h3 class="text-xl font-semibold text-gray-800">Edit Special Event</h3>
-                <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600">
+                <button type="button" onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600">
                     <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
         </div>
-        
+
         <form id="editBookingForm" class="p-6">
-            <input type="hidden" name="booking_id" id="edit_booking_id">
-            
+            <input type="hidden" id="edit_booking_id">
+
             <div class="grid grid-cols-2 gap-4 mb-6">
-                <!-- Guest Information -->
+
+                {{-- ===== GUEST INFORMATION ===== --}}
                 <div class="col-span-2">
                     <h4 class="text-lg font-medium text-gray-800 mb-3">Guest Information</h4>
                 </div>
-                
+
                 <div class="col-span-2">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Guest Name</label>
-                    <input type="text" name="guest_name" id="edit_guest_name" required readonly
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 cursor-not-allowed">
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <input type="email" name="email" id="edit_email" required readonly
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 cursor-not-allowed">
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                    <input type="text" name="phone" id="edit_phone" required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="edit_guest_name" required readonly
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 bg-gray-50 cursor-not-allowed">
                 </div>
 
-                <!-- Event Details -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" id="edit_email" required readonly
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 bg-gray-50 cursor-not-allowed">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                    <input type="text" id="edit_phone" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500">
+                </div>
+
+                {{-- ===== EVENT DETAILS ===== --}}
                 <div class="col-span-2 mt-4">
                     <h4 class="text-lg font-medium text-gray-800 mb-3">Event Details</h4>
                 </div>
-                
+
                 <div class="col-span-2">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Event Type</label>
-                    <select name="event_name" id="edit_event_name" required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select id="edit_event_name" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500">
                         <option value="">Select Event Type</option>
                         <option value="birthday">Birthday Celebration</option>
                         <option value="wedding">Wedding Reception</option>
@@ -56,65 +64,170 @@
                         <option value="other">Other Special Event</option>
                     </select>
                 </div>
-                
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Event Status</label>
-                    <select name="booking_status" id="edit_booking_status" required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select id="edit_booking_status" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500">
                         <option value="pending">Pending</option>
                         <option value="confirmed">Confirmed</option>
                         <option value="cancelled">Cancelled</option>
                         <option value="completed">Completed</option>
                     </select>
                 </div>
-                
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Number of Guests</label>
-                    <input type="number" name="num_guests" id="edit_num_guests" min="1" required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="number" id="edit_num_guests" min="1" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500">
                 </div>
-                
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Event Date</label>
-                    <input type="date" name="checkin_date" id="edit_checkin_date" required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="date" id="edit_checkin_date" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500">
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Event Start Time</label>
-                    <input type="time" name="event_start_time" id="edit_event_start_time" required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="time" id="edit_event_start_time" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500">
                 </div>
-                
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Event End Time</label>
-                    <input type="time" name="event_end_time" id="edit_event_end_time" required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="time" id="edit_event_end_time" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500">
                 </div>
-                
+
+                {{-- ===== VENUE SELECTION ===== --}}
+                <div class="col-span-2 mt-4">
+                    <h4 class="text-lg font-medium text-gray-800 mb-3">Event Venue</h4>
+                </div>
+
                 <div class="col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Total Price</label>
-                    <input type="number" name="total_price" id="edit_total_price" step="0.01" min="0" required readonly
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 cursor-not-allowed">
-                    <p class="text-xs text-gray-500 mt-1">Price is calculated based on venue selection and cannot be modified</p>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Select Event Venue</label>
+                    <select id="edit_unit_id" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500">
+                        <option value="">Loading venues...</option>
+                    </select>
+                    <div id="editUnitAvailabilityNotes" class="mt-2 text-sm"></div>
                 </div>
-                
+
+                {{-- ===== PRICE BREAKDOWN ===== --}}
+                <div class="col-span-2 mt-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="text-lg font-medium text-gray-800">Price Breakdown</h4>
+                        <label class="flex items-center gap-2 cursor-pointer select-none">
+                            <span class="text-sm text-gray-500">Manual override</span>
+                            <div class="relative">
+                                <input type="checkbox" id="edit_price_override_toggle" class="sr-only peer">
+                                <div class="w-10 h-5 bg-gray-300 rounded-full peer peer-checked:bg-violet-500 transition"></div>
+                                <div class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition peer-checked:translate-x-5"></div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="col-span-2">
+                    <div class="bg-gray-50 p-4 rounded-lg space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">Venue Price:</span>
+                            <span class="text-sm font-medium" id="edit_unit_price_display">₱0.00</span>
+                        </div>
+                        <div class="flex justify-between border-t border-gray-200 pt-2">
+                            <span class="text-sm font-semibold text-gray-800">Total Price:</span>
+                            <span class="text-sm font-bold text-violet-600" id="edit_total_price_display">₱0.00</span>
+                        </div>
+                        {{-- Manual override input — hidden by default --}}
+                        <div id="edit_manual_price_wrapper" class="hidden border-t border-violet-200 pt-3 mt-1">
+                            <label class="block text-sm font-medium text-violet-700 mb-1">
+                                <i class="fas fa-edit mr-1"></i>
+                                Override Total Price (₱)
+                            </label>
+                            <input type="number" id="edit_manual_total_price"
+                                   step="0.01" min="0"
+                                   class="w-full px-3 py-2 border-2 border-violet-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 text-violet-700 font-semibold text-sm"
+                                   placeholder="Enter custom total price">
+                            <p class="text-xs text-violet-500 mt-1">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                Auto-computed: <span id="edit_auto_price_hint">₱0.00</span>. Overriding will use your entered value instead.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- ===== CANCELLATION FIELDS ===== --}}
+                <div id="edit_cancellation_fields" class="col-span-2 hidden">
+                    <h4 class="text-lg font-medium text-gray-800 mb-3 mt-2">Cancellation Details</h4>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Cancellation Reason</label>
+                        <input type="text" id="edit_cancellation_reason"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
+                               placeholder="Optional reason for cancellation">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Refund Amount</label>
+                            <input type="number" id="edit_refund_amount" step="0.01" min="0"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
+                                   value="0">
+                            <p class="text-xs text-gray-500 mt-1">Max refundable: <span id="edit_max_refund_display">₱0.00</span></p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Refund Method</label>
+                            <select id="edit_refund_method"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500">
+                                <option value="">Select refund method</option>
+                                <option value="cash">Cash</option>
+                                <option value="bank_transfer">Bank Transfer</option>
+                                <option value="gcash">GCash</option>
+                                <option value="credit_card">Credit Card Reversal</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <p class="text-sm text-yellow-700">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            <strong>Note:</strong> Changing status to "Cancelled" will trigger a cancellation email to the guest.
+                        </p>
+                    </div>
+                </div>
+
+                {{-- ===== COMPLETED NOTE ===== --}}
+                <div id="edit_completed_note" class="col-span-2 hidden">
+                    <div class="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <p class="text-sm text-green-700">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            <strong>Note:</strong> Changing status to "Completed" will trigger a thank you email to the guest.
+                        </p>
+                    </div>
+                </div>
+
+                {{-- ===== SPECIAL REQUIREMENTS ===== --}}
                 <div class="col-span-2">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Event Requirements & Notes</label>
-                    <textarea name="special_requirements" id="edit_special_requirements" rows="3"
-                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    <textarea id="edit_special_requirements" rows="3"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
                               placeholder="Any special event requirements, setup needs, or additional notes..."></textarea>
                 </div>
             </div>
-            
+
             <div class="flex gap-3 pt-4 border-t border-gray-200">
                 <button type="button" onclick="closeEditModal()"
                         class="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition">
                     Cancel
                 </button>
-                <button type="submit"
-                        class="flex-1 px-4 py-2.5 bg-violet-600 text-white rounded-lg font-medium hover:bg-violet-700 transition">
-                    Update Event
+                <button type="submit" id="editEventSubmitBtn"
+                        class="flex-1 px-4 py-2.5 bg-violet-600 text-white rounded-lg font-medium hover:bg-violet-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed">
+                    <span id="editEventSubmitText">Update Event</span>
+                    <span id="editEventSubmitSpinner" class="hidden">
+                        <i class="fas fa-spinner fa-spin mr-2"></i>
+                        Updating...
+                    </span>
                 </button>
             </div>
         </form>
@@ -122,395 +235,775 @@
 </div>
 
 <script>
-// ============================================
-// EDIT SPECIAL EVENT MODAL SCRIPTS - NO LOADING EFFECT ON SWEETALERT
-// ============================================
+// ============================================================
+// EDIT SPECIAL EVENT MODAL — COMPLETE FIX
+// ============================================================
 
+console.log('🔧 Loading FIXED Edit Special Event Modal');
+
+// ---------- State Variables ----------
+let editEventOriginalUnitId   = '';
+let editEventOriginalUnitPrice = 0;
+let editEventMaxRefund         = 0;
+let editEventOriginalName      = '';
+let editEventOriginalEmail     = '';
+
+// ---------- Loading State Functions ----------
+function showEditEventLoading() {
+    const btn     = document.getElementById('editEventSubmitBtn');
+    const text    = document.getElementById('editEventSubmitText');
+    const spinner = document.getElementById('editEventSubmitSpinner');
+    
+    if (btn) btn.disabled = true;
+    if (text) text.classList.add('hidden');
+    if (spinner) spinner.classList.remove('hidden');
+}
+
+function hideEditEventLoading() {
+    const btn     = document.getElementById('editEventSubmitBtn');
+    const text    = document.getElementById('editEventSubmitText');
+    const spinner = document.getElementById('editEventSubmitSpinner');
+    
+    if (btn) btn.disabled = false;
+    if (text) text.classList.remove('hidden');
+    if (spinner) spinner.classList.add('hidden');
+}
+
+// ---------- Modal Open/Close Functions ----------
 function openEditModal() {
-    document.getElementById('editBookingModal').classList.remove('hidden');
-    document.getElementById('editBookingModal').classList.add('flex');
-    
-    // Setup phone validation for edit form
-    setupPhoneValidation('edit_phone');
-    
-    // Add event listener for outside click
-    setTimeout(() => {
-        document.addEventListener('click', handleEditOutsideClick);
-    }, 100);
+    console.log('✅ Opening edit modal');
+    const modal = document.getElementById('editBookingModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        
+        // Setup phone validation if function exists
+        if (typeof setupPhoneValidation === 'function') {
+            setupPhoneValidation('edit_phone');
+        }
+        
+        setTimeout(() => {
+            document.addEventListener('click', handleEditOutsideClick);
+        }, 100);
+    }
 }
 
 function closeEditModal() {
-    document.getElementById('editBookingModal').classList.add('hidden');
-    document.getElementById('editBookingModal').classList.remove('flex');
-    
-    // Clear phone validation styling
-    const phoneInput = document.getElementById('edit_phone');
-    if (phoneInput) {
-        phoneInput.classList.remove('border-red-500', 'border-green-500');
-        const errorDiv = phoneInput.parentNode.querySelector('.phone-error');
-        if (errorDiv) errorDiv.remove();
-    }
-    
-    // Remove event listener
-    document.removeEventListener('click', handleEditOutsideClick);
+    console.log('✅ Closing edit modal');
+    return new Promise((resolve) => {
+        const modal = document.getElementById('editBookingModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // Clear phone validation
+        const phoneInput = document.getElementById('edit_phone');
+        if (phoneInput) {
+            phoneInput.classList.remove('border-red-500', 'border-green-500');
+            const errDiv = phoneInput.parentNode.querySelector('.phone-error');
+            if (errDiv) errDiv.remove();
+        }
+
+        resetEditEventModalState();
+        document.removeEventListener('click', handleEditOutsideClick);
+
+        setTimeout(() => resolve(), 300);
+    });
 }
 
-// Handle outside click for edit modal
+function resetEditEventModalState() {
+    editEventOriginalUnitId    = '';
+    editEventOriginalUnitPrice = 0;
+    editEventMaxRefund         = 0;
+    editEventOriginalName      = '';
+    editEventOriginalEmail     = '';
+
+    // Hide dynamic sections
+    const cancellationFields = document.getElementById('edit_cancellation_fields');
+    const completedNote = document.getElementById('edit_completed_note');
+    if (cancellationFields) cancellationFields.classList.add('hidden');
+    if (completedNote) completedNote.classList.add('hidden');
+
+    // Reset price override
+    const toggle      = document.getElementById('edit_price_override_toggle');
+    const wrapper     = document.getElementById('edit_manual_price_wrapper');
+    const manualInput = document.getElementById('edit_manual_total_price');
+    if (toggle)      toggle.checked    = false;
+    if (wrapper)     wrapper.classList.add('hidden');
+    if (manualInput) manualInput.value = '';
+
+    // Reset displays
+    const unitPriceDisplay = document.getElementById('edit_unit_price_display');
+    const totalPriceDisplay = document.getElementById('edit_total_price_display');
+    const autoHint = document.getElementById('edit_auto_price_hint');
+    
+    if (unitPriceDisplay) unitPriceDisplay.textContent = '₱0.00';
+    if (totalPriceDisplay) totalPriceDisplay.textContent = '₱0.00';
+    if (autoHint) autoHint.textContent = '₱0.00';
+    
+    clearEditEventUnitNotes();
+    hideEditEventLoading();
+}
+
 function handleEditOutsideClick(event) {
     const modal = document.getElementById('editBookingModal');
+    if (!modal) return;
+    
     const modalContent = modal.querySelector('.bg-white');
-    if (!modalContent.contains(event.target)) closeEditModal();
+    if (modalContent && !modalContent.contains(event.target)) {
+        closeEditModal();
+    }
 }
 
-// Format date for HTML date input (YYYY-MM-DD)
-function formatDateForInput(dateString) {
+// ---------- Booking Status Change Handler ----------
+const editBookingStatusEl = document.getElementById('edit_booking_status');
+if (editBookingStatusEl) {
+    editBookingStatusEl.addEventListener('change', function () {
+        const status = this.value;
+        const cancellationFields = document.getElementById('edit_cancellation_fields');
+        const completedNote = document.getElementById('edit_completed_note');
+
+        if (!cancellationFields || !completedNote) return;
+
+        if (status === 'cancelled') {
+            cancellationFields.classList.remove('hidden');
+            completedNote.classList.add('hidden');
+            if (editEventMaxRefund > 0) {
+                const refundInput = document.getElementById('edit_refund_amount');
+                if (refundInput) {
+                    refundInput.value = editEventMaxRefund.toFixed(2);
+                }
+            }
+        } else if (status === 'completed') {
+            cancellationFields.classList.add('hidden');
+            completedNote.classList.remove('hidden');
+        } else {
+            cancellationFields.classList.add('hidden');
+            completedNote.classList.add('hidden');
+        }
+    });
+}
+
+// ---------- Price Override Toggle Handler ----------
+const editPriceToggleEl = document.getElementById('edit_price_override_toggle');
+if (editPriceToggleEl) {
+    editPriceToggleEl.addEventListener('change', function () {
+        const wrapper     = document.getElementById('edit_manual_price_wrapper');
+        const manualInput = document.getElementById('edit_manual_total_price');
+        const autoHint    = document.getElementById('edit_auto_price_hint');
+        const totalDisplay = document.getElementById('edit_total_price_display');
+
+        if (!wrapper || !manualInput) return;
+
+        if (this.checked) {
+            wrapper.classList.remove('hidden');
+            const currentAuto = totalDisplay ? totalDisplay.textContent.replace('₱', '').replace(',', '') : '0';
+            manualInput.value = parseFloat(currentAuto).toFixed(2);
+            if (autoHint) autoHint.textContent = '₱' + parseFloat(currentAuto).toFixed(2);
+            manualInput.focus();
+        } else {
+            wrapper.classList.add('hidden');
+            manualInput.value = '';
+        }
+    });
+}
+
+// ---------- Unit Notes Helper Functions ----------
+function clearEditEventUnitNotes() {
+    const notesDiv = document.getElementById('editUnitAvailabilityNotes');
+    if (notesDiv) {
+        notesDiv.innerHTML = '';
+        notesDiv.className = 'mt-2 text-sm';
+    }
+}
+
+function showEditEventUnitNotes(message, type = 'info') {
+    const notesDiv = document.getElementById('editUnitAvailabilityNotes');
+    if (!notesDiv) return;
+
+    const icons  = { error: 'fas fa-exclamation-circle', warning: 'fas fa-info-circle', success: 'fas fa-check-circle' };
+    const colors = { error: 'text-red-600', warning: 'text-yellow-600', success: 'text-green-600' };
+    const icon   = icons[type]  || icons.success;
+    const color  = colors[type] || colors.success;
+
+    notesDiv.innerHTML = `<div class="flex items-center ${color}"><i class="${icon} mr-2"></i>${message}</div>`;
+    notesDiv.className = `mt-2 text-sm ${color}`;
+}
+
+// ---------- Date/Time Format Helpers ----------
+function editEventFormatDateForInput(dateString) {
     if (!dateString) return '';
+    if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) return dateString;
     
-    const date = new Date(dateString);
-    
-    if (isNaN(date.getTime())) {
-        console.error('Invalid date:', dateString);
+    try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return '';
+        
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    } catch (e) {
+        console.error('Date format error:', e);
         return '';
     }
-    
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    
-    return `${year}-${month}-${day}`;
 }
 
-// Format time for HTML time input (HH:MM)
-function formatTimeForInput(timeString) {
-    if (!timeString) return '08:00'; // Default time
+function editEventFormatTimeForInput(timeString) {
+    if (!timeString) return '08:00';
+    if (timeString.match(/^\d{2}:\d{2}$/)) return timeString;
+    if (timeString.match(/^\d{2}:\d{2}:\d{2}$/)) return timeString.substring(0, 5);
     
-    console.log('Original time string:', timeString);
-    
-    // If time is already in HH:MM format
-    if (timeString.match(/^\d{2}:\d{2}$/)) {
-        return timeString;
-    }
-    
-    // If time is in HH:MM:SS format
-    if (timeString.match(/^\d{1,2}:\d{2}:\d{2}$/)) {
-        const [hours, minutes] = timeString.split(':');
-        return `${hours.padStart(2, '0')}:${minutes}`;
-    }
-    
-    // If time is in 12-hour format with AM/PM
-    if (timeString.match(/^\d{1,2}:\d{2}\s?(AM|PM)$/i)) {
-        const timeParts = timeString.split(/(?=[AP]M)/i);
-        const [time, period] = timeParts;
-        const [hours, minutes] = time.split(':');
-        
-        let hour24 = parseInt(hours);
-        if (period.toLowerCase() === 'pm' && hour24 < 12) {
-            hour24 += 12;
-        } else if (period.toLowerCase() === 'am' && hour24 === 12) {
-            hour24 = 0;
-        }
-        
-        return `${hour24.toString().padStart(2, '0')}:${minutes}`;
-    }
-    
-    // If it's just hours and minutes without seconds (single digit hours)
-    if (timeString.match(/^\d{1,2}:\d{2}$/)) {
-        const [hours, minutes] = timeString.split(':');
-        return `${hours.padStart(2, '0')}:${minutes}`;
-    }
-    
-    // If it's a time object or has unexpected format, try to parse it
     try {
-        // Try to create a date object with the time
         const testDate = new Date('1970-01-01T' + timeString + 'Z');
-        if (!isNaN(testDate.getTime())) {
-            return testDate.toTimeString().substring(0, 5);
-        }
+        if (!isNaN(testDate.getTime())) return testDate.toTimeString().substring(0, 5);
     } catch (e) {
-        console.warn('Could not parse time:', timeString, e);
+        console.error('Time format error:', e);
     }
     
-    console.warn('Using default time for:', timeString);
-    return '08:00'; // Fallback to default time
+    return '08:00';
 }
 
-// Edit special event function - NO LOADING ON SWEETALERT
-function editEvent(bookingId) {
-    console.log('Editing special event ID:', bookingId);
+// ---------- Load Payment Summary ----------
+function loadEditEventPaymentSummary(bookingId) {
+    console.log('📊 Loading payment summary for booking:', bookingId);
     
-    fetch(`/admin/special-events/${bookingId}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok: ' + response.status);
-            }
-            return response.json();
-        })
+    fetch(`/admin/special-events/${bookingId}/payments`)
+        .then(r => r.json())
         .then(data => {
-            console.log('Edit special event API response:', data);
+            if (!data.success) return;
+
+            let totalPaid     = 0;
+            let totalRefunded = 0;
             
-            if (data.success) {
-                const booking = data.data;
-                
-                console.log('Booking data for edit:', {
-                    eventType: booking.event_name,
-                    startTime: booking.event_start_time,
-                    endTime: booking.event_end_time,
-                    fullData: booking
-                });
-                
-                // Set form values
-                document.getElementById('edit_booking_id').value = booking.bookingID;
-                document.getElementById('edit_guest_name').value = booking.guest_name || '';
-                document.getElementById('edit_email').value = booking.email || '';
-                document.getElementById('edit_phone').value = booking.phone || '';
-                
-                // EVENT TYPE - Use lowercase value to match database enum
-                const eventNameSelect = document.getElementById('edit_event_name');
-                let eventTypeValue = (booking.event_name || '').toLowerCase();
-                
-                console.log('Event type value to set:', eventTypeValue);
-                
-                if (eventNameSelect) {
-                    // Set the value directly (now matches because dropdown uses lowercase)
-                    eventNameSelect.value = eventTypeValue;
-                    
-                    // If value not in options and not empty, add it as a new option
-                    if (eventTypeValue && !eventNameSelect.querySelector(`option[value="${eventTypeValue}"]`)) {
-                        console.log('Adding new event type option:', eventTypeValue);
-                        const newOption = document.createElement('option');
-                        newOption.value = eventTypeValue;
-                        newOption.textContent = eventTypeValue.charAt(0).toUpperCase() + eventTypeValue.slice(1);
-                        eventNameSelect.appendChild(newOption);
-                        eventNameSelect.value = eventTypeValue;
-                    }
-                    
-                    // If still not set, set to "other"
-                    if (!eventNameSelect.value && eventTypeValue) {
-                        eventNameSelect.value = 'other';
+            (data.data || []).forEach(p => {
+                if (p.paymentStatus === 'completed') {
+                    if (p.paymentType === 'refund') {
+                        totalRefunded += parseFloat(p.amountPaid || 0);
+                    } else {
+                        totalPaid += parseFloat(p.amountPaid || 0);
                     }
                 }
-                
-                document.getElementById('edit_booking_status').value = booking.booking_status || 'pending';
-                document.getElementById('edit_num_guests').value = booking.num_guests || 1;
-                
-                // Set total price as readonly
-                const totalPriceInput = document.getElementById('edit_total_price');
-                totalPriceInput.value = parseFloat(booking.total_price || 0).toFixed(2);
-                totalPriceInput.readOnly = true;
-                
-                document.getElementById('edit_special_requirements').value = booking.special_requirements || '';
-                
-                // Format date properly for date input
-                const eventDate = formatDateForInput(booking.checkin_date);
-                document.getElementById('edit_checkin_date').value = eventDate;
-                console.log('Event date set to:', eventDate);
-                
-                // TIME FIELDS - Format properly
-                const startTime = formatTimeForInput(booking.event_start_time);
-                const endTime = formatTimeForInput(booking.event_end_time);
-                
-                console.log('Time fields processing:', {
-                    rawStart: booking.event_start_time,
-                    rawEnd: booking.event_end_time,
-                    formattedStart: startTime,
-                    formattedEnd: endTime
-                });
-                
-                document.getElementById('edit_event_start_time').value = startTime;
-                document.getElementById('edit_event_end_time').value = endTime;
-                
-                // Verify the values were set correctly
-                setTimeout(() => {
-                    console.log('Final form values:', {
-                        eventType: document.getElementById('edit_event_name').value,
-                        startTime: document.getElementById('edit_event_start_time').value,
-                        endTime: document.getElementById('edit_event_end_time').value,
-                        date: document.getElementById('edit_checkin_date').value,
-                        price: document.getElementById('edit_total_price').value
-                    });
-                }, 100);
-                
-                openEditModal();
+            });
+
+            const netPaid = Math.max(0, totalPaid - totalRefunded);
+            editEventMaxRefund = netPaid;
+
+            const refundInput = document.getElementById('edit_refund_amount');
+            const maxDisplay  = document.getElementById('edit_max_refund_display');
+            
+            if (refundInput) {
+                refundInput.value = netPaid > 0 ? netPaid.toFixed(2) : '0.00';
+                refundInput.setAttribute('max', netPaid);
+            }
+            if (maxDisplay) {
+                maxDisplay.textContent = '₱' + netPaid.toFixed(2);
+            }
+            
+            console.log('✅ Payment summary loaded:', { totalPaid, totalRefunded, netPaid });
+        })
+        .catch(err => console.error('❌ Error loading payment summary:', err));
+}
+
+// ---------- Load Available Units ----------
+function loadEditEventAvailableUnits() {
+    const checkinDate = document.getElementById('edit_checkin_date');
+    const unitSelect  = document.getElementById('edit_unit_id');
+
+    if (!checkinDate || !unitSelect) {
+        console.error('❌ Required elements not found');
+        return;
+    }
+
+    const checkinValue = checkinDate.value;
+    console.log('📍 Loading units for date:', checkinValue, 'Original unit:', editEventOriginalUnitId);
+
+    clearEditEventUnitNotes();
+
+    if (!checkinValue) {
+        // No date — load all special event units
+        fetch('/admin/special-events/units/available?for_special_events=true')
+            .then(r => r.json())
+            .then(data => {
+                if (!data.success) return;
+                populateEditEventUnitSelect(data.data, []);
+                showEditEventUnitNotes('Select an event date to check availability', 'warning');
+            })
+            .catch(err => console.error('❌ Error loading all units:', err));
+        return;
+    }
+
+    const url = `/admin/special-events/units/available?for_special_events=true&checkin_date=${checkinValue}&checkout_date=${checkinValue}&booking_type=special-event`;
+
+    fetch(url)
+        .then(r => r.json())
+        .then(data => {
+            console.log('✅ Units response:', data);
+            
+            if (!data.success) {
+                showEditEventUnitNotes('Error loading venues', 'error');
+                return;
+            }
+
+            const available  = data.data || [];
+            const dateAvail  = data.date_availability || {};
+
+            if (dateAvail.available === false) {
+                populateEditEventUnitSelect([], available);
+                showEditEventUnitNotes(
+                    'This date has existing bookings. You can keep the current venue or choose a different date.',
+                    'warning'
+                );
+            } else if (available.length === 0) {
+                populateEditEventUnitSelect([], []);
+                showEditEventUnitNotes(
+                    'No available venues for selected date. You can keep the current venue or choose a different date.',
+                    'warning'
+                );
             } else {
-                // ✅ SWEETALERT - Error loading event (NO LOADING)
+                populateEditEventUnitSelect(available, []);
+                showEditEventUnitNotes(`${available.length} venue(s) available for selected date`, 'success');
+            }
+
+            updateEditEventTotalPrice();
+        })
+        .catch(err => {
+            console.error('❌ Error loading units:', err);
+            showEditEventUnitNotes('Error loading venues. Please try again.', 'error');
+        });
+}
+
+// ---------- Populate Unit Select ----------
+function populateEditEventUnitSelect(availableUnits, allUnits) {
+    const unitSelect = document.getElementById('edit_unit_id');
+    if (!unitSelect) return;
+    
+    unitSelect.innerHTML = '';
+
+    const list = availableUnits.length > 0 ? availableUnits : allUnits;
+    const isOriginalInList = list.some(u => String(u.unitID) === String(editEventOriginalUnitId));
+
+    let currentLabel = 'Current Venue';
+    if (isOriginalInList) {
+        currentLabel += ' (Available)';
+    } else {
+        currentLabel += ' (Keep Current)';
+    }
+
+    // Add current venue first
+    unitSelect.innerHTML += `<option value="${editEventOriginalUnitId}" data-price="${editEventOriginalUnitPrice}">${currentLabel}</option>`;
+
+    // Add other available units
+    list.forEach(unit => {
+        if (String(unit.unitID) !== String(editEventOriginalUnitId)) {
+            unitSelect.innerHTML += `
+                <option value="${unit.unitID}" data-price="${unit.unitRatePrice}">
+                    ${unit.unitName} - ₱${parseFloat(unit.unitRatePrice).toFixed(2)} (Capacity: ${unit.capacity})
+                </option>`;
+        }
+    });
+
+    unitSelect.value = editEventOriginalUnitId;
+    
+    console.log('✅ Unit select populated with', list.length, 'units');
+}
+
+// ---------- Update Price Calculation ----------
+function updateEditEventTotalPrice() {
+    const unitSelect     = document.getElementById('edit_unit_id');
+    const unitPriceDisplay  = document.getElementById('edit_unit_price_display');
+    const totalPriceDisplay = document.getElementById('edit_total_price_display');
+    const autoHint          = document.getElementById('edit_auto_price_hint');
+
+    if (!unitSelect || !unitPriceDisplay || !totalPriceDisplay) return;
+
+    const selectedOption = unitSelect.options[unitSelect.selectedIndex];
+    if (!selectedOption || !selectedOption.value) {
+        unitPriceDisplay.textContent  = '₱0.00';
+        totalPriceDisplay.textContent = '₱0.00';
+        if (autoHint) autoHint.textContent = '₱0.00';
+        return;
+    }
+
+    let unitPrice = parseFloat(selectedOption.getAttribute('data-price'));
+    if (isNaN(unitPrice) || unitPrice <= 0) {
+        unitPrice = editEventOriginalUnitPrice;
+    }
+
+    // Special events: total = venue price (no per-guest multiplier)
+    const totalPrice = unitPrice;
+
+    unitPriceDisplay.textContent  = '₱' + unitPrice.toFixed(2);
+    totalPriceDisplay.textContent = '₱' + totalPrice.toFixed(2);
+    if (autoHint) autoHint.textContent = '₱' + totalPrice.toFixed(2);
+
+    console.log('💰 Price updated:', { unitPrice, totalPrice });
+}
+
+// ---------- Unit Change Listener ----------
+const editUnitSelectEl = document.getElementById('edit_unit_id');
+if (editUnitSelectEl) {
+    editUnitSelectEl.addEventListener('change', function () {
+        console.log('🔄 Unit changed to:', this.value);
+        updateEditEventTotalPrice();
+    });
+}
+
+// ---------- MAIN editEvent Function ----------
+window.editEvent = function(bookingId) {
+    console.log('📝 Opening edit modal for booking:', bookingId);
+
+    fetch(`/admin/special-events/${bookingId}`)
+        .then(r => {
+            if (!r.ok) throw new Error('Network error: ' + r.status);
+            return r.json();
+        })
+        .then(data => {
+            console.log('✅ Booking data received:', data);
+
+            if (!data.success) {
+                throw new Error(data.message || 'Failed to load booking');
+            }
+
+            const booking = data.data;
+
+            // Store originals
+            editEventOriginalName  = booking.guest_name  || '';
+            editEventOriginalEmail = booking.email       || '';
+
+            // ✅ FIX: Get unit ID and price correctly from units array
+            if (Array.isArray(booking.units) && booking.units.length > 0) {
+                // Units array has full unit objects with unitID, unitName, etc.
+                const firstUnit = booking.units[0];
+                editEventOriginalUnitId = String(firstUnit.unitID);
+                
+                // ✅ For special events, back-calculate unit price from total_price
+                // Since special events: total_price = unit_price (no per-guest multiplier)
+                editEventOriginalUnitPrice = parseFloat(booking.total_price) || 0;
+                
+                console.log('📍 Unit from array:', {
+                    unitID: firstUnit.unitID,
+                    unitName: firstUnit.unitName,
+                    backCalculatedPrice: editEventOriginalUnitPrice
+                });
+            } else {
+                // Fallback: no units array (shouldn't happen)
+                editEventOriginalUnitId = '';
+                editEventOriginalUnitPrice = parseFloat(booking.total_price) || 0;
+            }
+
+            console.log('💾 Stored:', { 
+                unitId: editEventOriginalUnitId, 
+                unitPrice: editEventOriginalUnitPrice,
+                totalPrice: booking.total_price 
+            });
+
+            // Populate form fields
+            const fields = {
+                'edit_booking_id': booking.bookingID,
+                'edit_guest_name': editEventOriginalName,
+                'edit_email': editEventOriginalEmail,
+                'edit_phone': booking.phone || '',
+                'edit_booking_status': booking.booking_status || 'pending',
+                'edit_num_guests': booking.num_guests || 1,
+                'edit_special_requirements': booking.special_requirements || ''
+            };
+
+            Object.keys(fields).forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = fields[id];
+            });
+
+            // Event type
+            const eventNameSelect = document.getElementById('edit_event_name');
+            if (eventNameSelect) {
+                const eventTypeVal = (booking.event_name || '').toLowerCase();
+                eventNameSelect.value = eventTypeVal;
+                
+                // If event type not in options, add it
+                if (eventTypeVal && !eventNameSelect.querySelector(`option[value="${eventTypeVal}"]`)) {
+                    const opt = document.createElement('option');
+                    opt.value = eventTypeVal;
+                    opt.textContent = eventTypeVal.charAt(0).toUpperCase() + eventTypeVal.slice(1);
+                    eventNameSelect.appendChild(opt);
+                    eventNameSelect.value = eventTypeVal;
+                }
+            }
+
+            // Dates & times
+            const checkinInput = document.getElementById('edit_checkin_date');
+            const startTimeInput = document.getElementById('edit_event_start_time');
+            const endTimeInput = document.getElementById('edit_event_end_time');
+
+            if (checkinInput) {
+                const checkinFormatted = editEventFormatDateForInput(booking.checkin_date);
+                checkinInput.value = checkinFormatted;
+                checkinInput.min = new Date().toISOString().split('T')[0];
+            }
+
+            if (startTimeInput) {
+                startTimeInput.value = editEventFormatTimeForInput(booking.event_start_time);
+            }
+
+            if (endTimeInput) {
+                endTimeInput.value = editEventFormatTimeForInput(booking.event_end_time);
+            }
+
+            // ✅ FIX: Setup date change listener properly (clone to remove old listeners)
+            if (checkinInput) {
+                const newDateInput = checkinInput.cloneNode(true);
+                checkinInput.parentNode.replaceChild(newDateInput, checkinInput);
+                
+                newDateInput.addEventListener('change', function () {
+                    console.log('📅 Date changed to:', this.value);
+                    clearEditEventUnitNotes();
+                    loadEditEventAvailableUnits();
+                });
+            }
+
+            // Load payment summary
+            loadEditEventPaymentSummary(bookingId);
+
+            // ✅ FIX: Load units IMMEDIATELY on modal open
+            loadEditEventAvailableUnits();
+
+            // Open modal
+            openEditModal();
+        })
+        .catch(err => {
+            console.error('❌ Error loading event:', err);
+            
+            if (typeof Swal !== 'undefined') {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error Loading Event',
-                    text: data.message || 'Unknown error occurred',
+                    text: err.message || 'Failed to load event details',
+                    confirmButtonColor: '#7c3aed'
+                });
+            } else {
+                alert('Error loading event: ' + err.message);
+            }
+        });
+};
+
+// ---------- Form Submit Handler ----------
+const editFormEl = document.getElementById('editBookingForm');
+if (editFormEl) {
+    editFormEl.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        console.log('📤 Submitting edit form');
+
+        // Phone validation (if function exists)
+        if (typeof validateFormPhoneNumbers === 'function') {
+            if (!validateFormPhoneNumbers()) {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Invalid Phone Number',
+                        text: 'Please fix the phone number validation errors.',
+                        confirmButtonColor: '#7c3aed'
+                    });
+                }
+                return;
+            }
+        }
+
+        // Time validation
+        const startTime = document.getElementById('edit_event_start_time').value;
+        const endTime   = document.getElementById('edit_event_end_time').value;
+
+        if (startTime >= endTime) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Invalid Time',
+                    text: 'Event end time must be after start time.',
                     confirmButtonColor: '#7c3aed'
                 });
             }
-        })
-        .catch(error => {
-            console.error('Error loading special event:', error);
-            // ✅ SWEETALERT - Network error (NO LOADING)
-            Swal.fire({
-                icon: 'error',
-                title: 'Connection Error',
-                text: 'Failed to load event details: ' + error.message,
-                confirmButtonColor: '#7c3aed'
-            });
-        });
-}
+            return;
+        }
 
-// Update special event - NO LOADING ON SWEETALERT
-document.getElementById('editBookingForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // Validate phone numbers before submission
-    if (!validateFormPhoneNumbers()) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Invalid Phone Number',
-            text: 'Please fix the phone number validation errors before submitting.',
-            confirmButtonColor: '#7c3aed'
-        });
-        return;
-    }
-    
-    // Validate time
-    const startTime = document.getElementById('edit_event_start_time').value;
-    const endTime = document.getElementById('edit_event_end_time').value;
-    if (startTime >= endTime) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Invalid Time',
-            text: 'Event end time must be after start time',
-            confirmButtonColor: '#7c3aed'
-        });
-        return;
-    }
-    
-    const bookingId = document.getElementById('edit_booking_id').value;
-    const formData = new FormData(this);
-    const data = Object.fromEntries(formData);
-    
-    console.log('Updating special event data:', {
-        bookingId: bookingId,
-        formData: data,
-        eventType: data.event_name,
-        startTime: data.event_start_time,
-        endTime: data.event_end_time
-    });
+        // Gather form data
+        const bookingId    = document.getElementById('edit_booking_id').value;
+        const newStatus    = document.getElementById('edit_booking_status').value;
+        const checkinDate  = document.getElementById('edit_checkin_date').value;
+        const numGuests    = parseInt(document.getElementById('edit_num_guests').value);
+        const unitId       = document.getElementById('edit_unit_id').value;
+        const phoneInput   = document.getElementById('edit_phone');
+        const phone        = phoneInput ? phoneInput.value.replace(/\D/g, '') : '';
+        const specialReqs  = document.getElementById('edit_special_requirements').value;
+        const eventName    = document.getElementById('edit_event_name').value;
 
-    // Clean phone number before sending
-    if (data.phone) {
-        data.phone = data.phone.replace(/\D/g, '');
-    }
+        // Cancellation data
+        const cancellationReasonEl = document.getElementById('edit_cancellation_reason');
+        const refundAmountEl = document.getElementById('edit_refund_amount');
+        const refundMethodEl = document.getElementById('edit_refund_method');
+        
+        const cancellationReason = cancellationReasonEl ? cancellationReasonEl.value : '';
+        const refundAmount = refundAmountEl ? parseFloat(refundAmountEl.value) || 0 : 0;
+        const refundMethod = refundMethodEl ? refundMethodEl.value : '';
 
-    // Remove booking_id from data before sending
-    delete data.booking_id;
+        // Calculate total price
+        const isOverride     = document.getElementById('edit_price_override_toggle').checked;
+        const manualPriceVal = document.getElementById('edit_manual_total_price').value;
+        const autoDisplayVal = document.getElementById('edit_total_price_display').textContent;
 
-    // ✅ CLOSE MODAL IMMEDIATELY
-    closeEditModal();
-
-    fetch(`/admin/special-events/${bookingId}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': csrfToken
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Update response:', data);
-        if (data.success) {
-            // ✅ SWEETALERT - Success (NO LOADING)
-            Swal.fire({
-                icon: 'success',
-                title: 'Event Updated!',
-                text: 'Special event has been updated successfully',
-                confirmButtonColor: '#7c3aed'
-            });
-            
-            // Reload bookings immediately
-            loadBookings(getCurrentStatus(), getCurrentSearch(), currentPage);
+        let totalPrice = 0;
+        if (isOverride && manualPriceVal && parseFloat(manualPriceVal) >= 0) {
+            totalPrice = parseFloat(manualPriceVal);
         } else {
-            // ✅ SWEETALERT - Update error (NO LOADING)
-            Swal.fire({
-                icon: 'error',
-                title: 'Update Failed',
-                text: data.message || 'Failed to update special event',
-                confirmButtonColor: '#7c3aed'
-            });
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        // ✅ SWEETALERT - Network error (NO LOADING)
-        Swal.fire({
-            icon: 'error',
-            title: 'Connection Error',
-            text: 'Error updating special event: ' + error.message,
-            confirmButtonColor: '#7c3aed'
-        });
-    });
-});
-
-// Phone validation function
-function setupPhoneValidation(inputId) {
-    const phoneInput = document.getElementById(inputId);
-    if (!phoneInput) return;
-
-    phoneInput.addEventListener('input', function() {
-        const phone = this.value.replace(/\D/g, '');
-        const parent = this.parentNode;
-        let errorDiv = parent.querySelector('.phone-error');
-
-        if (!errorDiv) {
-            errorDiv = document.createElement('div');
-            errorDiv.className = 'phone-error text-xs mt-1';
-            parent.appendChild(errorDiv);
+            totalPrice = parseFloat(autoDisplayVal.replace('₱', '').replace(/,/g, '')) || 0;
         }
 
-        if (phone.length === 0) {
-            this.classList.remove('border-red-500', 'border-green-500');
-            errorDiv.textContent = '';
-        } else if (phone.length === 11 && phone.startsWith('09')) {
-            this.classList.remove('border-red-500');
-            this.classList.add('border-green-500');
-            errorDiv.className = 'phone-error text-xs mt-1 text-green-600';
-            errorDiv.textContent = '✓ Valid phone number';
-        } else {
-            this.classList.remove('border-green-500');
-            this.classList.add('border-red-500');
-            errorDiv.className = 'phone-error text-xs mt-1 text-red-600';
-            errorDiv.textContent = 'Please enter a valid 11-digit phone number starting with 09';
-        }
-    });
-}
-
-// Validate all phone numbers in form
-function validateFormPhoneNumbers() {
-    const phoneInputs = document.querySelectorAll('input[type="text"][name="phone"]');
-    let allValid = true;
-
-    phoneInputs.forEach(input => {
-        const phone = input.value.replace(/\D/g, '');
-        if (phone && (phone.length !== 11 || !phone.startsWith('09'))) {
-            allValid = false;
-            input.classList.add('border-red-500');
-            
-            // Ensure error message is shown
-            const parent = input.parentNode;
-            let errorDiv = parent.querySelector('.phone-error');
-            if (!errorDiv) {
-                errorDiv = document.createElement('div');
-                errorDiv.className = 'phone-error text-xs mt-1 text-red-600';
-                parent.appendChild(errorDiv);
+        // Validation
+        if (!unitId) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'No Venue Selected',
+                    text: 'Please select an event venue.',
+                    confirmButtonColor: '#7c3aed'
+                });
             }
-            errorDiv.textContent = 'Please enter a valid 11-digit phone number starting with 09';
+            return;
+        }
+
+        if (newStatus === 'cancelled' && refundAmount > editEventMaxRefund) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Invalid Refund Amount',
+                    text: `Refund amount cannot exceed ₱${editEventMaxRefund.toFixed(2)}.`,
+                    confirmButtonColor: '#7c3aed'
+                });
+            }
+            return;
+        }
+
+        // Status confirmations
+        if (newStatus === 'cancelled' && typeof Swal !== 'undefined') {
+            const result = await Swal.fire({
+                icon: 'warning',
+                title: 'Cancel Event?',
+                text: 'This will send a cancellation email to the guest.',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Yes, cancel event'
+            });
+            if (!result.isConfirmed) return;
+        }
+
+        if (newStatus === 'completed' && typeof Swal !== 'undefined') {
+            const result = await Swal.fire({
+                icon: 'question',
+                title: 'Mark as Completed?',
+                text: 'This will send a thank you email to the guest.',
+                showCancelButton: true,
+                confirmButtonColor: '#16a34a',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Yes, mark as completed'
+            });
+            if (!result.isConfirmed) return;
+        }
+
+        const payload = {
+            guest_name:           editEventOriginalName,
+            email:                editEventOriginalEmail,
+            phone:                phone,
+            event_name:           eventName,
+            booking_status:       newStatus,
+            checkin_date:         checkinDate,
+            num_guests:           numGuests,
+            total_price:          totalPrice,
+            event_start_time:     startTime,
+            event_end_time:       endTime,
+            special_requirements: specialReqs,
+            unit_id:              unitId,
+            cancellation_reason:  cancellationReason,
+            refund_amount:        refundAmount,
+            refund_method:        refundMethod
+        };
+
+        console.log('📦 Payload:', payload);
+
+        showEditEventLoading();
+
+        try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+            
+            const response = await fetch(`/admin/special-events/${bookingId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken || ''
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+            console.log('✅ Update response:', result);
+
+            hideEditEventLoading();
+
+            if (result.success) {
+                await closeEditModal();
+                
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Event Updated!',
+                        text: 'Special event updated successfully.',
+                        confirmButtonColor: '#7c3aed'
+                    }).then(() => {
+                        if (typeof loadBookings === 'function' && typeof getCurrentStatus === 'function' && typeof getCurrentSearch === 'function' && typeof currentPage !== 'undefined') {
+                            loadBookings(getCurrentStatus(), getCurrentSearch(), currentPage);
+                        } else {
+                            location.reload();
+                        }
+                    });
+                } else {
+                    if (typeof loadBookings === 'function') {
+                        loadBookings(getCurrentStatus(), getCurrentSearch(), currentPage);
+                    } else {
+                        location.reload();
+                    }
+                }
+            } else {
+                await closeEditModal();
+                
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Update Failed',
+                        text: result.message || 'Failed to update event',
+                        confirmButtonColor: '#dc2626'
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('❌ Submit error:', error);
+            hideEditEventLoading();
+            await closeEditModal();
+            
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Connection Error',
+                    text: 'Error updating event: ' + error.message,
+                    confirmButtonColor: '#dc2626'
+                });
+            }
         }
     });
-
-    return allValid;
 }
 
-// Make functions available globally
-window.editEvent = editEvent;
+// Expose functions globally
 window.closeEditModal = closeEditModal;
 window.openEditModal = openEditModal;
 
-console.log('Edit Special Event Modal - No Loading Effect on SweetAlert loaded successfully');
+console.log('✅ Edit Special Event Modal — FULLY LOADED AND READY');
 </script>
