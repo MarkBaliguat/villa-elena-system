@@ -93,7 +93,7 @@
         .active-item {
             background-color: #eff6ff;
             color: #1d4ed8;
-            border-right: 2px solid #2563eb;
+            border-left: 2px solid #2563eb;
             font-weight: 600;
         }
         
@@ -371,7 +371,7 @@
             box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
             transition: all 0.3s ease;
             z-index: 60;
-            border: 3px solid white;
+            /* border: 3px solid white; */
         }
         
         .toggle-btn:hover {

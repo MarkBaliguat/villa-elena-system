@@ -225,7 +225,7 @@
                 <div class="header-row">
                     <h2 class="text-xl font-semibold text-gray-800">Rooms & Cottages</h2>
                     <div class="action-buttons">
-                        <button id="blockDatesBtn" onclick="openBlockModal()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-lg font-medium flex items-center gap-2 transition disabled:bg-red-400 disabled:cursor-not-allowed" disabled>
+                        <button id="blockDatesBtn" onclick="openBlockModal()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2.5 rounded-lg font-medium flex items-center gap-2 transition disabled:bg-red-400 disabled:cursor-not-allowed" disabled>
                             <i class="far fa-calendar-times"></i>
                             Block Units
                         </button>
@@ -359,7 +359,7 @@
                                     <button class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium transition edit-btn" data-unit-id="{{ $unit->unitID }}">
                                         Edit
                                     </button>
-                                    <button onclick="confirmDelete('{{ $unit->unitID }}', '{{ $unit->unitName }}')" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-medium transition">
+                                    <button onclick="confirmDelete('{{ $unit->unitID }}', '{{ $unit->unitName }}')" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg font-medium transition">
                                         Delete
                                     </button>
                                 </div>
