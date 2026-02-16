@@ -382,7 +382,7 @@
                 <div class="header-row">
                     <h2 class="text-xl font-semibold text-gray-800">Active Event Reservations</h2>
                     <div class="action-buttons">
-                        <button onclick="openModal()" class="bg-violet-600 hover:bg-violet-700 text-white px-6 py-2.5 rounded-lg font-medium flex items-center gap-2 transition">
+                        <button onclick="openModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium flex items-center gap-2 transition">
                             <i class="fas fa-plus"></i>
                             Add Special Event
                         </button>

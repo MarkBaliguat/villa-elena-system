@@ -306,7 +306,7 @@
                                 </div>
                                 @if($unit->unitType == 'special')
                                 <div class="absolute top-2 right-2">
-                                    <span class="bg-purple-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
+                                    <span class="bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-semibold">
                                         Special
                                         @if($unit->for_special_events)
                                         <i class="fas fa-star ml-1"></i>
@@ -324,7 +324,7 @@
                                         {{ ucfirst($unit->unitStatus) }}
                                     </span>
                                 </div>
-                                <p class="text-sm text-gray-600 mb-3">{{ Str::limit($unit->description, 80) }}</p>
+                                <p class="text-sm text-gray-600 mb-3">{{ Str::limit($unit->description, 70) }}</p>
                                 <div class="space-y-1 mb-4">
                                     <div class="flex items-center text-sm text-gray-600">
                                         <i class="fas fa-users w-5"></i>
@@ -340,7 +340,7 @@
                                             @if($unit->unitType == 'special')
                                                 Special Unit
                                                 @if($unit->for_special_events)
-                                                    <span class="text-purple-600 ml-1">(For Events)</span>
+                                                    <span class="text-blue-600 ml-1">(For Events)</span>
                                                 @endif
                                             @else
                                                 {{ $unit->unitType }}
