@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" type="image/x-icon" href="{{ asset('images/sunflower1.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;500;600;700&display=swap');
@@ -1212,6 +1213,24 @@
             background: rgba(255, 255, 255, 0.1);
         }
 
+
+        /* Removed item from cart design */
+        .swal-custom-popup {
+            border-radius: 20px !important;
+            font-family: 'Poppins', sans-serif !important;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2) !important;
+        }
+        .swal-confirm-btn {
+            border-radius: 12px !important;
+            font-weight: 700 !important;
+            padding: 0.7rem 1.5rem !important;
+        }
+        .swal-cancel-btn {
+            border-radius: 12px !important;
+            font-weight: 700 !important;
+            padding: 0.7rem 1.5rem !important;
+        }
+
         /* ═══════════════════════════════
            AVAILABILITY MODAL
         ═══════════════════════════════ */
@@ -1381,6 +1400,7 @@
             .gallery-nav.prev { left: 0.8rem; }
             .gallery-nav.next { right: 0.8rem; }
         }
+
 
         @media (max-width: 480px) {
             .main-content {
@@ -2063,24 +2083,60 @@ function closeAvailModal() {
    REMOVE ITEMS
 ═══════════════════════════════ */
 function removeFromCart(id) {
-    if (!confirm('Remove this item from your cart?')) return;
-    
-    showNotification('Removing item...', 'info', 1500);
-    
-    fetch(`/api/cart/remove/${id}`, {
-        method:'DELETE',
-        headers: { 'X-CSRF-TOKEN': csrfToken(), 'Accept':'application/json' }
-    })
-    .then(r => r.json())
-    .then(d => {
-        if (d.success) { 
-            showNotification('Item removed successfully!', 'success'); 
-            setTimeout(() => { loadCartItems(); updateBadge(); }, 500); 
-        } else {
-            showNotification('Failed: ' + d.message, 'error');
+    Swal.fire({
+        title: 'Remove Item?',
+        text: 'Are you sure you want to remove this item from your cart?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#FF6B6B',
+        cancelButtonColor: '#6B7280',
+        confirmButtonText: '<i class="fas fa-trash-alt"></i> Yes, Remove',
+        cancelButtonText: '<i class="fas fa-times"></i> Cancel',
+        customClass: {
+            popup: 'swal-custom-popup',
+            confirmButton: 'swal-confirm-btn',
+            cancelButton: 'swal-cancel-btn'
         }
-    })
-    .catch(() => showNotification('Error removing item.', 'error'));
+    }).then((result) => {
+        if (!result.isConfirmed) return;
+
+        fetch(`/api/cart/remove/${id}`, {
+            method: 'DELETE',
+            headers: { 'X-CSRF-TOKEN': csrfToken(), 'Accept': 'application/json' }
+        })
+        .then(r => r.json())
+        .then(d => {
+            if (d.success) {
+                Swal.fire({
+                    title: 'Removed!',
+                    text: 'Item has been removed from your cart.',
+                    icon: 'success',
+                    showConfirmButton: true,
+                    confirmButtonColor: '#51CF66',
+                    confirmButtonText: 'OK',
+                    customClass: { popup: 'swal-custom-popup' }
+                }).then(() => {
+                    loadCartItems();
+                    updateBadge();
+                });
+            } else {
+                Swal.fire({
+                    title: 'Failed!',
+                    text: d.message || 'Could not remove item.',
+                    icon: 'error',
+                    confirmButtonColor: '#FF6B6B'
+                });
+            }
+        })
+        .catch(() => {
+            Swal.fire({
+                title: 'Error',
+                text: 'Something went wrong. Please try again.',
+                icon: 'error',
+                confirmButtonColor: '#FF6B6B'
+            });
+        });
+    });
 }
 
 function removeUnavailItem(id) {
