@@ -14,7 +14,7 @@
             font-family: 'Poppins', sans-serif;
             /* background: #ffffff;
             background-attachment: fixed; */
-            background:linear-gradient(to bottom,#ffffff 0%,#fffdf5 60%,rgb(255, 249, 230) 100%);#ffffff;
+            background:linear-gradient(to bottom,#ffffff 0%,#fffdf5 60%,rgb(255, 249, 230) 100%);
             /* background-attachment: fixed; */
             position: relative;
             min-height: 100vh;
