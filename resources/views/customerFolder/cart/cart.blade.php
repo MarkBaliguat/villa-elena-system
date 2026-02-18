@@ -533,6 +533,9 @@
             object-fit: cover;
             display: block;
             transition: transform 0.4s ease;
+            position: absolute;
+            inset: 0;
+            object-fit: cover;
         }
 
         .item-card:hover .item-img {
