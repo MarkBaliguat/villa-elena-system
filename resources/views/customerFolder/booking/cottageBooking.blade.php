@@ -339,7 +339,7 @@
             position: relative;
             width: 100%;
             height: 100%;
-            min-height: 370px;
+            aspect-ratio: 4 / 3;
         }
 
         .gallery-main-image {

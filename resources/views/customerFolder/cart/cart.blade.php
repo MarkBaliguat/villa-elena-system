@@ -529,7 +529,7 @@
         .item-img {
             width: 100%;
             height: 100%;
-            min-height: 180px;
+            /* min-height: 180px; */
             object-fit: cover;
             display: block;
             transition: transform 0.4s ease;
@@ -1634,7 +1634,7 @@ document.addEventListener('keydown', function(e) {
 });
 
 /* ═══════════════════════════════
-   RENDER CART - NEW LAYOUT (✅ FIXED FOR MIXED CART)
+   RENDER CART
 ═══════════════════════════════ */
 function renderCart(cart, items, container) {
     const days     = cart.daysCount > 0 ? cart.daysCount : 1;
@@ -1648,7 +1648,7 @@ function renderCart(cart, items, container) {
     
     const hasCottageInCart = cartUnitType === 'cottage' || cartUnitType === 'mixed';
     
-    // ✅ FIX: Allow checkout if no cottage OR if cottage has entrance fee
+    // FIX: Allow checkout if no cottage OR if cottage has entrance fee
     // OLD: const canProceed = !(hasCottageInCart && !hasActiveEntranceFee) && cartUnitType !== 'mixed';
     const canProceed = !(hasCottageInCart && !hasActiveEntranceFee); // ✅ REMOVED mixed cart restriction
 
