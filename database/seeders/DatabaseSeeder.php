@@ -17,10 +17,10 @@ class DatabaseSeeder extends Seeder
     {
         // Create manager account
         User::create([
-            'name' => 'Irish Manager',
-            'username' => 'irish_manager',
-            'email' => 'irish@gmail.com',
-            'password' => Hash::make('Jacinto22-1639'),
+            'name' => 'VE Manager',
+            'username' => 've_manager',
+            'email' => 'evelynbalaisserrano@gmail.com',
+            'password' => Hash::make('evelynserrano1234'),
             'role' => 'manager',
             'phoneNumber' => '09123456789',
             'email_verified_at' => now(),
