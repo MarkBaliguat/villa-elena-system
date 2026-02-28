@@ -20,14 +20,14 @@
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                    <select name="unitType" id="unitTypeSelect" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="toggleUnitTypeFields(this.value)">
+                    <select name="unitType" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="toggleSpecialEventField(this.value)">
                         <option value="room">Room</option>
                         <option value="cottage">Cottage</option>
                         <option value="special">Special Unit</option>
                     </select>
                 </div>
                 
-                {{-- Special Event Field — visible only when unitType = 'special' --}}
+                {{-- Special Event Field --}}
                 <div id="specialEventField" class="hidden">
                     <div class="flex items-center">
                         <input type="checkbox" name="for_special_events" id="for_special_events" value="1" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
@@ -53,12 +53,12 @@
                     <input type="number" name="unitRatePrice" required step="0.01" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
 
-                {{-- Virtual Tour Panorama Field — visible only for room at cottage, hidden para sa special --}}
-                <div id="virtualTourField">
+                {{-- Virtual Tour Panorama Field --}}
+                <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">
                         <i class="fas fa-street-view mr-1"></i>Virtual Tour Panorama
                     </label>
-                    <select name="virtualTourPanorama" id="virtualTourPanorama" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select name="virtualTourPanorama" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">No Virtual Tour</option>
                         <optgroup label="Accommodations - Cottages">
                             <option value="3tonicottageandihawan.jpg">Toni Cottage</option>
@@ -124,6 +124,15 @@
                 </div>
                 
                 <div id="blockDatesSection" class="hidden space-y-4 border-t pt-4">
+                    <!-- <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-blue-500 mt-1 mr-2"></i>
+                            <p class="text-xs text-blue-700">
+                                When adding a new unit with blocked status, it will be created as blocked. When editing an existing unit, the system will check if there are any confirmed or pending bookings during the selected dates.
+                            </p>
+                        </div>
+                    </div> -->
+
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">
                             Block Start Date <span class="text-red-500">*</span>
@@ -184,38 +193,16 @@
 let currentEditingUnit = null;
 
 /**
- * ✅ MAIN TOGGLE FUNCTION — controls both specialEventField at virtualTourField
- * room     → virtual tour: SHOW  | special event checkbox: HIDE
- * cottage  → virtual tour: SHOW  | special event checkbox: HIDE
- * special  → virtual tour: HIDE  | special event checkbox: SHOW
- */
-function toggleUnitTypeFields(unitType) {
-    const specialEventField = document.getElementById('specialEventField');
-    const virtualTourField  = document.getElementById('virtualTourField');
-    const virtualTourSelect = document.getElementById('virtualTourPanorama');
-
-    if (unitType === 'special') {
-        // SHOW special event checkbox
-        specialEventField.classList.remove('hidden');
-
-        // HIDE virtual tour at i-clear ang value
-        virtualTourField.classList.add('hidden');
-        virtualTourSelect.value = '';
-    } else {
-        // HIDE special event checkbox at i-uncheck
-        specialEventField.classList.add('hidden');
-        document.getElementById('for_special_events').checked = false;
-
-        // SHOW virtual tour para sa room at cottage
-        virtualTourField.classList.remove('hidden');
-    }
-}
-
-/**
- * @deprecated — kept para sa backward compatibility, redirects to toggleUnitTypeFields
+ * Toggles special event field based on unit type
  */
 function toggleSpecialEventField(unitType) {
-    toggleUnitTypeFields(unitType);
+    const specialEventField = document.getElementById('specialEventField');
+    if (unitType === 'special') {
+        specialEventField.classList.remove('hidden');
+    } else {
+        specialEventField.classList.add('hidden');
+        document.getElementById('for_special_events').checked = false;
+    }
 }
 
 /**
@@ -228,10 +215,7 @@ function openAddModal() {
     document.getElementById('methodField').innerHTML = '';
     document.getElementById('unitForm').reset();
     document.getElementById('blockDatesSection').classList.add('hidden');
-
-    // ✅ Default state: room ang default value ng select, kaya show virtual tour, hide special event
-    toggleUnitTypeFields('room');
-
+    document.getElementById('specialEventField').classList.add('hidden');
     resetImageSections();
     resetSubmitButton();
     initializeBlockDateInputs();
@@ -271,9 +255,7 @@ function openEditModal(unitId) {
         
         populateFormFields(unit);
         displayExistingImages(unit.images || []);
-
-        // ✅ I-apply ang toggle base sa unitType ng na-load na unit
-        toggleUnitTypeFields(unit.unitType || 'room');
+        toggleSpecialEventField(unit.unitType || 'room');
         toggleBlockDates(unit.unitStatus || 'available');
         resetSubmitButton();
         initializeBlockDateInputs();
@@ -295,29 +277,30 @@ function openEditModal(unitId) {
  * Populates form fields with unit data
  */
 function populateFormFields(unit) {
-    document.querySelector('input[name="unitName"]').value                  = unit.unitName || '';
-    document.querySelector('select[name="unitType"]').value                 = unit.unitType || 'room';
-    document.querySelector('textarea[name="description"]').value            = unit.description || '';
-    document.querySelector('input[name="capacity"]').value                  = unit.capacity || 1;
-    document.querySelector('input[name="unitRatePrice"]').value             = unit.unitRatePrice || 0;
-    document.querySelector('select[name="unitStatus"]').value               = unit.unitStatus || 'available';
-    document.querySelector('input[name="for_special_events"]').checked      = unit.for_special_events || false;
-    document.querySelector('input[name="blockStartDate"]').value            = unit.blockStartDate || '';
-    document.querySelector('input[name="blockEndDate"]').value              = unit.blockEndDate || '';
-    document.querySelector('select[name="blockReason"]').value              = unit.blockReason || '';
-    document.querySelector('select[name="virtualTourPanorama"]').value      = unit.virtualTourPanorama || '';
+    document.querySelector('input[name="unitName"]').value = unit.unitName || '';
+    document.querySelector('select[name="unitType"]').value = unit.unitType || 'room';
+    document.querySelector('textarea[name="description"]').value = unit.description || '';
+    document.querySelector('input[name="capacity"]').value = unit.capacity || 1;
+    document.querySelector('input[name="unitRatePrice"]').value = unit.unitRatePrice || 0;
+    document.querySelector('select[name="unitStatus"]').value = unit.unitStatus || 'available';
+    document.querySelector('input[name="for_special_events"]').checked = unit.for_special_events || false;
+    document.querySelector('input[name="blockStartDate"]').value = unit.blockStartDate || '';
+    document.querySelector('input[name="blockEndDate"]').value = unit.blockEndDate || '';
+    document.querySelector('select[name="blockReason"]').value = unit.blockReason || '';
+    document.querySelector('select[name="virtualTourPanorama"]').value = unit.virtualTourPanorama || '';
 }
 
 /**
  * Displays existing images in the edit modal
  */
 function displayExistingImages(images) {
-    const existingImages     = document.getElementById('existingImages');
+    const existingImages = document.getElementById('existingImages');
     const existingImagesGrid = document.getElementById('existingImagesGrid');
     
     if (images && images.length > 0) {
         existingImages.classList.remove('hidden');
         existingImagesGrid.innerHTML = '';
+        
         images.forEach((image, index) => {
             const imgContainer = createExistingImageContainer(image, index);
             existingImagesGrid.appendChild(imgContainer);
@@ -334,17 +317,19 @@ function createExistingImageContainer(image, index) {
     const imgContainer = document.createElement('div');
     imgContainer.className = 'relative';
     
-    const img       = document.createElement('img');
-    img.src         = '/storage/' + image;
-    img.className   = 'w-full h-24 object-cover rounded-lg';
-    img.alt         = 'Unit image ' + (index + 1);
-    img.onerror     = function() {
+    const img = document.createElement('img');
+    img.src = '/storage/' + image;
+    img.className = 'w-full h-24 object-cover rounded-lg';
+    img.alt = 'Unit image ' + (index + 1);
+    img.onerror = function() {
         this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2YzZjRmNiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkeT0iMC4zNWVtIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjEyIiBmaWxsPSIjOTk5Ij5ObyBJbWFnZTwvdGV4dD48L3N2Zz4=';
     };
     
     const removeBtn = createImageDeleteButton(image, imgContainer);
+    
     imgContainer.appendChild(img);
     imgContainer.appendChild(removeBtn);
+    
     return imgContainer;
 }
 
@@ -352,14 +337,15 @@ function createExistingImageContainer(image, index) {
  * Creates delete button for existing images
  */
 function createImageDeleteButton(image, imgContainer) {
-    const removeBtn       = document.createElement('button');
-    removeBtn.type        = 'button';
-    removeBtn.className   = 'absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition';
-    removeBtn.innerHTML   = '×';
-    removeBtn.title       = 'Delete image';
-    removeBtn.onclick     = function() {
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition';
+    removeBtn.innerHTML = '×';
+    removeBtn.title = 'Delete image';
+    removeBtn.onclick = function() {
         handleImageDelete(image, imgContainer);
     };
+    
     return removeBtn;
 }
 
@@ -408,12 +394,22 @@ function handleImageDelete(image, imgContainer) {
                         showConfirmButton: false
                     });
                 } else {
-                    Swal.fire({ icon: 'error', title: 'Error', text: 'Error deleting image', confirmButtonColor: '#3b82f6' });
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Error deleting image',
+                        confirmButtonColor: '#3b82f6'
+                    });
                 }
             })
             .catch(error => {
                 console.error('Error deleting image:', error);
-                Swal.fire({ icon: 'error', title: 'Error', text: 'Error deleting image', confirmButtonColor: '#3b82f6' });
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error deleting image',
+                    confirmButtonColor: '#3b82f6'
+                });
             });
         }
     });
@@ -423,7 +419,7 @@ function handleImageDelete(image, imgContainer) {
  * Sets up image preview for new uploads
  */
 function setupImagePreview() {
-    const imageInput   = document.getElementById('imageInput');
+    const imageInput = document.getElementById('imageInput');
     const imagePreview = document.getElementById('imagePreview');
     
     if (!imageInput) return;
@@ -433,16 +429,19 @@ function setupImagePreview() {
         imagePreview.classList.remove('hidden');
         
         const files = e.target.files;
+        
         if (files.length === 0) {
             imagePreview.classList.add('hidden');
             return;
         }
         
         Array.from(files).forEach((file, index) => {
-            if (!validateImageFile(file)) return;
+            if (!validateImageFile(file)) {
+                return;
+            }
             
-            const reader    = new FileReader();
-            reader.onload   = function(e) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
                 const previewContainer = createPreviewContainer(e.target.result, index, file.name);
                 imagePreview.appendChild(previewContainer);
             };
@@ -456,13 +455,25 @@ function setupImagePreview() {
  */
 function validateImageFile(file) {
     if (file.size > 2 * 1024 * 1024) {
-        Swal.fire({ icon: 'warning', title: 'File Too Large', text: `File ${file.name} is too large. Maximum size is 2MB.`, confirmButtonColor: '#3b82f6' });
+        Swal.fire({
+            icon: 'warning',
+            title: 'File Too Large',
+            text: `File ${file.name} is too large. Maximum size is 2MB.`,
+            confirmButtonColor: '#3b82f6'
+        });
         return false;
     }
+    
     if (!file.type.match('image.*')) {
-        Swal.fire({ icon: 'warning', title: 'Invalid File Type', text: `File ${file.name} is not an image.`, confirmButtonColor: '#3b82f6' });
+        Swal.fire({
+            icon: 'warning',
+            title: 'Invalid File Type',
+            text: `File ${file.name} is not an image.`,
+            confirmButtonColor: '#3b82f6'
+        });
         return false;
     }
+    
     return true;
 }
 
@@ -470,22 +481,23 @@ function validateImageFile(file) {
  * Creates preview container for new image
  */
 function createPreviewContainer(src, index, fileName) {
-    const imgContainer    = document.createElement('div');
+    const imgContainer = document.createElement('div');
     imgContainer.className = 'relative';
     imgContainer.dataset.index = index;
     
-    const img     = document.createElement('img');
-    img.src       = src;
+    const img = document.createElement('img');
+    img.src = src;
     img.className = 'w-full h-24 object-cover rounded-lg';
-    img.alt       = 'Preview ' + fileName;
+    img.alt = 'Preview ' + fileName;
     
-    const removeBtn     = document.createElement('button');
-    removeBtn.type      = 'button';
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
     removeBtn.className = 'absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition';
     removeBtn.innerHTML = '×';
-    removeBtn.title     = 'Remove image';
-    removeBtn.onclick   = function() {
+    removeBtn.title = 'Remove image';
+    removeBtn.onclick = function() {
         imgContainer.remove();
+        
         const imagePreview = document.getElementById('imagePreview');
         if (imagePreview.children.length <= 1) {
             imagePreview.classList.add('hidden');
@@ -494,6 +506,7 @@ function createPreviewContainer(src, index, fileName) {
     
     imgContainer.appendChild(img);
     imgContainer.appendChild(removeBtn);
+    
     return imgContainer;
 }
 
@@ -502,23 +515,25 @@ function createPreviewContainer(src, index, fileName) {
  */
 function toggleBlockDates(status) {
     const blockDatesSection = document.getElementById('blockDatesSection');
-    const blockStartDate    = document.getElementById('addEditBlockStartDate');
-    const blockEndDate      = document.getElementById('addEditBlockEndDate');
-    const blockReason       = document.getElementById('addEditBlockReason');
+    const blockStartDate = document.getElementById('addEditBlockStartDate');
+    const blockEndDate = document.getElementById('addEditBlockEndDate');
+    const blockReason = document.getElementById('addEditBlockReason');
     
     if (status === 'blocked') {
         blockDatesSection.classList.remove('hidden');
         blockStartDate.required = true;
-        blockEndDate.required   = true;
-        blockReason.required    = true;
+        blockEndDate.required = true;
+        blockReason.required = true;
     } else {
         blockDatesSection.classList.add('hidden');
         blockStartDate.required = false;
-        blockEndDate.required   = false;
-        blockReason.required    = false;
-        blockStartDate.value    = '';
-        blockEndDate.value      = '';
-        blockReason.value       = '';
+        blockEndDate.required = false;
+        blockReason.required = false;
+        
+        // ✅ CLEAR THE FIELDS when changing to available
+        blockStartDate.value = '';
+        blockEndDate.value = '';
+        blockReason.value = '';
     }
 }
 
@@ -537,8 +552,8 @@ function resetImageSections() {
  * Shows loading state on submit button
  */
 function showSubmitLoading() {
-    const submitBtn    = document.getElementById('submitUnitBtn');
-    const submitText   = document.getElementById('submitUnitText');
+    const submitBtn = document.getElementById('submitUnitBtn');
+    const submitText = document.getElementById('submitUnitText');
     const submitSpinner = document.getElementById('submitUnitSpinner');
     
     if (submitBtn && submitText && submitSpinner) {
@@ -552,8 +567,8 @@ function showSubmitLoading() {
  * Hides loading state on submit button
  */
 function hideSubmitLoading() {
-    const submitBtn    = document.getElementById('submitUnitBtn');
-    const submitText   = document.getElementById('submitUnitText');
+    const submitBtn = document.getElementById('submitUnitBtn');
+    const submitText = document.getElementById('submitUnitText');
     const submitSpinner = document.getElementById('submitUnitSpinner');
     
     if (submitBtn && submitText && submitSpinner) {
@@ -584,16 +599,24 @@ function closeModal() {
  * Sets minimum date for block date inputs to today
  */
 function initializeBlockDateInputs() {
-    const today        = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split('T')[0];
     const startDateInput = document.getElementById('addEditBlockStartDate');
-    const endDateInput   = document.getElementById('addEditBlockEndDate');
+    const endDateInput = document.getElementById('addEditBlockEndDate');
     
-    if (startDateInput) startDateInput.min = today;
-    if (endDateInput)   endDateInput.min   = today;
+    if (startDateInput) {
+        startDateInput.min = today;
+    }
     
+    if (endDateInput) {
+        endDateInput.min = today;
+    }
+    
+    // Update end date minimum when start date changes
     if (startDateInput && endDateInput) {
         startDateInput.addEventListener('change', function() {
             endDateInput.min = this.value || today;
+            
+            // Clear end date if it's before the new start date
             if (endDateInput.value && endDateInput.value < this.value) {
                 endDateInput.value = '';
             }
@@ -609,13 +632,15 @@ function validateUnitForm(e) {
     
     if (status === 'blocked') {
         const startDate = document.getElementById('addEditBlockStartDate').value;
-        const endDate   = document.getElementById('addEditBlockEndDate').value;
-        const reason    = document.getElementById('addEditBlockReason').value;
+        const endDate = document.getElementById('addEditBlockEndDate').value;
+        const reason = document.getElementById('addEditBlockReason').value;
         
         if (!startDate || !endDate || !reason) {
-            return true; // Let HTML5 validation handle this
+            // Let HTML5 validation handle this
+            return true;
         }
         
+        // Additional validation: check if end date is before start date
         if (new Date(endDate) < new Date(startDate)) {
             e.preventDefault();
             Swal.fire({
@@ -639,9 +664,7 @@ function handleFormSubmit(event) {
     return validateUnitForm(event);
 }
 
-// ============================================
-// INITIALIZE ON DOM READY
-// ============================================
+// Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
     setupImagePreview();
     initializeBlockDateInputs();
@@ -651,12 +674,12 @@ document.addEventListener('DOMContentLoaded', function() {
         unitForm.addEventListener('submit', handleFormSubmit);
     }
     
-    // Close modal on backdrop click
     document.getElementById('unitModal')?.addEventListener('click', function(e) {
-        if (e.target === this) closeModal();
+        if (e.target === this) {
+            closeModal();
+        }
     });
     
-    // Status change listener
     const statusSelect = document.querySelector('#unitModal select[name="unitStatus"]');
     if (statusSelect) {
         statusSelect.addEventListener('change', function() {
@@ -664,16 +687,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Close on Escape key
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             const unitModal = document.getElementById('unitModal');
-            if (unitModal && !unitModal.classList.contains('hidden')) closeModal();
+            if (unitModal && !unitModal.classList.contains('hidden')) {
+                closeModal();
+            }
         }
     });
-
-    // ✅ Set default state on page load (room ang default, so show virtual tour)
-    toggleUnitTypeFields(document.getElementById('unitTypeSelect')?.value || 'room');
 });
 </script>
 @endif
