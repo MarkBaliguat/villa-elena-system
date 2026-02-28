@@ -12,7 +12,7 @@ class Booking extends Model
     protected $fillable = [
         'cartID',
         'totalPrice',
-        'entranceFeeID', // IDAGDAG ITO
+        'entranceFeeID', 
         'bookingStatus',
         'gcash_payment_intent_id',
         'bookingType',
