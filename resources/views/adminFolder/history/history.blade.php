@@ -1248,7 +1248,7 @@
         // Update showing text
         function updateShowingText(showing) {
             const from = totalRecords === 0 ? 0 : ((currentPage - 1) * perPage) + 1;
-            const to = Math.min(from + showing - 1, totalRecords);
+             const to = totalRecords === 0 ? 0 : Math.min(from + showing - 1, totalRecords);
             document.getElementById('showingFrom').textContent = from;
             document.getElementById('showingTo').textContent = to;
             document.getElementById('totalRecords').textContent = totalRecords;
