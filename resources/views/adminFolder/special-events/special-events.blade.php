@@ -705,9 +705,11 @@
                             <button onclick="openSpecialEventPaymentModal(${booking.bookingID})" class="text-green-600 hover:text-green-800" title="Payment Management">
                                 <i class="fas fa-credit-card"></i>
                             </button>
-                            <button onclick="deleteEvent(${booking.bookingID})" class="text-red-600 hover:text-red-800" title="Delete">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                            @if(auth()->user()->role === 'manager')
+                                <button onclick="deleteEvent(${booking.bookingID})" class="text-red-600 hover:text-red-800" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            @endif
                         </div>
                     </td>
                 </tr>

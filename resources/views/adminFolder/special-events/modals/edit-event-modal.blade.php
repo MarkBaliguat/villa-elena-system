@@ -118,14 +118,16 @@
                 <div class="col-span-2 mt-4">
                     <div class="flex items-center justify-between mb-3">
                         <h4 class="text-lg font-medium text-gray-800">Price Breakdown</h4>
-                        <label class="flex items-center gap-2 cursor-pointer select-none">
-                            <span class="text-sm text-gray-500">Manual override</span>
-                            <div class="relative">
-                                <input type="checkbox" id="edit_price_override_toggle" class="sr-only peer">
-                                <div class="w-10 h-5 bg-gray-300 rounded-full peer peer-checked:bg-violet-500 transition"></div>
-                                <div class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition peer-checked:translate-x-5"></div>
-                            </div>
-                        </label>
+                        @if(auth()->user()->role === 'manager')
+                            <label class="flex items-center gap-2 cursor-pointer select-none">
+                                <span class="text-sm text-gray-500">Manual override</span>
+                                <div class="relative">
+                                        <input type="checkbox" id="edit_price_override_toggle" class="sr-only peer">
+                                    <div class="w-10 h-5 bg-gray-300 rounded-full peer peer-checked:bg-violet-500 transition"></div>
+                                    <div class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition peer-checked:translate-x-5"></div>
+                                </div>
+                            </label>
+                        @endif
                     </div>
                 </div>
 
