@@ -1,4 +1,3 @@
-<!-- Edit Booking Modal -->
 <div id="editBookingModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div class="p-6 border-b border-gray-200">
@@ -12,6 +11,9 @@
         
         <form id="editBookingForm" class="p-6">
             <input type="hidden" id="edit_booking_id">
+
+            {{-- Pass role to JS safely --}}
+            <input type="hidden" id="edit_booking_user_role" value="{{ auth()->user()->role }}">
             
             <div class="grid grid-cols-2 gap-4 mb-6">
 
@@ -112,8 +114,10 @@
                 <div class="col-span-2 mt-4">
                     <div class="flex items-center justify-between mb-3">
                         <h4 class="text-lg font-medium text-gray-800">Price Breakdown</h4>
-                        @if(auth()->user()->role === 'manager')    
-                            <label class="flex items-center gap-2 cursor-pointer select-none">
+
+                        {{-- Manager-only toggle --}}
+                        @if(auth()->user()->role === 'manager')
+                            <label class="flex items-center gap-2 cursor-pointer select-none" title="Manager only: Override computed price">
                                 <span class="text-sm text-gray-500">Manual override</span>
                                 <div class="relative">
                                     <input type="checkbox" id="edit_price_override_toggle" class="sr-only peer">
@@ -121,7 +125,7 @@
                                     <div class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition peer-checked:translate-x-5"></div>
                                 </div>
                             </label>
-                        @endif    
+                        @endif
                     </div>
                 </div>
                 
@@ -139,24 +143,26 @@
                         </div>
                         <div class="flex justify-between items-center border-t border-gray-200 pt-2">
                             <span class="text-sm font-semibold text-gray-800">Total Price:</span>
-                            <!-- Auto-computed display -->
                             <span class="text-sm font-bold text-blue-600" id="edit_total_price_display">₱0.00</span>
                         </div>
-                        <!-- Manual override input — hidden by default -->
-                        <div id="edit_manual_price_wrapper" class="hidden border-t border-blue-200 pt-3 mt-1">
-                            <label class="block text-sm font-medium text-blue-700 mb-1">
-                                <i class="fas fa-edit mr-1"></i>
-                                Override Total Price (₱)
-                            </label>
-                            <input type="number" id="edit_manual_total_price"
-                                   step="0.01" min="0"
-                                   class="w-full px-3 py-2 border-2 border-blue-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-blue-700 font-semibold text-sm"
-                                   placeholder="Enter custom total price">
-                            <p class="text-xs text-blue-500 mt-1">
-                                <i class="fas fa-info-circle mr-1"></i>
-                                Auto-computed: <span id="edit_auto_price_hint">₱0.00</span>. Overriding will use your entered value instead.
-                            </p>
-                        </div>
+
+                        {{-- Manual override input — manager only, hidden by default --}}
+                        @if(auth()->user()->role === 'manager')
+                            <div id="edit_manual_price_wrapper" class="hidden border-t border-blue-200 pt-3 mt-1">
+                                <label class="block text-sm font-medium text-blue-700 mb-1">
+                                    <i class="fas fa-edit mr-1"></i>
+                                    Override Total Price (₱)
+                                </label>
+                                <input type="number" id="edit_manual_total_price"
+                                       step="0.01" min="0"
+                                       class="w-full px-3 py-2 border-2 border-blue-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-blue-700 font-semibold text-sm"
+                                       placeholder="Enter custom total price">
+                                <p class="text-xs text-blue-500 mt-1">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    Auto-computed: <span id="edit_auto_price_hint">₱0.00</span>. Overriding will use your entered value instead.
+                                </p>
+                            </div>
+                        @endif
                     </div>
                 </div>
 
@@ -243,6 +249,12 @@
 // EDIT BOOKING MODAL SCRIPTS
 // ============================================
 
+// ── Detect user role from hidden input (safe for all roles) ──
+const EDIT_BOOKING_USER_ROLE = (document.getElementById('edit_booking_user_role')?.value || '').trim();
+const EDIT_BOOKING_IS_MANAGER = EDIT_BOOKING_USER_ROLE === 'manager';
+
+console.log('👤 Edit Booking | User role:', EDIT_BOOKING_USER_ROLE, '| Is manager:', EDIT_BOOKING_IS_MANAGER);
+
 // State variables
 let originalName         = '';
 let originalEmail        = '';
@@ -309,12 +321,8 @@ function closeEditModal() {
             if (errorDiv) errorDiv.remove();
         }
 
-        // Reset all state
         resetEditModalState();
-
-        // Remove outside click listener
         document.removeEventListener('click', handleEditOutsideClick);
-
         setTimeout(() => resolve(), 300);
     });
 }
@@ -332,32 +340,35 @@ function resetEditModalState() {
     editMaxRefund              = 0;
 
     // Hide dynamic sections
-    document.getElementById('cancellation_fields').classList.add('hidden');
-    document.getElementById('completed_note').classList.add('hidden');
-    document.getElementById('name-change-warning').classList.add('hidden');
-    document.getElementById('email-change-warning').classList.add('hidden');
+    document.getElementById('cancellation_fields')?.classList.add('hidden');
+    document.getElementById('completed_note')?.classList.add('hidden');
+    document.getElementById('name-change-warning')?.classList.add('hidden');
+    document.getElementById('email-change-warning')?.classList.add('hidden');
 
-    // Clear conflict messages and notes
     clearEditConflictMessage();
     clearEditUnitNotes();
-
-    // Reset loading
     hideUpdateLoading();
 
-    // Reset price display
-    document.getElementById('edit_unit_price_display').textContent  = '₱0.00';
-    document.getElementById('edit_entrance_fee_total').textContent  = '₱0.00';
-    document.getElementById('edit_total_price_display').textContent = '₱0.00';
-    document.getElementById('edit_entrance_fee_value').textContent  = '₱0.00';
-    document.getElementById('edit_guest_count').textContent         = '0';
-    document.getElementById('edit_auto_price_hint').textContent     = '₱0.00';
+    // Reset price displays
+    const priceFields = {
+        'edit_unit_price_display':  '₱0.00',
+        'edit_entrance_fee_total':  '₱0.00',
+        'edit_total_price_display': '₱0.00',
+        'edit_entrance_fee_value':  '₱0.00',
+        'edit_guest_count':         '0',
+        'edit_auto_price_hint':     '₱0.00'
+    };
+    Object.entries(priceFields).forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val;
+    });
 
-    // Reset manual price override
-    const toggle = document.getElementById('edit_price_override_toggle');
-    const wrapper = document.getElementById('edit_manual_price_wrapper');
+    // ✅ Safe null checks — toggle/wrapper/input only exist for managers
+    const toggle      = document.getElementById('edit_price_override_toggle');
+    const wrapper     = document.getElementById('edit_manual_price_wrapper');
     const manualInput = document.getElementById('edit_manual_total_price');
-    if (toggle)     toggle.checked    = false;
-    if (wrapper)    wrapper.classList.add('hidden');
+    if (toggle)      toggle.checked    = false;
+    if (wrapper)     wrapper.classList.add('hidden');
     if (manualInput) manualInput.value = '';
 }
 
@@ -378,10 +389,9 @@ document.getElementById('edit_booking_status').addEventListener('change', functi
     if (status === 'cancelled') {
         cancellationFields.classList.remove('hidden');
         completedNote.classList.add('hidden');
-
-        // Auto-fill refund amount with max refundable
         if (editMaxRefund > 0) {
-            document.getElementById('edit_refund_amount').value = editMaxRefund.toFixed(2);
+            const refundInput = document.getElementById('edit_refund_amount');
+            if (refundInput) refundInput.value = editMaxRefund.toFixed(2);
         }
     } else if (status === 'completed') {
         cancellationFields.classList.add('hidden');
@@ -393,29 +403,37 @@ document.getElementById('edit_booking_status').addEventListener('change', functi
 });
 
 // ─────────────────────────────────────────
-// MANUAL PRICE OVERRIDE TOGGLE
+// MANUAL PRICE OVERRIDE TOGGLE (Manager only)
+// Safe: element only exists in DOM when user is manager
 // ─────────────────────────────────────────
-document.getElementById('edit_price_override_toggle').addEventListener('change', function () {
-    const wrapper    = document.getElementById('edit_manual_price_wrapper');
-    const manualInput = document.getElementById('edit_manual_total_price');
-    const autoHint   = document.getElementById('edit_auto_price_hint');
+const editPriceOverrideToggle = document.getElementById('edit_price_override_toggle');
+if (EDIT_BOOKING_IS_MANAGER && editPriceOverrideToggle) {
+    editPriceOverrideToggle.addEventListener('change', function () {
+        const wrapper     = document.getElementById('edit_manual_price_wrapper');
+        const manualInput = document.getElementById('edit_manual_total_price');
+        const autoHint    = document.getElementById('edit_auto_price_hint');
 
-    if (this.checked) {
-        // Show manual input, pre-fill with current auto-computed value
-        wrapper.classList.remove('hidden');
-        const currentAuto = document.getElementById('edit_total_price_display').textContent
-            .replace('₱', '').replace(',', '');
-        manualInput.value = parseFloat(currentAuto).toFixed(2);
-        autoHint.textContent = '₱' + parseFloat(currentAuto).toFixed(2);
-        manualInput.focus();
-    } else {
-        // Hide manual input, revert to auto-computed
-        wrapper.classList.add('hidden');
-        manualInput.value = '';
-    }
-});
+        if (!wrapper || !manualInput) return;
 
+        if (this.checked) {
+            wrapper.classList.remove('hidden');
+            const currentAuto = document.getElementById('edit_total_price_display')?.textContent
+                .replace('₱', '').replace(/,/g, '') || '0';
+            manualInput.value = parseFloat(currentAuto || 0).toFixed(2);
+            if (autoHint) autoHint.textContent = '₱' + parseFloat(currentAuto || 0).toFixed(2);
+            manualInput.focus();
+        } else {
+            wrapper.classList.add('hidden');
+            manualInput.value = '';
+        }
+    });
+} else if (!EDIT_BOOKING_IS_MANAGER) {
+    console.log('ℹ️ Price override toggle not available (manager only)');
+}
 
+// ─────────────────────────────────────────
+// CONFLICT MESSAGE HELPERS
+// ─────────────────────────────────────────
 function clearEditConflictMessage() {
     const msg = document.getElementById('edit-conflict-message');
     if (msg) msg.remove();
@@ -432,9 +450,8 @@ function createEditConflictMessage() {
     div.id     = 'edit-conflict-message';
     div.className = 'col-span-2';
 
-    // Insert before the Special Requirements textarea
     const textarea = document.getElementById('edit_special_requirements');
-    const wrapper  = textarea.closest('.col-span-2');
+    const wrapper  = textarea?.closest('.col-span-2');
     if (wrapper && wrapper.parentNode) {
         wrapper.parentNode.insertBefore(div, wrapper);
     }
@@ -453,22 +470,11 @@ function showEditUnitNotes(message, type = 'info') {
     const notesDiv = document.getElementById('editUnitAvailabilityNotes');
     if (!notesDiv) return;
 
-    const icons = {
-        error:   'fas fa-exclamation-circle',
-        warning: 'fas fa-info-circle',
-        success: 'fas fa-check-circle'
-    };
-    const colors = {
-        error:   'text-red-600',
-        warning: 'text-yellow-600',
-        success: 'text-green-600'
-    };
+    const icons  = { error: 'fas fa-exclamation-circle', warning: 'fas fa-info-circle', success: 'fas fa-check-circle' };
+    const colors = { error: 'text-red-600', warning: 'text-yellow-600', success: 'text-green-600' };
 
-    const icon  = icons[type]  || icons.success;
-    const color = colors[type] || colors.success;
-
-    notesDiv.innerHTML = `<div class="flex items-center ${color}"><i class="${icon} mr-2"></i>${message}</div>`;
-    notesDiv.className = `mt-2 text-sm ${color}`;
+    notesDiv.innerHTML = `<div class="flex items-center ${colors[type] || colors.success}"><i class="${icons[type] || icons.success} mr-2"></i>${message}</div>`;
+    notesDiv.className = `mt-2 text-sm ${colors[type] || colors.success}`;
 }
 
 // ─────────────────────────────────────────
@@ -478,7 +484,6 @@ function formatDateForInput(dateString) {
     if (!dateString) return '';
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return '';
-
     const year  = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day   = String(date.getDate()).padStart(2, '0');
@@ -503,9 +508,7 @@ function loadPaymentSummaryForRefund(bookingId) {
                     refundInput.value = netPaid > 0 ? netPaid.toFixed(2) : '0.00';
                     refundInput.setAttribute('max', netPaid);
                 }
-                if (maxDisplay) {
-                    maxDisplay.textContent = '₱' + netPaid.toFixed(2);
-                }
+                if (maxDisplay) maxDisplay.textContent = '₱' + netPaid.toFixed(2);
             }
         })
         .catch(err => console.error('Error loading payment summary:', err));
@@ -517,7 +520,7 @@ function loadPaymentSummaryForRefund(bookingId) {
 function loadEditAvailableUnits() {
     const unitType    = originalUnitType;
     const bookingType = originalBookingType;
-    const checkinDate = document.getElementById('edit_checkin_date').value;
+    const checkinDate  = document.getElementById('edit_checkin_date').value;
     const checkoutDate = document.getElementById('edit_checkout_date').value;
 
     console.log('=== LOADING EDIT AVAILABLE UNITS ===');
@@ -549,54 +552,42 @@ function loadEditAvailableUnits() {
 
             const unitSelect = document.getElementById('edit_unit_id');
 
-            // Update entrance fee
             if (data.entrance_fee) {
                 editCurrentEntranceFee = parseFloat(data.entrance_fee);
-                document.getElementById('edit_entrance_fee_value').textContent =
-                    '₱' + editCurrentEntranceFee.toFixed(2);
+                const entranceFeeEl = document.getElementById('edit_entrance_fee_value');
+                if (entranceFeeEl) entranceFeeEl.textContent = '₱' + editCurrentEntranceFee.toFixed(2);
             }
 
             unitSelect.innerHTML = '';
 
-            // Always add the current/original unit first
             const isOriginalAvailable = data.data.some(u => u.unitID == originalUnitId);
             let currentLabel = 'Current Unit';
 
             if (data.has_special_event_conflict) {
                 currentLabel += ' (Special Event - Keep Current)';
                 hasEditSpecialEventConflict = true;
-                showEditUnitNotes(
-                    'There is a special event on the selected dates. You can keep the current unit or choose different dates.',
-                    'warning'
-                );
+                showEditUnitNotes('There is a special event on the selected dates. You can keep the current unit or choose different dates.', 'warning');
             } else if (data.data.length === 0) {
                 currentLabel += ' (No Other Units Available)';
                 hasEditSpecialEventConflict = false;
-                showEditUnitNotes(
-                    'No other units available for selected dates. You can keep current unit or choose different dates.',
-                    'warning'
-                );
+                showEditUnitNotes('No other units available for selected dates. You can keep current unit or choose different dates.', 'warning');
             } else {
                 currentLabel += isOriginalAvailable ? ' (Available)' : ' (Keep Current)';
                 hasEditSpecialEventConflict = false;
                 showEditUnitNotes(`${data.data.length} unit(s) available for selected dates`, 'success');
             }
 
-            // Add current unit option
             unitSelect.innerHTML += `<option value="${originalUnitId}" data-price="${originalUnitPrice}">${currentLabel}</option>`;
 
-            // Add other available units (exclude original)
             data.data.forEach(unit => {
                 if (unit.unitID != originalUnitId) {
                     unitSelect.innerHTML += `
                         <option value="${unit.unitID}" data-price="${unit.unitRatePrice}">
                             ${unit.unitName} - ₱${parseFloat(unit.unitRatePrice).toFixed(2)} (Capacity: ${unit.capacity})
-                        </option>
-                    `;
+                        </option>`;
                 }
             });
 
-            // Keep original unit selected
             unitSelect.value = originalUnitId;
 
             updateEditTotalPrice();
@@ -636,50 +627,48 @@ function updateEditTotalPrice() {
     const totalPriceDisplay = document.getElementById('edit_total_price_display');
     const guestCount        = document.getElementById('edit_guest_count');
 
-    guestCount.textContent = numGuests;
+    if (guestCount) guestCount.textContent = numGuests;
 
     if (!selectedOption || !selectedOption.value) {
-        unitPriceDisplay.textContent  = '₱0.00';
-        entranceFeeTotal.textContent  = '₱0.00';
-        totalPriceDisplay.textContent = '₱0.00';
+        if (unitPriceDisplay)  unitPriceDisplay.textContent  = '₱0.00';
+        if (entranceFeeTotal)  entranceFeeTotal.textContent  = '₱0.00';
+        if (totalPriceDisplay) totalPriceDisplay.textContent = '₱0.00';
         return;
     }
 
     let unitPrice = parseFloat(selectedOption.getAttribute('data-price'));
-    if (!unitPrice || isNaN(unitPrice)) {
-        unitPrice = originalUnitPrice;
-    }
+    if (!unitPrice || isNaN(unitPrice)) unitPrice = originalUnitPrice;
 
-    let totalPrice       = 0;
+    let totalPrice        = 0;
     let entranceFeeAmount = 0;
-    const daysCount      = bookingType === 'overnight' ? calculateEditDaysCount() : 1;
+    const daysCount       = bookingType === 'overnight' ? calculateEditDaysCount() : 1;
 
     console.log('Edit Price calculation:', { unitType, bookingType, unitPrice, numGuests, daysCount, editCurrentEntranceFee });
 
     if (unitType === 'cottage') {
-        entranceFeeAmount           = editCurrentEntranceFee * numGuests;
-        totalPrice                  = entranceFeeAmount + unitPrice;
-        unitPriceDisplay.textContent = '₱' + unitPrice.toFixed(2);
-        entranceFeeTotal.textContent = '₱' + entranceFeeAmount.toFixed(2);
+        entranceFeeAmount = editCurrentEntranceFee * numGuests;
+        totalPrice        = entranceFeeAmount + unitPrice;
+        if (unitPriceDisplay) unitPriceDisplay.textContent = '₱' + unitPrice.toFixed(2);
+        if (entranceFeeTotal) entranceFeeTotal.textContent = '₱' + entranceFeeAmount.toFixed(2);
     } else {
         if (bookingType === 'day-use') {
             if (numGuests === 1) {
                 totalPrice = unitPrice * 2;
-                unitPriceDisplay.textContent = '₱' + unitPrice.toFixed(2) + ' × 2 (single guest)';
+                if (unitPriceDisplay) unitPriceDisplay.textContent = '₱' + unitPrice.toFixed(2) + ' × 2 (single guest)';
             } else {
                 totalPrice = unitPrice * numGuests;
-                unitPriceDisplay.textContent = '₱' + unitPrice.toFixed(2) + ' × ' + numGuests + ' guests';
+                if (unitPriceDisplay) unitPriceDisplay.textContent = '₱' + unitPrice.toFixed(2) + ' × ' + numGuests + ' guests';
             }
         } else {
             totalPrice = unitPrice * numGuests * daysCount;
-            unitPriceDisplay.textContent = '₱' + unitPrice.toFixed(2) + ' × ' + numGuests + ' guests × ' + daysCount + ' days';
+            if (unitPriceDisplay) unitPriceDisplay.textContent = '₱' + unitPrice.toFixed(2) + ' × ' + numGuests + ' guests × ' + daysCount + ' days';
         }
-        entranceFeeTotal.textContent = '₱0.00';
+        if (entranceFeeTotal) entranceFeeTotal.textContent = '₱0.00';
     }
 
-    totalPriceDisplay.textContent = '₱' + totalPrice.toFixed(2);
+    if (totalPriceDisplay) totalPriceDisplay.textContent = '₱' + totalPrice.toFixed(2);
 
-    // ── Sync auto price hint if override is active ──
+    // Sync auto price hint (only exists for managers — safe null check)
     const autoHint = document.getElementById('edit_auto_price_hint');
     if (autoHint) autoHint.textContent = '₱' + totalPrice.toFixed(2);
 
@@ -720,10 +709,10 @@ function checkEditDateConflict() {
     const finalCheckout = (bookingType === 'day-use') ? checkinDate : (checkoutDate || checkinDate);
 
     const params = new URLSearchParams({
-        unit_id:           unitId,
-        checkin_date:      checkinDate,
-        checkout_date:     finalCheckout,
-        booking_type:      bookingType,
+        unit_id:            unitId,
+        checkin_date:       checkinDate,
+        checkout_date:      finalCheckout,
+        booking_type:       bookingType,
         exclude_booking_id: bookingId
     });
 
@@ -735,10 +724,10 @@ function checkEditDateConflict() {
         .then(data => {
             console.log('Conflict check response:', data);
 
-            const submitBtn      = document.getElementById('updateBookingBtn');
-            const conflictDiv    = document.getElementById('edit-conflict-message') || createEditConflictMessage();
-            const unitSelect     = document.getElementById('edit_unit_id');
-            const unitName       = unitSelect.options[unitSelect.selectedIndex]?.text.split(' - ')[0] || 'Selected unit';
+            const submitBtn   = document.getElementById('updateBookingBtn');
+            const conflictDiv = document.getElementById('edit-conflict-message') || createEditConflictMessage();
+            const unitSelect  = document.getElementById('edit_unit_id');
+            const unitName    = unitSelect.options[unitSelect.selectedIndex]?.text.split(' - ')[0] || 'Selected unit';
 
             const checkinFmt  = new Date(checkinDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
             const checkoutFmt = (bookingType === 'overnight' && finalCheckout !== checkinDate)
@@ -756,9 +745,7 @@ function checkEditDateConflict() {
                             <div>
                                 <strong class="block">Special Event Conflict</strong>
                                 <span class="text-sm">Cannot update to ${unitName} due to special event on selected dates.</span>
-                                <div class="mt-1 text-xs text-gray-600">
-                                    Requested: ${bookingType === 'day-use' ? checkinFmt : checkinFmt + ' to ' + checkoutFmt}
-                                </div>
+                                <div class="mt-1 text-xs text-gray-600">Requested: ${bookingType === 'day-use' ? checkinFmt : checkinFmt + ' to ' + checkoutFmt}</div>
                             </div>
                         </div>`;
                     conflictDiv.className = 'col-span-2 p-3 bg-orange-50 border border-orange-200 rounded-lg text-orange-800 text-sm';
@@ -816,8 +803,10 @@ function checkEditDateConflict() {
         .catch(err => {
             console.error('Error checking availability:', err);
             const btn = document.getElementById('updateBookingBtn');
-            btn.disabled = false;
-            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            if (btn) {
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
         });
 }
 
@@ -842,9 +831,9 @@ function editBooking(bookingId) {
 
             const booking = data.data;
 
-            // ── Store original values ──
-            originalName        = booking.guest_name  || '';
-            originalEmail       = booking.email        || '';
+            // Store originals
+            originalName        = booking.guest_name || '';
+            originalEmail       = booking.email       || '';
             originalBookingId   = booking.bookingID;
             originalBookingType = booking.booking_type;
 
@@ -852,12 +841,10 @@ function editBooking(bookingId) {
                 originalUnitId   = booking.units[0].unitID;
                 originalUnitType = booking.units[0].unitType;
 
-                // Calculate original unit price from total price
                 const totalPrice = parseFloat(booking.total_price);
                 const numGuests  = parseInt(booking.num_guests);
 
                 if (originalUnitType === 'cottage') {
-                    // Will be recalculated when entrance fee loads
                     originalUnitPrice = totalPrice;
                 } else {
                     if (originalBookingType === 'day-use') {
@@ -875,22 +862,21 @@ function editBooking(bookingId) {
                 originalUnitPrice = 0;
             }
 
-            // ── Populate form fields ──
-            document.getElementById('edit_booking_id').value          = booking.bookingID;
-            document.getElementById('edit_guest_name').value          = originalName;
-            document.getElementById('edit_email').value               = originalEmail;
-            document.getElementById('edit_phone').value               = booking.phone;
-            document.getElementById('edit_booking_status').value      = booking.booking_status;
-            document.getElementById('edit_num_guests').value          = booking.num_guests;
+            // Populate form fields
+            document.getElementById('edit_booking_id').value           = booking.bookingID;
+            document.getElementById('edit_guest_name').value           = originalName;
+            document.getElementById('edit_email').value                = originalEmail;
+            document.getElementById('edit_phone').value                = booking.phone;
+            document.getElementById('edit_booking_status').value       = booking.booking_status;
+            document.getElementById('edit_num_guests').value           = booking.num_guests;
             document.getElementById('edit_special_requirements').value = booking.special_requirements || '';
 
-            // ── Unit / Booking type displays ──
             document.getElementById('edit_unit_type_display').value =
                 originalUnitType.charAt(0).toUpperCase() + originalUnitType.slice(1);
             document.getElementById('edit_booking_type_display').value =
                 originalBookingType === 'day-use' ? 'Day Use' : 'Overnight';
 
-            // ── Dates ──
+            // Dates
             const checkinDate  = formatDateForInput(booking.checkin_date);
             const checkoutDate = booking.checkout_date ? formatDateForInput(booking.checkout_date) : '';
 
@@ -904,7 +890,6 @@ function editBooking(bookingId) {
             checkinInput.min  = today;
             checkoutInput.min = checkinDate;
 
-            // Disable checkout for day-use
             if (originalBookingType === 'day-use') {
                 checkoutInput.value    = checkinDate;
                 checkoutInput.disabled = true;
@@ -914,7 +899,7 @@ function editBooking(bookingId) {
                 document.getElementById('edit_checkout_date_wrapper').style.opacity = '1';
             }
 
-            // ── Date change listeners (replace old ones) ──
+            // Clone inputs to remove stale listeners
             const newCheckinInput  = checkinInput.cloneNode(true);
             const newCheckoutInput = checkoutInput.cloneNode(true);
             checkinInput.parentNode.replaceChild(newCheckinInput, checkinInput);
@@ -922,9 +907,7 @@ function editBooking(bookingId) {
 
             newCheckinInput.addEventListener('change', function () {
                 newCheckoutInput.min = this.value;
-                if (originalBookingType === 'day-use') {
-                    newCheckoutInput.value = this.value;
-                }
+                if (originalBookingType === 'day-use') newCheckoutInput.value = this.value;
                 clearEditConflictMessage();
                 loadEditAvailableUnits();
             });
@@ -934,13 +917,8 @@ function editBooking(bookingId) {
                 loadEditAvailableUnits();
             });
 
-            // ── Load payment summary for refund ──
             loadPaymentSummaryForRefund(bookingId);
-
-            // ── Load available units ──
             loadEditAvailableUnits();
-
-            // ── Open modal ──
             openEditModal();
         })
         .catch(err => {
@@ -955,7 +933,7 @@ function editBooking(bookingId) {
 document.getElementById('editBookingForm').addEventListener('submit', async function (e) {
     e.preventDefault();
 
-    // ── Check for active conflict messages ──
+    // Check for active conflict
     const conflictMsg = document.getElementById('edit-conflict-message');
     if (conflictMsg && (
         conflictMsg.textContent.includes('already booked') ||
@@ -966,60 +944,50 @@ document.getElementById('editBookingForm').addEventListener('submit', async func
         return;
     }
 
-    // ── Phone validation ──
-    if (!validateFormPhoneNumbers()) {
+    // Phone validation
+    if (typeof validateFormPhoneNumbers === 'function' && !validateFormPhoneNumbers()) {
         Swal.fire({ icon: 'warning', title: 'Invalid Phone Number', text: 'Please fix the phone number validation errors before submitting.', confirmButtonColor: '#f59e0b' });
         return;
     }
 
-    // ── Get all values directly from DOM ──
-    const bookingId    = document.getElementById('edit_booking_id').value;
-    const newStatus    = document.getElementById('edit_booking_status').value;
-    const checkinDate  = document.getElementById('edit_checkin_date').value;
-    const checkoutDate = document.getElementById('edit_checkout_date').value;
-    const numGuests    = parseInt(document.getElementById('edit_num_guests').value);
-    const unitId       = document.getElementById('edit_unit_id').value;
-    const phone        = document.getElementById('edit_phone').value.replace(/\D/g, '');
-    const specialReqs  = document.getElementById('edit_special_requirements').value;
+    // Gather form data
+    const bookingId    = document.getElementById('edit_booking_id')?.value           || '';
+    const newStatus    = document.getElementById('edit_booking_status')?.value       || 'pending';
+    const checkinDate  = document.getElementById('edit_checkin_date')?.value         || '';
+    const checkoutDate = document.getElementById('edit_checkout_date')?.value        || '';
+    const numGuests    = parseInt(document.getElementById('edit_num_guests')?.value  || 1);
+    const unitId       = document.getElementById('edit_unit_id')?.value              || '';
+    const phone        = (document.getElementById('edit_phone')?.value || '').replace(/\D/g, '');
+    const specialReqs  = document.getElementById('edit_special_requirements')?.value || '';
 
-    // Cancellation fields
     const cancellationReason = document.getElementById('edit_cancellation_reason')?.value || '';
-    const refundAmountRaw    = document.getElementById('edit_refund_amount')?.value || '0';
+    const refundAmount       = parseFloat(document.getElementById('edit_refund_amount')?.value || 0);
     const refundMethod       = document.getElementById('edit_refund_method')?.value || '';
-    const refundAmount       = parseFloat(refundAmountRaw) || 0;
 
-    // ── Compute total price (manual override OR auto-computed) ──
-    const isOverride     = document.getElementById('edit_price_override_toggle').checked;
-    const manualPriceVal = document.getElementById('edit_manual_total_price').value;
-    const autoDisplayVal = document.getElementById('edit_total_price_display').textContent;
+    // ✅ KEY FIX: Safe null check — toggle only exists for managers
+    const toggleEl       = document.getElementById('edit_price_override_toggle');
+    const isOverride     = EDIT_BOOKING_IS_MANAGER && toggleEl ? toggleEl.checked : false;
+    const manualPriceVal = document.getElementById('edit_manual_total_price')?.value || '';
+    const autoDisplayVal = document.getElementById('edit_total_price_display')?.textContent || '0';
 
     let totalPrice = 0;
-    if (isOverride && manualPriceVal && parseFloat(manualPriceVal) >= 0) {
+    if (isOverride && manualPriceVal !== '' && parseFloat(manualPriceVal) >= 0) {
         totalPrice = parseFloat(manualPriceVal);
+        console.log('💰 Using manager override price:', totalPrice);
     } else {
-        totalPrice = parseFloat(autoDisplayVal.replace('₱', '').replace(',', '')) || 0;
+        totalPrice = parseFloat(autoDisplayVal.replace('₱', '').replace(/,/g, '')) || 0;
+        console.log('💰 Using auto-computed price:', totalPrice);
     }
 
-    // ── Validate manual price if override is on ──
-    if (isOverride && (!manualPriceVal || isNaN(totalPrice) || totalPrice < 0)) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Invalid Price',
-            text: 'Please enter a valid total price.',
-            confirmButtonColor: '#f59e0b'
-        });
+    // Validate override price if active
+    if (isOverride && (manualPriceVal === '' || isNaN(totalPrice) || totalPrice < 0)) {
+        Swal.fire({ icon: 'warning', title: 'Invalid Price', text: 'Please enter a valid total price.', confirmButtonColor: '#f59e0b' });
         return;
     }
 
-    // ── Validate unit selected ──
     if (!unitId) {
         Swal.fire({ icon: 'warning', title: 'No Unit Selected', text: 'Please select a unit before updating.', confirmButtonColor: '#f59e0b' });
         return;
-    }
-
-    // ── Validate dates ──
-    if (originalBookingType === 'day-use') {
-        // No need to validate — checkout is auto-set to checkin
     }
 
     if (originalBookingType === 'overnight') {
@@ -1033,45 +1001,32 @@ document.getElementById('editBookingForm').addEventListener('submit', async func
         }
     }
 
-    // ── Validate refund amount if cancelling ──
     if (newStatus === 'cancelled' && refundAmount > editMaxRefund) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Invalid Refund Amount',
-            text: `Refund amount cannot exceed ₱${editMaxRefund.toFixed(2)} (net paid amount).`,
-            confirmButtonColor: '#f59e0b'
-        });
+        Swal.fire({ icon: 'warning', title: 'Invalid Refund Amount', text: `Refund amount cannot exceed ₱${editMaxRefund.toFixed(2)} (net paid amount).`, confirmButtonColor: '#f59e0b' });
         return;
     }
 
-    // ── Status change confirmations ──
+    // Status confirmations
     if (newStatus === 'cancelled') {
         const result = await Swal.fire({
-            icon: 'warning',
-            title: 'Cancel Booking?',
+            icon: 'warning', title: 'Cancel Booking?',
             text: 'This will send a cancellation email to the guest. Are you sure?',
             showCancelButton: true,
-            confirmButtonColor: '#dc2626',
-            cancelButtonColor: '#6b7280',
-            confirmButtonText: 'Yes, cancel booking',
-            cancelButtonText: 'No, go back'
+            confirmButtonColor: '#dc2626', cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, cancel booking', cancelButtonText: 'No, go back'
         });
         if (!result.isConfirmed) return;
     } else if (newStatus === 'completed') {
         const result = await Swal.fire({
-            icon: 'question',
-            title: 'Mark as Completed?',
+            icon: 'question', title: 'Mark as Completed?',
             text: 'This will send a thank you email to the guest. Are you sure?',
             showCancelButton: true,
-            confirmButtonColor: '#16a34a',
-            cancelButtonColor: '#6b7280',
-            confirmButtonText: 'Yes, mark as completed',
-            cancelButtonText: 'No, go back'
+            confirmButtonColor: '#16a34a', cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, mark as completed', cancelButtonText: 'No, go back'
         });
         if (!result.isConfirmed) return;
     }
 
-    // ── Build payload explicitly (NOT using FormData) ──
     const payload = {
         guest_name:           originalName,
         email:                originalEmail,
@@ -1113,37 +1068,22 @@ document.getElementById('editBookingForm').addEventListener('submit', async func
 
         if (result.success) {
             await closeEditModal();
-
             Swal.fire({
-                icon: 'success',
-                title: 'Success!',
+                icon: 'success', title: 'Success!',
                 text: 'Booking updated successfully!',
-                confirmButtonColor: '#16a34a',
-                confirmButtonText: 'OK'
+                confirmButtonColor: '#16a34a', confirmButtonText: 'OK'
             }).then(() => {
                 loadBookings(getCurrentStatus(), getCurrentSearch(), currentPage);
             });
         } else {
             await closeEditModal();
-
-            Swal.fire({
-                icon: 'error',
-                title: 'Error!',
-                text: result.message || 'Failed to update booking',
-                confirmButtonColor: '#dc2626'
-            });
+            Swal.fire({ icon: 'error', title: 'Error!', text: result.message || 'Failed to update booking', confirmButtonColor: '#dc2626' });
         }
     } catch (error) {
         console.error('Submit error:', error);
         hideUpdateLoading();
         await closeEditModal();
-
-        Swal.fire({
-            icon: 'error',
-            title: 'Error!',
-            text: 'Error updating booking',
-            confirmButtonColor: '#dc2626'
-        });
+        Swal.fire({ icon: 'error', title: 'Error!', text: 'Error updating booking', confirmButtonColor: '#dc2626' });
     }
 });
 </script>
