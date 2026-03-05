@@ -313,7 +313,7 @@ class UnitsController extends Controller
             DB::rollBack();
             Log::error('Error deleting unit: ' . $e->getMessage());
             return redirect()->route('admin.rooms-cottages')
-                ->with('error', 'Error deleting unit: ' . $e->getMessage());
+                ->with('error', 'Cannot delete this unit because it is currently in a guest\'s cart. Please wait until the cart is cleared or the booking is completed.');
         }
     }
 
