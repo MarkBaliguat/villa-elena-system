@@ -780,13 +780,12 @@
                 .current-location { bottom: 22px; right: 14px; padding: 9px 16px; font-size: 12px; }
                 .hotspot-tooltip { font-size: 13px; padding: 8px 14px; max-width: 200px; }
             }
-            /* Keep hover effects on pointer devices, allow touch on touch devices */
             @media (hover: none) and (pointer: coarse) {
                 .nav-item:hover, .dropdown-trigger:hover, .dropdown-item:hover {
                     background: transparent;
                     padding-left: revert;
                 }
-                /* NOTE: hotspot-tooltip is NOT hidden here so touch tooltip still works */
+                .hotspot-tooltip { display: none; }
             }
         </style>
     </head>
@@ -982,13 +981,6 @@
 
             let currentPanorama = "4centro.jpg";
 
-            // ── Touch-tap detection variables ──────────────────────────────
-            let touchStartX = 0;
-            let touchStartY = 0;
-            let touchStartTime = 0;
-            const TAP_MOVE_THRESHOLD = 10;   // px – max finger drift to count as a tap
-            const TAP_TIME_THRESHOLD = 250;  // ms – max duration to count as a tap
-
             init();
             animate();
 
@@ -1026,18 +1018,10 @@
                 loadHotspotsFor(currentPanorama);
                 updateCurrentLocation(getLocationName(currentPanorama));
                 updateActiveLocation(currentPanorama);
-
                 window.addEventListener("resize", onWindowResize);
                 renderer.domElement.addEventListener("wheel", onMouseWheel, { passive: false });
-
-                // ── Pinch-to-zoom (touch) ──────────────────────────────────
                 renderer.domElement.addEventListener("touchstart", handleTouchStart, { passive: false });
-                renderer.domElement.addEventListener("touchmove",  handleTouchMove,  { passive: false });
-
-                // ── Tap-to-click hotspot (touch) ───────────────────────────
-                renderer.domElement.addEventListener("touchend", handleTouchEnd, { passive: false });
-
-                // ── Hover tooltip (mouse / pointer) ────────────────────────
+                renderer.domElement.addEventListener("touchmove", handleTouchMove, { passive: false });
                 renderer.domElement.addEventListener("pointermove", onPointerMove, false);
             }
 
@@ -1049,16 +1033,10 @@
 
             function handleTouchStart(e) {
                 if (e.touches.length === 2) {
-                    // Two-finger pinch – record initial distance
                     const dx = e.touches[0].pageX - e.touches[1].pageX;
                     const dy = e.touches[0].pageY - e.touches[1].pageY;
                     initialPinchDistance = Math.sqrt(dx * dx + dy * dy);
                     initialFov = targetFov;
-                } else if (e.touches.length === 1) {
-                    // Single finger – record start position & time for tap detection
-                    touchStartX    = e.touches[0].clientX;
-                    touchStartY    = e.touches[0].clientY;
-                    touchStartTime = Date.now();
                 }
             }
 
@@ -1070,40 +1048,6 @@
                     const newDistance = Math.sqrt(dx * dx + dy * dy);
                     const zoomFactor = initialPinchDistance / newDistance;
                     targetFov = THREE.MathUtils.clamp(initialFov * zoomFactor, 30, 100);
-                }
-            }
-
-            // ── Touch-end: decide whether this was a tap on a hotspot ──────
-            function handleTouchEnd(e) {
-                // Reset pinch state
-                if (e.touches.length < 2) initialPinchDistance = null;
-
-                // Only process single-finger taps
-                if (e.changedTouches.length !== 1) return;
-
-                const touch     = e.changedTouches[0];
-                const elapsed   = Date.now() - touchStartTime;
-                const dx        = touch.clientX - touchStartX;
-                const dy        = touch.clientY - touchStartY;
-                const distance  = Math.sqrt(dx * dx + dy * dy);
-
-                // If the finger moved too much or held too long → it was a drag, not a tap
-                if (distance > TAP_MOVE_THRESHOLD || elapsed > TAP_TIME_THRESHOLD) return;
-
-                // Convert touch position to NDC and raycast against hotspots
-                const tapMouse = new THREE.Vector2(
-                    (touch.clientX / window.innerWidth)  *  2 - 1,
-                    (touch.clientY / window.innerHeight) * -2 + 1
-                );
-
-                const tapRaycaster = new THREE.Raycaster();
-                tapRaycaster.setFromCamera(tapMouse, camera);
-                const intersects = tapRaycaster.intersectObjects(spriteHotspots);
-
-                if (intersects.length > 0) {
-                    e.preventDefault(); // stop OrbitControls from also handling this event
-                    const tapped = intersects[0].object;
-                    if (tapped.userData.onClick) tapped.userData.onClick();
                 }
             }
 
@@ -1813,9 +1757,6 @@
             }
 
             function onPointerMove(event) {
-                // Only run hover logic for mouse/stylus (not touch)
-                if (event.pointerType === 'touch') return;
-
                 mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
                 mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
                 raycaster.setFromCamera(mouse, camera);
@@ -1873,11 +1814,7 @@
                 renderer.render(scene, camera);
             }
 
-            // ── Mouse click handler (desktop) ─────────────────────────────
             document.addEventListener("click", function (event) {
-                // Ignore if this came from a touch (touchend already handled it)
-                if (event.sourceCapabilities && event.sourceCapabilities.firesTouchEvents) return;
-
                 const mouseClick = new THREE.Vector2(
                     (event.clientX / window.innerWidth) * 2 - 1,
                     -(event.clientY / window.innerHeight) * 2 + 1,

@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'VE Manager',
             'username' => 've_manager',
             'email' => 'evelynbalaisserrano@gmail.com',
-            'password' => Hash::make('evelynserrano1234'),
+            'password' => Hash::make('evelynserrano12345'),
             'role' => 'manager',
             'phoneNumber' => '09123456789',
             'email_verified_at' => now(),
