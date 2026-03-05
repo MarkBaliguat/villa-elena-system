@@ -806,7 +806,7 @@
                                      onerror="this.src='/images/womens-craft.jpg'">
                             </div>
                             <div class="product-content">
-                                <h3 class="text-3xl font-bold mb-6">Women's Hands Crafts</h3>
+                                <h3 class="text-3xl font-bold mb-6">Womens HandCrafts</h3>
                                 <p class="text-gray-700 mb-6 text-lg leading-relaxed">
                                     Empowering local women artisans through our craft workshops and fair-trade partnerships. Each handcrafted piece tells a unique story of Filipino heritage, skill, and community empowerment.
                                 </p>
