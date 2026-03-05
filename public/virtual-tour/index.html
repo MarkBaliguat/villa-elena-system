@@ -548,7 +548,6 @@
             .unit-modal-card:hover .unit-modal-image img {
                 transform: scale(1.03);
             }
-            /* gradient overlay on image bottom */
             .unit-modal-image::after {
                 content: '';
                 position: absolute;
@@ -627,7 +626,6 @@
                 margin-bottom: 9px;
             }
 
-            /* Capacity chip */
             .unit-modal-info-row {
                 display: flex;
                 gap: 10px;
@@ -648,7 +646,6 @@
             }
             .unit-info-chip i { color: #e0b84f; font-size: 12px; }
 
-            /* Amenities list */
             .unit-modal-amenities {
                 list-style: none;
                 padding: 0; margin: 0 0 22px;
@@ -673,7 +670,6 @@
                 flex-shrink: 0;
             }
 
-            /* Rate + CTA */
             .unit-modal-rate {
                 margin-top: auto;
                 padding-top: 20px;
@@ -718,7 +714,6 @@
                 box-shadow: 0 6px 20px rgba(180, 160, 80, 0.4);
             }
 
-            /* Close button */
             .unit-modal-close {
                 position: absolute;
                 top: 14px; right: 14px;
@@ -762,7 +757,6 @@
                 #tmpcontent { padding: 20px; }
                 #tmpcontent img { max-width: 95%; max-height: 85vh; }
                 .mediaclosebutton { top: 20px; right: 20px; width: 45px; height: 45px; font-size: 22px; }
-                /* Modal responsive */
                 #unitModal { padding: 12px; }
                 .unit-modal-card { flex-direction: column; max-height: 96vh; border-radius: 14px; }
                 .unit-modal-image { flex: 0 0 210px; min-height: 210px; }
@@ -780,13 +774,11 @@
                 .current-location { bottom: 22px; right: 14px; padding: 9px 16px; font-size: 12px; }
                 .hotspot-tooltip { font-size: 13px; padding: 8px 14px; max-width: 200px; }
             }
-            /* Keep hover effects on pointer devices, allow touch on touch devices */
             @media (hover: none) and (pointer: coarse) {
                 .nav-item:hover, .dropdown-trigger:hover, .dropdown-item:hover {
                     background: transparent;
                     padding-left: revert;
                 }
-                /* NOTE: hotspot-tooltip is NOT hidden here so touch tooltip still works */
             }
         </style>
     </head>
@@ -986,8 +978,12 @@
             let touchStartX = 0;
             let touchStartY = 0;
             let touchStartTime = 0;
-            const TAP_MOVE_THRESHOLD = 20;   // px – max finger drift to count as a tap (increased)
-            const TAP_TIME_THRESHOLD = 400;  // ms – max duration to count as a tap (increased)
+            // FIX 1: Increased thresholds for better mobile tap detection
+            const TAP_MOVE_THRESHOLD = 15;   // px – stricter to avoid false taps during drag
+            const TAP_TIME_THRESHOLD = 500;  // ms – more generous time window
+
+            // FIX 2: Detect mobile device for larger sprite sizes
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
 
             init();
             animate();
@@ -1031,11 +1027,10 @@
                 renderer.domElement.addEventListener("wheel", onMouseWheel, { passive: false });
 
                 // ── Pinch-to-zoom (touch) ──────────────────────────────────
-                // Use capture:true so our handlers fire BEFORE OrbitControls gets the event
                 renderer.domElement.addEventListener("touchstart", handleTouchStart, { passive: false, capture: true });
                 renderer.domElement.addEventListener("touchmove",  handleTouchMove,  { passive: false, capture: true });
 
-                // ── Tap-to-click hotspot (touch) — capture phase ───────────
+                // ── Tap-to-click hotspot (touch) ───────────────────────────
                 renderer.domElement.addEventListener("touchend", handleTouchEnd, { passive: false, capture: true });
 
                 // ── Hover tooltip (mouse / pointer) ────────────────────────
@@ -1050,13 +1045,11 @@
 
             function handleTouchStart(e) {
                 if (e.touches.length === 2) {
-                    // Two-finger pinch – record initial distance
                     const dx = e.touches[0].pageX - e.touches[1].pageX;
                     const dy = e.touches[0].pageY - e.touches[1].pageY;
                     initialPinchDistance = Math.sqrt(dx * dx + dy * dy);
                     initialFov = targetFov;
                 } else if (e.touches.length === 1) {
-                    // Single finger – record start position & time for tap detection
                     touchStartX    = e.touches[0].clientX;
                     touchStartY    = e.touches[0].clientY;
                     touchStartTime = Date.now();
@@ -1074,12 +1067,9 @@
                 }
             }
 
-            // ── Touch-end: decide whether this was a tap on a hotspot ──────
+            // ── FIX 3: Improved touch-end handler ──────────────────────────
             function handleTouchEnd(e) {
-                // Reset pinch state when fingers lift
                 if (e.touches.length < 2) initialPinchDistance = null;
-
-                // Need at least one changed touch to evaluate
                 if (e.changedTouches.length < 1) return;
 
                 const touch   = e.changedTouches[0];
@@ -1088,7 +1078,7 @@
                 const dy      = touch.clientY - touchStartY;
                 const dist    = Math.sqrt(dx * dx + dy * dy);
 
-                // If the finger moved too much or held too long → drag, not tap
+                // Not a tap — finger moved too much or held too long
                 if (dist > TAP_MOVE_THRESHOLD || elapsed > TAP_TIME_THRESHOLD) return;
 
                 // Convert touch position to NDC
@@ -1097,16 +1087,17 @@
                     (touch.clientY / window.innerHeight) * -2 + 1
                 );
 
-                // Use a generous near threshold so small sprites are easier to tap
+                // FIX 4: Larger hit threshold for mobile touch
                 const tapRaycaster = new THREE.Raycaster();
-                tapRaycaster.params.Sprite = { threshold: 30 }; // enlarged hit area for touch
+                tapRaycaster.params.Sprite = { threshold: 60 };
                 tapRaycaster.setFromCamera(tapMouse, camera);
                 const intersects = tapRaycaster.intersectObjects(spriteHotspots);
 
                 if (intersects.length > 0) {
-                    // Prevent OrbitControls from treating this as a pan/rotate
+                    // FIX 5: stopImmediatePropagation prevents OrbitControls interference
                     e.preventDefault();
                     e.stopPropagation();
+                    e.stopImmediatePropagation();
                     const tapped = intersects[0].object;
                     if (tapped.userData.onClick) tapped.userData.onClick();
                 }
@@ -1788,13 +1779,15 @@
                     const material = new THREE.SpriteMaterial({ map: texture });
                     const sprite = new THREE.Sprite(material);
                     sprite.position.copy(position);
-                    sprite.scale.set(40, 40, 1);
+                    // FIX 6: Larger sprites on mobile for easier tapping
+                    const baseScale = isMobile ? 55 : 40;
+                    sprite.scale.set(baseScale, baseScale, 1);
                     const panoramaFileName = onClickCallback.toString().match(/switchPanorama\('(.*?)'\)/);
                     let destinationName = "Open Hotspot";
                     if (panoramaFileName && panoramaFileName[1]) {
                         destinationName = getLocationName(panoramaFileName[1]);
                     }
-                    sprite.userData = { onClick: onClickCallback, targetScale: 40, destinationName: destinationName, tooltipElement: null };
+                    sprite.userData = { onClick: onClickCallback, targetScale: baseScale, destinationName: destinationName, tooltipElement: null };
                     spriteHotspots.push(sprite);
                     scene.add(sprite);
                     createTooltipForHotspot(sprite);
@@ -1818,7 +1811,6 @@
             }
 
             function onPointerMove(event) {
-                // Only run hover logic for mouse/stylus (not touch)
                 if (event.pointerType === 'touch') return;
 
                 mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -1826,12 +1818,12 @@
                 raycaster.setFromCamera(mouse, camera);
                 const intersects = raycaster.intersectObjects(spriteHotspots);
                 spriteHotspots.forEach((sprite) => {
-                    sprite.userData.targetScale = 40;
+                    sprite.userData.targetScale = isMobile ? 55 : 40;
                     if (sprite.userData.tooltipElement) sprite.userData.tooltipElement.classList.remove("show");
                 });
                 if (intersects.length > 0) {
                     const intersectedSprite = intersects[0].object;
-                    intersectedSprite.userData.targetScale = 50;
+                    intersectedSprite.userData.targetScale = isMobile ? 65 : 50;
                     if (intersectedSprite.userData.tooltipElement) {
                         const vector = new THREE.Vector3();
                         intersectedSprite.getWorldPosition(vector);
@@ -1856,9 +1848,10 @@
                 requestAnimationFrame(animate);
                 camera.fov += (targetFov - camera.fov) * 0.1;
                 camera.updateProjectionMatrix();
+                const baseScale = isMobile ? 55 : 40;
                 spriteHotspots.forEach((sprite) => {
                     const currentScale = sprite.scale.x;
-                    const target = sprite.userData.targetScale || 40;
+                    const target = sprite.userData.targetScale || baseScale;
                     const newScale = THREE.MathUtils.lerp(currentScale, target, 0.1);
                     sprite.scale.set(newScale, newScale, 1);
                 });
@@ -1880,7 +1873,6 @@
 
             // ── Mouse click handler (desktop) ─────────────────────────────
             document.addEventListener("click", function (event) {
-                // Ignore if this came from a touch (touchend already handled it)
                 if (event.sourceCapabilities && event.sourceCapabilities.firesTouchEvents) return;
 
                 const mouseClick = new THREE.Vector2(
@@ -2165,7 +2157,6 @@
                     if (unit) {
                         showUnitModal(content, unit);
                     } else {
-                        // fallback: plain image in existing #tmp overlay
                         $("#tmpcontent").html("<img src='" + content + "' style='max-width:90%;max-height:88vh;border-radius:8px;'>");
                         $("#tmp").fadeIn();
                     }
@@ -2231,7 +2222,6 @@
                 document.body.style.overflow = '';
             }
 
-            // Close modal on Escape key
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') {
                     closeUnitModal();
