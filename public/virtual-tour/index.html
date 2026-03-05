@@ -860,7 +860,7 @@
                     <div class="dropdown-trigger" onclick="toggleDropdown('rooms-panel', this)">
                         <div class="trigger-left">
                             <i class="fa fa-bed nav-icon"></i>
-                            <span>Rooms List</span>
+                            <span>Rooms</span>
                         </div>
                         <i class="fa fa-chevron-down chevron"></i>
                     </div>
@@ -986,8 +986,8 @@
             let touchStartX = 0;
             let touchStartY = 0;
             let touchStartTime = 0;
-            const TAP_MOVE_THRESHOLD = 10;   // px – max finger drift to count as a tap
-            const TAP_TIME_THRESHOLD = 250;  // ms – max duration to count as a tap
+            const TAP_MOVE_THRESHOLD = 20;   // px – max finger drift to count as a tap (increased)
+            const TAP_TIME_THRESHOLD = 400;  // ms – max duration to count as a tap (increased)
 
             init();
             animate();
@@ -1031,11 +1031,12 @@
                 renderer.domElement.addEventListener("wheel", onMouseWheel, { passive: false });
 
                 // ── Pinch-to-zoom (touch) ──────────────────────────────────
-                renderer.domElement.addEventListener("touchstart", handleTouchStart, { passive: false });
-                renderer.domElement.addEventListener("touchmove",  handleTouchMove,  { passive: false });
+                // Use capture:true so our handlers fire BEFORE OrbitControls gets the event
+                renderer.domElement.addEventListener("touchstart", handleTouchStart, { passive: false, capture: true });
+                renderer.domElement.addEventListener("touchmove",  handleTouchMove,  { passive: false, capture: true });
 
-                // ── Tap-to-click hotspot (touch) ───────────────────────────
-                renderer.domElement.addEventListener("touchend", handleTouchEnd, { passive: false });
+                // ── Tap-to-click hotspot (touch) — capture phase ───────────
+                renderer.domElement.addEventListener("touchend", handleTouchEnd, { passive: false, capture: true });
 
                 // ── Hover tooltip (mouse / pointer) ────────────────────────
                 renderer.domElement.addEventListener("pointermove", onPointerMove, false);
@@ -1075,33 +1076,37 @@
 
             // ── Touch-end: decide whether this was a tap on a hotspot ──────
             function handleTouchEnd(e) {
-                // Reset pinch state
+                // Reset pinch state when fingers lift
                 if (e.touches.length < 2) initialPinchDistance = null;
 
-                // Only process single-finger taps
-                if (e.changedTouches.length !== 1) return;
+                // Need at least one changed touch to evaluate
+                if (e.changedTouches.length < 1) return;
 
-                const touch     = e.changedTouches[0];
-                const elapsed   = Date.now() - touchStartTime;
-                const dx        = touch.clientX - touchStartX;
-                const dy        = touch.clientY - touchStartY;
-                const distance  = Math.sqrt(dx * dx + dy * dy);
+                const touch   = e.changedTouches[0];
+                const elapsed = Date.now() - touchStartTime;
+                const dx      = touch.clientX - touchStartX;
+                const dy      = touch.clientY - touchStartY;
+                const dist    = Math.sqrt(dx * dx + dy * dy);
 
-                // If the finger moved too much or held too long → it was a drag, not a tap
-                if (distance > TAP_MOVE_THRESHOLD || elapsed > TAP_TIME_THRESHOLD) return;
+                // If the finger moved too much or held too long → drag, not tap
+                if (dist > TAP_MOVE_THRESHOLD || elapsed > TAP_TIME_THRESHOLD) return;
 
-                // Convert touch position to NDC and raycast against hotspots
+                // Convert touch position to NDC
                 const tapMouse = new THREE.Vector2(
                     (touch.clientX / window.innerWidth)  *  2 - 1,
                     (touch.clientY / window.innerHeight) * -2 + 1
                 );
 
+                // Use a generous near threshold so small sprites are easier to tap
                 const tapRaycaster = new THREE.Raycaster();
+                tapRaycaster.params.Sprite = { threshold: 30 }; // enlarged hit area for touch
                 tapRaycaster.setFromCamera(tapMouse, camera);
                 const intersects = tapRaycaster.intersectObjects(spriteHotspots);
 
                 if (intersects.length > 0) {
-                    e.preventDefault(); // stop OrbitControls from also handling this event
+                    // Prevent OrbitControls from treating this as a pan/rotate
+                    e.preventDefault();
+                    e.stopPropagation();
                     const tapped = intersects[0].object;
                     if (tapped.userData.onClick) tapped.userData.onClick();
                 }
