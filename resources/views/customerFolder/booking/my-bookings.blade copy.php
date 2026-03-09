@@ -6,7 +6,6 @@
     <title>My Bookings - Villa Elena</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" type="image/x-icon" href="{{ asset('images/sunflower1.png') }}">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
@@ -1414,10 +1413,9 @@ function cardHTML(b, i) {
 
         <div class="card-actions">
             <button onclick="viewBooking(${b.bookingID})" class="btn btn-primary"><i class="fas fa-eye"></i> View Details</button>
-            ${ /* (status === 'pending' || status === 'confirmed') ?
-                `<button onclick="cancelBooking(${b.bookingID})" class="btn btn-danger"><i class="fas fa-times"></i> Cancel</button>` : '' */ ''}
+            ${(status === 'pending' || status === 'confirmed') ?
+                `<button onclick="cancelBooking(${b.bookingID})" class="btn btn-danger"><i class="fas fa-times"></i> Cancel</button>` : ''}
         </div>
-        
     </div>`;
 }
 
@@ -1545,79 +1543,27 @@ function renderModal(b) {
             <p>${b.specialRequirements}</p>
         </div>` : ''}
 
-        ${ /* <div class="modal-actions">
+        <div class="modal-actions">
             ${(status === 'pending' || status === 'confirmed') ?
                 `<button onclick="cancelBooking(${b.bookingID}, true)" class="btn btn-danger"><i class="fas fa-times"></i> Cancel Booking</button>` : ''}
             <button onclick="closeModal()" class="btn btn-ghost"><i class="fas fa-times"></i> Close</button>
-        </div> */ ''}
+        </div>
     `;
 }
 
 /* ─── CANCEL ─── */
-
 function cancelBooking(id, fromModal = false) {
-    Swal.fire({
-        title: 'Cancel Booking?',
-        text: 'Are you sure you want to cancel this booking? This action cannot be undone.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: ' Yes, Cancel It',
-        cancelButtonText: ' Keep Booking',
-        confirmButtonColor: '#EF4444',
-        cancelButtonColor: '#FFD709',
-        reverseButtons: true,
-    }).then(result => {
-        if (!result.isConfirmed) return;
-
-        Swal.fire({
-            title: 'Cancelling...',
-            text: 'Please wait while we process your request.',
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            didOpen: () => Swal.showLoading()
-        });
-
-        fetch(`/api/my-bookings/${id}/cancel`, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            }
-        })
-        .then(r => r.json())
-        .then(d => {
-            if (d.success) {
-                Swal.fire({
-                    title: 'Booking Cancelled',
-                    text: 'Your booking has been successfully cancelled.',
-                    icon: 'success',
-                    confirmButtonText: 'OK',
-                    confirmButtonColor: '#FFD709',
-                }).then(() => {
-                    if (fromModal) closeModal();
-                    loadBookings();
-                });
-            } else {
-                Swal.fire({
-                    title: 'Cancellation Failed',
-                    text: d.message || 'Something went wrong. Please try again.',
-                    icon: 'error',
-                    confirmButtonText: 'Close',
-                    confirmButtonColor: '#EF4444',
-                });
-            }
-        })
-        .catch(e => {
-            Swal.fire({
-                title: 'Network Error',
-                text: e.message || 'Unable to connect. Please check your connection and try again.',
-                icon: 'error',
-                confirmButtonText: 'Close',
-                confirmButtonColor: '#EF4444',
-            });
-        });
-    });
+    if (!confirm('Cancel this booking? This cannot be undone.')) return;
+    fetch(`/api/my-bookings/${id}/cancel`, {
+        method: 'POST',
+        headers: { 'Accept':'application/json', 'Content-Type':'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') }
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (d.success) { alert('Booking cancelled.'); if (fromModal) closeModal(); loadBookings(); }
+        else alert('Failed: ' + d.message);
+    })
+    .catch(e => alert('Error: ' + e.message));
 }
 
 /* ─── MODAL CONTROLS ─── */
