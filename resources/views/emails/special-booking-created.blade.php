@@ -211,7 +211,6 @@
             <ul style="color: #555; line-height: 1.8;">
                 <li>Please arrive 30 minutes before your event start time</li>
                 <li>Bring valid ID for verification</li>
-                <li>Final guest count must be confirmed 3 days before the event</li>
                 <li>Contact us for any special setup requirements</li>
             </ul>
             
@@ -222,9 +221,9 @@
             <p style="margin-top: 30px;">For any questions or special arrangements, please contact our events team:</p>
             
             <p style="margin-top: 20px;">
-                <strong>Villa Elena Events Team</strong><br>
-                📧 <a href="mailto:events@villa-elena.com">events@villa-elena.com</a><br>
-                📞 {{ config('app.contact_phone') }}
+                 <strong>The Villa Elena Team</strong><br>
+                Email: <a href="mailto:{{ config('mail.from.address') }}">{{ config('mail.from.address') }}</a><br>
+                Phone: 0917-301-0790
             </p>
         </div>
         

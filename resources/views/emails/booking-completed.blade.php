@@ -200,14 +200,6 @@
                 </div>
             </div>
             
-            <div class="rating-section">
-                <p><strong>How was your experience?</strong></p>
-                <p>We would love to hear your feedback!</p>
-                <div class="stars">
-                    ★ ★ ★ ★ ★
-                </div>
-                <a href="{{ config('app.url') }}/feedback?booking={{ $booking->bookingID }}" class="button">Share Your Feedback</a>
-            </div>
             
             <p><strong>Looking forward to your next visit!</strong></p>
             <p>Book your next getaway with us and enjoy special returning guest discounts.</p>
@@ -221,7 +213,7 @@
             <p style="margin-top: 20px;">
                 <strong>The Villa Elena Team</strong><br>
                 Email: <a href="mailto:{{ config('mail.from.address') }}">{{ config('mail.from.address') }}</a><br>
-                Phone: {{ config('app.contact_phone') }}
+                Phone: 0917-301-0790
             </p>
         </div>
         

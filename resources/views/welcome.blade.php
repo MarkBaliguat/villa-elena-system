@@ -905,8 +905,8 @@
                                 </div>
                                 <div>
                                     <strong class="block text-lg">Email Address</strong>
-                                    <a href="mailto:ebs_sunflower@yahoo.com" class="text-yellow-600 hover:text-yellow-700">
-                                        ebs_sunflower@yahoo.com
+                                    <a href="mailto:evelynbalaisserrano@gmail.com" class="text-yellow-600 hover:text-yellow-700">
+                                        evelynbalaisserrano@gmail.com
                                     </a>
                                 </div>
                             </div>

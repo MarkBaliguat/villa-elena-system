@@ -206,15 +206,15 @@
             </ul>
             
             <center>
-                <a href="{{ config('app.url') }}/contact" class="button">Contact Support</a>
+                <a href="{{ config('app.url') }}/special-bookings/{{ $booking->bookingID }}" class="button">View Booking Details</a>
             </center>
             
             <p style="margin-top: 30px;">We're sorry to see you go and hope to host your future events!</p>
             
             <p style="margin-top: 20px;">
-                <strong>Villa Elena Events Team</strong><br>
-                📧 <a href="mailto:events@villa-elena.com">events@villa-elena.com</a><br>
-                📞 {{ config('app.contact_phone') }}
+                <strong>The Villa Elena Team</strong><br>
+                📧 <a href="mailto:{{ config('mail.from.address') }}">{{ config('mail.from.address') }}</a><br>
+                📞 0917-301-0790
             </p>
         </div>
         

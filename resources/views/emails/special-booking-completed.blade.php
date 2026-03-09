@@ -218,28 +218,20 @@
                 @endif
             </div>
             
-            <div class="rating-section">
-                <p><strong>How was your event experience?</strong></p>
-                <p>We would love to hear your feedback and see your photos!</p>
-                <div class="stars">
-                    ★ ★ ★ ★ ★
-                </div>
-                <a href="{{ config('app.url') }}/feedback/special-event?booking={{ $booking->bookingID }}" class="button">Share Your Experience</a>
-            </div>
             
             <p><strong>Looking forward to hosting your next special occasion!</strong></p>
             <p>As a valued client, you'll receive priority booking for future events.</p>
             
             <center>
-                <a href="{{ config('app.url') }}/special-events" class="button">Plan Your Next Event</a>
+                <a href="{{ config('app.url') }}/special-bookings/{{ $booking->bookingID }}" class="button">View Booking Details</a>
             </center>
             
             <p style="margin-top: 30px;">Thank you for choosing Villa Elena for your special day!</p>
             
             <p style="margin-top: 20px;">
-                <strong>The Villa Elena Events Team</strong><br>
-                📧 <a href="mailto:events@villa-elena.com">events@villa-elena.com</a><br>
-                📞 {{ config('app.contact_phone') }}
+                <strong>The Villa Elena Team</strong><br>
+                📧 <a href="mailto:{{ config('mail.from.address') }}">{{ config('mail.from.address') }}</a><br>
+                📞 0917-301-0790
             </p>
         </div>
         

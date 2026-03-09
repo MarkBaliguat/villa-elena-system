@@ -203,11 +203,9 @@
             
             <p style="margin-top: 30px;">If you have any questions or need assistance, feel free to contact us:</p>
             
-            <p style="margin-top: 20px;">
-                <strong>Villa Elena Team</strong><br>
+             <strong>The Villa Elena Team</strong><br>
                 Email: <a href="mailto:{{ config('mail.from.address') }}">{{ config('mail.from.address') }}</a><br>
-                Phone: {{ $user->phoneNumber }}
-            </p>
+                Phone: 0917-301-0790
         </div>
         
         <div class="footer">

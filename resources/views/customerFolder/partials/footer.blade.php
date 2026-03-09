@@ -148,7 +148,7 @@
                                 <i class="fas fa-envelope"></i>
                             </div>
                             <div class="text-left flex-1 min-w-0">
-                                <p class="text-sm font-medium text-gray-800 break-all email-text">ebs_sunflower@yahoo.com</p>
+                                <p class="text-sm font-medium text-gray-800 break-all email-text">evelynbalaisserrano@gmail.com</p>
                                 <p class="text-xs text-gray-500">Email us anytime</p>
                             </div>
                             <i class="fas fa-chevron-right ml-2 opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 flex-shrink-0"></i>

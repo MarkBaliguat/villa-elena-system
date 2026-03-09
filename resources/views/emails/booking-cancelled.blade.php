@@ -222,8 +222,8 @@
             <p>If this cancellation was a mistake or if you'd like to reschedule, please contact us immediately.</p>
             
             <center>
-                <a href="{{ config('app.url') }}/contact" class="button button-primary">Contact Us</a>
-                <a href="{{ config('app.url') }}/booking" class="button">Book Again</a>
+                <a href="{{ config('http://srv1457061.hstgr.cloud/') }}/contact" class="button button-primary">Contact Us</a>
+                <a href="{{ config('http://srv1457061.hstgr.cloud/') }}/booking" class="button">Book Again</a>
             </center>
             
             <p style="margin-top: 30px;">We hope to have the opportunity to serve you in the future.</p>
@@ -231,7 +231,7 @@
             <p style="margin-top: 20px;">
                 <strong>The Villa Elena Team</strong><br>
                 Email: <a href="mailto:{{ config('mail.from.address') }}">{{ config('mail.from.address') }}</a><br>
-                Phone: {{ config('app.contact_phone') }}
+                Phone: 0917-301-0790
             </p>
         </div>
         
