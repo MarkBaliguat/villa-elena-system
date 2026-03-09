@@ -644,11 +644,7 @@ class CustomerBookingController extends Controller
             $paymentType = 'downpayment';
             $remainingBalance = $totalPrice - $paymentAmount;
             $bookingStatus = 'pending';
-
-            // ✅ FIX: Cash payments are always 'completed' when recorded.
-            // Previously 'pending' for downpayments caused total_paid to show ₱0.00
-            // because the sum queries filter by paymentStatus = 'completed'.
-            $paymentStatus = 'completed';
+            $paymentStatus = 'pending';
             
             if ($paymentAmount >= $totalPrice) {
                 $paymentType = 'full';
@@ -687,7 +683,7 @@ class CustomerBookingController extends Controller
                         'special_requirements' => $request->special_requirements,
                         'event_start' => $cart->checkInDate,
                         'event_end' => $cart->checkOutDate,
-                        'phone' => $request->phone,
+                        'phone' => $request->phone, // Include phone number
                     ],
                     'payment_data' => [
                         'payment_amount' => $paymentAmount,

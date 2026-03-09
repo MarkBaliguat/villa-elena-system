@@ -8,16 +8,11 @@
     <link rel="icon" type="image/x-icon" href="{{ asset('images/sunflower1.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
-    <!-- SweetAlert2 CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.5/sweetalert2.all.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.5/sweetalert2.min.css">
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;500;600;700&display=swap');
 
         /* ═══════════════════════════════════════════════════════════
-           SCOPED CSS VARIABLES
+           SCOPED CSS VARIABLES - Enhanced Colors
         ═══════════════════════════════════════════════════════════ */
         .booking-page-wrapper {
             --booking-primary-yellow: #FFD709;
@@ -48,70 +43,20 @@
             background: #FFFFFF;
             color: #1F2937;
         }
-
+        
         .cursive-font {
             font-family: 'Dancing Script', cursive;
         }
 
-        html { scroll-behavior: smooth; }
-
-        /* ─── TOAST NOTIFICATION (FIXED) ─── */
-        .toast {
-            position: fixed;
-            top: 5rem;          /* below navbar */
-            right: 1.5rem;
-            background: var(--booking-text-dark);
-            color: #fff;
-            padding: 1rem 1.3rem;
-            border-radius: 14px;
-            font-size: 0.85rem;
-            max-width: 380px;
-            min-width: 280px;
-            display: flex;
-            gap: 0.7rem;
-            align-items: flex-start;
-            z-index: 99999;     /* above everything */
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
-            animation: toastSlide 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-            font-weight: 500;
+        /* Smooth scroll behavior */
+        html {
+            scroll-behavior: smooth;
         }
-
-        .toast.error {
-            background: linear-gradient(135deg, #EF4444, #DC2626);
-            border-left: 4px solid #fff3;
-        }
-
-        .toast.success {
-            background: linear-gradient(135deg, #10B981, #059669);
-            border-left: 4px solid #fff3;
-        }
-
-        .toast.warning {
-            background: linear-gradient(135deg, #F59E0B, #D97706);
-            border-left: 4px solid #fff3;
-        }
-
-        @keyframes toastSlide {
-            from { opacity: 0; transform: translateX(120px) scale(0.9); }
-            to   { opacity: 1; transform: translateX(0) scale(1); }
-        }
-
-        .toast-close {
-            margin-left: auto;
-            cursor: pointer;
-            opacity: 0.7;
-            flex-shrink: 0;
-            padding: 2px 4px;
-            border-radius: 4px;
-            transition: opacity 0.2s;
-        }
-
-        .toast-close:hover { opacity: 1; }
-
-        .toast i.toast-icon { flex-shrink: 0; margin-top: 2px; font-size: 1.1rem; }
 
         /* ─── MAIN CONTENT WRAPPER ─── */
-        .booking-page-wrapper { background: transparent; }
+        .booking-page-wrapper {
+            background: transparent;
+        }
 
         .main-content {
             margin-top: 80px;
@@ -119,7 +64,7 @@
             padding: 2.5rem 1rem 3rem;
         }
 
-        /* ─── PAGE TITLE ─── */
+        /* ─── PAGE TITLE WITH ENHANCED STYLING ─── */
         .page-title-wrap {
             text-align: center;
             margin-bottom: 2.5rem;
@@ -127,18 +72,27 @@
         }
 
         @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to   { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .page-title {
             font-size: 2.8rem;
             font-weight: 800;
-            background: #1F2937;
+            /* background: linear-gradient(135deg, #F59E0B, #D97706, #B45309); */
+            /* background: linear-gradient(0deg, var(--booking-text-dark), var(--booking-text-medium)); */
+            background:#1F2937;
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
             display: inline-block;
+            /* text-shadow: 0 4px 12px rgba(245, 158, 11, 0.2); */
             letter-spacing: -0.5px;
         }
 
@@ -153,11 +107,17 @@
         }
 
         @keyframes expandLine {
-            from { width: 0; opacity: 0; }
-            to   { width: 100px; opacity: 1; }
+            from {
+                width: 0;
+                opacity: 0;
+            }
+            to {
+                width: 100px;
+                opacity: 1;
+            }
         }
 
-        /* ─── CONTENT LAYOUT ─── */
+        /* ─── CONTENT LAYOUT WITH VERTICAL STEPPER ─── */
         .content-layout {
             display: flex;
             gap: 2rem;
@@ -166,7 +126,7 @@
             align-items: flex-start;
         }
 
-        /* ─── VERTICAL STEP PROGRESS BAR ─── */
+        /* ─── VERTICAL STEP PROGRESS BAR (LEFT SIDE) ─── */
         .stepper {
             position: sticky;
             top: 100px;
@@ -177,7 +137,10 @@
             animation: fadeIn 0.8s ease-out 0.2s both;
         }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
 
         .step-item {
             display: flex;
@@ -187,7 +150,9 @@
             padding-bottom: 2.5rem;
         }
 
-        .step-item:last-child { padding-bottom: 0; }
+        .step-item:last-child {
+            padding-bottom: 0;
+        }
 
         .step-item::before {
             content: '';
@@ -200,7 +165,9 @@
             transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .step-item:last-child::before { display: none; }
+        .step-item:last-child::before {
+            display: none;
+        }
 
         .step-item.active::before,
         .step-item.completed::before {
@@ -222,7 +189,7 @@
             position: relative;
             z-index: 2;
             transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             flex-shrink: 0;
         }
 
@@ -253,11 +220,19 @@
         }
 
         @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 0.6; }
-            50%       { transform: scale(1.2); opacity: 0; }
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0;
+            }
         }
 
-        .step-circle i { font-size: 1.1rem; }
+        .step-circle i {
+            font-size: 1.1rem;
+        }
 
         .step-content {
             display: flex;
@@ -281,10 +256,15 @@
             line-height: 1.4;
         }
 
-        .step-item.active .step-label { color: var(--booking-secondary-yellow); }
-        .step-item.active .step-desc  { color: var(--booking-text-dark); }
+        .step-item.active .step-label {
+            color: var(--booking-secondary-yellow);
+        }
 
-        /* ─── PANELS CONTAINER ─── */
+        .step-item.active .step-desc {
+            color: var(--booking-text-dark);
+        }
+
+        /* ─── PANELS CONTAINER (RIGHT SIDE) ─── */
         .panels-container {
             position: relative;
             overflow: hidden;
@@ -293,17 +273,62 @@
 
         .step-panel {
             display: none;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: none;
         }
 
         .step-panel.active {
             display: block;
+            animation: slideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
 
-        /* ─── BOOKING CARD ─── */
+        .step-panel.slide-out-left {
+            animation: slideOutLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .step-panel.slide-out-right {
+            animation: slideOutRight 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100%) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+        }
+
+        @keyframes slideOutLeft {
+            from {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(-100%) scale(0.95);
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100%) scale(0.95);
+            }
+        }
+
+        /* ─── ENHANCED BOOKING CARD WITH VISIBLE BORDER ─── */
         .booking-card {
             background: #FFFFFF;
             border-radius: 24px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
             border: 2px solid #E5E7EB;
             overflow: hidden;
             margin-bottom: 1.5rem;
@@ -313,14 +338,16 @@
         .booking-card::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; right: 0;
+            top: 0;
+            left: 0;
+            right: 0;
             height: 6px;
             background: linear-gradient(90deg, var(--booking-primary-yellow), var(--booking-secondary-yellow), var(--booking-yellow-dark));
         }
 
         .card-header {
             padding: 2rem 2.5rem 0.5rem;
-            background: linear-gradient(180deg, rgba(255,215,0,0.05), transparent);
+            background: linear-gradient(180deg, rgba(255, 215, 0, 0.05), transparent);
         }
 
         .card-header h2 {
@@ -340,9 +367,11 @@
             font-weight: 500;
         }
 
-        .card-body { padding: 2rem 2.5rem 2.5rem; }
+        .card-body {
+            padding: 2rem 2.5rem 2.5rem;
+        }
 
-        /* ─── FORM ELEMENTS ─── */
+        /* ─── ENHANCED FORM ELEMENTS ─── */
         .form-group {
             margin-bottom: 1.5rem;
             animation: fadeInUp 0.5s ease-out both;
@@ -354,8 +383,14 @@
         .form-group:nth-child(4) { animation-delay: 0.4s; }
 
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to   { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .form-label {
@@ -373,10 +408,13 @@
         .form-label i {
             color: var(--booking-primary-yellow);
             font-size: 1.1rem;
-            filter: drop-shadow(0 2px 4px rgba(255,215,0,0.3));
+            filter: drop-shadow(0 2px 4px rgba(255, 215, 0, 0.3));
         }
 
-        .form-label .required { color: var(--booking-red); margin-left: 2px; }
+        .form-label .required {
+            color: var(--booking-red);
+            margin-left: 2px;
+        }
 
         .form-input,
         .form-textarea {
@@ -396,7 +434,7 @@
         .form-textarea:focus {
             outline: none;
             border-color: var(--booking-primary-yellow);
-            box-shadow: 0 0 0 4px var(--booking-yellow-light), 0 4px 12px rgba(255,215,0,0.2);
+            box-shadow: 0 0 0 4px var(--booking-yellow-light), 0 4px 12px rgba(255, 215, 0, 0.2);
             transform: translateY(-2px);
             background: #FFFFFF;
         }
@@ -408,23 +446,15 @@
             border-color: #D1D5DB;
         }
 
-        /* ERROR STATE - red border shake */
         .form-input.error,
         .form-textarea.error {
-            border-color: var(--booking-red) !important;
-            box-shadow: 0 0 0 3px rgba(239,68,68,0.15) !important;
-            animation: shake 0.4s ease-in-out;
+            border-color: var(--booking-red);
         }
 
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%       { transform: translateX(-6px); }
-            40%       { transform: translateX(6px); }
-            60%       { transform: translateX(-4px); }
-            80%       { transform: translateX(4px); }
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
         }
-
-        .form-textarea { resize: vertical; min-height: 100px; }
 
         .row-2 {
             display: grid;
@@ -438,15 +468,13 @@
             margin-top: 0.4rem;
             display: none;
             font-weight: 600;
-            align-items: center;
-            gap: 4px;
         }
 
         .error-message.show {
-            display: flex;
+            display: block;
         }
 
-        /* ─── PAYMENT METHOD CARDS ─── */
+        /* ─── VIBRANT PAYMENT METHOD CARDS ─── */
         .pay-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -478,19 +506,23 @@
         .pay-card:hover {
             border-color: var(--booking-primary-yellow);
             transform: translateY(-6px) scale(1.02);
-            box-shadow: 0 12px 28px rgba(255,215,0,0.25);
+            box-shadow: 0 12px 28px rgba(255, 215, 0, 0.25);
         }
 
-        .pay-card:hover::before { opacity: 1; }
+        .pay-card:hover::before {
+            opacity: 1;
+        }
 
         .pay-card.selected {
             border-color: var(--booking-primary-yellow);
-            background: linear-gradient(135deg, var(--booking-yellow-light), rgba(255,215,0,0.05));
-            box-shadow: 0 0 0 4px var(--booking-yellow-light), 0 8px 24px rgba(255,215,0,0.3);
+            background: linear-gradient(135deg, var(--booking-yellow-light), rgba(255, 215, 0, 0.05));
+            box-shadow: 0 0 0 4px var(--booking-yellow-light), 0 8px 24px rgba(255, 215, 0, 0.3);
             transform: scale(1.05);
         }
 
-        .pay-card.selected::before { opacity: 1; }
+        .pay-card.selected::before {
+            opacity: 1;
+        }
 
         .pay-card.selected .pay-check {
             opacity: 1;
@@ -499,8 +531,10 @@
 
         .pay-check {
             position: absolute;
-            top: 12px; right: 12px;
-            width: 28px; height: 28px;
+            top: 12px;
+            right: 12px;
+            width: 28px;
+            height: 28px;
             background: linear-gradient(135deg, var(--booking-green), var(--booking-green-dark));
             color: #fff;
             border-radius: 50%;
@@ -512,15 +546,16 @@
             transform: scale(0) rotate(0deg);
             transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
             z-index: 1;
-            box-shadow: 0 4px 12px rgba(16,185,129,0.4);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
         }
 
         .pay-card .pay-icon {
-            position: relative; z-index: 1;
+            position: relative;
+            z-index: 1;
             font-size: 2.5rem;
             margin-bottom: 0.8rem;
             transition: all 0.4s;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
         }
 
         .pay-card .pay-icon i {
@@ -531,7 +566,9 @@
         }
 
         .pay-card.selected .pay-icon,
-        .pay-card:hover .pay-icon { transform: scale(1.15) rotate(5deg); }
+        .pay-card:hover .pay-icon {
+            transform: scale(1.15) rotate(5deg);
+        }
 
         .pay-card.selected .pay-icon i {
             background: linear-gradient(135deg, var(--booking-secondary-yellow), var(--booking-yellow-dark));
@@ -541,26 +578,24 @@
         }
 
         .pay-card .pay-title {
-            position: relative; z-index: 1;
-            font-size: 1rem; font-weight: 700;
+            position: relative;
+            z-index: 1;
+            font-size: 1rem;
+            font-weight: 700;
             color: var(--booking-text-dark);
             margin-bottom: 0.3rem;
             letter-spacing: 0.3px;
         }
 
         .pay-card .pay-sub {
-            position: relative; z-index: 1;
+            position: relative;
+            z-index: 1;
             font-size: 0.75rem;
             color: var(--booking-text-medium);
             font-weight: 500;
         }
 
-        /* highlight pay grid when error */
-        .pay-grid.error-highlight .pay-card {
-            border-color: rgba(239,68,68,0.4);
-        }
-
-        /* ─── AMOUNT CHIPS ─── */
+        /* ─── VIBRANT AMOUNT CHIPS ─── */
         .amount-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -579,34 +614,43 @@
             background: linear-gradient(135deg, #FFFFFF, #FAFAFA);
             overflow: hidden;
         }
-
         .amount-chip::before {
             content: '';
-            position: absolute; inset: 0;
+            position: absolute;
+            inset: 0;
+            /* background: linear-gradient(135deg, var(--booking-purple-light), transparent); */
             background: linear-gradient(135deg, var(--booking-green-light), transparent);
             opacity: 0;
             transition: opacity 0.4s;
             z-index: 0;
         }
-
-        .chip-label, .chip-amount, .chip-note { position: relative; z-index: 1; }
+        .chip-label,
+        .chip-amount,
+        .chip-note {
+            position: relative;
+            z-index: 1;
+        }
 
         .amount-chip:hover {
             border-color: var(--booking-green);
             transform: translateY(-6px) scale(1.02);
-            box-shadow: 0 6px 14px rgb(43,195,63);
+            box-shadow: 0 6px 14px rgb(43, 195, 63);
         }
 
-        .amount-chip:hover::before { opacity: 1; }
+        .amount-chip:hover::before {
+            opacity: 1;
+        }
 
         .amount-chip.selected {
             border-color: var(--booking-green);
-            background: linear-gradient(135deg, var(--booking-purple-light), rgba(43,195,246,0.05));
-            box-shadow: 0 0 0 4px var(--booking-purple-light), 0 8px 24px rgba(43,195,63,0.3);
+            background: linear-gradient(135deg, var(--booking-purple-light), rgba(43, 195, 246, 0.05));
+            box-shadow: 0 0 0 4px var(--booking-purple-light), 0 8px 24px rgba(43, 195, 63, 0.3);
             transform: scale(1.05);
         }
 
-        .amount-chip.selected::before { opacity: 1; }
+        .amount-chip.selected::before {
+            opacity: 1;
+        }
 
         .amount-chip.selected .chip-check {
             opacity: 1;
@@ -615,8 +659,10 @@
 
         .chip-check {
             position: absolute;
-            top: 10px; right: 10px;
-            width: 26px; height: 26px;
+            top: 10px;
+            right: 10px;
+            width: 26px;
+            height: 26px;
             background: linear-gradient(135deg, var(--booking-green), var(--booking-green-dark));
             color: #fff;
             border-radius: 50%;
@@ -627,18 +673,21 @@
             opacity: 0;
             transform: scale(0) rotate(0deg);
             transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-shadow: 0 4px 12px rgba(16,185,129,0.4);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
         }
 
         .chip-label {
-            font-size: 0.75rem; font-weight: 700;
+            font-size: 0.75rem;
+            font-weight: 700;
             color: var(--booking-text-medium);
-            text-transform: uppercase; letter-spacing: 0.8px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
             margin-bottom: 0.5rem;
         }
 
         .chip-amount {
-            font-size: 1.4rem; font-weight: 800;
+            font-size: 1.4rem;
+            font-weight: 800;
             background: linear-gradient(135deg, var(--booking-text-dark), #1F2937);
             -webkit-background-clip: text;
             background-clip: text;
@@ -646,26 +695,38 @@
             margin-bottom: 0.3rem;
         }
 
-        .chip-note { font-size: 0.7rem; color: var(--booking-text-light); font-weight: 500; }
+        .chip-note {
+            font-size: 0.7rem;
+            color: var(--booking-text-light);
+            font-weight: 500;
+        }
 
         /* ─── SUMMARY SECTIONS ─── */
         .section-label {
-            font-size: 0.7rem; font-weight: 800;
-            text-transform: uppercase; letter-spacing: 1.5px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
             color: var(--booking-text-medium);
-            margin-bottom: 1rem; padding-bottom: 0.6rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.6rem;
             border-bottom: 2px solid var(--booking-border-color);
-            display: flex; align-items: center; gap: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .section-label::before {
             content: '';
-            width: 4px; height: 16px;
+            width: 4px;
+            height: 16px;
             background: linear-gradient(135deg, var(--booking-primary-yellow), var(--booking-secondary-yellow));
             border-radius: 2px;
         }
 
-        .summary-block { margin-bottom: 2rem; }
+        .summary-block {
+            margin-bottom: 2rem;
+        }
 
         .s-row {
             display: flex;
@@ -676,10 +737,21 @@
             border-bottom: 1px solid #F3F4F6;
         }
 
-        .s-row:last-child { border-bottom: none; }
-        .s-row .s-label { color: var(--booking-text-medium); font-weight: 500; }
-        .s-row .s-value { font-weight: 700; color: var(--booking-text-dark); }
+        .s-row:last-child {
+            border-bottom: none;
+        }
 
+        .s-row .s-label {
+            color: var(--booking-text-medium);
+            font-weight: 500;
+        }
+
+        .s-row .s-value {
+            font-weight: 700;
+            color: var(--booking-text-dark);
+        }
+
+        /* Accommodation item */
         .accom-item {
             display: flex;
             justify-content: space-between;
@@ -688,24 +760,49 @@
             border-bottom: 2px solid #F3F4F6;
         }
 
-        .accom-item:last-child { border-bottom: none; }
-
-        .accom-name { font-size: 0.95rem; font-weight: 700; color: var(--booking-text-dark); margin-bottom: 0.4rem; }
-
-        .accom-badge {
-            display: inline-flex; align-items: center; gap: 5px;
-            font-size: 0.65rem; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 0.8px;
-            padding: 4px 12px; border-radius: 20px;
+        .accom-item:last-child {
+            border-bottom: none;
         }
 
-        .accom-badge.room    { background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(29,78,216,0.1)); color: #1e40af; }
-        .accom-badge.cottage { background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(5,150,105,0.1)); color: #065f46; }
+        .accom-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--booking-text-dark);
+            margin-bottom: 0.4rem;
+        }
 
-        .accom-calc { font-size: 0.75rem; color: var(--booking-text-light); margin-top: 0.3rem; font-weight: 500; }
+        .accom-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        .accom-badge.room {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(29, 78, 216, 0.1));
+            color: #1e40af;
+        }
+
+        .accom-badge.cottage {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.1));
+            color: #065f46;
+        }
+
+        .accom-calc {
+            font-size: 0.75rem;
+            color: var(--booking-text-light);
+            margin-top: 0.3rem;
+            font-weight: 500;
+        }
 
         .accom-price {
-            font-size: 1.1rem; font-weight: 800;
+            font-size: 1.1rem;
+            font-weight: 800;
             background: linear-gradient(135deg, #3B82F6, #2563EB);
             -webkit-background-clip: text;
             background-clip: text;
@@ -713,8 +810,9 @@
             white-space: nowrap;
         }
 
+        /* Total box */
         .total-price-box {
-            background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(5,150,105,0.08));
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.08));
             border: 3px solid var(--booking-green);
             border-radius: 18px;
             padding: 1.5rem 1.8rem;
@@ -722,17 +820,20 @@
             justify-content: space-between;
             align-items: center;
             margin-top: 1rem;
-            box-shadow: 0 8px 24px rgba(16,185,129,0.2);
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.2);
         }
 
         .total-price-box .t-label {
-            font-size: 0.85rem; font-weight: 800;
-            text-transform: uppercase; letter-spacing: 1px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
             color: var(--booking-green-dark);
         }
 
         .total-price-box .t-amount {
-            font-size: 2rem; font-weight: 900;
+            font-size: 2rem;
+            font-weight: 900;
             background: linear-gradient(135deg, var(--booking-green), var(--booking-green-dark));
             -webkit-background-clip: text;
             background-clip: text;
@@ -740,116 +841,222 @@
         }
 
         /* ─── RULES CARDS ─── */
-        .rules-card { margin-bottom: 1.2rem; }
+        .rules-card {
+            margin-bottom: 1.2rem;
+        }
 
         .rules-header {
-            display: flex; align-items: center; gap: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
             padding: 2rem 2.5rem 1rem;
         }
 
         .rules-icon {
-            width: 50px; height: 50px;
+            width: 50px;
+            height: 50px;
             border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.3rem; flex-shrink: 0;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
-        .rules-icon.room-icon    { background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(29,78,216,0.1)); color: #2563eb; }
-        .rules-icon.cottage-icon { background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(5,150,105,0.1)); color: #10b981; }
-        .rules-icon.general-icon { background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,165,0,0.15)); color: var(--booking-secondary-yellow); }
+        .rules-icon.room-icon {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(29, 78, 216, 0.1));
+            color: #2563eb;
+        }
 
-        .rules-header h3 { font-size: 1.1rem; font-weight: 800; color: var(--booking-text-dark); }
-        .rules-header p  { font-size: 0.75rem; color: var(--booking-text-medium); margin-top: 0.2rem; font-weight: 500; }
+        .rules-icon.cottage-icon {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.1));
+            color: #10b981;
+        }
 
-        .rules-list { list-style: none; padding: 0 2.5rem 2rem; }
+        .rules-icon.general-icon {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.15));
+            color: var(--booking-secondary-yellow);
+        }
+
+        .rules-header h3 {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--booking-text-dark);
+        }
+
+        .rules-header p {
+            font-size: 0.75rem;
+            color: var(--booking-text-medium);
+            margin-top: 0.2rem;
+            font-weight: 500;
+        }
+
+        .rules-list {
+            list-style: none;
+            padding: 0 2.5rem 2rem;
+        }
 
         .rules-list li {
-            display: flex; gap: 0.8rem;
+            display: flex;
+            gap: 0.8rem;
             padding: 0.7rem 0;
             font-size: 0.85rem;
             color: var(--booking-text-medium);
             border-bottom: 1px solid #F3F4F6;
             align-items: flex-start;
-            line-height: 1.6; font-weight: 500;
+            line-height: 1.6;
+            font-weight: 500;
         }
 
-        .rules-list li:last-child { border-bottom: none; }
-        .rules-list .ri { font-size: 0.5rem; margin-top: 6px; flex-shrink: 0; }
-        .rules-list .ri.y { color: var(--booking-secondary-yellow); }
-        .rules-list .ri.g { color: var(--booking-green); }
-        .rules-list .ri.r { color: var(--booking-red); }
+        .rules-list li:last-child {
+            border-bottom: none;
+        }
 
+        .rules-list .ri {
+            font-size: 0.5rem;
+            margin-top: 6px;
+            flex-shrink: 0;
+        }
+
+        .rules-list .ri.y {
+            color: var(--booking-secondary-yellow);
+        }
+
+        .rules-list .ri.g {
+            color: var(--booking-green);
+        }
+
+        .rules-list .ri.r {
+            color: var(--booking-red);
+        }
+
+        /* Cancel notice */
         .cancel-notice {
-            background: linear-gradient(135deg, var(--booking-red-light), rgba(239,68,68,0.05));
+            background: linear-gradient(135deg, var(--booking-red-light), rgba(239, 68, 68, 0.05));
             border: 2px solid var(--booking-red);
             border-radius: 14px;
             padding: 1.2rem 1.3rem;
-            display: flex; gap: 0.8rem; align-items: flex-start;
+            display: flex;
+            gap: 0.8rem;
+            align-items: flex-start;
         }
 
-        .cancel-notice i { color: var(--booking-red); flex-shrink: 0; margin-top: 2px; font-size: 1.1rem; }
-        .cancel-notice p { font-size: 0.8rem; color: var(--booking-red-dark); line-height: 1.6; font-weight: 500; }
+        .cancel-notice i {
+            color: var(--booking-red);
+            flex-shrink: 0;
+            margin-top: 2px;
+            font-size: 1.1rem;
+        }
 
+        .cancel-notice p {
+            font-size: 0.8rem;
+            color: var(--booking-red-dark);
+            line-height: 1.6;
+            font-weight: 500;
+        }
+
+        /* Contact strip */
         .contact-strip {
-            display: flex; gap: 1.5rem; flex-wrap: wrap;
-            margin-top: 1rem; padding: 1.2rem 1.3rem;
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+            padding: 1.2rem 1.3rem;
             background: linear-gradient(135deg, #F9FAFB, #F3F4F6);
             border: 2px solid var(--booking-border-color);
             border-radius: 14px;
         }
 
-        .contact-item { display: flex; align-items: center; gap: 0.6rem; font-size: 0.8rem; color: var(--booking-text-medium); font-weight: 600; }
-        .contact-item i { color: var(--booking-primary-yellow); font-size: 1rem; filter: drop-shadow(0 2px 4px rgba(255,215,0,0.3)); }
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.8rem;
+            color: var(--booking-text-medium);
+            font-weight: 600;
+        }
 
-        /* ─── BUTTONS ─── */
-        .btn-row { display: flex; gap: 1rem; margin-top: 2rem; }
+        .contact-item i {
+            color: var(--booking-primary-yellow);
+            font-size: 1rem;
+            filter: drop-shadow(0 2px 4px rgba(255, 215, 0, 0.3));
+        }
+
+        /* ─── ENHANCED BUTTONS ─── */
+        .btn-row {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
 
         .action-btn {
             display: inline-flex;
-            align-items: center; justify-content: center;
+            align-items: center;
+            justify-content: center;
             gap: 10px;
             padding: 16px 28px;
             border-radius: 14px;
-            font-weight: 700; font-size: 0.9rem;
-            border: none; cursor: pointer;
+            font-weight: 700;
+            font-size: 0.9rem;
+            border: none;
+            cursor: pointer;
             transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             font-family: 'Poppins', sans-serif;
             letter-spacing: 0.3px;
             text-decoration: none;
-            position: relative; overflow: hidden;
+            position: relative;
+            overflow: hidden;
         }
 
         .action-btn::before {
             content: '';
             position: absolute;
-            top: 50%; left: 50%;
-            width: 0; height: 0;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
             border-radius: 50%;
-            background: rgba(255,255,255,0.3);
+            background: rgba(255, 255, 255, 0.3);
             transform: translate(-50%, -50%);
             transition: width 0.6s, height 0.6s;
         }
 
-        .action-btn:hover::before { width: 300px; height: 300px; }
-        .action-btn:active { transform: scale(0.95); }
-
-        .action-btn:disabled {
-            opacity: 0.5; cursor: not-allowed; transform: none !important;
+        .action-btn:hover::before {
+            width: 300px;
+            height: 300px;
         }
 
-        .action-btn:disabled::before { display: none; }
-        .action-btn i, .action-btn span { position: relative; z-index: 1; }
+        .action-btn:active {
+            transform: scale(0.95);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .action-btn:disabled::before {
+            display: none;
+        }
+
+        .action-btn i,
+        .action-btn span {
+            position: relative;
+            z-index: 1;
+        }
 
         .btn-primary {
             background: linear-gradient(135deg, var(--booking-primary-yellow), var(--booking-secondary-yellow), var(--booking-yellow-dark));
-            color: #fff; flex: 1;
-            box-shadow: 0 6px 20px rgba(255,215,0,0.4);
-            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            color: #fff;
+            flex: 1;
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
 
         .btn-primary:hover:not(:disabled) {
-            box-shadow: 0 10px 30px rgba(255,215,0,0.5);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.5);
             transform: translateY(-3px);
         }
 
@@ -857,39 +1064,41 @@
             background: linear-gradient(135deg, #FFFFFF, #F9FAFB);
             color: var(--booking-text-medium);
             border: 2px solid var(--booking-border-color);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         }
 
         .btn-secondary:hover {
             background: linear-gradient(135deg, #F9FAFB, #F3F4F6);
             border-color: var(--booking-text-medium);
             transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
         }
 
         .btn-success {
             background: linear-gradient(135deg, var(--booking-green), var(--booking-green-dark));
-            color: #fff; flex: 1;
-            box-shadow: 0 6px 20px rgba(16,185,129,0.4);
-            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            color: #fff;
+            flex: 1;
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
 
         .btn-success:hover:not(:disabled) {
             background: linear-gradient(135deg, var(--booking-green-dark), #047857);
-            box-shadow: 0 10px 30px rgba(16,185,129,0.5);
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.5);
             transform: translateY(-3px);
         }
 
         .btn-gcash {
             background: linear-gradient(135deg, var(--booking-gcash-blue), #0062CC);
-            color: #fff; flex: 1;
-            box-shadow: 0 6px 20px rgba(0,125,255,0.4);
-            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            color: #fff;
+            flex: 1;
+            box-shadow: 0 6px 20px rgba(0, 125, 255, 0.4);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
 
         .btn-gcash:hover:not(:disabled) {
             background: linear-gradient(135deg, #0062CC, #004C99);
-            box-shadow: 0 10px 30px rgba(0,125,255,0.5);
+            box-shadow: 0 10px 30px rgba(0, 125, 255, 0.5);
             transform: translateY(-3px);
         }
 
@@ -897,7 +1106,8 @@
             background: transparent;
             color: var(--booking-red);
             border: 2px solid var(--booking-red);
-            width: 100%; margin-top: 1rem;
+            width: 100%;
+            margin-top: 1rem;
             justify-content: center;
         }
 
@@ -905,30 +1115,44 @@
             background: var(--booking-red-light);
             border-color: var(--booking-red-dark);
             transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(239,68,68,0.3);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.3);
         }
 
         /* ─── SUCCESS STATE ─── */
-        .success-wrap { text-align: center; padding: 3rem 1.5rem 2rem; }
+        .success-wrap {
+            text-align: center;
+            padding: 3rem 1.5rem 2rem;
+        }
 
         .success-icon {
-            width: 90px; height: 90px;
-            background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(5,150,105,0.1));
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.1));
             border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             margin: 0 auto 1.5rem;
-            font-size: 2.5rem; color: var(--booking-green);
+            font-size: 2.5rem;
+            color: var(--booking-green);
             animation: scaleIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-shadow: 0 8px 24px rgba(16,185,129,0.3);
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
         }
 
         @keyframes scaleIn {
-            from { transform: scale(0); opacity: 0; }
-            to   { transform: scale(1); opacity: 1; }
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
 
         .success-wrap h3 {
-            font-size: 1.8rem; font-weight: 800;
+            font-size: 1.8rem;
+            font-weight: 800;
             background: linear-gradient(135deg, var(--booking-green), var(--booking-green-dark));
             -webkit-background-clip: text;
             background-clip: text;
@@ -936,66 +1160,135 @@
             margin-bottom: 0.5rem;
         }
 
-        .success-wrap > p { font-size: 0.9rem; color: var(--booking-text-medium); margin-bottom: 1.5rem; font-weight: 500; }
+        .success-wrap > p {
+            font-size: 0.9rem;
+            color: var(--booking-text-medium);
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
 
         .ref-box {
             background: linear-gradient(135deg, #F9FAFB, #F3F4F6);
             border: 2px solid var(--booking-border-color);
             border-radius: 14px;
             padding: 1.3rem 1.5rem;
-            text-align: left; display: inline-block;
+            text-align: left;
+            display: inline-block;
             min-width: 300px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
         }
 
         .ref-row {
-            display: flex; justify-content: space-between;
-            font-size: 0.8rem; padding: 0.4rem 0;
-            color: var(--booking-text-medium); font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            padding: 0.4rem 0;
+            color: var(--booking-text-medium);
+            font-weight: 600;
         }
 
-        .ref-row span:last-child { font-weight: 700; color: var(--booking-text-dark); }
+        .ref-row span:last-child {
+            font-weight: 700;
+            color: var(--booking-text-dark);
+        }
 
         .success-btns {
-            display: flex; gap: 0.8rem; justify-content: center;
-            margin-top: 2rem; flex-wrap: wrap;
+            display: flex;
+            gap: 0.8rem;
+            justify-content: center;
+            margin-top: 2rem;
+            flex-wrap: wrap;
         }
 
-        .success-btns .action-btn {
-            flex: 0 0 auto;
-            min-width: 150px;
+        /* ─── TOAST ─── */
+        .toast {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: var(--booking-text-dark);
+            color: #fff;
+            padding: 1rem 1.3rem;
+            border-radius: 14px;
+            font-size: 0.85rem;
+            max-width: 350px;
+            display: flex;
+            gap: 0.7rem;
+            align-items: flex-start;
+            z-index: 999;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            animation: toastSlide 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .toast.error {
+            background: linear-gradient(135deg, var(--booking-red), var(--booking-red-dark));
+        }
+
+        .toast.success {
+            background: linear-gradient(135deg, var(--booking-green), var(--booking-green-dark));
+        }
+
+        @keyframes toastSlide {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .toast i {
+            flex-shrink: 0;
+            margin-top: 2px;
+            font-size: 1.1rem;
         }
 
         /* ─── SPINNER ─── */
         .spinner {
-            width: 40px; height: 40px;
-            border: 4px solid rgba(255,215,0,0.2);
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 215, 0, 0.2);
             border-top-color: var(--booking-primary-yellow);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
             margin: 3rem auto;
         }
 
-        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
 
         /* ─── RESPONSIVE ─── */
         @media (max-width: 1024px) {
-            .content-layout { flex-direction: column; align-items: center; }
+            .content-layout {
+                flex-direction: column;
+                align-items: center;
+            }
 
             .stepper {
                 position: static;
                 flex-direction: row;
                 justify-content: center;
-                min-width: auto; width: 100%; max-width: 600px;
+                min-width: auto;
+                width: 100%;
+                max-width: 600px;
                 margin: 0 auto 2rem;
             }
 
             .step-item {
-                flex-direction: column; align-items: center;
-                padding-bottom: 0; flex: 1; position: relative;
+                flex-direction: column;
+                align-items: center;
+                padding-bottom: 0;
+                flex: 1;
+                position: relative;
             }
 
-            .step-item::before { display: none; }
+            .step-item::before {
+                display: none;
+            }
 
             .step-item::after {
                 content: '';
@@ -1008,37 +1301,103 @@
                 transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
             }
 
-            .step-item:last-child::after { display: none; }
+            .step-item:last-child::after {
+                display: none;
+            }
 
             .step-item.active::after,
             .step-item.completed::after {
                 background: linear-gradient(90deg, var(--booking-primary-yellow), var(--booking-secondary-yellow));
             }
 
-            .step-content { align-items: center; text-align: center; margin-top: 0.5rem; }
-            .step-label   { font-size: 0.75rem; }
-            .step-desc    { display: none; }
-            .panels-container { width: 100%; max-width: 100%; }
+            .step-content {
+                align-items: center;
+                text-align: center;
+                margin-top: 0.5rem;
+            }
+
+            .step-label {
+                font-size: 0.75rem;
+            }
+
+            .step-desc {
+                display: none;
+            }
+
+            .panels-container {
+                width: 100%;
+                max-width: 100%;
+            }
         }
 
         @media (max-width: 640px) {
-            .main-content { margin-top: 70px; padding: 2rem 1rem 3rem; }
-            .row-2, .pay-grid, .amount-row { grid-template-columns: 1fr; }
-            .card-body, .card-header { padding-left: 1.5rem; padding-right: 1.5rem; }
-            .rules-list, .rules-header { padding-left: 1.5rem; padding-right: 1.5rem; }
-            .contact-strip { flex-direction: column; gap: 0.8rem; }
-            .page-title { font-size: 2rem; }
-            .step-circle { width: 44px; height: 44px; font-size: 0.9rem; }
-            .btn-row { flex-direction: column; }
-            .action-btn { width: 100%; }
-            .stepper { padding: 0 1rem; }
-            .step-label { font-size: 0.65rem; }
+            .main-content {
+                margin-top: 70px;
+                padding: 2rem 1rem 3rem;
+            }
+            
+            .row-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .pay-grid,
+            .amount-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .card-body,
+            .card-header {
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
+            }
+            
+            .rules-list {
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
+            }
+            
+            .rules-header {
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
+            }
+            
+            .contact-strip {
+                flex-direction: column;
+                gap: 0.8rem;
+            }
+            
+            .page-title {
+                font-size: 2rem;
+            }
+            
+            .step-circle {
+                width: 44px;
+                height: 44px;
+                font-size: 0.9rem;
+            }
+            
+            .btn-row {
+                flex-direction: column;
+            }
+            
+            .action-btn {
+                width: 100%;
+            }
+
+            .stepper {
+                padding: 0 1rem;
+            }
+
+            .step-label {
+                font-size: 0.65rem;
+            }
         }
     </style>
 </head>
 <body>
     @include('customerFolder.partials.navbar')
 
+    <!-- WRAP EVERYTHING IN A SCOPED CONTAINER -->
     <div class="booking-page-wrapper">
         <div class="main-content">
 
@@ -1048,10 +1407,9 @@
                 <div class="page-title-line"></div>
             </div>
 
-            <!-- CONTENT LAYOUT -->
+            <!-- CONTENT LAYOUT: Stepper Left, Panels Right -->
             <div class="content-layout">
-
-                <!-- VERTICAL STEP PROGRESS -->
+                <!-- VERTICAL STEP PROGRESS (LEFT SIDE) -->
                 <div class="stepper">
                     <div class="step-item active" id="step-nav-1">
                         <div class="step-circle active"><i class="fas fa-user"></i></div>
@@ -1076,10 +1434,11 @@
                     </div>
                 </div>
 
-                <!-- PANELS CONTAINER -->
+                <!-- PANELS CONTAINER (RIGHT SIDE) -->
                 <div class="panels-container">
-
-                    <!-- ══════════════ STEP 1 ══════════════ -->
+                    <!-- ══════════════════════════════════════
+                         STEP 1 – Guest Info + Payment
+                    ══════════════════════════════════════ -->
                     <div class="step-panel active" id="panel-1">
                         <div class="booking-card">
                             <div class="card-header">
@@ -1090,34 +1449,26 @@
                                 <form id="bookingForm">
                                     @csrf
 
-                                    <!-- Full Name -->
                                     <div class="form-group">
                                         <label class="form-label">
                                             <i class="fas fa-user"></i>
                                             <span>Full Name</span>
                                             <span class="required">*</span>
                                         </label>
-                                        <input type="text" name="full_name" id="input-name" class="form-input" readonly>
-                                        <div class="error-message" id="error-name">
-                                            <i class="fas fa-exclamation-circle"></i> Full name is required
-                                        </div>
+                                        <input type="text" name="full_name" class="form-input" readonly>
+                                        <div class="error-message" id="error-name">Name is required</div>
                                     </div>
 
                                     <div class="row-2">
-                                        <!-- Email -->
                                         <div class="form-group">
                                             <label class="form-label">
                                                 <i class="fas fa-envelope"></i>
                                                 <span>Email</span>
                                                 <span class="required">*</span>
                                             </label>
-                                            <input type="email" name="email" id="input-email" class="form-input" readonly>
-                                            <div class="error-message" id="error-email">
-                                                <i class="fas fa-exclamation-circle"></i> Valid email is required
-                                            </div>
+                                            <input type="email" name="email" class="form-input" readonly>
+                                            <div class="error-message" id="error-email">Valid email is required</div>
                                         </div>
-
-                                        <!-- Phone -->
                                         <div class="form-group">
                                             <label class="form-label">
                                                 <i class="fas fa-phone"></i>
@@ -1125,13 +1476,10 @@
                                                 <span class="required">*</span>
                                             </label>
                                             <input type="tel" name="phone" class="form-input" id="phone-input" placeholder="09XXXXXXXXX" maxlength="11">
-                                            <div class="error-message" id="error-phone">
-                                                <i class="fas fa-exclamation-circle"></i> Must start with 09 and be exactly 11 digits
-                                            </div>
+                                            <div class="error-message" id="error-phone">Phone must start with 09 and be 11 digits</div>
                                         </div>
                                     </div>
 
-                                    <!-- Special Requirements -->
                                     <div class="form-group">
                                         <label class="form-label">
                                             <i class="fas fa-comment-dots"></i>
@@ -1147,7 +1495,7 @@
                                             <span>Payment Method</span>
                                             <span class="required">*</span>
                                         </label>
-                                        <div class="pay-grid" id="pay-grid">
+                                        <div class="pay-grid">
                                             <div class="pay-card" id="pay-cash" onclick="selectPayMethod('cash')">
                                                 <div class="pay-check"><i class="fas fa-check"></i></div>
                                                 <div class="pay-icon"><i class="fas fa-money-bill-wave"></i></div>
@@ -1161,16 +1509,14 @@
                                                 <div class="pay-sub">Pay online now</div>
                                             </div>
                                         </div>
-                                        <div class="error-message" id="error-payment">
-                                            <i class="fas fa-exclamation-circle"></i> Please select a payment method
-                                        </div>
+                                        <div class="error-message" id="error-payment">Please select a payment method</div>
                                     </div>
 
-                                    <!-- Amount Selection -->
+                                    <!-- Amount Selection (appears after method) -->
                                     <div id="amount-section" style="display:none;">
                                         <div class="form-group">
                                             <label class="form-label">
-                                                <i class="fas fa-peso-sign"></i>
+                                                <i class="fas fa-dollar-sign"></i>
                                                 <span>Payment Amount</span>
                                                 <span class="required">*</span>
                                             </label>
@@ -1188,9 +1534,7 @@
                                                     <div class="chip-note">100% of total</div>
                                                 </div>
                                             </div>
-                                            <div class="error-message" id="error-amount">
-                                                <i class="fas fa-exclamation-circle"></i> Please select a payment amount
-                                            </div>
+                                            <div class="error-message" id="error-amount">Please select a payment amount</div>
                                         </div>
                                     </div>
 
@@ -1211,7 +1555,9 @@
                         </div>
                     </div>
 
-                    <!-- ══════════════ STEP 2 ══════════════ -->
+                    <!-- ══════════════════════════════════════
+                         STEP 2 – Booking Summary
+                    ══════════════════════════════════════ -->
                     <div class="step-panel" id="panel-2">
                         <div class="booking-card">
                             <div class="card-header">
@@ -1235,7 +1581,9 @@
                         </div>
                     </div>
 
-                    <!-- ══════════════ STEP 3 ══════════════ -->
+                    <!-- ══════════════════════════════════════
+                         STEP 3 – Rules + Confirm
+                    ══════════════════════════════════════ -->
                     <div class="step-panel" id="panel-3">
 
                         <!-- Room Rules -->
@@ -1276,7 +1624,7 @@
                             </ul>
                         </div>
 
-                        <!-- Cancellation & Contact -->
+                        <!-- Cancellation + Contact -->
                         <div class="booking-card rules-card">
                             <div class="rules-header">
                                 <div class="rules-icon general-icon"><i class="fas fa-info-circle"></i></div>
@@ -1290,6 +1638,7 @@
                                     <i class="fas fa-exclamation-triangle"></i>
                                     <p>Cancellations made <strong>less than 48 hours</strong> before check-in are non-refundable. Cancellations made 48 hours or more in advance will receive a full downpayment refund.</p>
                                 </div>
+
                                 <div style="margin-top:1rem;">
                                     <div class="section-label" style="margin-top:0;">Reach Us</div>
                                     <div class="contact-strip">
@@ -1317,15 +1666,15 @@
                             </button>
                         </div>
 
-                        <!-- Cancel Button — SweetAlert2 -->
                         <button class="action-btn btn-danger-ghost" onclick="cancelBooking()">
                             <i class="fas fa-times-circle"></i>
                             <span>Cancel Booking</span>
                         </button>
-
                     </div>
 
-                    <!-- ══════════════ SUCCESS ══════════════ -->
+                    <!-- ══════════════════════════════════════
+                         SUCCESS STATE
+                    ══════════════════════════════════════ -->
                     <div class="step-panel" id="panel-success">
                         <div class="booking-card">
                             <div class="card-body">
@@ -1348,121 +1697,105 @@
                             </div>
                         </div>
                     </div>
-
                 </div><!-- /panels-container -->
             </div><!-- /content-layout -->
+
         </div><!-- /main-content -->
     </div><!-- /booking-page-wrapper -->
 
     @include('customerFolder.partials.footer')
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-// ═══════════════════════════════════════════════
-//  STATE
-// ═══════════════════════════════════════════════
-let bookingTotal       = 0;
-let selectedPayMethod  = null;
+<script>
+// ─── STATE ───
+let bookingTotal = 0;
+let selectedPayMethod = null;
 let selectedAmountType = null;
-let selectedAmount     = 0;
-let daysCount          = 1;
-let numGuests          = 1;
-let entranceFeeAmount  = 0;
-let totalEntranceFees  = 0;
+let selectedAmount = 0;
+let daysCount = 1;
+let numGuests = 1;
+let entranceFeeAmount = 0;
+let totalEntranceFees = 0;
 let hasActiveEntranceFee = false;
-let hasRoom    = false;
+let hasRoom = false;
 let hasCottage = false;
-let cartItems  = [];
-let cartData   = null;
+let cartItems = [];
+let cartData = null;
 let currentStep = 1;
 
-// ═══════════════════════════════════════════════
-//  INIT
-// ═══════════════════════════════════════════════
+// ─── INIT ───
 document.addEventListener('DOMContentLoaded', function () {
     Promise.all([loadEntranceFee(), loadBookingSummary()]).then(() => {
         prefillUserInfo();
-        validateForm();
+        validateForm(); // Initial validation check
     });
 });
 
-// ═══════════════════════════════════════════════
-//  PHONE VALIDATION
-// ═══════════════════════════════════════════════
+// ─── PHONE NUMBER VALIDATION ───
 function validatePhoneNumber(phone) {
-    return /^09\d{9}$/.test(phone);
+    // Must start with 09 and be exactly 11 digits
+    const phoneRegex = /^09\d{9}$/;
+    return phoneRegex.test(phone);
 }
 
-// ═══════════════════════════════════════════════
-//  FORM VALIDATION (real-time)
-// ═══════════════════════════════════════════════
+// ─── FORM VALIDATION ───
 function validateForm() {
-    const nameInput  = document.getElementById('input-name');
-    const emailInput = document.getElementById('input-email');
-    const phoneInput = document.getElementById('phone-input');
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
+    const nameInput = document.querySelector('input[name="full_name"]');
+    const emailInput = document.querySelector('input[name="email"]');
+    const phoneInput = document.querySelector('input[name="phone"]');
+    
     let isValid = true;
-
-    if (!nameInput.value.trim()) isValid = false;
-    if (!emailInput.value.trim() || !emailRegex.test(emailInput.value)) isValid = false;
-
-    const phoneVal = phoneInput.value.trim();
-    if (!phoneVal || !validatePhoneNumber(phoneVal)) {
+    
+    // Validate name
+    if (!nameInput.value.trim()) {
         isValid = false;
-        if (phoneVal.length > 0) phoneInput.classList.add('error');
-        else phoneInput.classList.remove('error');
+    }
+    
+    // Validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailInput.value.trim() || !emailRegex.test(emailInput.value)) {
+        isValid = false;
+    }
+    
+    // Validate phone - must start with 09 and be 11 digits
+    const phoneValue = phoneInput.value.trim();
+    if (!phoneValue || !validatePhoneNumber(phoneValue)) {
+        isValid = false;
+        if (phoneValue && !validatePhoneNumber(phoneValue)) {
+            phoneInput.classList.add('error');
+        } else {
+            phoneInput.classList.remove('error');
+        }
     } else {
         phoneInput.classList.remove('error');
-        document.getElementById('error-phone').classList.remove('show');
     }
-
-    if (!selectedPayMethod) isValid = false;
-    if (selectedPayMethod && !selectedAmountType) isValid = false;
-
+    
+    // Validate payment method
+    if (!selectedPayMethod) {
+        isValid = false;
+    }
+    
+    // Validate payment amount
+    if (!selectedAmountType) {
+        isValid = false;
+    }
+    
+    // Update button state
     document.getElementById('btn-next1').disabled = !isValid;
+    
     return isValid;
 }
 
-// ═══════════════════════════════════════════════
-//  SHOW / HIDE INLINE ERRORS
-// ═══════════════════════════════════════════════
-function showInlineError(id) {
-    const el = document.getElementById('error-' + id);
-    if (el) {
-        el.classList.add('show');
-        setTimeout(() => el.classList.remove('show'), 4500);
+function showFieldError(fieldName) {
+    const errorEl = document.getElementById(`error-${fieldName}`);
+    if (errorEl) {
+        errorEl.classList.add('show');
+        setTimeout(() => {
+            errorEl.classList.remove('show');
+        }, 3000);
     }
 }
 
-function hideInlineError(id) {
-    const el = document.getElementById('error-' + id);
-    if (el) el.classList.remove('show');
-}
-
-// ═══════════════════════════════════════════════
-//  TOAST NOTIFICATION (FIXED)
-// ═══════════════════════════════════════════════
-function showToast(type, msg) {
-    // Remove any existing toasts
-    document.querySelectorAll('.toast').forEach(t => t.remove());
-
-    const icons = { success: 'check-circle', error: 'times-circle', warning: 'exclamation-triangle', info: 'info-circle' };
-    const t = document.createElement('div');
-    t.className = 'toast ' + type;
-    t.innerHTML = `
-        <i class="fas fa-${icons[type] || 'info-circle'} toast-icon"></i>
-        <span style="flex:1;">${msg}</span>
-        <span class="toast-close" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></span>
-    `;
-    document.body.appendChild(t);
-
-    // Auto-remove after 5 seconds
-    setTimeout(() => { if (t.parentElement) t.remove(); }, 5000);
-}
-
-// ═══════════════════════════════════════════════
-//  LOAD ENTRANCE FEE
-// ═══════════════════════════════════════════════
+// ─── LOAD ENTRANCE FEE ───
 async function loadEntranceFee() {
     try {
         const r = await fetch('/api/entrance-fee', {
@@ -1475,22 +1808,21 @@ async function loadEntranceFee() {
         if (r.ok) {
             const d = await r.json();
             if (d.success && d.entrance_fee) {
-                entranceFeeAmount    = parseFloat(d.entrance_fee.amount);
+                entranceFeeAmount = parseFloat(d.entrance_fee.amount);
                 hasActiveEntranceFee = true;
+                console.log('Entrance fee loaded:', entranceFeeAmount);
             }
         }
     } catch (e) { console.error('Entrance fee error:', e); }
 }
 
-// ═══════════════════════════════════════════════
-//  LOAD CART
-// ═══════════════════════════════════════════════
+// ─── LOAD CART ───
 function loadBookingSummary() {
     return fetch('/api/cart/items')
         .then(r => r.json())
         .then(data => {
             if (data.success && data.cart && data.items.length > 0) {
-                cartData  = data.cart;
+                cartData = data.cart;
                 cartItems = data.items;
                 computeTotals();
             } else {
@@ -1501,9 +1833,7 @@ function loadBookingSummary() {
         .catch(e => console.error('Cart error:', e));
 }
 
-// ═══════════════════════════════════════════════
-//  COMPUTE TOTALS
-// ═══════════════════════════════════════════════
+// ─── COMPUTE TOTALS ───
 function computeTotals() {
     daysCount = parseInt(cartData.daysCount) || 1;
     numGuests = parseInt(cartData.numGuests) || 1;
@@ -1513,10 +1843,10 @@ function computeTotals() {
     const isSameDay = checkIn.toDateString() === checkOut.toDateString();
     document.getElementById('h-booking-type').value = isSameDay ? 'day-use' : 'overnight';
 
-    let roomSubtotal    = 0;
+    let roomSubtotal = 0;
     let cottageSubtotal = 0;
-    totalEntranceFees   = 0;
-    hasRoom    = false;
+    totalEntranceFees = 0;
+    hasRoom = false;
     hasCottage = false;
 
     cartItems.forEach(item => {
@@ -1525,19 +1855,20 @@ function computeTotals() {
 
         if (unit.unitType === 'room') {
             hasRoom = true;
-            const mult      = numGuests === 1 ? 2 : numGuests;
+            const mult = numGuests === 1 ? 2 : numGuests;
             const roomTotal = price * mult * daysCount;
-            roomSubtotal   += roomTotal;
-            item._total     = roomTotal;
-            item._calc      = `₱${price.toFixed(2)} × ${mult} guest${mult > 1 ? 's' : ''} × ${daysCount} day${daysCount > 1 ? 's' : ''}`;
+            roomSubtotal += roomTotal;
+            item._total = roomTotal;
+            item._calc  = `₱${price.toFixed(2)} × ${mult} guest${mult > 1 ? 's' : ''} × ${daysCount} day${daysCount > 1 ? 's' : ''}`;
         } else if (unit.unitType === 'cottage') {
-            hasCottage       = true;
+            hasCottage = true;
             cottageSubtotal += price;
+            
             if (hasActiveEntranceFee) {
-                const ef      = entranceFeeAmount * numGuests;
-                totalEntranceFees += ef;
-                item._total   = price + ef;
-                item._calc    = `Cottage: ₱${price.toFixed(2)} + Entrance fees: ₱${ef.toFixed(2)} (₱${entranceFeeAmount.toFixed(2)} × ${numGuests})`;
+                const entranceFeeForThisCottage = entranceFeeAmount * numGuests;
+                totalEntranceFees += entranceFeeForThisCottage;
+                item._total = price + entranceFeeForThisCottage;
+                item._calc  = `Cottage: ₱${price.toFixed(2)} + Entrance fees: ₱${entranceFeeForThisCottage.toFixed(2)} (₱${entranceFeeAmount.toFixed(2)} × ${numGuests})`;
             } else {
                 item._total = price;
                 item._calc  = 'Cottage price only';
@@ -1546,10 +1877,18 @@ function computeTotals() {
     });
 
     bookingTotal = roomSubtotal + cottageSubtotal + totalEntranceFees;
-    cartData._roomSubtotal    = roomSubtotal;
+
+    cartData._roomSubtotal = roomSubtotal;
     cartData._cottageSubtotal = cottageSubtotal;
-    cartData._entranceFees    = totalEntranceFees;
-    cartData._subtotal        = bookingTotal;
+    cartData._entranceFees = totalEntranceFees;
+    cartData._subtotal = roomSubtotal + cottageSubtotal + totalEntranceFees;
+
+    console.log('Totals computed:', {
+        room: roomSubtotal,
+        cottage: cottageSubtotal,
+        entrance: totalEntranceFees,
+        total: bookingTotal
+    });
 
     updateAmountChips();
 }
@@ -1560,60 +1899,58 @@ function updateAmountChips() {
     document.getElementById('chip-full-amt').textContent = '₱' + bookingTotal.toFixed(2);
 }
 
-// ═══════════════════════════════════════════════
-//  PREFILL USER INFO
-// ═══════════════════════════════════════════════
+// ─── PREFILL USER ───
 function prefillUserInfo() {
     const n = '{{ Auth::user()->name ?? "" }}';
     const e = '{{ Auth::user()->email ?? "" }}';
     const p = '{{ Auth::user()->phoneNumber ?? "" }}';
-
-    if (n) document.getElementById('input-name').value  = n.trim();
-    if (e) document.getElementById('input-email').value = e;
-
+    
+    if (n) document.querySelector('input[name="full_name"]').value = n.trim();
+    if (e) document.querySelector('input[name="email"]').value = e;
+    
     const phoneInput = document.getElementById('phone-input');
-    if (p && p.trim()) phoneInput.value = p;
-
+    if (p && p.trim()) {
+        phoneInput.value = p;
+    }
+    
+    // Always make phone editable
     phoneInput.readOnly = false;
-
-    phoneInput.addEventListener('input', function () {
-        this.value = this.value.replace(/\D/g, '').slice(0, 11);
-        if (validatePhoneNumber(this.value)) {
-            this.classList.remove('error');
-            hideInlineError('phone');
+    
+    // Add input listener for phone validation and formatting
+    phoneInput.addEventListener('input', function(e) {
+        // Only allow numbers
+        this.value = this.value.replace(/\D/g, '');
+        
+        // Limit to 11 digits
+        if (this.value.length > 11) {
+            this.value = this.value.slice(0, 11);
         }
+        
         validateForm();
     });
-
-    phoneInput.addEventListener('blur', function () {
-        const v = this.value.trim();
-        if (v && !validatePhoneNumber(v)) {
+    
+    phoneInput.addEventListener('blur', function() {
+        const phoneValue = this.value.trim();
+        if (phoneValue && !validatePhoneNumber(phoneValue)) {
             this.classList.add('error');
-            showInlineError('phone');
-        } else if (validatePhoneNumber(v)) {
+            showFieldError('phone');
+        } else {
             this.classList.remove('error');
-            hideInlineError('phone');
         }
     });
 }
 
-// ═══════════════════════════════════════════════
-//  PAYMENT METHOD SELECTION
-// ═══════════════════════════════════════════════
+// ─── PAYMENT METHOD ───
 function selectPayMethod(method) {
     selectedPayMethod = method;
     document.getElementById('pay-cash').classList.toggle('selected', method === 'cash');
     document.getElementById('pay-gcash').classList.toggle('selected', method === 'gcash');
     document.getElementById('h-payment-method').value = method;
     document.getElementById('amount-section').style.display = 'block';
-    document.getElementById('pay-grid').classList.remove('error-highlight');
-    hideInlineError('payment');
     validateForm();
 }
 
-// ═══════════════════════════════════════════════
-//  AMOUNT SELECTION
-// ═══════════════════════════════════════════════
+// ─── AMOUNT SELECTION ───
 function selectAmount(type) {
     selectedAmountType = type;
     document.getElementById('chip-down').classList.toggle('selected', type === 'downpayment');
@@ -1622,101 +1959,85 @@ function selectAmount(type) {
         ? Math.round(bookingTotal * 0.5 * 100) / 100
         : bookingTotal;
     document.getElementById('h-payment-amount').value = selectedAmount.toFixed(2);
-    hideInlineError('amount');
     validateForm();
 }
 
-// ═══════════════════════════════════════════════
-//  STEP NAVIGATION
-// ═══════════════════════════════════════════════
+// ─── ENHANCED STEP NAVIGATION WITH SWIPE ANIMATION & SCROLL TO TOP ───
 function goToStep(n) {
-    const oldPanel = document.getElementById('panel-' + currentStep);
+    const oldStep = currentStep;
+    const oldPanel = document.getElementById('panel-' + oldStep);
     const newPanel = document.getElementById('panel-' + n);
-
-    if (oldPanel) oldPanel.classList.remove('active');
-    if (newPanel) newPanel.classList.add('active');
-
+    
+    // Determine direction
+    const isForward = n > oldStep;
+    
+    // Add exit animation to current panel
+    if (oldPanel && oldPanel !== newPanel) {
+        oldPanel.classList.add(isForward ? 'slide-out-left' : 'slide-out-right');
+        
+        setTimeout(() => {
+            oldPanel.classList.remove('active', 'slide-out-left', 'slide-out-right');
+        }, 600);
+    }
+    
+    // Add enter animation to new panel
+    setTimeout(() => {
+        if (newPanel) {
+            newPanel.style.transform = isForward ? 'translateX(100%)' : 'translateX(-100%)';
+            newPanel.classList.add('active');
+        }
+    }, isForward ? 100 : 0);
+    
     currentStep = n;
 
+    // Update step indicators
     for (let i = 1; i <= 3; i++) {
         const nav    = document.getElementById('step-nav-' + i);
         const circle = nav.querySelector('.step-circle');
         const icon   = circle.querySelector('i');
-
+        
         nav.classList.toggle('active', i === n);
         circle.classList.toggle('active', i === n);
         circle.classList.toggle('completed', i < n);
-
-        if (i < n)      icon.className = 'fas fa-check';
-        else if (i === 1) icon.className = 'fas fa-user';
-        else if (i === 2) icon.className = 'fas fa-file-invoice';
-        else if (i === 3) icon.className = 'fas fa-check-circle';
+        
+        // Change icons for completed steps
+        if (i < n) {
+            icon.className = 'fas fa-check';
+        } else if (i === 1) {
+            icon.className = 'fas fa-user';
+        } else if (i === 2) {
+            icon.className = 'fas fa-file-invoice';
+        } else if (i === 3) {
+            icon.className = 'fas fa-check-circle';
+        }
     }
-
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Scroll to top smoothly
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
 }
 
-// ═══════════════════════════════════════════════
-//  GO TO STEP 2 — with field-by-field validation
-// ═══════════════════════════════════════════════
 function goToStep2() {
-    const nameInput  = document.getElementById('input-name');
-    const emailInput = document.getElementById('input-email');
-    const phoneInput = document.getElementById('phone-input');
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    // 1. Name
-    if (!nameInput.value.trim()) {
-        nameInput.classList.add('error');
-        showInlineError('name');
-        showToast('error', 'Full name is required.');
-        nameInput.focus();
+    if (!validateForm()) {
+        const phoneInput = document.querySelector('input[name="phone"]');
+        const phoneValue = phoneInput.value.trim();
+        
+        // Show specific error messages
+        if (!selectedPayMethod) {
+            showFieldError('payment');
+            showToast('error', 'Please select a payment method');
+        } else if (!selectedAmountType) {
+            showFieldError('amount');
+            showToast('error', 'Please select a payment amount');
+        } else if (!phoneValue || !validatePhoneNumber(phoneValue)) {
+            showFieldError('phone');
+            showToast('error', 'Phone number must start with 09 and be exactly 11 digits');
+            phoneInput.focus();
+        }
         return;
     }
-    nameInput.classList.remove('error');
-    hideInlineError('name');
-
-    // 2. Email
-    if (!emailInput.value.trim() || !emailRegex.test(emailInput.value)) {
-        emailInput.classList.add('error');
-        showInlineError('email');
-        showToast('error', 'Please enter a valid email address.');
-        emailInput.focus();
-        return;
-    }
-    emailInput.classList.remove('error');
-    hideInlineError('email');
-
-    // 3. Phone
-    const phoneVal = phoneInput.value.trim();
-    if (!phoneVal || !validatePhoneNumber(phoneVal)) {
-        phoneInput.classList.add('error');
-        showInlineError('phone');
-        showToast('error', 'Phone number must start with 09 and be exactly 11 digits (e.g. 09171234567).');
-        phoneInput.focus();
-        return;
-    }
-    phoneInput.classList.remove('error');
-    hideInlineError('phone');
-
-    // 4. Payment method
-    if (!selectedPayMethod) {
-        document.getElementById('pay-grid').classList.add('error-highlight');
-        showInlineError('payment');
-        showToast('error', 'Please select a payment method — Cash or GCash.');
-        document.getElementById('pay-grid').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        return;
-    }
-
-    // 5. Payment amount
-    if (!selectedAmountType) {
-        showInlineError('amount');
-        showToast('error', 'Please select a payment amount — Downpayment or Full Payment.');
-        document.getElementById('amount-section').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        return;
-    }
-
-    // ✅ All good
     renderSummary();
     goToStep(2);
 }
@@ -1724,21 +2045,18 @@ function goToStep2() {
 function goToStep3() {
     document.getElementById('room-rules-card').style.display    = hasRoom    ? 'block' : 'none';
     document.getElementById('cottage-rules-card').style.display = hasCottage ? 'block' : 'none';
-    document.getElementById('btn-confirm-cash').style.display   = selectedPayMethod === 'cash'  ? 'flex' : 'none';
-    document.getElementById('btn-confirm-gcash').style.display  = selectedPayMethod === 'gcash' ? 'flex' : 'none';
+    document.getElementById('btn-confirm-cash').style.display   = selectedPayMethod === 'cash'   ? 'flex' : 'none';
+    document.getElementById('btn-confirm-gcash').style.display  = selectedPayMethod === 'gcash'  ? 'flex' : 'none';
     goToStep(3);
 }
 
-// ═══════════════════════════════════════════════
-//  RENDER SUMMARY
-// ═══════════════════════════════════════════════
+// ─── RENDER SUMMARY ───
 function renderSummary() {
     const d = cartData;
-    const checkIn   = new Date(d.checkInDate);
-    const checkOut  = new Date(d.checkOutDate);
+    const checkIn  = new Date(d.checkInDate);
+    const checkOut = new Date(d.checkOutDate);
     const isSameDay = checkIn.toDateString() === checkOut.toDateString();
     const bookingType = isSameDay ? 'Day Use' : 'Overnight';
-    const payLabel    = selectedAmountType === 'downpayment' ? 'Downpayment (50%)' : 'Full Payment';
 
     const itemsHTML = cartItems.map(item => {
         const u = item.unit;
@@ -1755,10 +2073,22 @@ function renderSummary() {
         </div>`;
     }).join('');
 
+    const payLabel = selectedAmountType === 'downpayment' ? 'Downpayment (50%)' : 'Full Payment';
+
+    // Build pricing rows WITH entrance fee breakdown
     let pricingRows = '';
-    if (d._roomSubtotal > 0)    pricingRows += `<div class="s-row"><span class="s-label">Rooms Subtotal</span><span class="s-value">₱${d._roomSubtotal.toFixed(2)}</span></div>`;
-    if (d._cottageSubtotal > 0) pricingRows += `<div class="s-row"><span class="s-label">Cottages Subtotal</span><span class="s-value">₱${d._cottageSubtotal.toFixed(2)}</span></div>`;
-    if (d._entranceFees > 0)    pricingRows += `<div class="s-row"><span class="s-label">Entrance Fees (${numGuests} guest${numGuests > 1 ? 's' : ''})</span><span class="s-value">₱${d._entranceFees.toFixed(2)}</span></div>`;
+    
+    if (d._roomSubtotal > 0) {
+        pricingRows += `<div class="s-row"><span class="s-label">Rooms Subtotal</span><span class="s-value">₱${d._roomSubtotal.toFixed(2)}</span></div>`;
+    }
+    
+    if (d._cottageSubtotal > 0) {
+        pricingRows += `<div class="s-row"><span class="s-label">Cottages Subtotal</span><span class="s-value">₱${d._cottageSubtotal.toFixed(2)}</span></div>`;
+    }
+    
+    if (d._entranceFees > 0) {
+        pricingRows += `<div class="s-row"><span class="s-label">Entrance Fees (${numGuests} guest${numGuests > 1 ? 's' : ''})</span><span class="s-value">₱${d._entranceFees.toFixed(2)}</span></div>`;
+    }
 
     document.getElementById('summary-body').innerHTML = `
         <div class="summary-block">
@@ -1770,10 +2100,12 @@ function renderSummary() {
             <div class="s-row"><span class="s-label">Guests</span><span class="s-value">${numGuests}</span></div>
             <div class="s-row"><span class="s-label">Event Type</span><span class="s-value">Normal Booking</span></div>
         </div>
+
         <div class="summary-block">
             <div class="section-label">Accommodations</div>
             ${itemsHTML}
         </div>
+
         <div class="summary-block">
             <div class="section-label">Pricing</div>
             ${pricingRows}
@@ -1782,6 +2114,7 @@ function renderSummary() {
                 <span class="t-amount">₱${bookingTotal.toFixed(2)}</span>
             </div>
         </div>
+
         <div class="summary-block">
             <div class="section-label">Payment</div>
             <div class="s-row"><span class="s-label">Method</span><span class="s-value" style="text-transform:capitalize;">${selectedPayMethod}</span></div>
@@ -1790,9 +2123,16 @@ function renderSummary() {
     `;
 }
 
-// ═══════════════════════════════════════════════
-//  PRE-VALIDATE CART
-// ═══════════════════════════════════════════════
+// ─── TOAST ───
+function showToast(type, msg) {
+    const t = document.createElement('div');
+    t.className = 'toast ' + type;
+    t.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i><span>${msg}</span>`;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 4500);
+}
+
+// ─── PRE-VALIDATE ───
 async function validateCartBeforeSubmit() {
     try {
         const r = await fetch('/api/cart/pre-validate', {
@@ -1809,15 +2149,10 @@ async function validateCartBeforeSubmit() {
             return false;
         }
         return true;
-    } catch (e) {
-        showToast('error', 'Validation error. Please try again.');
-        return false;
-    }
+    } catch (e) { showToast('error', 'Validation error. Please try again.'); return false; }
 }
 
-// ═══════════════════════════════════════════════
-//  SUBMIT CASH
-// ═══════════════════════════════════════════════
+// ─── SUBMIT CASH ───
 async function submitCashBooking() {
     const btn = document.getElementById('btn-confirm-cash');
     btn.disabled = true;
@@ -1825,14 +2160,16 @@ async function submitCashBooking() {
 
     if (!(await validateCartBeforeSubmit())) { resetBtn(btn, 'cash'); return; }
 
+    const fd = new FormData(document.getElementById('bookingForm'));
+    
+    // Explicitly add and validate phone number
     const phoneValue = document.getElementById('phone-input').value.trim();
     if (!validatePhoneNumber(phoneValue)) {
         showToast('error', 'Invalid phone number. Must start with 09 and be 11 digits.');
         resetBtn(btn, 'cash');
         return;
     }
-
-    const fd = new FormData(document.getElementById('bookingForm'));
+    
     fd.set('phone', phoneValue);
     fd.set('payment_amount', selectedAmount.toFixed(2));
     fd.set('payment_method', 'cash');
@@ -1854,9 +2191,7 @@ async function submitCashBooking() {
     } catch (e) { showToast('error', e.message); resetBtn(btn, 'cash'); }
 }
 
-// ═══════════════════════════════════════════════
-//  SUBMIT GCASH
-// ═══════════════════════════════════════════════
+// ─── SUBMIT GCASH (TWO-PHASE) ───
 async function submitGCashBooking() {
     const btn = document.getElementById('btn-confirm-gcash');
     btn.disabled = true;
@@ -1864,14 +2199,16 @@ async function submitGCashBooking() {
 
     if (!(await validateCartBeforeSubmit())) { resetBtn(btn, 'gcash'); return; }
 
+    const fd = new FormData(document.getElementById('bookingForm'));
+    
+    // Explicitly add and validate phone number
     const phoneValue = document.getElementById('phone-input').value.trim();
     if (!validatePhoneNumber(phoneValue)) {
         showToast('error', 'Invalid phone number. Must start with 09 and be 11 digits.');
         resetBtn(btn, 'gcash');
         return;
     }
-
-    const fd = new FormData(document.getElementById('bookingForm'));
+    
     fd.set('phone', phoneValue);
     fd.set('payment_amount', selectedAmount.toFixed(2));
     fd.set('payment_method', 'gcash');
@@ -1879,6 +2216,7 @@ async function submitGCashBooking() {
     fd.set('event_type', 'normal-booking');
 
     try {
+        // PHASE 1 – Validate
         const vr = await fetch('/api/customer-bookings', {
             method: 'POST',
             headers: {
@@ -1892,6 +2230,7 @@ async function submitGCashBooking() {
 
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Processing payment…</span>';
 
+        // PHASE 2 – Pay
         const pr = await fetch('/gcash/process-payment', {
             method: 'POST',
             headers: {
@@ -1914,13 +2253,11 @@ function resetBtn(btn, type) {
         : '<i class="fas fa-mobile-alt"></i><span>Pay with GCash</span>';
 }
 
-// ═══════════════════════════════════════════════
-//  SUCCESS
-// ═══════════════════════════════════════════════
+// ─── SUCCESS ───
 function showSuccess(data) {
     document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
     document.getElementById('panel-success').classList.add('active');
-    document.querySelector('.stepper').style.display        = 'none';
+    document.querySelector('.stepper').style.display = 'none';
     document.querySelector('.page-title-wrap').style.display = 'none';
 
     document.getElementById('ref-box').innerHTML = `
@@ -1928,101 +2265,22 @@ function showSuccess(data) {
         <div class="ref-row"><span>Booking ID</span><span>${data.booking_id}</span></div>
         <div class="ref-row"><span>Status</span><span>${data.booking_status}</span></div>
     `;
-
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-// ═══════════════════════════════════════════════
-//  CANCEL BOOKING — SweetAlert2
-// ═══════════════════════════════════════════════
-function cancelBooking() {
-    Swal.fire({
-        title: 'Cancel Booking?',
-        html: `
-            <div style="font-size:0.9rem; color:#6B7280; line-height:1.7;">
-                Are you sure you want to cancel? <br>
-                <strong style="color:#EF4444;">Your cart will be cleared</strong> and you'll be taken back to the home page.
-            </div>
-        `,
-        icon: 'warning',
-        iconColor: '#EF4444',
-        showCancelButton: true,
-        confirmButtonText: '<i class="fas fa-times-circle"></i> Yes, Cancel Booking',
-        cancelButtonText:  '<i class="fas fa-arrow-left"></i> Go Back',
-        confirmButtonColor: '#EF4444',
-        cancelButtonColor:  '#6B7280',
-        reverseButtons: true,
-        focusCancel: true,
-        customClass: {
-            popup:         'swal-booking-popup',
-            title:         'swal-booking-title',
-            confirmButton: 'swal-confirm-btn',
-            cancelButton:  'swal-cancel-btn',
-        },
-        backdrop: `rgba(0,0,0,0.5)`,
-        showLoaderOnConfirm: true,
-        preConfirm: () => {
-            return fetch('/api/cart/clear', {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
-            })
-            .then(r => r.json())
-            .then(d => {
-                if (!d.success) Swal.showValidationMessage('Failed to clear cart. Please try again.');
-                return d;
-            })
-            .catch(() => Swal.showValidationMessage('Network error. Please try again.'));
-        },
-        allowOutsideClick: () => !Swal.isLoading()
-    }).then(result => {
-        if (result.isConfirmed) {
-            Swal.fire({
-                title: 'Booking Cancelled',
-                text: 'Your cart has been cleared.',
-                icon: 'success',
-                iconColor: '#10B981',
-                confirmButtonColor: '#10B981',
-                confirmButtonText: 'Go to Home',
-                timer: 3000,
-                timerProgressBar: true,
-            }).then(() => {
-                window.location.href = "{{ route('home') }}";
-            });
-        }
+    
+    // Scroll to top on success
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
     });
 }
+
+// ─── CANCEL ───
+function cancelBooking() {
+    if (!confirm('Are you sure you want to cancel this booking?')) return;
+    fetch('/api/cart/clear', {
+        method: 'DELETE',
+        headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') }
+    }).then(r => r.json()).then(d => { if (d.success) window.location.href = "{{ route('home') }}"; });
+}
 </script>
-
-<!-- SweetAlert2 custom styles -->
-<style>
-    .swal-booking-popup {
-        border-radius: 20px !important;
-        font-family: 'Poppins', sans-serif !important;
-        padding: 2rem !important;
-        box-shadow: 0 25px 60px rgba(0,0,0,0.2) !important;
-    }
-
-    .swal-booking-title {
-        font-size: 1.4rem !important;
-        font-weight: 800 !important;
-        color: #1F2937 !important;
-    }
-
-    .swal2-icon.swal2-warning {
-        border-color: #EF4444 !important;
-        color: #EF4444 !important;
-    }
-
-    .swal-confirm-btn,
-    .swal-cancel-btn {
-        border-radius: 12px !important;
-        padding: 12px 22px !important;
-        font-weight: 700 !important;
-        font-size: 0.88rem !important;
-        font-family: 'Poppins', sans-serif !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: 8px !important;
-    }
+</body>
+</html>
