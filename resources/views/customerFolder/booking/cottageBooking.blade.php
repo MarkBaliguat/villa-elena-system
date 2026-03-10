@@ -1211,18 +1211,42 @@
         let currentZoomImages = [];
         let currentZoomIndex = 0;
 
+        // ==================== HELPER: GET TODAY STRING ====================
+        function getTodayString() {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        }
+
+        // ==================== HELPER: VALIDATE BOOKING DATE ====================
+        // Returns true if valid, false + shows notification if not
+        function validateBookingDate(checkIn, showErrors = true) {
+            const today = getTodayString();
+
+            if (!checkIn) {
+                if (showErrors) showNotification('Please select a booking date.', 'error');
+                return false;
+            }
+
+            if (checkIn < today) {
+                if (showErrors) showNotification('Booking date cannot be in the past.', 'error');
+                return false;
+            }
+
+            return true;
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize date inputs
-            const today = new Date().toISOString().split('T')[0];
+            // Initialize date inputs — set min to today so picker won't allow past dates
+            const today = getTodayString();
             const checkInInput = document.getElementById('check_in');
             const checkOutInput = document.getElementById('check_out');
-            
+
             checkInInput.min = today;
-            // DO NOT set default date - leave empty
-            
-            // For cottages, check-out is always same as check-in (same day)
             checkOutInput.min = today;
-            
+
             // Disable check-out input (auto-set to same day)
             checkOutInput.disabled = true;
 
@@ -1243,11 +1267,8 @@
             document.getElementById('searchBtn').addEventListener('click', function() {
                 const checkIn = checkInInput.value;
                 const guests = document.getElementById('guest-number').value;
-                
-                if (!checkIn) {
-                    showNotification('Please select a booking date first', 'error');
-                    return;
-                }
+
+                if (!validateBookingDate(checkIn)) return;
                 
                 // For cottages, check-out is always same as check-in (same day)
                 currentCheckIn = checkIn;
@@ -1293,17 +1314,24 @@
                 }
             });
 
-            // Check-in date event listener - AUTO SET CHECK-OUT TO SAME DATE
+            // Check-in date event listener - AUTO SET CHECK-OUT TO SAME DATE + past date check
             checkInInput.addEventListener('change', function() {
+                const today = getTodayString();
                 const checkIn = this.value;
-                
+
+                // Block past date typed manually
+                if (checkIn && checkIn < today) {
+                    showNotification('Booking date cannot be in the past.', 'error');
+                    this.value = '';
+                    checkOutInput.value = '';
+                    return;
+                }
+
                 if (checkIn) {
                     // Auto-set check-out to same date as check-in (same day booking)
                     checkOutInput.value = checkIn;
                     currentCheckIn = checkIn;
                     currentCheckOut = checkIn;
-                    
-                    console.log('Check-out auto-set to:', checkIn, '(same day booking)');
                 }
             });
 
@@ -1721,10 +1749,8 @@
             const checkIn = document.getElementById('check_in').value;
             const guests = document.getElementById('guest-number').value;
             
-            if (!checkIn) {
-                showNotification('Please select a booking date first', 'error');
-                return;
-            }
+            // ===== PAST DATE VALIDATION =====
+            if (!validateBookingDate(checkIn)) return;
             
             const effectiveCheckOut = checkIn;
             const originalContent = button.innerHTML;
@@ -1792,10 +1818,8 @@
             const checkIn = document.getElementById('check_in').value;
             const guests = document.getElementById('guest-number').value;
             
-            if (!checkIn) {
-                showNotification('Please select a booking date first', 'error');
-                return;
-            }
+            // ===== PAST DATE VALIDATION =====
+            if (!validateBookingDate(checkIn)) return;
             
             const effectiveCheckOut = checkIn;
             const originalContent = button.innerHTML;

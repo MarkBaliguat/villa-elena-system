@@ -1179,14 +1179,48 @@
         let currentZoomImages = [];
         let currentZoomIndex = 0;
 
+        // ==================== HELPER: GET TODAY STRING ====================
+        function getTodayString() {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        }
+
+        // ==================== HELPER: VALIDATE DATES ====================
+        // Returns true if valid, false + shows notification if not
+        function validateDates(checkIn, checkOut, showErrors = true) {
+            const today = getTodayString();
+
+            if (!checkIn || !checkOut) {
+                if (showErrors) showNotification('Please select both check-in and check-out dates.', 'error');
+                return false;
+            }
+
+            if (checkIn < today) {
+                if (showErrors) showNotification('Check-in date cannot be in the past.', 'error');
+                return false;
+            }
+
+            if (checkOut < today) {
+                if (showErrors) showNotification('Check-out date cannot be in the past.', 'error');
+                return false;
+            }
+
+            if (checkOut < checkIn) {
+                if (showErrors) showNotification('Check-out date cannot be before check-in date.', 'error');
+                return false;
+            }
+
+            return true;
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize date inputs
-            const today = new Date().toISOString().split('T')[0];
+            // Initialize date inputs — set min to today so the calendar picker won't allow past dates
+            const today = getTodayString();
             document.getElementById('check_in').min = today;
             document.getElementById('check_out').min = today;
-            
-            // DO NOT set default checkout date - leave it empty
-            // Removed the automatic checkout date setting
 
             // Set active tab
             const currentPath = window.location.pathname;
@@ -1206,19 +1240,8 @@
                 const checkIn = document.getElementById('check_in').value;
                 const checkOut = document.getElementById('check_out').value;
                 const guests = document.getElementById('guest-number').value;
-                
-                if (!checkIn || !checkOut) {
-                    showNotification('Please select both check-in and check-out dates', 'error');
-                    return;
-                }
-                
-                const checkInDate = new Date(checkIn);
-                const checkOutDate = new Date(checkOut);
-                
-                if (checkOutDate < checkInDate) {
-                    showNotification('Check-out date cannot be before check-in date', 'error');
-                    return;
-                }
+
+                if (!validateDates(checkIn, checkOut)) return;
                 
                 currentCheckIn = checkIn;
                 currentCheckOut = checkOut;
@@ -1262,28 +1285,42 @@
 
             // Date input event listeners
             document.getElementById('check_in').addEventListener('change', function() {
+                const today = getTodayString();
                 const checkIn = this.value;
                 const checkOut = document.getElementById('check_out').value;
-                
+
+                // Block past check-in typed manually
+                if (checkIn && checkIn < today) {
+                    showNotification('Check-in date cannot be in the past.', 'error');
+                    this.value = '';
+                    return;
+                }
+
                 if (checkIn) {
                     document.getElementById('check_out').min = checkIn;
                     if (checkOut && checkOut < checkIn) {
-                        document.getElementById('check_out').value = checkIn;
+                        document.getElementById('check_out').value = '';
+                        showNotification('Check-out date was reset because it was earlier than the new check-in date.', 'warning');
                     }
                 }
             });
 
             document.getElementById('check_out').addEventListener('change', function() {
+                const today = getTodayString();
                 const checkIn = document.getElementById('check_in').value;
                 const checkOut = this.value;
+
+                // Block past check-out typed manually
+                if (checkOut && checkOut < today) {
+                    showNotification('Check-out date cannot be in the past.', 'error');
+                    this.value = '';
+                    return;
+                }
                 
                 if (checkIn && checkOut) {
-                    const checkInDate = new Date(checkIn);
-                    const checkOutDate = new Date(checkOut);
-                    
-                    if (checkOutDate < checkInDate) {
-                        showNotification('Check-out date cannot be before check-in date', 'error');
-                        this.value = checkIn;
+                    if (checkOut < checkIn) {
+                        showNotification('Check-out date cannot be before check-in date.', 'error');
+                        this.value = '';
                     }
                 }
             });
@@ -1705,18 +1742,8 @@
             const checkOut = document.getElementById('check_out').value;
             const guests = document.getElementById('guest-number').value;
             
-            if (!checkIn || !checkOut) {
-                showNotification('Please select check-in and check-out dates first', 'error');
-                return;
-            }
-            
-            const checkInDate = new Date(checkIn);
-            const checkOutDate = new Date(checkOut);
-            
-            if (checkOutDate < checkInDate) {
-                showNotification('Check-out date cannot be before check-in date', 'error');
-                return;
-            }
+            // ===== PAST DATE VALIDATION =====
+            if (!validateDates(checkIn, checkOut)) return;
             
             if (cartItems.length > 0) {
                 if (checkIn !== cartDates.checkIn || checkOut !== cartDates.checkOut) {
@@ -1797,18 +1824,8 @@
             const checkOut = document.getElementById('check_out').value;
             const guests = document.getElementById('guest-number').value;
             
-            if (!checkIn || !checkOut) {
-                showNotification('Please select check-in and check-out dates first', 'error');
-                return;
-            }
-            
-            const checkInDate = new Date(checkIn);
-            const checkOutDate = new Date(checkOut);
-            
-            if (checkOutDate < checkInDate) {
-                showNotification('Check-out date cannot be before check-in date', 'error');
-                return;
-            }
+            // ===== PAST DATE VALIDATION =====
+            if (!validateDates(checkIn, checkOut)) return;
             
             if (cartItems.length > 0) {
                 if (checkIn !== cartDates.checkIn || checkOut !== cartDates.checkOut) {
