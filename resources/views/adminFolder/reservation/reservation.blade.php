@@ -7,9 +7,13 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" type="image/x-icon" href="{{ asset('images/sunflower1.png') }}">
+    {{-- jsPDF + AutoTable for PDF export --}}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    {{-- SheetJS for Excel (.xlsx) export --}}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    {{-- SweetAlert2 --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <title>Reservations - Villa Elena</title>
     <style>
         /* ===== SIDEBAR RESPONSIVE LAYOUT ===== */
@@ -215,9 +219,9 @@
             opacity: 0.85;
         }
 
-        .btn-card-edit { background: #2563eb; color: white; }
+        .btn-card-edit    { background: #2563eb; color: white; }
         .btn-card-payment { background: #16a34a; color: white; }
-        .btn-card-delete { background: #dc2626; color: white; }
+        .btn-card-delete  { background: #dc2626; color: white; }
 
         .booking-card:hover {
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
@@ -408,14 +412,15 @@
                             <option value="confirmed">Confirmed</option>
                         </select>
                         <button type="button" onclick="clearFilters()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2.5 rounded-lg font-medium">
-                            Clear
+                            Refresh
                         </button>
                         {{-- Export Buttons --}}
                         <div class="export-buttons">
-                            <button type="button" onclick="exportToCSV()" class="export-btn bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg font-medium flex items-center gap-2 transition text-sm">
-                                <i class="fas fa-file-csv"></i>
-                                <span class="hidden sm:inline">Export CSV</span>
-                                <span class="sm:hidden">CSV</span>
+                            {{-- FIXED: Changed from CSV to Excel using SheetJS --}}
+                            <button type="button" onclick="exportToExcel()" class="export-btn bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg font-medium flex items-center gap-2 transition text-sm">
+                                <i class="fas fa-file-excel"></i>
+                                <span class="hidden sm:inline">Export Excel</span>
+                                <span class="sm:hidden">Excel</span>
                             </button>
                             <button type="button" onclick="printTable()" class="export-btn bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium flex items-center gap-2 transition text-sm">
                                 <i class="fas fa-print"></i>
@@ -491,7 +496,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             const savedState = localStorage.getItem('sidebarState');
             const mainContent = document.getElementById('mainContent');
-            // Default to expanded unless explicitly collapsed
             if (savedState === 'collapsed') {
                 mainContent.classList.remove('ml-64');
                 mainContent.classList.add('ml-24');
@@ -640,7 +644,7 @@
                 });
         }
 
-        // ✅ FIXED: Display bookings in table with REAL-TIME balance calculation
+        // Display bookings in table
         function displayBookings(bookings) {
             const tbody = document.getElementById('bookingsTableBody');
 
@@ -656,23 +660,12 @@
             }
 
             tbody.innerHTML = bookings.map(booking => {
-                // ✅ REAL-TIME BALANCE CALCULATION (client-side verification)
-                const totalPrice = parseFloat(booking.total_price) || 0;
-                const totalPaid = parseFloat(booking.total_paid) || 0;
-                const totalRefunded = parseFloat(booking.total_refunded) || 0;
-                const netPaid = totalPaid - totalRefunded;
+                const totalPrice        = parseFloat(booking.total_price)    || 0;
+                const totalPaid         = parseFloat(booking.total_paid)     || 0;
+                const totalRefunded     = parseFloat(booking.total_refunded) || 0;
+                const netPaid           = totalPaid - totalRefunded;
                 const calculatedBalance = Math.max(0, totalPrice - netPaid);
-                
-                console.log('Booking calculation:', {
-                    bookingID: booking.bookingID,
-                    totalPrice,
-                    totalPaid,
-                    totalRefunded,
-                    netPaid,
-                    calculatedBalance,
-                    serverBalance: booking.remaining_balance
-                });
-                
+
                 return `
                 <tr class="border-b border-gray-100 table-row-hover">
                     <td class="py-4 px-4">
@@ -688,15 +681,15 @@
                             <p class="text-sm"><span class="font-medium">Check-in:</span> ${booking.checkin_date}</p>
                             <p class="text-sm"><span class="font-medium">Check-out:</span> ${booking.checkout_date || 'N/A'}</p>
                             <p class="text-sm"><span class="font-medium">Guests:</span> ${booking.num_guests}</p>
-                            <p class="text-sm"><span class="font-medium">Price:</span> ₱${totalPrice.toFixed(2)}</p>
+                            <p class="text-sm"><span class="font-medium">Price:</span> PHP ${totalPrice.toFixed(2)}</p>
                         </div>
                     </td>
                     <td class="py-4 px-4">
                         <div class="space-y-1">
-                            <p class="text-sm"><span class="font-medium">Total:</span> ₱${totalPrice.toFixed(2)}</p>
-                            <p class="text-sm"><span class="font-medium">Paid:</span> <span class="text-green-600 font-semibold">₱${totalPaid.toFixed(2)}</span></p>
-                            <p class="text-sm"><span class="font-medium">Refunded:</span> <span class="text-orange-600">₱${totalRefunded.toFixed(2)}</span></p>
-                            <p class="text-sm"><span class="font-medium">Balance:</span> <span class="${calculatedBalance === 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}">₱${calculatedBalance.toFixed(2)}</span></p>
+                            <p class="text-sm"><span class="font-medium">Total:</span> PHP ${totalPrice.toFixed(2)}</p>
+                            <p class="text-sm"><span class="font-medium">Paid:</span> <span class="text-green-600 font-semibold">PHP ${totalPaid.toFixed(2)}</span></p>
+                            <p class="text-sm"><span class="font-medium">Refunded:</span> <span class="text-orange-600">PHP ${totalRefunded.toFixed(2)}</span></p>
+                            <p class="text-sm"><span class="font-medium">Balance:</span> <span class="${calculatedBalance === 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}">PHP ${calculatedBalance.toFixed(2)}</span></p>
                             ${booking.payment_status ? `<p class="text-xs ${getPaymentStatusColor(booking.payment_status)}">${booking.payment_status.toUpperCase()}</p>` : ''}
                         </div>
                     </td>
@@ -728,7 +721,7 @@
             }).join('');
         }
 
-        // ✅ FIXED: Display bookings as cards with REAL-TIME balance calculation
+        // Display bookings as cards (mobile)
         function displayBookingCards(bookings) {
             const container = document.getElementById('bookingsCardsContainer');
 
@@ -738,13 +731,12 @@
             }
 
             container.innerHTML = bookings.map(booking => {
-                // ✅ REAL-TIME BALANCE CALCULATION
-                const totalPrice = parseFloat(booking.total_price) || 0;
-                const totalPaid = parseFloat(booking.total_paid) || 0;
-                const totalRefunded = parseFloat(booking.total_refunded) || 0;
-                const netPaid = totalPaid - totalRefunded;
+                const totalPrice        = parseFloat(booking.total_price)    || 0;
+                const totalPaid         = parseFloat(booking.total_paid)     || 0;
+                const totalRefunded     = parseFloat(booking.total_refunded) || 0;
+                const netPaid           = totalPaid - totalRefunded;
                 const calculatedBalance = Math.max(0, totalPrice - netPaid);
-                
+
                 return `
                 <div class="booking-card">
                     <div class="card-header">
@@ -780,19 +772,19 @@
                         </div>
                         <div class="card-item">
                             <span class="card-label">Total Price</span>
-                            <span class="card-value font-semibold text-blue-600">₱${totalPrice.toFixed(2)}</span>
+                            <span class="card-value font-semibold text-blue-600">PHP ${totalPrice.toFixed(2)}</span>
                         </div>
                         <div class="card-item">
                             <span class="card-label">Amount Paid</span>
-                            <span class="card-value text-green-600 font-semibold">₱${totalPaid.toFixed(2)}</span>
+                            <span class="card-value text-green-600 font-semibold">PHP ${totalPaid.toFixed(2)}</span>
                         </div>
                         <div class="card-item">
                             <span class="card-label">Refunded</span>
-                            <span class="card-value text-orange-600">₱${totalRefunded.toFixed(2)}</span>
+                            <span class="card-value text-orange-600">PHP ${totalRefunded.toFixed(2)}</span>
                         </div>
                         <div class="card-item">
                             <span class="card-label">Balance</span>
-                            <span class="card-value ${calculatedBalance === 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}">₱${calculatedBalance.toFixed(2)}</span>
+                            <span class="card-value ${calculatedBalance === 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}">PHP ${calculatedBalance.toFixed(2)}</span>
                         </div>
                         ${booking.payment_status ? `
                         <div class="card-item">
@@ -828,7 +820,6 @@
 
             let html = '';
 
-            // Previous
             if (currentPage > 1) {
                 html += `<button onclick="loadBookings(getCurrentStatus(), getCurrentSearch(), ${currentPage - 1})" 
                     class="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">
@@ -840,14 +831,12 @@
             let end = Math.min(totalPages, start + maxVisible - 1);
             if (end - start + 1 < maxVisible) start = Math.max(1, end - maxVisible + 1);
 
-            // First + ellipsis
             if (start > 1) {
                 html += `<button onclick="loadBookings(getCurrentStatus(), getCurrentSearch(), 1)" 
                     class="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">1</button>`;
                 if (start > 2) html += `<span class="px-3 py-2 text-sm text-gray-400">...</span>`;
             }
 
-            // Pages
             for (let i = start; i <= end; i++) {
                 if (i === currentPage) {
                     html += `<button class="px-3 py-2 text-sm border border-blue-500 bg-blue-500 text-white rounded-lg transition">${i}</button>`;
@@ -857,14 +846,12 @@
                 }
             }
 
-            // Last + ellipsis
             if (end < totalPages) {
                 if (end < totalPages - 1) html += `<span class="px-3 py-2 text-sm text-gray-400">...</span>`;
                 html += `<button onclick="loadBookings(getCurrentStatus(), getCurrentSearch(), ${totalPages})" 
                     class="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">${totalPages}</button>`;
             }
 
-            // Next
             if (currentPage < totalPages) {
                 html += `<button onclick="loadBookings(getCurrentStatus(), getCurrentSearch(), ${currentPage + 1})" 
                     class="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">
@@ -910,7 +897,6 @@
         // DELETE BOOKING WITH SWEETALERT2
         // ============================================
         async function deleteBooking(bookingId) {
-            // ✅ SWEETALERT CONFIRMATION
             const confirmResult = await Swal.fire({
                 icon: 'warning',
                 title: 'Delete Booking?',
@@ -921,33 +907,29 @@
                 confirmButtonText: 'Yes, delete it',
                 cancelButtonText: 'Cancel'
             });
-            
+
             if (!confirmResult.isConfirmed) return;
-            
-            // ✅ SHOW LOADING SWEETALERT
+
             Swal.fire({
                 title: 'Deleting...',
                 text: 'Please wait while we delete the booking',
                 allowOutsideClick: false,
                 allowEscapeKey: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
+                didOpen: () => { Swal.showLoading(); }
             });
 
             try {
                 const response = await fetch(`/admin/bookings/${bookingId}`, {
                     method: 'DELETE',
-                    headers: { 
+                    headers: {
                         'X-CSRF-TOKEN': csrfToken,
                         'Content-Type': 'application/json'
                     }
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.success) {
-                    // ✅ SUCCESS SWEETALERT
                     Swal.fire({
                         icon: 'success',
                         title: 'Deleted!',
@@ -955,11 +937,9 @@
                         confirmButtonColor: '#16a34a',
                         confirmButtonText: 'OK'
                     }).then(() => {
-                        // Reload bookings after user closes SweetAlert
                         loadBookings(getCurrentStatus(), getCurrentSearch(), currentPage);
                     });
                 } else {
-                    // ✅ ERROR SWEETALERT
                     Swal.fire({
                         icon: 'error',
                         title: 'Error!',
@@ -969,8 +949,6 @@
                 }
             } catch (error) {
                 console.error('Error:', error);
-                
-                // ✅ ERROR SWEETALERT
                 Swal.fire({
                     icon: 'error',
                     title: 'Error!',
@@ -980,84 +958,156 @@
             }
         }
 
-        // Export to CSV
-        function exportToCSV() {
-            if (allBookings.length === 0) { alert('No data to export'); return; }
+        // ============================================
+        // EXPORT TO EXCEL (.xlsx) — FIXED
+        // Uses SheetJS; no ₱ symbol encoding issues.
+        // Currency values stored as proper numbers.
+        // ============================================
+        function exportToExcel() {
+            if (allBookings.length === 0) {
+                Swal.fire({ icon: 'warning', title: 'No Data', text: 'No data available to export', confirmButtonColor: '#3b82f6' });
+                return;
+            }
 
-            const headers = ['Guest Name','Email','Phone','Booking Type','Check-in','Check-out','Guests','Units','Total Price','Amount Paid','Amount Refunded','Remaining Balance','Status','Payment Status','Special Requirements'];
             const rows = allBookings.map(b => {
-                const totalPrice = parseFloat(b.total_price) || 0;
-                const totalPaid = parseFloat(b.total_paid) || 0;
+                const totalPrice    = parseFloat(b.total_price)    || 0;
+                const totalPaid     = parseFloat(b.total_paid)     || 0;
                 const totalRefunded = parseFloat(b.total_refunded) || 0;
-                const calculatedBalance = Math.max(0, totalPrice - (totalPaid - totalRefunded));
-                
-                return [
-                    `"${b.guest_name}"`,`"${b.email}"`,`"${b.phone}"`,`"${b.booking_type}"`,
-                    `"${b.checkin_date}"`,`"${b.checkout_date || 'N/A'}"`,`"${b.num_guests}"`,`"${b.units}"`,
-                    `"₱${totalPrice.toFixed(2)}"`,
-                    `"₱${totalPaid.toFixed(2)}"`,
-                    `"₱${totalRefunded.toFixed(2)}"`,
-                    `"₱${calculatedBalance.toFixed(2)}"`,
-                    `"${b.booking_status}"`,`"${b.payment_status || 'No Payment'}"`,`"${b.special_requirements || 'N/A'}"`
-                ];
+                const balance       = Math.max(0, totalPrice - (totalPaid - totalRefunded));
+
+                return {
+                    'Guest Name':            b.guest_name,
+                    'Email':                 b.email,
+                    'Phone':                 b.phone,
+                    'Booking Type':          b.booking_type,
+                    'Check-in':              b.checkin_date,
+                    'Check-out':             b.checkout_date || 'N/A',
+                    'No. of Guests':         b.num_guests,
+                    'Units':                 b.units,
+                    'Total Price (PHP)':     totalPrice,
+                    'Amount Paid (PHP)':     totalPaid,
+                    'Amount Refunded (PHP)': totalRefunded,
+                    'Balance (PHP)':         balance,
+                    'Booking Status':        b.booking_status,
+                    'Payment Status':        b.payment_status || 'No Payment',
+                    'Special Requirements':  b.special_requirements || 'N/A'
+                };
             });
 
-            const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.setAttribute('href', URL.createObjectURL(blob));
-            link.setAttribute('download', `active_reservations_${new Date().toISOString().split('T')[0]}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            const ws = XLSX.utils.json_to_sheet(rows);
+
+            // Style header row (blue bg, white bold text)
+            const range = XLSX.utils.decode_range(ws['!ref']);
+            for (let C = range.s.c; C <= range.e.c; C++) {
+                const cellRef = XLSX.utils.encode_cell({ r: 0, c: C });
+                if (!ws[cellRef]) continue;
+                ws[cellRef].s = {
+                    font:      { bold: true, color: { rgb: 'FFFFFF' } },
+                    fill:      { patternType: 'solid', fgColor: { rgb: '3B82F6' } },
+                    alignment: { horizontal: 'center', wrapText: true }
+                };
+            }
+
+            // Format currency columns as numbers
+            const phpCols = [8, 9, 10, 11]; // Total, Paid, Refunded, Balance
+            for (let R = 1; R <= range.e.r; R++) {
+                phpCols.forEach(C => {
+                    const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
+                    if (ws[cellRef]) {
+                        ws[cellRef].t = 'n';
+                        ws[cellRef].z = '#,##0.00';
+                    }
+                });
+            }
+
+            // Auto column widths
+            const colWidths = Object.keys(rows[0]).map(key => ({
+                wch: Math.max(key.length, ...rows.map(r => String(r[key] ?? '').length)) + 3
+            }));
+            ws['!cols'] = colWidths;
+
+            // Freeze header row
+            ws['!freeze'] = { xSplit: 0, ySplit: 1 };
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Reservations');
+
+            XLSX.writeFile(wb, `active_reservations_${new Date().toISOString().split('T')[0]}.xlsx`, { cellStyles: true });
         }
 
-        // Print table
+        // ============================================
+        // PRINT TABLE — FIXED
+        // Uses "PHP" prefix; renders cleanly in all browsers.
+        // ============================================
         function printTable() {
-            if (allBookings.length === 0) { alert('No data to print'); return; }
+            if (allBookings.length === 0) {
+                Swal.fire({ icon: 'warning', title: 'No Data', text: 'No data available to print', confirmButtonColor: '#3b82f6' });
+                return;
+            }
 
             const printWindow = window.open('', '_blank');
             const printContent = `
                 <!DOCTYPE html><html><head>
                     <title>Active Reservations Report - Villa Elena</title>
+                    <meta charset="UTF-8">
                     <style>
                         body { font-family: Arial, sans-serif; margin: 20px; }
                         h1 { color: #2d3748; text-align: center; margin-bottom: 20px; }
                         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
                         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 11px; }
-                        th { background-color: #f8f9fa; font-weight: bold; }
-                        .status-confirmed { background-color: #d1fae5; color: #065f46; }
-                        .status-pending { background-color: #fef3c7; color: #92400e; }
-                        .print-date { text-align: right; margin-bottom: 20px; color: #6b7280; }
+                        th { background-color: #3b82f6; color: white; font-weight: bold; }
+                        tr:nth-child(even) { background-color: #f9fafb; }
+                        .status-confirmed { background-color: #d1fae5; color: #065f46; padding: 2px 8px; border-radius: 999px; }
+                        .status-pending   { background-color: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 999px; }
+                        .print-date { text-align: right; margin-bottom: 20px; color: #6b7280; font-size: 11px; }
+                        .summary { margin-top: 20px; text-align: right; color: #374151; font-size: 12px; }
                     </style>
                 </head><body>
                     <h1>Active Reservations Report - Villa Elena</h1>
                     <div class="print-date">Printed on: ${new Date().toLocaleString()}</div>
-                    <table><thead><tr>
-                        <th>Guest Name</th><th>Email</th><th>Phone</th><th>Type</th>
-                        <th>Check-in</th><th>Check-out</th><th>Guests</th><th>Units</th>
-                        <th>Total</th><th>Paid</th><th>Refunded</th><th>Balance</th><th>Status</th>
-                    </tr></thead><tbody>
-                        ${allBookings.map(b => {
-                            const totalPrice = parseFloat(b.total_price) || 0;
-                            const totalPaid = parseFloat(b.total_paid) || 0;
-                            const totalRefunded = parseFloat(b.total_refunded) || 0;
-                            const calculatedBalance = Math.max(0, totalPrice - (totalPaid - totalRefunded));
-                            
-                            return `<tr>
-                                <td>${b.guest_name}</td><td>${b.email}</td><td>${b.phone}</td>
-                                <td>${b.booking_type}</td><td>${b.checkin_date}</td><td>${b.checkout_date || 'N/A'}</td>
-                                <td>${b.num_guests}</td><td>${b.units}</td>
-                                <td>₱${totalPrice.toFixed(2)}</td>
-                                <td>₱${totalPaid.toFixed(2)}</td>
-                                <td>₱${totalRefunded.toFixed(2)}</td>
-                                <td>₱${calculatedBalance.toFixed(2)}</td>
-                                <td><span class="status-${b.booking_status}">${b.booking_status.toUpperCase()}</span></td>
-                            </tr>`;
-                        }).join('')}
-                    </tbody></table>
-                    <div style="margin-top:20px;text-align:center;color:#6b7280;">Total Records: ${allBookings.length}</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Guest Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Type</th>
+                                <th>Check-in</th>
+                                <th>Check-out</th>
+                                <th>Guests</th>
+                                <th>Units</th>
+                                <th>Total (PHP)</th>
+                                <th>Paid (PHP)</th>
+                                <th>Refunded (PHP)</th>
+                                <th>Balance (PHP)</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${allBookings.map(b => {
+                                const totalPrice    = parseFloat(b.total_price)    || 0;
+                                const totalPaid     = parseFloat(b.total_paid)     || 0;
+                                const totalRefunded = parseFloat(b.total_refunded) || 0;
+                                const calcBalance   = Math.max(0, totalPrice - (totalPaid - totalRefunded));
+                                return `<tr>
+                                    <td>${b.guest_name}</td>
+                                    <td>${b.email}</td>
+                                    <td>${b.phone}</td>
+                                    <td>${b.booking_type}</td>
+                                    <td>${b.checkin_date}</td>
+                                    <td>${b.checkout_date || 'N/A'}</td>
+                                    <td>${b.num_guests}</td>
+                                    <td>${b.units}</td>
+                                    <td>${totalPrice.toLocaleString('en-PH', {minimumFractionDigits:2})}</td>
+                                    <td>${totalPaid.toLocaleString('en-PH', {minimumFractionDigits:2})}</td>
+                                    <td>${totalRefunded.toLocaleString('en-PH', {minimumFractionDigits:2})}</td>
+                                    <td>${calcBalance.toLocaleString('en-PH', {minimumFractionDigits:2})}</td>
+                                    <td><span class="status-${b.booking_status.toLowerCase()}">${b.booking_status.toUpperCase()}</span></td>
+                                </tr>`;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                    <div class="summary">Total Records: <strong>${allBookings.length}</strong></div>
                 </body></html>`;
 
             printWindow.document.write(printContent);
@@ -1066,44 +1116,141 @@
             setTimeout(() => { printWindow.print(); printWindow.close(); }, 500);
         }
 
-        // Export to PDF
+        // ============================================
+        // EXPORT TO PDF — FIXED
+        // Removed ₱ symbol; uses "PHP" in headers.
+        // Landscape orientation for more columns.
+        // ============================================
         function exportToPDF() {
-            if (allBookings.length === 0) { alert('No data to export'); return; }
+            if (allBookings.length === 0) {
+                Swal.fire({ icon: 'warning', title: 'No Data', text: 'No data available to export', confirmButtonColor: '#3b82f6' });
+                return;
+            }
 
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+            const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
 
+            // Title
             doc.setFontSize(16);
             doc.setTextColor(40, 40, 40);
             doc.text('Active Reservations Report - Villa Elena', 14, 15);
-            doc.setFontSize(10);
-            doc.setTextColor(100, 100, 100);
-            doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 22);
 
-            const headers = ['Guest','Email','Phone','Type','Check-in','Check-out','Guests','Units','Total','Paid','Refunded','Balance','Status'];
+            // Generated date
+            doc.setFontSize(9);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Generated on: ${new Date().toLocaleString('en-PH')}`, 14, 22);
+
+            // Headers — use "(PHP)" not "₱" to avoid encoding issues
+            const headers = [
+                'Guest Name',
+                'Email',
+                'Phone',
+                'Type',
+                'Check-in',
+                'Check-out',
+                'Guests',
+                'Units',
+                'Total\n(PHP)',
+                'Paid\n(PHP)',
+                'Refunded\n(PHP)',
+                'Balance\n(PHP)',
+                'Status'
+            ];
+
             const rows = allBookings.map(b => {
-                const totalPrice = parseFloat(b.total_price) || 0;
-                const totalPaid = parseFloat(b.total_paid) || 0;
+                const totalPrice    = parseFloat(b.total_price)    || 0;
+                const totalPaid     = parseFloat(b.total_paid)     || 0;
                 const totalRefunded = parseFloat(b.total_refunded) || 0;
-                const calculatedBalance = Math.max(0, totalPrice - (totalPaid - totalRefunded));
-                
+                const calcBalance   = Math.max(0, totalPrice - (totalPaid - totalRefunded));
+
                 return [
-                    b.guest_name, b.email, b.phone, b.booking_type,
-                    b.checkin_date, b.checkout_date || 'N/A', b.num_guests, b.units,
-                    `₱${totalPrice.toFixed(2)}`,
-                    `₱${totalPaid.toFixed(2)}`,
-                    `₱${totalRefunded.toFixed(2)}`,
-                    `₱${calculatedBalance.toFixed(2)}`,
+                    b.guest_name,
+                    b.email,
+                    b.phone,
+                    b.booking_type,
+                    b.checkin_date,
+                    b.checkout_date || 'N/A',
+                    String(b.num_guests),
+                    b.units,
+                    totalPrice.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+                    totalPaid.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+                    totalRefunded.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+                    calcBalance.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
                     b.booking_status.toUpperCase()
                 ];
             });
 
             doc.autoTable({
-                head: [headers], body: rows, startY: 30,
-                styles: { fontSize: 7, cellPadding: 2 },
-                headStyles: { fillColor: [59, 130, 246] },
-                alternateRowStyles: { fillColor: [249, 250, 251] }
+                head: [headers],
+                body: rows,
+                startY: 28,
+                styles: {
+                    fontSize: 7,
+                    cellPadding: 2,
+                    font: 'helvetica',
+                    overflow: 'linebreak',
+                    valign: 'middle'
+                },
+                headStyles: {
+                    fillColor: [59, 130, 246],
+                    textColor: 255,
+                    fontStyle: 'bold',
+                    halign: 'center',
+                    valign: 'middle',
+                    fontSize: 7
+                },
+                alternateRowStyles: {
+                    fillColor: [249, 250, 251]
+                },
+                didParseCell: function(data) {
+                    // Color-code status column
+                    if (data.section === 'body' && data.column.index === 12) {
+                        const val = (data.cell.raw || '').toLowerCase();
+                        if (val === 'confirmed') {
+                            data.cell.styles.textColor = [5, 150, 105];
+                            data.cell.styles.fontStyle = 'bold';
+                        } else if (val === 'pending') {
+                            data.cell.styles.textColor = [180, 130, 0];
+                            data.cell.styles.fontStyle = 'bold';
+                        }
+                    }
+                    // Right-align currency columns
+                    if (data.section === 'body' && [8, 9, 10, 11].includes(data.column.index)) {
+                        data.cell.styles.halign = 'right';
+                    }
+                },
+                columnStyles: {
+                    0:  { cellWidth: 28 },  // Guest Name
+                    1:  { cellWidth: 38 },  // Email
+                    2:  { cellWidth: 24 },  // Phone
+                    3:  { cellWidth: 22 },  // Type
+                    4:  { cellWidth: 20 },  // Check-in
+                    5:  { cellWidth: 20 },  // Check-out
+                    6:  { cellWidth: 12 },  // Guests
+                    7:  { cellWidth: 18 },  // Units
+                    8:  { cellWidth: 20 },  // Total
+                    9:  { cellWidth: 20 },  // Paid
+                    10: { cellWidth: 20 },  // Refunded
+                    11: { cellWidth: 20 },  // Balance
+                    12: { cellWidth: 20 }   // Status
+                },
+                margin: { top: 28, left: 8, right: 8 },
+                tableWidth: 'auto'
             });
+
+            // Footer with page count
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(8);
+                doc.setTextColor(150, 150, 150);
+                doc.text(
+                    `Page ${i} of ${pageCount}  |  Villa Elena Reservations`,
+                    doc.internal.pageSize.getWidth() / 2,
+                    doc.internal.pageSize.getHeight() - 6,
+                    { align: 'center' }
+                );
+            }
 
             doc.save(`active_reservations_${new Date().toISOString().split('T')[0]}.pdf`);
         }

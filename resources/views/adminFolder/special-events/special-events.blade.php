@@ -7,9 +7,13 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" type="image/x-icon" href="{{ asset('images/sunflower1.png') }}">
+    {{-- jsPDF + AutoTable for PDF export --}}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    {{-- SheetJS for Excel (.xlsx) export --}}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    {{-- SweetAlert2 --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <title>Special Events - Villa Elena</title>
     <style>
         /* ===== SIDEBAR RESPONSIVE LAYOUT ===== */
@@ -402,7 +406,7 @@
                                 class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
                             >
                         </div>
-                       <select name="status" id="statusFilter" class="px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                        <select name="status" id="statusFilter" class="px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
                             <option value="all">All Status</option>
                             <option value="pending">Pending</option>
                             <option value="confirmed">Confirmed</option>
@@ -410,14 +414,15 @@
                             <option value="completed">Completed</option>
                         </select>
                         <button type="button" onclick="clearFilters()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2.5 rounded-lg font-medium">
-                            Clear
+                            Refresh
                         </button>
                         {{-- Export Buttons --}}
                         <div class="export-buttons">
-                            <button type="button" onclick="exportToCSV()" class="export-btn bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg font-medium flex items-center gap-2 transition text-sm">
-                                <i class="fas fa-file-csv"></i>
-                                <span class="hidden sm:inline">Export CSV</span>
-                                <span class="sm:hidden">CSV</span>
+                            {{-- FIXED: Changed from CSV to Excel using SheetJS --}}
+                            <button type="button" onclick="exportToExcel()" class="export-btn bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg font-medium flex items-center gap-2 transition text-sm">
+                                <i class="fas fa-file-excel"></i>
+                                <span class="hidden sm:inline">Export Excel</span>
+                                <span class="sm:hidden">Excel</span>
                             </button>
                             <button type="button" onclick="printTable()" class="export-btn bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium flex items-center gap-2 transition text-sm">
                                 <i class="fas fa-print"></i>
@@ -676,16 +681,16 @@
                             <p class="text-sm"><span class="font-medium">Event Date:</span> ${eventDate}</p>
                             <p class="text-sm"><span class="font-medium">Time:</span> ${booking.event_start_time || '08:00'} - ${booking.event_end_time || '17:00'}</p>
                             <p class="text-sm"><span class="font-medium">Guests:</span> ${booking.num_guests}</p>
-                            <p class="text-sm"><span class="font-medium">Price:</span> ₱${totalPrice.toFixed(2)}</p>
+                            <p class="text-sm"><span class="font-medium">Price:</span> PHP ${totalPrice.toFixed(2)}</p>
                             ${booking.special_requirements ? `<p class="text-sm mt-1"><span class="font-medium">Notes:</span> ${booking.special_requirements}</p>` : ''}
                         </div>
                     </td>
                     <td class="py-4 px-4">
                         <div class="space-y-1">
-                            <p class="text-sm"><span class="font-medium">Total:</span> ₱${totalPrice.toFixed(2)}</p>
-                            <p class="text-sm"><span class="font-medium">Paid:</span> <span class="text-green-600 font-semibold">₱${totalPaid.toFixed(2)}</span></p>
-                            <p class="text-sm"><span class="font-medium">Refunded:</span> <span class="text-orange-600">₱${totalRefunded.toFixed(2)}</span></p>
-                            <p class="text-sm"><span class="font-medium">Balance:</span> <span class="${calculatedBalance === 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}">₱${calculatedBalance.toFixed(2)}</span></p>
+                            <p class="text-sm"><span class="font-medium">Total:</span> PHP ${totalPrice.toFixed(2)}</p>
+                            <p class="text-sm"><span class="font-medium">Paid:</span> <span class="text-green-600 font-semibold">PHP ${totalPaid.toFixed(2)}</span></p>
+                            <p class="text-sm"><span class="font-medium">Refunded:</span> <span class="text-orange-600">PHP ${totalRefunded.toFixed(2)}</span></p>
+                            <p class="text-sm"><span class="font-medium">Balance:</span> <span class="${calculatedBalance === 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}">PHP ${calculatedBalance.toFixed(2)}</span></p>
                             ${booking.payment_status ? `<p class="text-xs ${getPaymentStatusColor(booking.payment_status)}">${booking.payment_status.toUpperCase()}</p>` : ''}
                         </div>
                     </td>
@@ -766,19 +771,19 @@
                         </div>
                         <div class="card-item">
                             <span class="card-label">Total Price</span>
-                            <span class="card-value font-semibold text-violet-600">₱${totalPrice.toFixed(2)}</span>
+                            <span class="card-value font-semibold text-violet-600">PHP ${totalPrice.toFixed(2)}</span>
                         </div>
                         <div class="card-item">
                             <span class="card-label">Amount Paid</span>
-                            <span class="card-value text-green-600 font-semibold">₱${totalPaid.toFixed(2)}</span>
+                            <span class="card-value text-green-600 font-semibold">PHP ${totalPaid.toFixed(2)}</span>
                         </div>
                         <div class="card-item">
                             <span class="card-label">Refunded</span>
-                            <span class="card-value text-orange-600">₱${totalRefunded.toFixed(2)}</span>
+                            <span class="card-value text-orange-600">PHP ${totalRefunded.toFixed(2)}</span>
                         </div>
                         <div class="card-item">
                             <span class="card-label">Balance</span>
-                            <span class="card-value ${calculatedBalance === 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}">₱${calculatedBalance.toFixed(2)}</span>
+                            <span class="card-value ${calculatedBalance === 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}">PHP ${calculatedBalance.toFixed(2)}</span>
                         </div>
                         ${booking.payment_status ? `
                         <div class="card-item">
@@ -894,10 +899,9 @@
         }
 
         // ============================================
-        // DELETE EVENT - WITH SWEETALERT2 (NO LOADING)
+        // DELETE EVENT - WITH SWEETALERT2
         // ============================================
         function deleteEvent(bookingId) {
-            // ✅ SWEETALERT CONFIRMATION
             Swal.fire({
                 icon: 'warning',
                 title: 'Delete Special Event?',
@@ -909,7 +913,6 @@
                 cancelButtonText: 'Cancel'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Proceed with deletion
                     fetch(`/admin/special-events/${bookingId}`, {
                         method: 'DELETE',
                         headers: { 'X-CSRF-TOKEN': csrfToken }
@@ -917,18 +920,14 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            // ✅ SWEETALERT SUCCESS (NO LOADING)
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Deleted!',
                                 text: 'Special event has been deleted successfully',
                                 confirmButtonColor: '#16a34a'
                             });
-                            
-                            // Reload bookings immediately
                             loadBookings(getCurrentStatus(), getCurrentSearch(), currentPage);
                         } else {
-                            // ✅ SWEETALERT ERROR (NO LOADING)
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Delete Failed',
@@ -939,7 +938,6 @@
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        // ✅ SWEETALERT ERROR (NO LOADING)
                         Swal.fire({
                             icon: 'error',
                             title: 'Connection Error',
@@ -951,59 +949,94 @@
             });
         }
 
-        // Export to CSV
-        function exportToCSV() {
+        // ============================================
+        // EXPORT TO EXCEL (.xlsx) — FIXED
+        // Uses SheetJS so currency values store as proper
+        // numbers; no ₱ symbol encoding issues.
+        // ============================================
+        function exportToExcel() {
             if (allBookings.length === 0) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'No Data',
-                    text: 'No data available to export',
-                    confirmButtonColor: '#7c3aed'
-                });
+                Swal.fire({ icon: 'warning', title: 'No Data', text: 'No data available to export', confirmButtonColor: '#7c3aed' });
                 return;
             }
 
-            const headers = ['Guest Name','Email','Phone','Event Name','Event Date','Start Time','End Time','Guests','Venue','Total Price','Amount Paid','Amount Refunded','Remaining Balance','Status','Payment Status','Special Requirements'];
             const rows = allBookings.map(b => {
                 const eventDate = b.checkin_date ? b.checkin_date : 'N/A';
-                const totalPrice = parseFloat(b.total_price) || 0;
-                const totalPaid = parseFloat(b.total_paid) || 0;
-                const totalRefunded = parseFloat(b.total_refunded) || 0;
-                const calculatedBalance = Math.max(0, totalPrice - (totalPaid - totalRefunded));
-                
-                return [
-                    `"${b.guest_name}"`,`"${b.email}"`,`"${b.phone}"`,`"${b.event_name || 'Special Event'}"`,
-                    `"${eventDate}"`,`"${b.event_start_time || '08:00'}"`,`"${b.event_end_time || '17:00'}"`,
-                    `"${b.num_guests}"`,`"${b.units}"`,
-                    `"₱${totalPrice.toFixed(2)}"`,
-                    `"₱${totalPaid.toFixed(2)}"`,
-                    `"₱${totalRefunded.toFixed(2)}"`,
-                    `"₱${calculatedBalance.toFixed(2)}"`,
-                    `"${b.booking_status}"`,`"${b.payment_status || 'No Payment'}"`,
-                    `"${b.special_requirements || 'N/A'}"`
-                ];
+                const totalPrice  = parseFloat(b.total_price)    || 0;
+                const totalPaid   = parseFloat(b.total_paid)      || 0;
+                const totalRefund = parseFloat(b.total_refunded)  || 0;
+                const balance     = Math.max(0, totalPrice - (totalPaid - totalRefund));
+
+                return {
+                    'Guest Name':            b.guest_name,
+                    'Email':                 b.email,
+                    'Phone':                 b.phone,
+                    'Event Name':            b.event_name || 'Special Event',
+                    'Event Date':            eventDate,
+                    'Start Time':            b.event_start_time || '08:00',
+                    'End Time':              b.event_end_time   || '17:00',
+                    'No. of Guests':         b.num_guests,
+                    'Venue':                 b.units,
+                    'Total Price (PHP)':     totalPrice,
+                    'Amount Paid (PHP)':     totalPaid,
+                    'Amount Refunded (PHP)': totalRefund,
+                    'Balance (PHP)':         balance,
+                    'Booking Status':        b.booking_status,
+                    'Payment Status':        b.payment_status || 'No Payment',
+                    'Special Requirements':  b.special_requirements || 'N/A'
+                };
             });
 
-            const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.setAttribute('href', URL.createObjectURL(blob));
-            link.setAttribute('download', `special_events_${new Date().toISOString().split('T')[0]}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            const ws = XLSX.utils.json_to_sheet(rows);
+
+            // Style header row (purple bg, white bold text, centered)
+            const range = XLSX.utils.decode_range(ws['!ref']);
+            for (let C = range.s.c; C <= range.e.c; C++) {
+                const cellRef = XLSX.utils.encode_cell({ r: 0, c: C });
+                if (!ws[cellRef]) continue;
+                ws[cellRef].s = {
+                    font:      { bold: true, color: { rgb: 'FFFFFF' } },
+                    fill:      { patternType: 'solid', fgColor: { rgb: '7C3AED' } },
+                    alignment: { horizontal: 'center', wrapText: true }
+                };
+            }
+
+            // Format currency columns as PHP number format
+            const phpCols = [9, 10, 11, 12]; // 0-indexed: Total, Paid, Refunded, Balance
+            for (let R = 1; R <= range.e.r; R++) {
+                phpCols.forEach(C => {
+                    const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
+                    if (ws[cellRef]) {
+                        ws[cellRef].t = 'n';
+                        ws[cellRef].z = '#,##0.00';
+                    }
+                });
+            }
+
+            // Auto column widths
+            const colWidths = Object.keys(rows[0]).map(key => ({
+                wch: Math.max(key.length, ...rows.map(r => String(r[key] ?? '').length)) + 3
+            }));
+            ws['!cols'] = colWidths;
+
+            // Freeze header row
+            ws['!freeze'] = { xSplit: 0, ySplit: 1 };
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Special Events');
+
+            // Write with cellStyles enabled
+            XLSX.writeFile(wb, `special_events_${new Date().toISOString().split('T')[0]}.xlsx`, { cellStyles: true });
         }
 
-        // Print table
+        // ============================================
+        // PRINT TABLE — FIXED
+        // Uses "PHP" text prefix instead of ₱ symbol
+        // so print preview renders cleanly in all browsers.
+        // ============================================
         function printTable() {
             if (allBookings.length === 0) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'No Data',
-                    text: 'No data available to print',
-                    confirmButtonColor: '#7c3aed'
-                });
+                Swal.fire({ icon: 'warning', title: 'No Data', text: 'No data available to print', confirmButtonColor: '#7c3aed' });
                 return;
             }
 
@@ -1011,47 +1044,68 @@
             const printContent = `
                 <!DOCTYPE html><html><head>
                     <title>Special Events Report - Villa Elena</title>
+                    <meta charset="UTF-8">
                     <style>
                         body { font-family: Arial, sans-serif; margin: 20px; }
                         h1 { color: #7c3aed; text-align: center; margin-bottom: 20px; }
                         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
                         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 11px; }
-                        th { background-color: #f8f9fa; font-weight: bold; }
-                        .status-confirmed { background-color: #d1fae5; color: #065f46; }
-                        .status-pending { background-color: #fef3c7; color: #92400e; }
-                        .status-cancelled { background-color: #fee2e2; color: #991b1b; }
-                        .status-completed { background-color: #dbeafe; color: #1e40af; }
-                        .print-date { text-align: right; margin-bottom: 20px; color: #6b7280; }
+                        th { background-color: #7c3aed; color: white; font-weight: bold; }
+                        tr:nth-child(even) { background-color: #f9fafb; }
+                        .status-confirmed { background-color: #d1fae5; color: #065f46; padding: 2px 8px; border-radius: 999px; }
+                        .status-pending   { background-color: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 999px; }
+                        .status-cancelled { background-color: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 999px; }
+                        .status-completed { background-color: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 999px; }
+                        .print-date { text-align: right; margin-bottom: 20px; color: #6b7280; font-size: 11px; }
+                        .summary { margin-top: 20px; text-align: right; color: #374151; font-size: 12px; }
                     </style>
                 </head><body>
                     <h1>Special Events Report - Villa Elena</h1>
                     <div class="print-date">Printed on: ${new Date().toLocaleString()}</div>
-                    <table><thead><tr>
-                        <th>Guest Name</th><th>Email</th><th>Phone</th><th>Event Name</th>
-                        <th>Event Date</th><th>Time</th><th>Guests</th><th>Venue</th>
-                        <th>Total</th><th>Paid</th><th>Refunded</th><th>Balance</th><th>Status</th>
-                    </tr></thead><tbody>
-                        ${allBookings.map(b => {
-                            const eventDate = b.checkin_date ? b.checkin_date : 'N/A';
-                            const totalPrice = parseFloat(b.total_price) || 0;
-                            const totalPaid = parseFloat(b.total_paid) || 0;
-                            const totalRefunded = parseFloat(b.total_refunded) || 0;
-                            const calculatedBalance = Math.max(0, totalPrice - (totalPaid - totalRefunded));
-                            
-                            return `<tr>
-                                <td>${b.guest_name}</td><td>${b.email}</td><td>${b.phone}</td>
-                                <td>${b.event_name || 'Special Event'}</td><td>${eventDate}</td>
-                                <td>${b.event_start_time || '08:00'} - ${b.event_end_time || '17:00'}</td>
-                                <td>${b.num_guests}</td><td>${b.units}</td>
-                                <td>₱${totalPrice.toFixed(2)}</td>
-                                <td>₱${totalPaid.toFixed(2)}</td>
-                                <td>₱${totalRefunded.toFixed(2)}</td>
-                                <td>₱${calculatedBalance.toFixed(2)}</td>
-                                <td><span class="status-${b.booking_status}">${b.booking_status.toUpperCase()}</span></td>
-                            </tr>`;
-                        }).join('')}
-                    </tbody></table>
-                    <div style="margin-top:20px;text-align:center;color:#6b7280;">Total Records: ${allBookings.length}</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Guest Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Event Name</th>
+                                <th>Event Date</th>
+                                <th>Time</th>
+                                <th>Guests</th>
+                                <th>Venue</th>
+                                <th>Total (PHP)</th>
+                                <th>Paid (PHP)</th>
+                                <th>Refunded (PHP)</th>
+                                <th>Balance (PHP)</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${allBookings.map(b => {
+                                const eventDate      = b.checkin_date ? b.checkin_date : 'N/A';
+                                const totalPrice     = parseFloat(b.total_price)   || 0;
+                                const totalPaid      = parseFloat(b.total_paid)    || 0;
+                                const totalRefunded  = parseFloat(b.total_refunded)|| 0;
+                                const calcBalance    = Math.max(0, totalPrice - (totalPaid - totalRefunded));
+                                return `<tr>
+                                    <td>${b.guest_name}</td>
+                                    <td>${b.email}</td>
+                                    <td>${b.phone}</td>
+                                    <td>${b.event_name || 'Special Event'}</td>
+                                    <td>${eventDate}</td>
+                                    <td>${b.event_start_time || '08:00'} - ${b.event_end_time || '17:00'}</td>
+                                    <td>${b.num_guests}</td>
+                                    <td>${b.units}</td>
+                                    <td>${totalPrice.toLocaleString('en-PH', {minimumFractionDigits:2})}</td>
+                                    <td>${totalPaid.toLocaleString('en-PH', {minimumFractionDigits:2})}</td>
+                                    <td>${totalRefunded.toLocaleString('en-PH', {minimumFractionDigits:2})}</td>
+                                    <td>${calcBalance.toLocaleString('en-PH', {minimumFractionDigits:2})}</td>
+                                    <td><span class="status-${b.booking_status.toLowerCase()}">${b.booking_status.toUpperCase()}</span></td>
+                                </tr>`;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                    <div class="summary">Total Records: <strong>${allBookings.length}</strong></div>
                 </body></html>`;
 
             printWindow.document.write(printContent);
@@ -1060,54 +1114,151 @@
             setTimeout(() => { printWindow.print(); printWindow.close(); }, 500);
         }
 
-        // Export to PDF
+        // ============================================
+        // EXPORT TO PDF — FIXED
+        // Removed ₱ symbol entirely; uses "PHP" prefix
+        // in column headers so jsPDF Helvetica renders
+        // all text cleanly without encoding artifacts.
+        // Also switched to landscape for more columns.
+        // ============================================
         function exportToPDF() {
             if (allBookings.length === 0) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'No Data',
-                    text: 'No data available to export',
-                    confirmButtonColor: '#7c3aed'
-                });
+                Swal.fire({ icon: 'warning', title: 'No Data', text: 'No data available to export', confirmButtonColor: '#7c3aed' });
                 return;
             }
 
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+            // Landscape orientation gives more horizontal space
+            const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
 
+            // Title
             doc.setFontSize(16);
             doc.setTextColor(40, 40, 40);
             doc.text('Special Events Report - Villa Elena', 14, 15);
-            doc.setFontSize(10);
-            doc.setTextColor(100, 100, 100);
-            doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 22);
 
-            const headers = ['Guest','Email','Phone','Event','Date','Time','Guests','Venue','Total','Paid','Refunded','Balance','Status'];
+            // Generated date
+            doc.setFontSize(9);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Generated on: ${new Date().toLocaleString('en-PH')}`, 14, 22);
+
+            // Table headers — use "PHP" not "₱" to avoid encoding issues
+            const headers = [
+                'Guest Name',
+                'Email',
+                'Phone',
+                'Event Name',
+                'Event Date',
+                'Time',
+                'Guests',
+                'Venue',
+                'Total\n(PHP)',
+                'Paid\n(PHP)',
+                'Refunded\n(PHP)',
+                'Balance\n(PHP)',
+                'Status'
+            ];
+
             const rows = allBookings.map(b => {
-                const eventDate = b.checkin_date ? b.checkin_date : 'N/A';
-                const totalPrice = parseFloat(b.total_price) || 0;
-                const totalPaid = parseFloat(b.total_paid) || 0;
+                const eventDate     = b.checkin_date ? b.checkin_date : 'N/A';
+                const totalPrice    = parseFloat(b.total_price)    || 0;
+                const totalPaid     = parseFloat(b.total_paid)     || 0;
                 const totalRefunded = parseFloat(b.total_refunded) || 0;
-                const calculatedBalance = Math.max(0, totalPrice - (totalPaid - totalRefunded));
-                
+                const calcBalance   = Math.max(0, totalPrice - (totalPaid - totalRefunded));
+
                 return [
-                    b.guest_name, b.email, b.phone, b.event_name || 'Event',
-                    eventDate, `${b.event_start_time || '08:00'}-${b.event_end_time || '17:00'}`,
-                    b.num_guests, b.units,
-                    `₱${totalPrice.toFixed(2)}`,
-                    `₱${totalPaid.toFixed(2)}`,
-                    `₱${totalRefunded.toFixed(2)}`,
-                    `₱${calculatedBalance.toFixed(2)}`,
+                    b.guest_name,
+                    b.email,
+                    b.phone,
+                    b.event_name || 'Special Event',
+                    eventDate,
+                    `${b.event_start_time || '08:00'} - ${b.event_end_time || '17:00'}`,
+                    String(b.num_guests),
+                    b.units,
+                    totalPrice.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+                    totalPaid.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+                    totalRefunded.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+                    calcBalance.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
                     b.booking_status.toUpperCase()
                 ];
             });
 
             doc.autoTable({
-                head: [headers], body: rows, startY: 30,
-                styles: { fontSize: 7, cellPadding: 2 },
-                headStyles: { fillColor: [124, 58, 237] },
-                alternateRowStyles: { fillColor: [249, 250, 251] }
+                head: [headers],
+                body: rows,
+                startY: 28,
+                styles: {
+                    fontSize: 7,
+                    cellPadding: 2,
+                    font: 'helvetica',
+                    overflow: 'linebreak',
+                    valign: 'middle'
+                },
+                headStyles: {
+                    fillColor: [124, 58, 237],
+                    textColor: 255,
+                    fontStyle: 'bold',
+                    halign: 'center',
+                    valign: 'middle',
+                    fontSize: 7
+                },
+                alternateRowStyles: {
+                    fillColor: [249, 250, 251]
+                },
+                // Status column: color by value
+                didParseCell: function(data) {
+                    if (data.section === 'body' && data.column.index === 12) {
+                        const val = (data.cell.raw || '').toLowerCase();
+                        if (val === 'confirmed') {
+                            data.cell.styles.textColor = [5, 150, 105];
+                            data.cell.styles.fontStyle = 'bold';
+                        } else if (val === 'pending') {
+                            data.cell.styles.textColor = [180, 130, 0];
+                            data.cell.styles.fontStyle = 'bold';
+                        } else if (val === 'cancelled') {
+                            data.cell.styles.textColor = [220, 38, 38];
+                            data.cell.styles.fontStyle = 'bold';
+                        } else if (val === 'completed') {
+                            data.cell.styles.textColor = [37, 99, 235];
+                            data.cell.styles.fontStyle = 'bold';
+                        }
+                    }
+                    // Right-align currency columns
+                    if (data.section === 'body' && [8,9,10,11].includes(data.column.index)) {
+                        data.cell.styles.halign = 'right';
+                    }
+                },
+                columnStyles: {
+                    0:  { cellWidth: 28 },  // Guest Name
+                    1:  { cellWidth: 38 },  // Email
+                    2:  { cellWidth: 24 },  // Phone
+                    3:  { cellWidth: 26 },  // Event Name
+                    4:  { cellWidth: 20 },  // Event Date
+                    5:  { cellWidth: 22 },  // Time
+                    6:  { cellWidth: 12 },  // Guests
+                    7:  { cellWidth: 18 },  // Venue
+                    8:  { cellWidth: 20 },  // Total
+                    9:  { cellWidth: 20 },  // Paid
+                    10: { cellWidth: 20 },  // Refunded
+                    11: { cellWidth: 20 },  // Balance
+                    12: { cellWidth: 20 }   // Status
+                },
+                margin: { top: 28, left: 8, right: 8 },
+                tableWidth: 'auto'
             });
+
+            // Footer with page count
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(8);
+                doc.setTextColor(150, 150, 150);
+                doc.text(
+                    `Page ${i} of ${pageCount}  |  Villa Elena Special Events`,
+                    doc.internal.pageSize.getWidth() / 2,
+                    doc.internal.pageSize.getHeight() - 6,
+                    { align: 'center' }
+                );
+            }
 
             doc.save(`special_events_${new Date().toISOString().split('T')[0]}.pdf`);
         }
@@ -1249,9 +1400,9 @@
                     console.error('Invalid date:', dateString);
                     return '';
                 }
-                const year = date.getFullYear();
+                const year  = date.getFullYear();
                 const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
+                const day   = String(date.getDate()).padStart(2, '0');
                 return `${year}-${month}-${day}`;
             } catch (error) {
                 console.error('Error formatting date:', error);
@@ -1283,22 +1434,25 @@
         //             console.log('Edit special event response:', data);
         //             if (data.success) {
         //                 const booking = data.data;
-        //                 document.getElementById('edit_booking_id').value = booking.bookingID;
-        //                 document.getElementById('edit_guest_name').value = booking.guest_name;
-        //                 document.getElementById('edit_email').value = booking.email;
-        //                 document.getElementById('edit_phone').value = booking.phone;
-        //                 document.getElementById('edit_event_name').value = booking.event_name || '';
-        //                 document.getElementById('edit_booking_status').value = booking.booking_status;
-        //                 document.getElementById('edit_num_guests').value = booking.num_guests;
-        //                 document.getElementById('edit_total_price').value = parseFloat(booking.total_price).toFixed(2);
+        //                 document.getElementById('edit_booking_id').value          = booking.bookingID;
+        //                 document.getElementById('edit_guest_name').value          = booking.guest_name;
+        //                 document.getElementById('edit_email').value               = booking.email;
+        //                 document.getElementById('edit_phone').value               = booking.phone;
+        //                 document.getElementById('edit_event_name').value          = booking.event_name || '';
+        //                 document.getElementById('edit_booking_status').value      = booking.booking_status;
+        //                 document.getElementById('edit_num_guests').value          = booking.num_guests;
+        //                 document.getElementById('edit_total_price').value         = parseFloat(booking.total_price).toFixed(2);
         //                 document.getElementById('edit_special_requirements').value = booking.special_requirements || '';
-        //                 const eventDate = formatDateForInput(booking.checkin_date);
-        //                 document.getElementById('edit_checkin_date').value = eventDate;
-        //                 const startTime = formatTimeForInput(booking.event_start_time);
-        //                 const endTime = formatTimeForInput(booking.event_end_time);
-        //                 document.getElementById('edit_event_start_time').value = startTime;
-        //                 document.getElementById('edit_event_end_time').value = endTime;
-        //                 console.log('Formatted event details:', { date: eventDate, startTime: startTime, endTime: endTime });
+
+        //                 const eventDate  = formatDateForInput(booking.checkin_date);
+        //                 const startTime  = formatTimeForInput(booking.event_start_time);
+        //                 const endTime    = formatTimeForInput(booking.event_end_time);
+
+        //                 document.getElementById('edit_checkin_date').value        = eventDate;
+        //                 document.getElementById('edit_event_start_time').value    = startTime;
+        //                 document.getElementById('edit_event_end_time').value      = endTime;
+
+        //                 console.log('Formatted event details:', { date: eventDate, startTime, endTime });
         //                 openEditModal();
         //             } else {
         //                 Swal.fire({

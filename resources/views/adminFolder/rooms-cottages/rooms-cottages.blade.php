@@ -264,7 +264,7 @@
                             <option value="special" {{ request('type') == 'special' ? 'selected' : '' }}>Special Units</option>
                         </select>
                         <button type="button" onclick="clearFilters()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2.5 rounded-lg font-medium">
-                            Clear
+                            Refresh
                         </button>
                     </div>
                 </form>

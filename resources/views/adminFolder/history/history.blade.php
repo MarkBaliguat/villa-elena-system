@@ -7,8 +7,11 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" type="image/x-icon" href="{{ asset('images/sunflower1.png') }}">
+    {{-- jsPDF + AutoTable for PDF export --}}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    {{-- SheetJS for Excel (.xlsx) export --}}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <title>Booking History - Villa Elena</title>
     <style>
         /* ===== MODAL STYLES ===== */
@@ -50,14 +53,8 @@
         }
 
         @keyframes slideIn {
-            from {
-                transform: translateY(-20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
+            from { transform: translateY(-20px); opacity: 0; }
+            to   { transform: translateY(0);     opacity: 1; }
         }
 
         .modal-header {
@@ -84,7 +81,7 @@
         }
 
         .modal-close:hover {
-           color: black;
+            color: black;
             transform: scale(1.1);
         }
 
@@ -92,7 +89,6 @@
             padding: 1.5rem;
         }
 
-        /* Enhanced Section Headers */
         .section-header {
             font-size: 1rem;
             font-weight: 700;
@@ -110,7 +106,6 @@
             font-size: 1.125rem;
         }
 
-        /* Enhanced Info Grid */
         .info-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -146,7 +141,6 @@
             font-weight: 600;
         }
 
-        /* Enhanced Payment Summary */
         .payment-summary {
             background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
             border: 2px solid #93c5fd;
@@ -183,7 +177,6 @@
             font-weight: 600;
         }
 
-        /* Enhanced Cancellation Box */
         .cancellation-box {
             background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
             border: 2px solid #fca5a5;
@@ -192,7 +185,6 @@
             margin-bottom: 1.5rem;
         }
 
-        /* Enhanced Action Buttons */
         .modal-actions {
             display: flex;
             gap: 0.75rem;
@@ -266,22 +258,10 @@
             border: 1px solid #e5e7eb;
         }
 
-        .table-container::-webkit-scrollbar {
-            height: 8px;
-        }
-
-        .table-container::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-
-        .table-container::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-
-        .table-container::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
+        .table-container::-webkit-scrollbar { height: 8px; }
+        .table-container::-webkit-scrollbar-track { background: #f1f5f9; }
+        .table-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
         #historyTable {
             width: 100%;
@@ -324,10 +304,6 @@
             cursor: pointer;
         }
 
-        .history-card .card-header:hover {
-            background-color: #f9fafb;
-        }
-
         .history-card .card-body {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -335,10 +311,7 @@
             cursor: pointer;
         }
 
-        .history-card .card-item {
-            display: flex;
-            flex-direction: column;
-        }
+        .history-card .card-item { display: flex; flex-direction: column; }
 
         .history-card .card-label {
             font-size: 0.75rem;
@@ -352,25 +325,12 @@
             color: #111827;
         }
 
-        /* Table row hover - only on button */
-        .table-row {
-            transition: background-color 0.2s;
-        }
+        .table-row { transition: background-color 0.2s; }
+        .table-row:hover { background-color: #f9fafb !important; }
 
-        .table-row:hover {
-            background-color: #f9fafb !important;
-        }
+        .view-btn { cursor: pointer; transition: all 0.2s; }
+        .view-btn:hover { transform: scale(1.05); }
 
-        .view-btn {
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .view-btn:hover {
-            transform: scale(1.05);
-        }
-
-        /* Status badge */
         .status-badge {
             display: inline-flex;
             align-items: center;
@@ -381,7 +341,7 @@
             font-weight: 600;
         }
 
-        /* Pagination Styles */
+        /* Pagination */
         .pagination-info {
             display: flex;
             align-items: center;
@@ -390,11 +350,7 @@
             font-size: 0.875rem;
         }
 
-        .pagination-controls {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
+        .pagination-controls { display: flex; align-items: center; gap: 0.25rem; }
 
         .pagination-btn {
             min-width: 36px;
@@ -412,26 +368,10 @@
             font-weight: 500;
         }
 
-        .pagination-btn:hover:not(:disabled) {
-            background: #f3f4f6;
-            border-color: #9ca3af;
-        }
-
-        .pagination-btn.active {
-            background: #3b82f6;
-            border-color: #3b82f6;
-            color: white;
-        }
-
-        .pagination-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .pagination-ellipsis {
-            padding: 0 0.5rem;
-            color: #9ca3af;
-        }
+        .pagination-btn:hover:not(:disabled) { background: #f3f4f6; border-color: #9ca3af; }
+        .pagination-btn.active { background: #3b82f6; border-color: #3b82f6; color: white; }
+        .pagination-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .pagination-ellipsis { padding: 0 0.5rem; color: #9ca3af; }
 
         /* ===== RESPONSIVE FILTER BAR ===== */
         .filter-bar {
@@ -450,10 +390,7 @@
 
         .search-wrapper input {
             width: 100%;
-            padding-left: 2.5rem;
-            padding-right: 1rem;
-            padding-top: 0.625rem;
-            padding-bottom: 0.625rem;
+            padding: 0.625rem 1rem 0.625rem 2.5rem;
             border: 1px solid #d1d5db;
             border-radius: 0.5rem;
             font-size: 0.875rem;
@@ -467,75 +404,29 @@
             color: #9ca3af;
         }
 
-        .status-filter {
-            min-width: 140px;
-        }
+        .status-filter { min-width: 140px; }
+        .clear-btn { white-space: nowrap; }
 
-        .clear-btn {
-            white-space: nowrap;
-        }
+        .export-buttons { display: flex; gap: 0.5rem; }
+        .export-btn { white-space: nowrap; }
+        .export-btn .btn-text-full { display: inline; }
+        .export-btn .btn-text-short { display: none; }
 
-        .export-buttons {
-            display: flex;
-            gap: 0.5rem;
-           
-        }
-
-        .export-btn {
-            white-space: nowrap;
-        }
-
-        .export-btn .btn-text-full {
-            display: inline;
-        }
-
-        .export-btn .btn-text-short {
-            display: none;
-        }
-
-        /* Show short text on smaller screens */
         @media (max-width: 1280px) {
-            .export-btn .btn-text-full {
-                display: none;
-            }
-
-            .export-btn .btn-text-short {
-                display: inline;
-            }
+            .export-btn .btn-text-full { display: none; }
+            .export-btn .btn-text-short { display: inline; }
         }
 
         /* ===== RESPONSIVE BREAKPOINTS ===== */
         @media (max-width: 1024px) {
-            .table-container {
-                display: none;
-            }
+            .table-container { display: none; }
+            .history-card { display: block; }
 
-            .history-card {
-                display: block;
-            }
-
-            .filter-bar {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .search-wrapper {
-                width: 100%;
-            }
-
-            .status-filter,
-            .clear-btn {
-                width: 100%;
-            }
-
-            .export-buttons {
-                width: 100%;
-                margin-left: 0;
-            }
-
-            .export-btn {
-                flex: 1;
-            }
+            .filter-bar { flex-direction: column; align-items: stretch; }
+            .search-wrapper { width: 100%; }
+            .status-filter, .clear-btn { width: 100%; }
+            .export-buttons { width: 100%; margin-left: 0; }
+            .export-btn { flex: 1; }
         }
 
         @media (max-width: 768px) {
@@ -545,67 +436,23 @@
                 padding: 1rem !important;
             }
 
-            .history-card .card-body {
-                grid-template-columns: 1fr;
-            }
-
-            .modal-content {
-                width: 95%;
-                max-height: 85vh;
-            }
-
-            .modal-header {
-                padding: 1rem;
-            }
-
-            .modal-body {
-                padding: 1rem;
-            }
-
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .modal-actions {
-                flex-direction: column-reverse;
-            }
-
-            .btn-modal {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .payment-row {
-                flex-direction: column;
-                gap: 0.25rem;
-            }
+            .history-card .card-body { grid-template-columns: 1fr; }
+            .modal-content { width: 95%; max-height: 85vh; }
+            .modal-header, .modal-body { padding: 1rem; }
+            .info-grid { grid-template-columns: 1fr; }
+            .modal-actions { flex-direction: column-reverse; }
+            .btn-modal { width: 100%; justify-content: center; }
+            .payment-row { flex-direction: column; gap: 0.25rem; }
         }
 
         @media (max-width: 640px) {
-            #mainContent {
-                padding: 0.75rem !important;
-            }
-
-            .pagination-btn {
-                min-width: 32px;
-                height: 32px;
-                font-size: 0.75rem;
-            }
-
-            .pagination-info {
-                font-size: 0.75rem;
-            }
-
-            .export-buttons {
-                flex-direction: column;
-            }
-
-            .export-btn {
-                width: 100%;
-            }
+            #mainContent { padding: 0.75rem !important; }
+            .pagination-btn { min-width: 32px; height: 32px; font-size: 0.75rem; }
+            .pagination-info { font-size: 0.75rem; }
+            .export-buttons { flex-direction: column; }
+            .export-btn { width: 100%; }
         }
 
-        /* Enhanced badge colors */
         .badge-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -646,7 +493,6 @@
             {{-- Filters and Stats --}}
             <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
 
-                {{-- Top Row: Title --}}
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-xl font-semibold text-gray-800">History Records</h2>
                 </div>
@@ -669,14 +515,14 @@
                             <option value="cancelled">Cancelled</option>
                         </select>
                         <button type="button" onclick="clearFilters()" class="clear-btn bg-gray-600 hover:bg-gray-700 text-white px-6 py-2.5 rounded-lg font-medium text-sm">
-                            Clear
+                            Refresh
                         </button>
-                        {{-- Export Buttons --}}
+                        {{-- Export Buttons — FIXED: CSV replaced with Excel --}}
                         <div class="export-buttons">
-                            <button type="button" onclick="exportToCSV()" class="export-btn bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 transition text-sm">
-                                <i class="fas fa-file-csv"></i>
-                                <span class="btn-text-full">Export CSV</span>
-                                <span class="btn-text-short">CSV</span>
+                            <button type="button" onclick="exportToExcel()" class="export-btn bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 transition text-sm">
+                                <i class="fas fa-file-excel"></i>
+                                <span class="btn-text-full">Export Excel</span>
+                                <span class="btn-text-short">Excel</span>
                             </button>
                             <button type="button" onclick="printTable()" class="export-btn bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 transition text-sm">
                                 <i class="fas fa-print"></i>
@@ -810,16 +656,14 @@
         function loadHistory() {
             const tbody = document.getElementById('historyTableBody');
             const cardsContainer = document.getElementById('historyCardsContainer');
-            
-            const loadingRow = `
+
+            tbody.innerHTML = `
                 <tr>
                     <td colspan="6" class="text-center py-8 text-gray-500">
                         <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
                         <p>Loading history...</p>
                     </td>
                 </tr>`;
-
-            tbody.innerHTML = loadingRow;
             cardsContainer.innerHTML = `<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-gray-500"></i></div>`;
 
             fetch(`/admin/history/data`)
@@ -830,8 +674,7 @@
                         totalRecords = data.data.length;
                         applyFilters();
                     } else {
-                        const errorMsg = `<tr><td colspan="6" class="text-center py-8 text-red-500">Error loading history</td></tr>`;
-                        tbody.innerHTML = errorMsg;
+                        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-red-500">Error loading history</td></tr>`;
                         cardsContainer.innerHTML = `<div class="text-center py-8 text-red-500">Error loading history</div>`;
                     }
                 })
@@ -847,21 +690,17 @@
             const status = document.getElementById('statusFilter').value;
             const search = document.getElementById('searchInput').value.toLowerCase();
 
-            // Filter the data
             filteredHistory = allHistory.filter(record => {
                 const matchesStatus = status === 'all' || record.booking_status === status;
-                const matchesSearch = !search || 
+                const matchesSearch = !search ||
                     record.guest_name.toLowerCase().includes(search) ||
                     record.email.toLowerCase().includes(search) ||
                     record.phone.toLowerCase().includes(search);
-                
                 return matchesStatus && matchesSearch;
             });
 
-            // Update total records
             totalRecords = filteredHistory.length;
 
-            // Reset to page 1 if current page is beyond available pages
             const totalPages = Math.ceil(totalRecords / perPage);
             if (currentPage > totalPages && totalPages > 0) {
                 currentPage = totalPages;
@@ -869,12 +708,9 @@
                 currentPage = 1;
             }
 
-            // Get paginated data
             const startIndex = (currentPage - 1) * perPage;
-            const endIndex = startIndex + perPage;
-            const paginatedData = filteredHistory.slice(startIndex, endIndex);
+            const paginatedData = filteredHistory.slice(startIndex, startIndex + perPage);
 
-            // Display data
             displayHistory(paginatedData);
             displayHistoryCards(paginatedData);
             updatePagination();
@@ -884,7 +720,7 @@
         // Display history in table (Desktop)
         function displayHistory(history) {
             const tbody = document.getElementById('historyTableBody');
-            
+
             if (history.length === 0) {
                 tbody.innerHTML = `
                     <tr>
@@ -965,7 +801,7 @@
                         </div>
                         <div class="card-item">
                             <span class="card-label">Total Price</span>
-                            <span class="card-value font-semibold text-blue-600">₱${parseFloat(record.total_price).toFixed(2)}</span>
+                            <span class="card-value font-semibold text-blue-600">PHP ${parseFloat(record.total_price).toLocaleString('en-PH', {minimumFractionDigits:2})}</span>
                         </div>
                     </div>
                 </div>
@@ -976,7 +812,7 @@
         function viewDetails(bookingID) {
             const modal = document.getElementById('viewModal');
             const modalBody = document.getElementById('modalBody');
-            
+
             modal.classList.add('active');
             modalBody.innerHTML = `
                 <div class="text-center py-8">
@@ -988,8 +824,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        const record = data.data[0];
-                        displayModalContent(record);
+                        displayModalContent(data.data[0]);
                     } else {
                         modalBody.innerHTML = `<div class="text-center py-8 text-red-500">Error loading details</div>`;
                     }
@@ -1000,86 +835,48 @@
                 });
         }
 
-        // Display modal content with enhanced design
+        // Display modal content
         function displayModalContent(record) {
             const modalBody = document.getElementById('modalBody');
-            
+            const fmt = v => parseFloat(v || 0).toLocaleString('en-PH', {minimumFractionDigits:2, maximumFractionDigits:2});
+
             modalBody.innerHTML = `
                 <!-- Guest Information -->
                 <div class="mb-6">
-                    <div class="section-header">
-                        <i class="fas fa-user"></i>
-                        Guest Information
-                    </div>
+                    <div class="section-header"><i class="fas fa-user"></i> Guest Information</div>
                     <div class="info-grid">
-                        <div class="info-item">
-                            <div class="info-label">Name</div>
-                            <div class="info-value">${record.guest_name}</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Email</div>
-                            <div class="info-value">${record.email}</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Phone</div>
-                            <div class="info-value">${record.phone}</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Guests</div>
-                            <div class="info-value">${record.num_guests}</div>
-                        </div>
+                        <div class="info-item"><div class="info-label">Name</div><div class="info-value">${record.guest_name}</div></div>
+                        <div class="info-item"><div class="info-label">Email</div><div class="info-value">${record.email}</div></div>
+                        <div class="info-item"><div class="info-label">Phone</div><div class="info-value">${record.phone}</div></div>
+                        <div class="info-item"><div class="info-label">Guests</div><div class="info-value">${record.num_guests}</div></div>
                     </div>
                 </div>
 
                 <!-- Booking Details -->
                 <div class="mb-6">
-                    <div class="section-header">
-                        <i class="fas fa-calendar-check"></i>
-                        Booking Details
-                    </div>
+                    <div class="section-header"><i class="fas fa-calendar-check"></i> Booking Details</div>
                     <div class="info-grid">
-                        <div class="info-item">
-                            <div class="info-label">Booking ID</div>
-                            <div class="info-value"><span class="badge-primary">#${record.bookingID}</span></div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Type</div>
-                            <div class="info-value">${record.booking_type}</div>
-                        </div>
+                        <div class="info-item"><div class="info-label">Booking ID</div><div class="info-value"><span class="badge-primary">#${record.bookingID}</span></div></div>
+                        <div class="info-item"><div class="info-label">Type</div><div class="info-value">${record.booking_type}</div></div>
                         <div class="info-item">
                             <div class="info-label">Status</div>
                             <div class="info-value">
-                                <span class="status-badge ${getStatusColor(record.booking_status)}">
-                                    ${record.booking_status.toUpperCase()}
-                                </span>
+                                <span class="status-badge ${getStatusColor(record.booking_status)}">${record.booking_status.toUpperCase()}</span>
                             </div>
                         </div>
-                        <div class="info-item">
-                            <div class="info-label">Check-in</div>
-                            <div class="info-value">${new Date(record.checkin_date).toLocaleDateString()}</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Check-out</div>
-                            <div class="info-value">${record.checkout_date ? new Date(record.checkout_date).toLocaleDateString() : 'N/A'}</div>
-                        </div>
-                        ${record.event_type !== 'normal-booking' ? `
-                        <div class="info-item">
-                            <div class="info-label">Event</div>
-                            <div class="info-value">${record.event_type}</div>
-                        </div>
-                        ` : ''}
+                        <div class="info-item"><div class="info-label">Check-in</div><div class="info-value">${new Date(record.checkin_date).toLocaleDateString()}</div></div>
+                        <div class="info-item"><div class="info-label">Check-out</div><div class="info-value">${record.checkout_date ? new Date(record.checkout_date).toLocaleDateString() : 'N/A'}</div></div>
+                        ${record.event_type !== 'normal-booking' ? `<div class="info-item"><div class="info-label">Event</div><div class="info-value">${record.event_type}</div></div>` : ''}
                         ${record.gcash_payment_intent_id ? `
                         <div class="info-item" style="grid-column: 1 / -1;">
                             <div class="info-label">GCash Payment Intent ID</div>
                             <div class="info-value"><span class="info-highlight">${record.gcash_payment_intent_id}</span></div>
-                        </div>
-                        ` : ''}
+                        </div>` : ''}
                         ${record.payment_reference ? `
                         <div class="info-item" style="grid-column: 1 / -1;">
                             <div class="info-label">Payment Reference</div>
                             <div class="info-value"><span class="info-highlight">${record.payment_reference}</span></div>
-                        </div>
-                        ` : ''}
+                        </div>` : ''}
                         <div class="info-item" style="grid-column: 1 / -1;">
                             <div class="info-label">Units</div>
                             <div class="info-value">${record.units}</div>
@@ -1089,26 +886,23 @@
 
                 <!-- Payment Summary -->
                 <div class="mb-6">
-                    <div class="section-header">
-                        <i class="fas fa-money-bill-wave"></i>
-                        Payment Summary
-                    </div>
+                    <div class="section-header"><i class="fas fa-money-bill-wave"></i> Payment Summary</div>
                     <div class="payment-summary">
                         <div class="payment-row">
                             <span class="payment-label">Total Price</span>
-                            <span class="payment-value">₱${parseFloat(record.total_price).toFixed(2)}</span>
+                            <span class="payment-value">PHP ${fmt(record.total_price)}</span>
                         </div>
                         <div class="payment-row">
                             <span class="payment-label">Amount Paid</span>
-                            <span class="payment-value">₱${parseFloat(record.total_paid || 0).toFixed(2)}</span>
+                            <span class="payment-value">PHP ${fmt(record.total_paid)}</span>
                         </div>
                         <div class="payment-row">
                             <span class="payment-label">Amount Refunded</span>
-                            <span class="payment-value">₱${parseFloat(record.total_refunded || 0).toFixed(2)}</span>
+                            <span class="payment-value">PHP ${fmt(record.total_refunded)}</span>
                         </div>
                         <div class="payment-row">
                             <span class="payment-label">Net Paid</span>
-                            <span class="payment-value">₱${parseFloat(record.net_paid || 0).toFixed(2)}</span>
+                            <span class="payment-value">PHP ${fmt(record.net_paid)}</span>
                         </div>
                     </div>
                 </div>
@@ -1116,10 +910,7 @@
                 ${record.cancellation_reason ? `
                 <!-- Cancellation Details -->
                 <div class="mb-6">
-                    <div class="section-header">
-                        <i class="fas fa-ban"></i>
-                        Cancellation Details
-                    </div>
+                    <div class="section-header"><i class="fas fa-ban"></i> Cancellation Details</div>
                     <div class="cancellation-box">
                         <div class="info-item">
                             <div class="info-label">Reason</div>
@@ -1129,35 +920,25 @@
                         <div class="info-item" style="margin-top: 0.75rem;">
                             <div class="info-label">Cancelled On</div>
                             <div class="info-value">${new Date(record.cancelled_at).toLocaleString()}</div>
-                        </div>
-                        ` : ''}
+                        </div>` : ''}
                     </div>
-                </div>
-                ` : ''}
+                </div>` : ''}
 
                 <!-- Record Info -->
                 <div class="mb-4">
-                    <div class="section-header">
-                        <i class="fas fa-info-circle"></i>
-                        Record Information
-                    </div>
+                    <div class="section-header"><i class="fas fa-info-circle"></i> Record Information</div>
                     <div class="info-grid">
-                        <div class="info-item">
-                            <div class="info-label">Created</div>
-                            <div class="info-value">${new Date(record.created_at).toLocaleString()}</div>
-                        </div>
+                        <div class="info-item"><div class="info-label">Created</div><div class="info-value">${new Date(record.created_at).toLocaleString()}</div></div>
                     </div>
                 </div>
 
                 <!-- Actions -->
                 <div class="modal-actions">
                     <button onclick="printBookingDetails(${record.bookingID})" class="btn-modal btn-modal-print">
-                        <i class="fas fa-print"></i>
-                        Print Details
+                        <i class="fas fa-print"></i> Print Details
                     </button>
                     <button onclick="closeModal()" class="btn-modal btn-modal-close">
-                        <i class="fas fa-times"></i>
-                        Close
+                        <i class="fas fa-times"></i> Close
                     </button>
                 </div>
             `;
@@ -1165,16 +946,12 @@
 
         // Close modal
         function closeModal() {
-            const modal = document.getElementById('viewModal');
-            modal.classList.remove('active');
+            document.getElementById('viewModal').classList.remove('active');
         }
 
-        // Close modal when clicking outside
         window.onclick = function(event) {
             const modal = document.getElementById('viewModal');
-            if (event.target === modal) {
-                closeModal();
-            }
+            if (event.target === modal) closeModal();
         }
 
         // Update pagination
@@ -1182,64 +959,34 @@
             const totalPages = Math.ceil(totalRecords / perPage);
             const controls = document.getElementById('paginationControls');
 
-            if (totalPages <= 1) {
-                controls.innerHTML = '';
-                return;
-            }
+            if (totalPages <= 1) { controls.innerHTML = ''; return; }
 
-            let html = '';
-
-            // Previous button
-            html += `
-                <button class="pagination-btn" ${currentPage === 1 ? 'disabled' : ''} 
-                    onclick="goToPage(${currentPage - 1})">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-            `;
+            let html = `<button class="pagination-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})"><i class="fas fa-chevron-left"></i></button>`;
 
             const maxVisible = window.innerWidth < 640 ? 3 : 5;
             let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
             let end = Math.min(totalPages, start + maxVisible - 1);
             if (end - start + 1 < maxVisible) start = Math.max(1, end - maxVisible + 1);
 
-            // First page + ellipsis
             if (start > 1) {
                 html += `<button class="pagination-btn" onclick="goToPage(1)">1</button>`;
-                if (start > 2) {
-                    html += `<span class="pagination-ellipsis">...</span>`;
-                }
+                if (start > 2) html += `<span class="pagination-ellipsis">...</span>`;
             }
 
-            // Page numbers
             for (let i = start; i <= end; i++) {
-                html += `
-                    <button class="pagination-btn ${i === currentPage ? 'active' : ''}" 
-                        onclick="goToPage(${i})">
-                        ${i}
-                    </button>
-                `;
+                html += `<button class="pagination-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
             }
 
-            // Last page + ellipsis
             if (end < totalPages) {
-                if (end < totalPages - 1) {
-                    html += `<span class="pagination-ellipsis">...</span>`;
-                }
+                if (end < totalPages - 1) html += `<span class="pagination-ellipsis">...</span>`;
                 html += `<button class="pagination-btn" onclick="goToPage(${totalPages})">${totalPages}</button>`;
             }
 
-            // Next button
-            html += `
-                <button class="pagination-btn" ${currentPage === totalPages ? 'disabled' : ''} 
-                    onclick="goToPage(${currentPage + 1})">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-            `;
+            html += `<button class="pagination-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})"><i class="fas fa-chevron-right"></i></button>`;
 
             controls.innerHTML = html;
         }
 
-        // Go to specific page
         function goToPage(page) {
             currentPage = page;
             applyFilters();
@@ -1248,9 +995,9 @@
         // Update showing text
         function updateShowingText(showing) {
             const from = totalRecords === 0 ? 0 : ((currentPage - 1) * perPage) + 1;
-             const to = totalRecords === 0 ? 0 : Math.min(from + showing - 1, totalRecords);
+            const to   = totalRecords === 0 ? 0 : Math.min(from + showing - 1, totalRecords);
             document.getElementById('showingFrom').textContent = from;
-            document.getElementById('showingTo').textContent = to;
+            document.getElementById('showingTo').textContent   = to;
             document.getElementById('totalRecords').textContent = totalRecords;
         }
 
@@ -1263,76 +1010,134 @@
             }
         }
 
-        // Export to CSV
-        function exportToCSV() {
-            if (filteredHistory.length === 0) { alert('No data to export'); return; }
+        // ============================================
+        // EXPORT TO EXCEL (.xlsx) — FIXED
+        // Uses SheetJS; no ₱ symbol encoding issues.
+        // ============================================
+        function exportToExcel() {
+            if (filteredHistory.length === 0) {
+                alert('No data to export');
+                return;
+            }
 
-            const headers = ['Guest Name','Email','Phone','Booking Type','Status','Check-in','Check-out','Guests','Units','Total Price','Amount Paid','Amount Refunded','Net Paid','Event Type','GCash Intent ID','Payment Reference','Cancellation Reason','Created Date','Cancelled Date'];
-            const rows = filteredHistory.map(r => [
-                `"${r.guest_name}"`,`"${r.email}"`,`"${r.phone}"`,`"${r.booking_type}"`,`"${r.booking_status}"`,
-                `"${r.checkin_date}"`,`"${r.checkout_date || 'N/A'}"`,`"${r.num_guests}"`,`"${r.units}"`,
-                `"₱${parseFloat(r.total_price).toFixed(2)}"`,
-                `"₱${parseFloat(r.total_paid || 0).toFixed(2)}"`,
-                `"₱${parseFloat(r.total_refunded || 0).toFixed(2)}"`,
-                `"₱${parseFloat(r.net_paid || 0).toFixed(2)}"`,
-                `"${r.event_type}"`,
-                `"${r.gcash_payment_intent_id || 'N/A'}"`,
-                `"${r.payment_reference || 'N/A'}"`,
-                `"${r.cancellation_reason || 'N/A'}"`,
-                `"${new Date(r.created_at).toLocaleDateString()}"`,
-                `"${r.cancelled_at ? new Date(r.cancelled_at).toLocaleDateString() : 'N/A'}"`
-            ]);
+            const rows = filteredHistory.map(r => ({
+                'Guest Name':            r.guest_name,
+                'Email':                 r.email,
+                'Phone':                 r.phone,
+                'Booking Type':          r.booking_type,
+                'Status':                r.booking_status,
+                'Check-in':              r.checkin_date,
+                'Check-out':             r.checkout_date || 'N/A',
+                'No. of Guests':         r.num_guests,
+                'Units':                 r.units,
+                'Total Price (PHP)':     parseFloat(r.total_price)        || 0,
+                'Amount Paid (PHP)':     parseFloat(r.total_paid    || 0) || 0,
+                'Amount Refunded (PHP)': parseFloat(r.total_refunded|| 0) || 0,
+                'Net Paid (PHP)':        parseFloat(r.net_paid      || 0) || 0,
+                'Event Type':            r.event_type,
+                'GCash Intent ID':       r.gcash_payment_intent_id || 'N/A',
+                'Payment Reference':     r.payment_reference || 'N/A',
+                'Cancellation Reason':   r.cancellation_reason || 'N/A',
+                'Created Date':          new Date(r.created_at).toLocaleDateString(),
+                'Cancelled Date':        r.cancelled_at ? new Date(r.cancelled_at).toLocaleDateString() : 'N/A'
+            }));
 
-            const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.setAttribute('href', URL.createObjectURL(blob));
-            link.setAttribute('download', `booking_history_${new Date().toISOString().split('T')[0]}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            const ws = XLSX.utils.json_to_sheet(rows);
+
+            // Style header row (blue bg, white bold text)
+            const range = XLSX.utils.decode_range(ws['!ref']);
+            for (let C = range.s.c; C <= range.e.c; C++) {
+                const cellRef = XLSX.utils.encode_cell({ r: 0, c: C });
+                if (!ws[cellRef]) continue;
+                ws[cellRef].s = {
+                    font:      { bold: true, color: { rgb: 'FFFFFF' } },
+                    fill:      { patternType: 'solid', fgColor: { rgb: '3B82F6' } },
+                    alignment: { horizontal: 'center', wrapText: true }
+                };
+            }
+
+            // Format currency columns as numbers
+            const phpCols = [9, 10, 11, 12]; // Total, Paid, Refunded, Net
+            for (let R = 1; R <= range.e.r; R++) {
+                phpCols.forEach(C => {
+                    const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
+                    if (ws[cellRef]) {
+                        ws[cellRef].t = 'n';
+                        ws[cellRef].z = '#,##0.00';
+                    }
+                });
+            }
+
+            // Auto column widths
+            const colWidths = Object.keys(rows[0]).map(key => ({
+                wch: Math.max(key.length, ...rows.map(r => String(r[key] ?? '').length)) + 3
+            }));
+            ws['!cols'] = colWidths;
+            ws['!freeze'] = { xSplit: 0, ySplit: 1 };
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Booking History');
+            XLSX.writeFile(wb, `booking_history_${new Date().toISOString().split('T')[0]}.xlsx`, { cellStyles: true });
         }
 
-        // Print table
+        // ============================================
+        // PRINT TABLE — FIXED
+        // Uses "PHP" prefix; renders cleanly.
+        // ============================================
         function printTable() {
             if (filteredHistory.length === 0) { alert('No data to print'); return; }
 
+            const fmt = v => parseFloat(v || 0).toLocaleString('en-PH', {minimumFractionDigits:2});
             const printWindow = window.open('', '_blank');
             const printContent = `
                 <!DOCTYPE html><html><head>
                     <title>Booking History Report - Villa Elena</title>
+                    <meta charset="UTF-8">
                     <style>
                         body { font-family: Arial, sans-serif; margin: 20px; }
                         h1 { color: #2d3748; text-align: center; margin-bottom: 20px; }
                         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
                         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 11px; }
-                        th { background-color: #f8f9fa; font-weight: bold; }
-                        .status-completed { background-color: #d1fae5; color: #065f46; }
-                        .status-cancelled { background-color: #fecaca; color: #991b1b; }
-                        .print-date { text-align: right; margin-bottom: 20px; color: #6b7280; }
+                        th { background-color: #3b82f6; color: white; font-weight: bold; }
+                        tr:nth-child(even) { background-color: #f9fafb; }
+                        .status-completed { background-color: #d1fae5; color: #065f46; padding: 2px 8px; border-radius: 999px; }
+                        .status-cancelled { background-color: #fecaca; color: #991b1b; padding: 2px 8px; border-radius: 999px; }
+                        .print-date { text-align: right; margin-bottom: 20px; color: #6b7280; font-size: 11px; }
+                        .summary { margin-top: 20px; text-align: right; color: #374151; font-size: 12px; }
                     </style>
                 </head><body>
                     <h1>Booking History Report - Villa Elena</h1>
                     <div class="print-date">Printed on: ${new Date().toLocaleString()}</div>
-                    <table><thead><tr>
-                        <th>Guest Name</th><th>Email</th><th>Phone</th><th>Type</th><th>Status</th>
-                        <th>Check-in</th><th>Check-out</th><th>Guests</th><th>Units</th>
-                        <th>Total</th><th>Paid</th><th>Refunded</th><th>Net Paid</th>
-                    </tr></thead><tbody>
-                        ${filteredHistory.map(r => `<tr>
-                            <td>${r.guest_name}</td><td>${r.email}</td><td>${r.phone}</td>
-                            <td>${r.booking_type}</td>
-                            <td><span class="status-${r.booking_status}">${r.booking_status.toUpperCase()}</span></td>
-                            <td>${r.checkin_date}</td><td>${r.checkout_date || 'N/A'}</td>
-                            <td>${r.num_guests}</td><td>${r.units}</td>
-                            <td>₱${parseFloat(r.total_price).toFixed(2)}</td>
-                            <td>₱${parseFloat(r.total_paid || 0).toFixed(2)}</td>
-                            <td>₱${parseFloat(r.total_refunded || 0).toFixed(2)}</td>
-                            <td>₱${parseFloat(r.net_paid || 0).toFixed(2)}</td>
-                        </tr>`).join('')}
-                    </tbody></table>
-                    <div style="margin-top:20px;text-align:center;color:#6b7280;">Total Records: ${filteredHistory.length}</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Guest Name</th><th>Email</th><th>Phone</th>
+                                <th>Type</th><th>Status</th>
+                                <th>Check-in</th><th>Check-out</th>
+                                <th>Guests</th><th>Units</th>
+                                <th>Total (PHP)</th><th>Paid (PHP)</th>
+                                <th>Refunded (PHP)</th><th>Net Paid (PHP)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${filteredHistory.map(r => `<tr>
+                                <td>${r.guest_name}</td>
+                                <td>${r.email}</td>
+                                <td>${r.phone}</td>
+                                <td>${r.booking_type}</td>
+                                <td><span class="status-${r.booking_status.toLowerCase()}">${r.booking_status.toUpperCase()}</span></td>
+                                <td>${r.checkin_date}</td>
+                                <td>${r.checkout_date || 'N/A'}</td>
+                                <td>${r.num_guests}</td>
+                                <td>${r.units}</td>
+                                <td>${fmt(r.total_price)}</td>
+                                <td>${fmt(r.total_paid)}</td>
+                                <td>${fmt(r.total_refunded)}</td>
+                                <td>${fmt(r.net_paid)}</td>
+                            </tr>`).join('')}
+                        </tbody>
+                    </table>
+                    <div class="summary">Total Records: <strong>${filteredHistory.length}</strong></div>
                 </body></html>`;
 
             printWindow.document.write(printContent);
@@ -1341,46 +1146,125 @@
             setTimeout(() => { printWindow.print(); printWindow.close(); }, 500);
         }
 
-        // Export to PDF
+        // ============================================
+        // EXPORT TO PDF — FIXED
+        // Removed ₱ symbol; uses "PHP" in headers.
+        // Landscape orientation for more columns.
+        // ============================================
         function exportToPDF() {
             if (filteredHistory.length === 0) { alert('No data to export'); return; }
 
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+            const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
 
             doc.setFontSize(16);
+            doc.setTextColor(40, 40, 40);
             doc.text('Booking History Report - Villa Elena', 14, 15);
-            doc.setFontSize(10);
+            doc.setFontSize(9);
             doc.setTextColor(100, 100, 100);
-            doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 22);
+            doc.text(`Generated on: ${new Date().toLocaleString('en-PH')}`, 14, 22);
 
-            const headers = ['Guest','Email','Phone','Type','Status','Check-in','Check-out','Guests','Units','Total','Paid','Refunded','Net'];
+            const headers = [
+                'Guest Name', 'Email', 'Phone', 'Type', 'Status',
+                'Check-in', 'Check-out', 'Guests', 'Units',
+                'Total\n(PHP)', 'Paid\n(PHP)', 'Refunded\n(PHP)', 'Net Paid\n(PHP)'
+            ];
+
+            const fmt = v => parseFloat(v || 0).toLocaleString('en-PH', {minimumFractionDigits:2, maximumFractionDigits:2});
+
             const rows = filteredHistory.map(r => [
-                r.guest_name, r.email, r.phone, r.booking_type, r.booking_status.toUpperCase(),
-                r.checkin_date, r.checkout_date || 'N/A', r.num_guests, r.units,
-                `₱${parseFloat(r.total_price).toFixed(2)}`,
-                `₱${parseFloat(r.total_paid || 0).toFixed(2)}`,
-                `₱${parseFloat(r.total_refunded || 0).toFixed(2)}`,
-                `₱${parseFloat(r.net_paid || 0).toFixed(2)}`
+                r.guest_name, r.email, r.phone, r.booking_type,
+                r.booking_status.toUpperCase(),
+                r.checkin_date, r.checkout_date || 'N/A',
+                String(r.num_guests), r.units,
+                fmt(r.total_price),
+                fmt(r.total_paid),
+                fmt(r.total_refunded),
+                fmt(r.net_paid)
             ]);
 
             doc.autoTable({
-                head: [headers], body: rows, startY: 30,
-                styles: { fontSize: 7, cellPadding: 2 },
-                headStyles: { fillColor: [59, 130, 246] },
-                alternateRowStyles: { fillColor: [249, 250, 251] }
+                head: [headers],
+                body: rows,
+                startY: 28,
+                styles: {
+                    fontSize: 7,
+                    cellPadding: 2,
+                    font: 'helvetica',
+                    overflow: 'linebreak',
+                    valign: 'middle'
+                },
+                headStyles: {
+                    fillColor: [59, 130, 246],
+                    textColor: 255,
+                    fontStyle: 'bold',
+                    halign: 'center',
+                    valign: 'middle',
+                    fontSize: 7
+                },
+                alternateRowStyles: { fillColor: [249, 250, 251] },
+                didParseCell: function(data) {
+                    // Color-code status column
+                    if (data.section === 'body' && data.column.index === 4) {
+                        const val = (data.cell.raw || '').toLowerCase();
+                        if (val === 'completed') {
+                            data.cell.styles.textColor = [5, 150, 105];
+                            data.cell.styles.fontStyle = 'bold';
+                        } else if (val === 'cancelled') {
+                            data.cell.styles.textColor = [220, 38, 38];
+                            data.cell.styles.fontStyle = 'bold';
+                        }
+                    }
+                    // Right-align currency columns
+                    if (data.section === 'body' && [9, 10, 11, 12].includes(data.column.index)) {
+                        data.cell.styles.halign = 'right';
+                    }
+                },
+                columnStyles: {
+                    0:  { cellWidth: 28 },  // Guest Name
+                    1:  { cellWidth: 36 },  // Email
+                    2:  { cellWidth: 22 },  // Phone
+                    3:  { cellWidth: 22 },  // Type
+                    4:  { cellWidth: 20 },  // Status
+                    5:  { cellWidth: 20 },  // Check-in
+                    6:  { cellWidth: 20 },  // Check-out
+                    7:  { cellWidth: 12 },  // Guests
+                    8:  { cellWidth: 18 },  // Units
+                    9:  { cellWidth: 20 },  // Total
+                    10: { cellWidth: 18 },  // Paid
+                    11: { cellWidth: 18 },  // Refunded
+                    12: { cellWidth: 20 }   // Net Paid
+                },
+                margin: { top: 28, left: 8, right: 8 },
+                tableWidth: 'auto'
             });
+
+            // Footer with page count
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(8);
+                doc.setTextColor(150, 150, 150);
+                doc.text(
+                    `Page ${i} of ${pageCount}  |  Villa Elena Booking History`,
+                    doc.internal.pageSize.getWidth() / 2,
+                    doc.internal.pageSize.getHeight() - 6,
+                    { align: 'center' }
+                );
+            }
 
             doc.save(`booking_history_${new Date().toISOString().split('T')[0]}.pdf`);
         }
 
-        // Print booking details
+        // ============================================
+        // PRINT BOOKING DETAILS — FIXED
+        // Uses "PHP" prefix in payment section.
+        // ============================================
         function printBookingDetails(bookingID) {
             const record = allHistory.find(r => r.bookingID === bookingID);
-            if (!record) {
-                alert('Booking details not found');
-                return;
-            }
+            if (!record) { alert('Booking details not found'); return; }
+
+            const fmt = v => parseFloat(v || 0).toLocaleString('en-PH', {minimumFractionDigits:2});
 
             const printWindow = window.open('', '_blank');
             const printContent = `
@@ -1388,6 +1272,7 @@
                 <html>
                 <head>
                     <title>Booking Details - #${record.bookingID}</title>
+                    <meta charset="UTF-8">
                     <style>
                         * { margin: 0; padding: 0; box-sizing: border-box; }
                         body { font-family: Arial, sans-serif; padding: 30px; color: #1f2937; }
@@ -1417,88 +1302,44 @@
                     <div class="section">
                         <div class="section-title">Guest Information</div>
                         <div class="info-grid">
-                            <div class="info-item">
-                                <div class="info-label">Name</div>
-                                <div class="info-value">${record.guest_name}</div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-label">Email</div>
-                                <div class="info-value">${record.email}</div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-label">Phone</div>
-                                <div class="info-value">${record.phone}</div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-label">Guests</div>
-                                <div class="info-value">${record.num_guests}</div>
-                            </div>
+                            <div class="info-item"><div class="info-label">Name</div><div class="info-value">${record.guest_name}</div></div>
+                            <div class="info-item"><div class="info-label">Email</div><div class="info-value">${record.email}</div></div>
+                            <div class="info-item"><div class="info-label">Phone</div><div class="info-value">${record.phone}</div></div>
+                            <div class="info-item"><div class="info-label">Guests</div><div class="info-value">${record.num_guests}</div></div>
                         </div>
                     </div>
 
                     <div class="section">
                         <div class="section-title">Booking Information</div>
                         <div class="info-grid">
-                            <div class="info-item">
-                                <div class="info-label">Type</div>
-                                <div class="info-value">${record.booking_type}</div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-label">Status</div>
-                                <div class="info-value">${record.booking_status.toUpperCase()}</div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-label">Check-in</div>
-                                <div class="info-value">${new Date(record.checkin_date).toLocaleDateString()}</div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-label">Check-out</div>
-                                <div class="info-value">${record.checkout_date ? new Date(record.checkout_date).toLocaleDateString() : 'N/A'}</div>
-                            </div>
+                            <div class="info-item"><div class="info-label">Type</div><div class="info-value">${record.booking_type}</div></div>
+                            <div class="info-item"><div class="info-label">Status</div><div class="info-value">${record.booking_status.toUpperCase()}</div></div>
+                            <div class="info-item"><div class="info-label">Check-in</div><div class="info-value">${new Date(record.checkin_date).toLocaleDateString()}</div></div>
+                            <div class="info-item"><div class="info-label">Check-out</div><div class="info-value">${record.checkout_date ? new Date(record.checkout_date).toLocaleDateString() : 'N/A'}</div></div>
                         </div>
                         ${record.gcash_payment_intent_id ? `
-                        <div style="margin-top: 10px;">
-                            <div class="info-item">
-                                <div class="info-label">GCash Payment Intent ID</div>
-                                <div class="info-value">${record.gcash_payment_intent_id}</div>
-                            </div>
-                        </div>
-                        ` : ''}
+                        <div style="margin-top: 10px;"><div class="info-item">
+                            <div class="info-label">GCash Payment Intent ID</div>
+                            <div class="info-value">${record.gcash_payment_intent_id}</div>
+                        </div></div>` : ''}
                         ${record.payment_reference ? `
-                        <div style="margin-top: 10px;">
-                            <div class="info-item">
-                                <div class="info-label">Payment Reference</div>
-                                <div class="info-value">${record.payment_reference}</div>
-                            </div>
-                        </div>
-                        ` : ''}
-                        <div style="margin-top: 10px;">
-                            <div class="info-item">
-                                <div class="info-label">Units</div>
-                                <div class="info-value">${record.units}</div>
-                            </div>
-                        </div>
+                        <div style="margin-top: 10px;"><div class="info-item">
+                            <div class="info-label">Payment Reference</div>
+                            <div class="info-value">${record.payment_reference}</div>
+                        </div></div>` : ''}
+                        <div style="margin-top: 10px;"><div class="info-item">
+                            <div class="info-label">Units</div>
+                            <div class="info-value">${record.units}</div>
+                        </div></div>
                     </div>
 
                     <div class="section">
-                        <div class="section-title">Payment Summary</div>
+                        <div class="section-title">Payment Summary (PHP)</div>
                         <div class="payment-box">
-                            <div class="payment-row">
-                                <span>Total Price:</span>
-                                <span>₱${parseFloat(record.total_price).toFixed(2)}</span>
-                            </div>
-                            <div class="payment-row">
-                                <span>Amount Paid:</span>
-                                <span>₱${parseFloat(record.total_paid || 0).toFixed(2)}</span>
-                            </div>
-                            <div class="payment-row">
-                                <span>Amount Refunded:</span>
-                                <span>₱${parseFloat(record.total_refunded || 0).toFixed(2)}</span>
-                            </div>
-                            <div class="payment-row">
-                                <span>Net Paid:</span>
-                                <span>₱${parseFloat(record.net_paid || 0).toFixed(2)}</span>
-                            </div>
+                            <div class="payment-row"><span>Total Price:</span><span>${fmt(record.total_price)}</span></div>
+                            <div class="payment-row"><span>Amount Paid:</span><span>${fmt(record.total_paid)}</span></div>
+                            <div class="payment-row"><span>Amount Refunded:</span><span>${fmt(record.total_refunded)}</span></div>
+                            <div class="payment-row"><span>Net Paid:</span><span>${fmt(record.net_paid)}</span></div>
                         </div>
                     </div>
 
@@ -1509,16 +1350,14 @@
                             <div class="info-label">Reason</div>
                             <div class="info-value">${record.cancellation_reason}</div>
                         </div>
-                    </div>
-                    ` : ''}
+                    </div>` : ''}
 
                     <div class="footer">
                         <p><strong>Villa Elena Resort</strong></p>
                         <p>Thank you for choosing our resort!</p>
                     </div>
                 </body>
-                </html>
-            `;
+                </html>`;
 
             printWindow.document.write(printContent);
             printWindow.document.close();
@@ -1540,12 +1379,10 @@
             }, 500);
         });
 
-        // Repaginate on resize
         window.addEventListener('resize', () => {
             if (totalRecords > 0) updatePagination();
         });
 
-        // Load on page load
         document.addEventListener('DOMContentLoaded', function() {
             console.log('=== HISTORY PAGE LOADED ===');
             loadHistory();

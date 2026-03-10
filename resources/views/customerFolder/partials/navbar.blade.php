@@ -19,12 +19,14 @@
         <!-- Right Section - Cart + User -->
         <div class="flex items-center space-x-2 sm:space-x-4">
             <!-- Cart Icon -->
+            @auth
             <a href="{{ route('cart') }}" class="cart-icon relative hover-effect" id="cart-icon" aria-label="Cart">
                 <i class="fas fa-shopping-cart text-lg sm:text-xl cart-icon-img"></i>
                 <span id="navbar-cart-badge" class="absolute -top-2 -right-2 bg-yellow-500 text-black text-xs rounded-full h-5 w-5 flex items-center justify-center hidden transition-all duration-300">
                     0
                 </span>
             </a>
+            @endauth
 
             <!-- User Authentication Section -->
             @auth
@@ -104,11 +106,11 @@
         <a href="{{ route('roomBooking') }}" class="nav-link hover-effect">
         <i class="fas fa-calendar-check mr-2"></i>Book Now
     </a>
+        <a href="{{ url('/#gallery') }}" class="nav-link hover-effect">
+        <i class="fas fa-images mr-2"></i>Gallery
+    </a>
     <a href="{{ url('/#activities') }}" class="nav-link hover-effect">
         <i class="fas fa-hiking mr-2"></i>Activities
-    </a>
-    <a href="{{ url('/#gallery') }}" class="nav-link hover-effect">
-        <i class="fas fa-images mr-2"></i>Gallery
     </a>
     <a href="{{ url('/#contact') }}" class="nav-link hover-effect">
         <i class="fas fa-phone-alt mr-2"></i>Contact Us
