@@ -10,7 +10,7 @@
     <link rel="icon" type="image/x-icon" href="{{ asset('images/sunflower1.png') }}">
     <title>Rooms & Cottages - Villa Elena</title>
     <style>
-        /* ===== SIDEBAR RESPONSIVE LAYOUT (same pattern as history page) ===== */
+        /* ===== SIDEBAR RESPONSIVE LAYOUT ===== */
         .page-container {
             display: flex;
             min-height: 100vh;
@@ -33,7 +33,6 @@
             width: calc(100% - 16rem);
         }
 
-        /* Tablet */
         @media (max-width: 768px) {
             #mainContent {
                 margin-left: 5.5rem !important;
@@ -42,7 +41,6 @@
             }
         }
 
-        /* Extra Small */
         @media (max-width: 640px) {
             #mainContent {
                 padding: 0.75rem !important;
@@ -194,6 +192,23 @@
                 order: -1;
             }
         }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state-icon-wrap {
+            width: 80px;
+            height: 80px;
+            background-color: #f3f4f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem auto;
+        }
+
+        .empty-state-icon-wrap i {
+            font-size: 2rem;
+            color: #9ca3af;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -202,7 +217,7 @@
         @include('adminFolder.partials.sidebar')
         @include('adminFolder.rooms-cottages.modals.add-edit-modal')
         @include('adminFolder.rooms-cottages.modals.block-modal')
-        
+
         {{-- Main Content --}}
         <div class="p-8" id="mainContent">
             {{-- Header Section --}}
@@ -243,11 +258,11 @@
                     <div class="filter-bar mb-6">
                         <div class="search-wrapper">
                             <i class="fas fa-search search-icon absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                            <input 
-                                type="text" 
+                            <input
+                                type="text"
                                 name="search"
                                 id="searchInput"
-                                placeholder="Search rooms or cottages..." 
+                                placeholder="Search rooms or cottages..."
                                 value="{{ request('search') }}"
                                 class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             >
@@ -286,7 +301,7 @@
                 <div id="unitsContainer">
                     {{-- Units Grid --}}
                     <div id="unitsGrid" class="units-grid">
-                        @foreach($units as $unit)
+                        @forelse($units as $unit)
                         <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition relative unit-card" data-unit-id="{{ $unit->unitID }}">
                             @if(auth()->user()->role === 'manager')
                             <div class="checkbox-container">
@@ -318,7 +333,7 @@
                             <div class="p-4">
                                 <div class="flex justify-between items-start mb-2">
                                     <h3 class="text-lg font-bold text-gray-800">{{ $unit->unitName }}</h3>
-                                    <span class="px-3 py-1 text-xs font-semibold rounded-full 
+                                    <span class="px-3 py-1 text-xs font-semibold rounded-full
                                         {{ $unit->unitStatus == 'available' ? 'bg-green-100 text-green-700' : '' }}
                                         {{ $unit->unitStatus == 'blocked' ? 'bg-red-100 text-red-700' : '' }}">
                                         {{ ucfirst($unit->unitStatus) }}
@@ -370,7 +385,22 @@
                                 @endif
                             </div>
                         </div>
-                        @endforeach
+
+                        @empty
+                        {{-- Empty State: No units in database at all --}}
+                        <div class="col-span-full py-16 text-center" id="emptyStateDB">
+                            <div class="empty-state-icon-wrap">
+                                <i class="fas fa-building"></i>
+                            </div>
+                            <p class="text-base font-semibold text-gray-500">No units yet</p>
+                            <p class="text-sm text-gray-400 mt-1">Start by adding your first room or cottage</p>
+                            @if(auth()->user()->role === 'manager')
+                            <button onclick="openAddModal()" class="mt-4 inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium transition">
+                                <i class="fas fa-plus"></i> Add Unit
+                            </button>
+                            @endif
+                        </div>
+                        @endforelse
                     </div>
 
                     {{-- Loading Indicator --}}
@@ -381,16 +411,20 @@
                         </div>
                     </div>
 
-                    {{-- No Results Message --}}
-                    <div id="noResults" class="hidden text-center py-12">
-                        <div class="text-gray-500">
-                            <i class="fas fa-search text-4xl mb-4"></i>
-                            <p class="text-lg">No units found matching your criteria</p>
-                            <p class="text-sm mt-2">Try adjusting your search or filters</p>
+                    {{-- No Results Message (shown when filter/search returns nothing) --}}
+                    <div id="noResults" class="hidden text-center py-16">
+                        <div class="empty-state-icon-wrap">
+                            <i class="fas fa-magnifying-glass"></i>
                         </div>
+                        <p class="text-base font-semibold text-gray-500">No units found</p>
+                        <p class="text-sm text-gray-400 mt-1">Try adjusting your search or filters</p>
+                        <button onclick="clearFilters()" class="mt-4 text-blue-500 hover:text-blue-700 text-sm font-medium underline underline-offset-2">
+                            Clear filters
+                        </button>
                     </div>
 
                     {{-- Pagination --}}
+                    @if($units->isNotEmpty())
                     <div id="paginationSection" class="flex justify-between items-center">
                         <div class="text-sm text-gray-600">
                             Showing {{ $units->firstItem() }} to {{ $units->lastItem() }} of {{ $units->total() }} results
@@ -399,12 +433,13 @@
                             {{ $units->links() }}
                         </div>
                     </div>
+                    @endif
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- ✅ SHOW SUCCESS/ERROR MESSAGES --}}
+    {{-- SUCCESS/ERROR MESSAGES --}}
     @if(session('success'))
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -431,7 +466,7 @@
     </script>
     @endif
 
-  <script>
+    <script>
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
 
         // ============================================
@@ -456,9 +491,6 @@
                 mainContent.classList.add('ml-24');
             }
         });
-        // ============================================
-        // END SIDEBAR RESPONSIVE
-        // ============================================
 
         // ============================================
         // UNIT SELECTION FUNCTIONS
@@ -469,7 +501,7 @@
         function initializeUnitSelection() {
             selectedUnits.clear();
             updateSelection();
-            
+
             document.querySelectorAll('.unit-card').forEach(card => {
                 setupUnitCardSelection(card);
             });
@@ -477,39 +509,39 @@
 
         function setupUnitCardSelection(card) {
             const checkbox = card.querySelector('.unit-checkbox');
-            
+
             const newCard = card.cloneNode(true);
             card.parentNode.replaceChild(newCard, card);
-            
+
             const updatedCheckbox = newCard.querySelector('.unit-checkbox');
-            
+
             newCard.addEventListener('click', function(e) {
                 if (e.target.closest('button') || e.target.closest('form') || e.target.closest('a')) {
                     return;
                 }
-                
+
                 const unitId = this.getAttribute('data-unit-id');
-                
+
                 if (selectedUnits.has(unitId)) {
                     deselectUnit(unitId, this, updatedCheckbox);
                 } else {
                     selectUnit(unitId, this, updatedCheckbox);
                 }
-                
+
                 updateSelection();
             });
-            
+
             if (updatedCheckbox) {
                 updatedCheckbox.addEventListener('click', function(e) {
                     e.stopPropagation();
                     const unitId = newCard.getAttribute('data-unit-id');
-                    
+
                     if (this.checked) {
                         selectUnit(unitId, newCard, this);
                     } else {
                         deselectUnit(unitId, newCard, this);
                     }
-                    
+
                     updateSelection();
                 });
             }
@@ -518,7 +550,7 @@
         function selectUnit(unitId, card, checkbox) {
             selectedUnits.add(unitId);
             card.classList.add('selected-unit');
-            
+
             if (checkbox) {
                 checkbox.checked = true;
                 checkbox.classList.remove('hidden');
@@ -528,7 +560,7 @@
         function deselectUnit(unitId, card, checkbox) {
             selectedUnits.delete(unitId);
             card.classList.remove('selected-unit');
-            
+
             if (checkbox) {
                 checkbox.checked = false;
                 checkbox.classList.add('hidden');
@@ -540,11 +572,11 @@
             const selectionInfo = document.getElementById('selectionInfo');
             const blockDatesBtn = document.getElementById('blockDatesBtn');
             const selectedCountElement = document.getElementById('selectedCount');
-            
+
             if (selectedCountElement) {
                 selectedCountElement.textContent = selectedCount;
             }
-            
+
             if (selectionInfo) {
                 if (selectedCount > 0) {
                     selectionInfo.classList.remove('hidden');
@@ -552,13 +584,13 @@
                     selectionInfo.classList.add('hidden');
                 }
             }
-            
+
             if (blockDatesBtn) {
                 blockDatesBtn.disabled = selectedCount === 0;
-                
+
                 if (selectedCount > 0) {
                     const allBlocked = checkIfAllSelectedUnitsAreBlocked();
-                    
+
                     if (allBlocked) {
                         blockDatesBtn.innerHTML = '<i class="far fa-calendar-check"></i> Unblock Units';
                         blockDatesBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'disabled:bg-red-400');
@@ -571,12 +603,12 @@
                 }
             }
         }
-        
+
         function checkIfAllSelectedUnitsAreBlocked() {
             if (selectedUnits.size === 0) return false;
-            
+
             let allBlocked = true;
-            
+
             selectedUnits.forEach(unitId => {
                 const card = document.querySelector(`.unit-card[data-unit-id="${unitId}"]`);
                 if (card) {
@@ -589,22 +621,22 @@
                     }
                 }
             });
-            
+
             return allBlocked;
         }
 
         function clearSelection() {
             selectedUnits.clear();
-            
+
             document.querySelectorAll('.unit-checkbox').forEach(checkbox => {
                 checkbox.checked = false;
                 checkbox.classList.add('hidden');
             });
-            
+
             document.querySelectorAll('.unit-card').forEach(card => {
                 card.classList.remove('selected-unit');
             });
-            
+
             updateSelection();
         }
 
@@ -620,26 +652,26 @@
             const unitsGrid = document.getElementById('unitsGrid');
             const paginationSection = document.getElementById('paginationSection');
             const noResults = document.getElementById('noResults');
-            
+
             if (loadingIndicator) loadingIndicator.classList.remove('hidden');
             if (unitsGrid) unitsGrid.classList.add('hidden');
             if (paginationSection) paginationSection.classList.add('hidden');
             if (noResults) noResults.classList.add('hidden');
-            
+
             const searchContainer = document.querySelector('.search-wrapper');
             if (searchContainer) {
                 searchContainer.classList.add('search-loading');
             }
-            
+
             const formData = new FormData(searchForm);
             const params = new URLSearchParams();
-            
+
             for (let [key, value] of formData) {
                 if (value) {
                     params.append(key, value);
                 }
             }
-            
+
             fetch(searchForm.action + '?' + params.toString(), {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
@@ -668,26 +700,31 @@
         function updateUnitsDisplay(html) {
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = html;
-            
+
             const newUnitsContainer = tempDiv.querySelector('#unitsContainer');
-            
+
             if (newUnitsContainer) {
                 const currentContainer = document.getElementById('unitsContainer');
                 if (currentContainer) {
                     currentContainer.innerHTML = newUnitsContainer.innerHTML;
                 }
-                
+
                 initializeUnitSelection();
-                
+
                 const unitsGrid = document.getElementById('unitsGrid');
                 const noResults = document.getElementById('noResults');
-                
+                const emptyStateDB = document.getElementById('emptyStateDB');
+
                 if (unitsGrid && noResults) {
-                    const hasResults = unitsGrid.children.length > 0;
-                    
+                    // Count only actual unit-cards (not the empty state div)
+                    const unitCards = unitsGrid.querySelectorAll('.unit-card');
+                    const hasResults = unitCards.length > 0;
+                    const hasEmptyStateDB = !!emptyStateDB;
+
                     if (hasResults) {
                         noResults.classList.add('hidden');
-                    } else {
+                    } else if (!hasEmptyStateDB) {
+                        // No results from filter/search (not an empty DB)
                         noResults.classList.remove('hidden');
                     }
                 }
@@ -702,10 +739,9 @@
         }
 
         // ============================================
-        // ✅ IMPROVED DELETE CONFIRMATION WITH VALIDATION
+        // DELETE CONFIRMATION WITH VALIDATION
         // ============================================
         async function confirmDelete(unitId, unitName) {
-            // First, check if unit has active bookings
             try {
                 const checkResponse = await fetch(`/admin/units/${unitId}/booking-status`, {
                     method: 'GET',
@@ -714,29 +750,28 @@
                         'Accept': 'application/json'
                     }
                 });
-                
+
                 const checkData = await checkResponse.json();
-                
+
                 if (!checkData.can_delete) {
-                    // Show detailed error about why it can't be deleted
                     let bookingDetails = '';
-                    
+
                     if (checkData.active_bookings_count > 0) {
                         bookingDetails = `<div class="text-left mt-4 bg-red-50 p-3 rounded">
                             <p class="font-semibold text-red-800 mb-2">Active Bookings Found:</p>
                             <ul class="text-sm text-red-700 space-y-1">`;
-                        
+
                         checkData.bookings.forEach(booking => {
-                            const dateInfo = booking.check_in 
+                            const dateInfo = booking.check_in
                                 ? `${booking.check_in} to ${booking.check_out}`
                                 : `${booking.event_start} to ${booking.event_end}`;
-                            
+
                             bookingDetails += `<li>• ${booking.status.toUpperCase()} - ${booking.guest_name} (${dateInfo})</li>`;
                         });
-                        
+
                         bookingDetails += `</ul></div>`;
                     }
-                    
+
                     await Swal.fire({
                         icon: 'error',
                         title: 'Cannot Delete Unit',
@@ -749,16 +784,14 @@
                         confirmButtonColor: '#3b82f6',
                         confirmButtonText: 'Understood'
                     });
-                    
+
                     return;
                 }
-                
+
             } catch (error) {
                 console.error('Error checking booking status:', error);
-                // Continue with delete if check fails (fallback to server-side validation)
             }
-            
-            // Proceed with delete confirmation
+
             const result = await Swal.fire({
                 icon: 'warning',
                 title: 'Delete Unit?',
@@ -775,7 +808,6 @@
             });
 
             if (result.isConfirmed) {
-                // Show loading
                 Swal.fire({
                     title: 'Deleting...',
                     text: 'Please wait',
@@ -784,22 +816,21 @@
                         Swal.showLoading();
                     }
                 });
-                
-                // Create and submit form
+
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = `/admin/units/${unitId}`;
-                
+
                 const csrfInput = document.createElement('input');
                 csrfInput.type = 'hidden';
                 csrfInput.name = '_token';
                 csrfInput.value = csrfToken;
-                
+
                 const methodInput = document.createElement('input');
                 methodInput.type = 'hidden';
                 methodInput.name = '_method';
                 methodInput.value = 'DELETE';
-                
+
                 form.appendChild(csrfInput);
                 form.appendChild(methodInput);
                 document.body.appendChild(form);
@@ -816,10 +847,10 @@
             if (editBtn) {
                 e.preventDefault();
                 e.stopPropagation();
-                
+
                 const unitId = editBtn.getAttribute('data-unit-id');
                 console.log('Edit button clicked for unit:', unitId);
-                
+
                 if (unitId) {
                     openEditModal(unitId);
                 } else {
@@ -834,9 +865,9 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             document.addEventListener('click', handleEditButtonClick);
-            
+
             initializeUnitSelection();
-            
+
             const searchInput = document.getElementById('searchInput');
             if (searchInput) {
                 searchInput.addEventListener('input', function() {
@@ -844,12 +875,12 @@
                     searchTimeout = setTimeout(performSearch, 500);
                 });
             }
-            
+
             const statusFilter = document.getElementById('statusFilter');
             if (statusFilter) {
                 statusFilter.addEventListener('change', performSearch);
             }
-            
+
             const typeFilter = document.getElementById('typeFilter');
             if (typeFilter) {
                 typeFilter.addEventListener('change', performSearch);
