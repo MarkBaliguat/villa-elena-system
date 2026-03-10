@@ -16,7 +16,7 @@ class StaffController extends Controller
         $staff = User::whereIn('role', ['staff', 'manager'])
                     ->orderBy('created_at', 'desc')
                     ->get();
-        
+
         return view('adminFolder.staff.index', compact('staff'));
     }
 
@@ -30,16 +30,21 @@ class StaffController extends Controller
         $validator = Validator::make($request->all(), [
             'name'          => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
             'username'      => 'required|string|max:255|unique:users|regex:/^[a-zA-Z0-9_]+$/',
-            'email'         => 'required|email|max:255|unique:users',
+            'email'         => ['required', 'email', 'max:255', 'unique:users', 'regex:/@gmail\.com$/i'],
             'phoneNumber'   => 'nullable|string|max:11|regex:/^09[0-9]{9}$/',
             'role'          => 'required|in:staff,manager',
             'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'password'      => 'required|string|min:8|confirmed',
+            'password'      => [
+                'required', 'string', 'min:8', 'confirmed',
+                'regex:/^(?=.*[A-Z])(?=.*[0-9])(?=.*[\W_]).{8,}$/'
+            ],
         ], [
             'name.regex'          => 'The name field may only contain letters and spaces.',
             'username.regex'      => 'The username may only contain letters, numbers, and underscores.',
+            'email.regex'         => 'Only @gmail.com email addresses are allowed.',
             'phoneNumber.regex'   => 'The phone number must be a valid 11-digit Philippine number starting with 09.',
             'password.min'        => 'The password must be at least 8 characters.',
+            'password.regex'      => 'Password must have at least 1 uppercase letter, 1 number, and 1 special character.',
             'profile_image.image' => 'The profile photo must be an image file.',
             'profile_image.mimes' => 'Accepted formats: jpeg, png, jpg, gif, webp.',
             'profile_image.max'   => 'Profile photo must not exceed 2MB.',
@@ -76,7 +81,7 @@ class StaffController extends Controller
     {
         $staff = User::whereIn('role', ['staff', 'manager'])
                     ->findOrFail($id);
-        
+
         return view('adminFolder.staff.edit', compact('staff'));
     }
 
@@ -93,17 +98,23 @@ class StaffController extends Controller
             ],
             'email'         => [
                 'required', 'email', 'max:255',
+                'regex:/@gmail\.com$/i',
                 Rule::unique('users')->ignore($staff->userID, 'userID'),
             ],
             'phoneNumber'   => 'nullable|string|max:11|regex:/^09[0-9]{9}$/',
             'role'          => 'required|in:staff,manager',
             'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'password'      => 'nullable|string|min:8|confirmed',
+            'password'      => [
+                'nullable', 'string', 'min:8', 'confirmed',
+                'regex:/^(?=.*[A-Z])(?=.*[0-9])(?=.*[\W_]).{8,}$/'
+            ],
         ], [
             'name.regex'          => 'The name field may only contain letters and spaces.',
             'username.regex'      => 'The username may only contain letters, numbers, and underscores.',
+            'email.regex'         => 'Only @gmail.com email addresses are allowed.',
             'phoneNumber.regex'   => 'The phone number must be a valid 11-digit Philippine number starting with 09.',
             'password.min'        => 'The password must be at least 8 characters.',
+            'password.regex'      => 'Password must have at least 1 uppercase letter, 1 number, and 1 special character.',
             'profile_image.image' => 'The profile photo must be an image file.',
             'profile_image.mimes' => 'Accepted formats: jpeg, png, jpg, gif, webp.',
             'profile_image.max'   => 'Profile photo must not exceed 2MB.',

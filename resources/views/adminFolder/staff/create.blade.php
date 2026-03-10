@@ -20,7 +20,6 @@
             #mainContent { margin-left: 5.5rem !important; width: calc(100% - 5.5rem) !important; padding: 1rem !important; }
         }
         @media (max-width: 640px) { #mainContent { padding: 0.75rem !important; } }
-        .password-requirements { font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem; }
 
         /* Image upload styles */
         .image-upload-area {
@@ -49,6 +48,31 @@
             color: white; font-size: 2rem;
             border: 3px solid #e5e7eb;
         }
+
+        /* Validation styles */
+        .input-error  { border-color: #ef4444 !important; }
+        .input-success { border-color: #22c55e !important; }
+        .field-msg { font-size: 0.75rem; margin-top: 0.25rem; min-height: 1rem; }
+        .field-msg.error   { color: #ef4444; }
+        .field-msg.success { color: #22c55e; }
+
+        /* Password toggle */
+        .pw-wrapper { position: relative; }
+        .pw-toggle {
+            position: absolute; right: 0.75rem; top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer; color: #6b7280;
+            background: none; border: none; padding: 0;
+            line-height: 1;
+        }
+        .pw-toggle:hover { color: #374151; }
+
+        /* Password strength checklist */
+        .pw-checklist { list-style: none; padding: 0; margin: 0.5rem 0 0; display: flex; flex-direction: column; gap: 0.2rem; }
+        .pw-checklist li { font-size: 0.72rem; display: flex; align-items: center; gap: 0.35rem; color: #9ca3af; transition: color 0.2s; }
+        .pw-checklist li.pass { color: #22c55e; }
+        .pw-checklist li.fail { color: #ef4444; }
+        .pw-checklist li i { width: 12px; text-align: center; }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -65,13 +89,13 @@
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6">
             <form action="{{ route('admin.staff.store') }}" method="POST" id="staffForm" enctype="multipart/form-data">
                 @csrf
-                
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
 
                     <!-- Personal Information -->
                     <div class="space-y-4">
                         <h3 class="text-base md:text-lg font-semibold text-gray-900 border-b pb-2">Personal Information</h3>
-                        
+
                         <div>
                             <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
                             <input type="text" id="name" name="name" value="{{ old('name') }}"
@@ -79,6 +103,7 @@
                                    class="w-full px-4 py-2.5 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm md:text-base"
                                    required pattern="[a-zA-Z\s]+" title="Name should only contain letters and spaces">
                             @error('name')<p class="text-red-500 text-xs md:text-sm mt-1">{{ $message }}</p>@enderror
+                            <div id="name-msg" class="field-msg"></div>
                             <p class="text-xs text-gray-500 mt-1">Only letters and spaces are allowed</p>
                         </div>
 
@@ -89,6 +114,7 @@
                                    class="w-full px-4 py-2.5 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm md:text-base"
                                    required pattern="[a-zA-Z0-9_]+" title="Username may only contain letters, numbers, and underscores">
                             @error('username')<p class="text-red-500 text-xs md:text-sm mt-1">{{ $message }}</p>@enderror
+                            <div id="username-msg" class="field-msg"></div>
                             <p class="text-xs text-gray-500 mt-1">Letters, numbers, and underscores only</p>
                         </div>
                     </div>
@@ -96,7 +122,7 @@
                     <!-- Contact & Role -->
                     <div class="space-y-4">
                         <h3 class="text-base md:text-lg font-semibold text-gray-900 border-b pb-2">Contact & Role</h3>
-                        
+
                         <div>
                             <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
                             <input type="email" id="email" name="email" value="{{ old('email') }}"
@@ -104,6 +130,7 @@
                                    class="w-full px-4 py-2.5 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm md:text-base"
                                    required>
                             @error('email')<p class="text-red-500 text-xs md:text-sm mt-1">{{ $message }}</p>@enderror
+                            <div id="email-msg" class="field-msg"></div>
                         </div>
 
                         <div>
@@ -114,6 +141,7 @@
                                    maxlength="11" pattern="09[0-9]{9}"
                                    title="Please enter a valid 11-digit Philippine number starting with 09">
                             @error('phoneNumber')<p class="text-red-500 text-xs md:text-sm mt-1">{{ $message }}</p>@enderror
+                            <div id="phone-msg" class="field-msg"></div>
                             <p class="text-xs text-gray-500 mt-1">11-digit number starting with 09 (e.g., 09123456789)</p>
                         </div>
 
@@ -133,7 +161,7 @@
                     <!-- Profile Image -->
                     <div class="md:col-span-2 space-y-4">
                         <h3 class="text-base md:text-lg font-semibold text-gray-900 border-b pb-2">Profile Image <span class="text-gray-400 font-normal text-sm">(Optional)</span></h3>
-                        
+
                         <div class="flex flex-col sm:flex-row items-start gap-6">
                             <!-- Preview -->
                             <div class="flex-shrink-0 flex flex-col items-center gap-2">
@@ -141,8 +169,7 @@
                                     <div class="avatar-placeholder" id="avatarPlaceholder">
                                         <i class="fas fa-user"></i>
                                     </div>
-                                    <img id="avatarPreview" src="#" alt="Preview"
-                                         class="avatar-preview hidden">
+                                    <img id="avatarPreview" src="#" alt="Preview" class="avatar-preview hidden">
                                 </div>
                                 <span class="text-xs text-gray-500">Preview</span>
                             </div>
@@ -172,21 +199,38 @@
                     <!-- Security -->
                     <div class="md:col-span-2 space-y-4">
                         <h3 class="text-base md:text-lg font-semibold text-gray-900 border-b pb-2">Security</h3>
-                        
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password *</label>
-                                <input type="password" id="password" name="password"
-                                       class="w-full px-4 py-2.5 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm md:text-base"
-                                       required minlength="8">
+                                <div class="pw-wrapper">
+                                    <input type="password" id="password" name="password"
+                                           class="w-full px-4 py-2.5 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm md:text-base pr-10"
+                                           required minlength="8">
+                                    <button type="button" class="pw-toggle" onclick="togglePw('password', this)" tabindex="-1">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
                                 @error('password')<p class="text-red-500 text-xs md:text-sm mt-1">{{ $message }}</p>@enderror
-                                <p class="password-requirements">Minimum 8 characters</p>
+                                <div id="password-msg" class="field-msg"></div>
+                                <ul class="pw-checklist" id="pw-checklist">
+                                    <li id="chk-length">  <i class="fas fa-circle"></i> At least 8 characters</li>
+                                    <li id="chk-upper">   <i class="fas fa-circle"></i> At least 1 uppercase letter</li>
+                                    <li id="chk-number">  <i class="fas fa-circle"></i> At least 1 number</li>
+                                    <li id="chk-special"> <i class="fas fa-circle"></i> At least 1 special character (!@#$...)</li>
+                                </ul>
                             </div>
                             <div>
                                 <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password *</label>
-                                <input type="password" id="password_confirmation" name="password_confirmation"
-                                       class="w-full px-4 py-2.5 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm md:text-base"
-                                       required minlength="8">
+                                <div class="pw-wrapper">
+                                    <input type="password" id="password_confirmation" name="password_confirmation"
+                                           class="w-full px-4 py-2.5 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm md:text-base pr-10"
+                                           required minlength="8">
+                                    <button type="button" class="pw-toggle" onclick="togglePw('password_confirmation', this)" tabindex="-1">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <div id="confirm-msg" class="field-msg"></div>
                             </div>
                         </div>
                     </div>
@@ -233,36 +277,151 @@
             }
         });
 
-        // ===== PHONE =====
-        document.getElementById('phoneNumber').addEventListener('input', function() {
+        // ===== PASSWORD TOGGLE =====
+        function togglePw(id, btn) {
+            const input = document.getElementById(id);
+            const icon  = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        // ===== REAL-TIME VALIDATION HELPERS =====
+        function setFieldState(inputEl, msgEl, isValid, msg) {
+            inputEl.classList.toggle('input-error',   !isValid);
+            inputEl.classList.toggle('input-success',  isValid);
+            if (msgEl) {
+                msgEl.textContent = msg;
+                msgEl.className   = 'field-msg ' + (isValid ? 'success' : 'error');
+            }
+        }
+        function clearFieldState(inputEl, msgEl) {
+            inputEl.classList.remove('input-error', 'input-success');
+            if (msgEl) { msgEl.textContent = ''; msgEl.className = 'field-msg'; }
+        }
+
+        // Name
+        document.getElementById('name').addEventListener('input', function () {
+            const msgEl = document.getElementById('name-msg');
+            if (!this.value) { clearFieldState(this, msgEl); return; }
+            const valid = /^[a-zA-Z\s]+$/.test(this.value);
+            setFieldState(this, msgEl, valid, valid ? '✓ Looks good' : 'Only letters and spaces are allowed');
+        });
+
+        // Username
+        document.getElementById('username').addEventListener('input', function () {
+            const msgEl = document.getElementById('username-msg');
+            if (!this.value) { clearFieldState(this, msgEl); return; }
+            const valid = /^[a-zA-Z0-9_]+$/.test(this.value);
+            setFieldState(this, msgEl, valid, valid ? '✓ Valid username' : 'Only letters, numbers, and underscores');
+        });
+
+        // Email — @gmail.com only
+        document.getElementById('email').addEventListener('input', function () {
+            const msgEl = document.getElementById('email-msg');
+            const val   = this.value.trim();
+            if (!val) { clearFieldState(this, msgEl); return; }
+            const isGmail = /^[^\s@]+@gmail\.com$/i.test(val);
+            setFieldState(this, msgEl, isGmail, isGmail ? '✓ Valid Gmail address' : 'Only @gmail.com emails are allowed');
+        });
+
+        // Phone
+        document.getElementById('phoneNumber').addEventListener('input', function () {
             this.value = this.value.replace(/\D/g, '').slice(0, 11);
             if (this.value.length > 0 && !this.value.startsWith('09')) {
                 this.value = '09' + this.value.slice(2);
             }
+            const msgEl = document.getElementById('phone-msg');
+            if (!this.value) { clearFieldState(this, msgEl); return; }
+            const valid = /^09[0-9]{9}$/.test(this.value);
+            setFieldState(this, msgEl, valid, valid ? '✓ Valid phone number' : 'Must be 11 digits starting with 09');
         });
 
-        // ===== PASSWORD =====
-        document.getElementById('password_confirmation').addEventListener('input', function() {
-            this.setCustomValidity(
-                this.value !== document.getElementById('password').value ? 'Passwords do not match' : ''
-            );
+        // ===== PASSWORD WITH STRENGTH CHECKLIST =====
+        const passwordInput = document.getElementById('password');
+        const confirmInput  = document.getElementById('password_confirmation');
+
+        const pwChecks = {
+            'chk-length':  v => v.length >= 8,
+            'chk-upper':   v => /[A-Z]/.test(v),
+            'chk-number':  v => /[0-9]/.test(v),
+            'chk-special': v => /[\W_]/.test(v),
+        };
+
+        passwordInput.addEventListener('input', function () {
+            const val   = this.value;
+            const msgEl = document.getElementById('password-msg');
+
+            // Update checklist items
+            Object.entries(pwChecks).forEach(([id, test]) => {
+                const li   = document.getElementById(id);
+                const pass = test(val);
+                li.classList.toggle('pass', pass);
+                li.classList.toggle('fail', val.length > 0 && !pass);
+                li.querySelector('i').className = pass
+                    ? 'fas fa-check-circle'
+                    : (val.length > 0 ? 'fas fa-times-circle' : 'fas fa-circle');
+            });
+
+            if (!val) { clearFieldState(this, msgEl); return; }
+
+            const allPass = Object.values(pwChecks).every(test => test(val));
+            setFieldState(this, msgEl, allPass,
+                allPass ? '✓ Strong password' : 'Password does not meet all requirements');
+
+            if (confirmInput.value) validateConfirm();
         });
-        document.getElementById('staffForm').addEventListener('submit', function(e) {
-            if (document.getElementById('password').value !== document.getElementById('password_confirmation').value) {
+
+        // Confirm password
+        function validateConfirm() {
+            const msgEl = document.getElementById('confirm-msg');
+            if (!confirmInput.value) { clearFieldState(confirmInput, msgEl); confirmInput.setCustomValidity(''); return; }
+            const match = passwordInput.value === confirmInput.value;
+            confirmInput.setCustomValidity(match ? '' : 'Passwords do not match');
+            setFieldState(confirmInput, msgEl, match, match ? '✓ Passwords match' : '✗ Passwords do not match');
+        }
+        confirmInput.addEventListener('input', validateConfirm);
+
+        // ===== FORM SUBMIT GUARD =====
+        document.getElementById('staffForm').addEventListener('submit', function (e) {
+            const email = document.getElementById('email').value.trim();
+            if (!/^[^\s@]+@gmail\.com$/i.test(email)) {
                 e.preventDefault();
-                alert('Passwords do not match. Please check your password confirmation.');
+                Swal.fire({ icon: 'error', title: 'Invalid Email', text: 'Only @gmail.com email addresses are allowed.' });
+                return;
+            }
+
+            const pw = passwordInput.value;
+            const allPass = Object.values(pwChecks).every(test => test(pw));
+            if (!allPass) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Weak Password',
+                    text: 'Password must have at least 8 characters, 1 uppercase letter, 1 number, and 1 special character.'
+                });
+                return;
+            }
+
+            if (pw !== confirmInput.value) {
+                e.preventDefault();
+                Swal.fire({ icon: 'error', title: 'Password Mismatch', text: 'Passwords do not match. Please check your confirmation.' });
             }
         });
 
         // ===== IMAGE UPLOAD =====
-        const profileInput   = document.getElementById('profile_image');
-        const avatarPreview  = document.getElementById('avatarPreview');
+        const profileInput      = document.getElementById('profile_image');
+        const avatarPreview     = document.getElementById('avatarPreview');
         const avatarPlaceholder = document.getElementById('avatarPlaceholder');
-        const fileNameDisplay = document.getElementById('fileNameDisplay');
-        const fileNameSpan   = document.getElementById('fileName');
-        const uploadArea     = document.getElementById('uploadArea');
+        const fileNameDisplay   = document.getElementById('fileNameDisplay');
+        const fileNameSpan      = document.getElementById('fileName');
+        const uploadArea        = document.getElementById('uploadArea');
 
-        profileInput.addEventListener('change', function() {
+        profileInput.addEventListener('change', function () {
             const file = this.files[0];
             if (!file) return;
             showPreview(file);
@@ -295,8 +454,8 @@
         }
 
         // Drag & Drop
-        uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('drag-over'); });
-        uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('drag-over'));
+        uploadArea.addEventListener('dragover',  (e) => { e.preventDefault(); uploadArea.classList.add('drag-over'); });
+        uploadArea.addEventListener('dragleave', ()  => uploadArea.classList.remove('drag-over'));
         uploadArea.addEventListener('drop', (e) => {
             e.preventDefault();
             uploadArea.classList.remove('drag-over');
