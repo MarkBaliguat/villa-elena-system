@@ -9,85 +9,52 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        /* Main Content Responsive Layout */
         #mainContent {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             margin-left: 16rem;
             width: calc(100% - 16rem);
         }
-
-        #mainContent.ml-24 {
-            margin-left: 5.5rem;
-            width: calc(100% - 5.5rem);
-        }
-
-        #mainContent.ml-64 {
-            margin-left: 16rem;
-            width: calc(100% - 16rem);
-        }
-
+        #mainContent.ml-24 { margin-left: 5.5rem; width: calc(100% - 5.5rem); }
+        #mainContent.ml-64 { margin-left: 16rem; width: calc(100% - 16rem); }
         @media (max-width: 768px) {
-            #mainContent {
-                margin-left: 5.5rem !important;
-                width: calc(100% - 5.5rem) !important;
-                padding: 1rem !important;
-            }
+            #mainContent { margin-left: 5.5rem !important; width: calc(100% - 5.5rem) !important; padding: 1rem !important; }
         }
+        @media (max-width: 640px) { #mainContent { padding: 0.75rem !important; } }
+        .password-requirements { font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem; }
 
-        @media (max-width: 640px) {
-            #mainContent {
-                padding: 0.75rem !important;
-            }
+        /* Image upload styles */
+        .image-upload-area {
+            border: 2px dashed #d1d5db;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.2s;
+            cursor: pointer;
+            background: #f9fafb;
         }
-
-        .sidebar {
-            width: 16rem;
-            position: fixed;
-            left: 0;
-            top: 0;
-            height: 100%;
-            background-color: white;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            border-right: 1px solid #e5e7eb;
-            display: flex;
-            flex-direction: column;
-            z-index: 50;
+        .image-upload-area:hover { border-color: #3b82f6; background: #eff6ff; }
+        .image-upload-area.drag-over { border-color: #3b82f6; background: #eff6ff; }
+        .avatar-preview {
+            width: 96px; height: 96px;
+            border-radius: 0.75rem;
+            object-fit: cover;
+            border: 3px solid #e5e7eb;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        
-        .icon-container {
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 12px;
-        }
-        
-        .active-item {
-            background-color: #eff6ff;
-            color: #1d4ed8;
-            border-right: 2px solid #2563eb;
-            font-weight: 600;
-        }
-        
-        .hover-item:hover {
-            background-color: #f9fafb;
-            color: #2563eb;
-        }
-        
-        .password-requirements {
-            font-size: 0.75rem;
-            color: #6b7280;
-            margin-top: 0.25rem;
+        .avatar-placeholder {
+            width: 96px; height: 96px;
+            border-radius: 0.75rem;
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 2rem;
+            border: 3px solid #e5e7eb;
         }
     </style>
 </head>
 <body class="bg-gray-50">
     @include('adminFolder.partials.sidebar')
 
-    <!-- Main Content -->
     <div class="ml-64 p-8" id="mainContent">
-        <!-- Header -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 md:mb-8">
             <div>
                 <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Add New Staff</h1>
@@ -95,47 +62,33 @@
             </div>
         </div>
 
-        <!-- Form -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6">
-            <form action="{{ route('admin.staff.store') }}" method="POST" id="staffForm">
+            <form action="{{ route('admin.staff.store') }}" method="POST" id="staffForm" enctype="multipart/form-data">
                 @csrf
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+
                     <!-- Personal Information -->
                     <div class="space-y-4">
                         <h3 class="text-base md:text-lg font-semibold text-gray-900 border-b pb-2">Personal Information</h3>
                         
                         <div>
                             <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
-                            <input type="text" 
-                                   id="name" 
-                                   name="name" 
-                                   value="{{ old('name') }}"
+                            <input type="text" id="name" name="name" value="{{ old('name') }}"
                                    placeholder="Juan Dela Cruz"
                                    class="w-full px-4 py-2.5 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm md:text-base"
-                                   required
-                                   pattern="[a-zA-Z\s]+"
-                                   title="Name should only contain letters and spaces">
-                            @error('name')
-                                <p class="text-red-500 text-xs md:text-sm mt-1">{{ $message }}</p>
-                            @enderror
+                                   required pattern="[a-zA-Z\s]+" title="Name should only contain letters and spaces">
+                            @error('name')<p class="text-red-500 text-xs md:text-sm mt-1">{{ $message }}</p>@enderror
                             <p class="text-xs text-gray-500 mt-1">Only letters and spaces are allowed</p>
                         </div>
 
                         <div>
                             <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username *</label>
-                            <input type="text" 
-                                   id="username" 
-                                   name="username" 
-                                   value="{{ old('username') }}"
+                            <input type="text" id="username" name="username" value="{{ old('username') }}"
                                    placeholder="juandelacruz"
                                    class="w-full px-4 py-2.5 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm md:text-base"
-                                   required
-                                   pattern="[a-zA-Z0-9_]+"
-                                   title="Username may only contain letters, numbers, and underscores">
-                            @error('username')
-                                <p class="text-red-500 text-xs md:text-sm mt-1">{{ $message }}</p>
-                            @enderror
+                                   required pattern="[a-zA-Z0-9_]+" title="Username may only contain letters, numbers, and underscores">
+                            @error('username')<p class="text-red-500 text-xs md:text-sm mt-1">{{ $message }}</p>@enderror
                             <p class="text-xs text-gray-500 mt-1">Letters, numbers, and underscores only</p>
                         </div>
                     </div>
@@ -146,78 +99,94 @@
                         
                         <div>
                             <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
-                            <input type="email" 
-                                   id="email" 
-                                   name="email" 
-                                   value="{{ old('email') }}"
+                            <input type="email" id="email" name="email" value="{{ old('email') }}"
                                    placeholder="juandelacruz@gmail.com"
                                    class="w-full px-4 py-2.5 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm md:text-base"
                                    required>
-                            @error('email')
-                                <p class="text-red-500 text-xs md:text-sm mt-1">{{ $message }}</p>
-                            @enderror
+                            @error('email')<p class="text-red-500 text-xs md:text-sm mt-1">{{ $message }}</p>@enderror
                         </div>
 
                         <div>
                             <label for="phoneNumber" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                            <input type="tel" 
-                                   id="phoneNumber" 
-                                   name="phoneNumber" 
-                                   value="{{ old('phoneNumber') }}"
+                            <input type="tel" id="phoneNumber" name="phoneNumber" value="{{ old('phoneNumber') }}"
                                    placeholder="09123456789"
                                    class="w-full px-4 py-2.5 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm md:text-base"
-                                   maxlength="11"
-                                   pattern="09[0-9]{9}"
+                                   maxlength="11" pattern="09[0-9]{9}"
                                    title="Please enter a valid 11-digit Philippine number starting with 09">
-                            @error('phoneNumber')
-                                <p class="text-red-500 text-xs md:text-sm mt-1">{{ $message }}</p>
-                            @enderror
+                            @error('phoneNumber')<p class="text-red-500 text-xs md:text-sm mt-1">{{ $message }}</p>@enderror
                             <p class="text-xs text-gray-500 mt-1">11-digit number starting with 09 (e.g., 09123456789)</p>
                         </div>
 
                         <div>
                             <label for="role" class="block text-sm font-medium text-gray-700 mb-1">Role *</label>
-                            <select id="role" 
-                                    name="role" 
+                            <select id="role" name="role"
                                     class="w-full px-4 py-2.5 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm md:text-base"
                                     required>
                                 <option value="">Select Role</option>
-                                <option value="staff" {{ old('role') == 'staff' ? 'selected' : '' }}>Staff</option>
+                                <option value="staff"   {{ old('role') == 'staff'   ? 'selected' : '' }}>Staff</option>
                                 <option value="manager" {{ old('role') == 'manager' ? 'selected' : '' }}>Manager</option>
                             </select>
-                            @error('role')
-                                <p class="text-red-500 text-xs md:text-sm mt-1">{{ $message }}</p>
-                            @enderror
+                            @error('role')<p class="text-red-500 text-xs md:text-sm mt-1">{{ $message }}</p>@enderror
                         </div>
                     </div>
 
-                    <!-- Password -->
+                    <!-- Profile Image -->
+                    <div class="md:col-span-2 space-y-4">
+                        <h3 class="text-base md:text-lg font-semibold text-gray-900 border-b pb-2">Profile Image <span class="text-gray-400 font-normal text-sm">(Optional)</span></h3>
+                        
+                        <div class="flex flex-col sm:flex-row items-start gap-6">
+                            <!-- Preview -->
+                            <div class="flex-shrink-0 flex flex-col items-center gap-2">
+                                <div id="previewContainer">
+                                    <div class="avatar-placeholder" id="avatarPlaceholder">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <img id="avatarPreview" src="#" alt="Preview"
+                                         class="avatar-preview hidden">
+                                </div>
+                                <span class="text-xs text-gray-500">Preview</span>
+                            </div>
+
+                            <!-- Upload Area -->
+                            <div class="flex-1 w-full">
+                                <div class="image-upload-area" id="uploadArea" onclick="document.getElementById('profile_image').click()">
+                                    <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                                    <p class="text-sm font-medium text-gray-700">Click to upload or drag & drop</p>
+                                    <p class="text-xs text-gray-500 mt-1">JPG, PNG, GIF, WEBP — max 2MB</p>
+                                </div>
+                                <input type="file" id="profile_image" name="profile_image"
+                                       accept="image/jpeg,image/png,image/jpg,image/gif,image/webp"
+                                       class="hidden">
+                                <div id="fileNameDisplay" class="hidden mt-2 flex items-center gap-2 text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-lg border border-gray-200">
+                                    <i class="fas fa-image text-blue-500"></i>
+                                    <span id="fileName"></span>
+                                    <button type="button" onclick="clearImage()" class="ml-auto text-red-500 hover:text-red-700">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                @error('profile_image')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security -->
                     <div class="md:col-span-2 space-y-4">
                         <h3 class="text-base md:text-lg font-semibold text-gray-900 border-b pb-2">Security</h3>
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password *</label>
-                                <input type="password" 
-                                       id="password" 
-                                       name="password" 
+                                <input type="password" id="password" name="password"
                                        class="w-full px-4 py-2.5 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm md:text-base"
-                                       required
-                                       minlength="8">
-                                @error('password')
-                                    <p class="text-red-500 text-xs md:text-sm mt-1">{{ $message }}</p>
-                                @enderror
+                                       required minlength="8">
+                                @error('password')<p class="text-red-500 text-xs md:text-sm mt-1">{{ $message }}</p>@enderror
                                 <p class="password-requirements">Minimum 8 characters</p>
                             </div>
-
                             <div>
                                 <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password *</label>
-                                <input type="password" 
-                                       id="password_confirmation" 
-                                       name="password_confirmation" 
+                                <input type="password" id="password_confirmation" name="password_confirmation"
                                        class="w-full px-4 py-2.5 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm md:text-base"
-                                       required
-                                       minlength="8">
+                                       required minlength="8">
                             </div>
                         </div>
                     </div>
@@ -225,11 +194,11 @@
 
                 <!-- Form Actions -->
                 <div class="flex flex-col sm:flex-row justify-end gap-3 md:gap-4 mt-6 md:mt-8 pt-4 md:pt-6 border-t">
-                    <a href="{{ route('admin.staff.index') }}" 
+                    <a href="{{ route('admin.staff.index') }}"
                        class="w-full sm:w-auto px-6 py-2.5 md:py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors text-center text-sm md:text-base">
                         Cancel
                     </a>
-                    <button type="submit" 
+                    <button type="submit"
                             class="w-full sm:w-auto px-6 py-2.5 md:py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm md:text-base">
                         <i class="fas fa-save"></i>
                         Create Staff Account
@@ -240,86 +209,103 @@
     </div>
 
     <script>
-        // ===== SIDEBAR RESPONSIVE SCRIPT =====
+        // ===== SIDEBAR =====
         window.addEventListener('sidebarToggled', (event) => {
-            const mainContent = document.getElementById('mainContent');
-            if (event.detail.collapsed) {
-                mainContent.classList.remove('ml-64');
-                mainContent.classList.add('ml-24');
-            } else {
-                mainContent.classList.remove('ml-24');
-                mainContent.classList.add('ml-64');
-            }
+            const mc = document.getElementById('mainContent');
+            mc.classList.toggle('ml-64', !event.detail.collapsed);
+            mc.classList.toggle('ml-24', event.detail.collapsed);
         });
-
         document.addEventListener('DOMContentLoaded', () => {
-            const savedState = localStorage.getItem('sidebarState');
-            const mainContent = document.getElementById('mainContent');
-            
-            if (window.innerWidth > 768) {
-                if (savedState === 'collapsed') {
-                    mainContent.classList.remove('ml-64');
-                    mainContent.classList.add('ml-24');
-                }
-            } else {
-                mainContent.classList.remove('ml-64');
-                mainContent.classList.add('ml-24');
+            const mc = document.getElementById('mainContent');
+            if (window.innerWidth > 768 && localStorage.getItem('sidebarState') === 'collapsed') {
+                mc.classList.replace('ml-64', 'ml-24');
+            } else if (window.innerWidth <= 768) {
+                mc.classList.replace('ml-64', 'ml-24');
             }
         });
-
         window.addEventListener('resize', () => {
-            const mainContent = document.getElementById('mainContent');
-            const savedState = localStorage.getItem('sidebarState');
-            
+            const mc = document.getElementById('mainContent');
             if (window.innerWidth > 768) {
-                if (savedState === 'collapsed') {
-                    mainContent.classList.remove('ml-64');
-                    mainContent.classList.add('ml-24');
-                } else {
-                    mainContent.classList.remove('ml-24');
-                    mainContent.classList.add('ml-64');
-                }
+                mc.classList.toggle('ml-24', localStorage.getItem('sidebarState') === 'collapsed');
+                mc.classList.toggle('ml-64', localStorage.getItem('sidebarState') !== 'collapsed');
             } else {
-                mainContent.classList.remove('ml-64');
-                mainContent.classList.add('ml-24');
+                mc.classList.replace('ml-64', 'ml-24');
             }
         });
-        // ===== END SIDEBAR RESPONSIVE SCRIPT =====
 
-        // Phone number validation
-        document.getElementById('phoneNumber').addEventListener('input', function(e) {
-            this.value = this.value.replace(/\D/g, '');
-            
-            if (this.value.length > 11) {
-                this.value = this.value.slice(0, 11);
-            }
-            
+        // ===== PHONE =====
+        document.getElementById('phoneNumber').addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0, 11);
             if (this.value.length > 0 && !this.value.startsWith('09')) {
                 this.value = '09' + this.value.slice(2);
             }
         });
 
-        // Password confirmation validation
-        document.getElementById('password_confirmation').addEventListener('input', function(e) {
-            const password = document.getElementById('password').value;
-            const confirmPassword = this.value;
-            
-            if (password !== confirmPassword) {
-                this.setCustomValidity('Passwords do not match');
-            } else {
-                this.setCustomValidity('');
+        // ===== PASSWORD =====
+        document.getElementById('password_confirmation').addEventListener('input', function() {
+            this.setCustomValidity(
+                this.value !== document.getElementById('password').value ? 'Passwords do not match' : ''
+            );
+        });
+        document.getElementById('staffForm').addEventListener('submit', function(e) {
+            if (document.getElementById('password').value !== document.getElementById('password_confirmation').value) {
+                e.preventDefault();
+                alert('Passwords do not match. Please check your password confirmation.');
             }
         });
 
-        // Form validation
-        document.getElementById('staffForm').addEventListener('submit', function(e) {
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('password_confirmation').value;
-            
-            if (password !== confirmPassword) {
-                e.preventDefault();
-                alert('Passwords do not match. Please check your password confirmation.');
-                return false;
+        // ===== IMAGE UPLOAD =====
+        const profileInput   = document.getElementById('profile_image');
+        const avatarPreview  = document.getElementById('avatarPreview');
+        const avatarPlaceholder = document.getElementById('avatarPlaceholder');
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+        const fileNameSpan   = document.getElementById('fileName');
+        const uploadArea     = document.getElementById('uploadArea');
+
+        profileInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (!file) return;
+            showPreview(file);
+        });
+
+        function showPreview(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                avatarPreview.src = e.target.result;
+                avatarPreview.classList.remove('hidden');
+                avatarPlaceholder.classList.add('hidden');
+            };
+            reader.readAsDataURL(file);
+            fileNameSpan.textContent = file.name;
+            fileNameDisplay.classList.remove('hidden');
+            uploadArea.innerHTML = `<i class="fas fa-check-circle text-3xl text-green-500 mb-2"></i>
+                <p class="text-sm font-medium text-green-700">Image selected</p>
+                <p class="text-xs text-gray-500 mt-1">Click to change</p>`;
+        }
+
+        function clearImage() {
+            profileInput.value = '';
+            avatarPreview.classList.add('hidden');
+            avatarPreview.src = '#';
+            avatarPlaceholder.classList.remove('hidden');
+            fileNameDisplay.classList.add('hidden');
+            uploadArea.innerHTML = `<i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                <p class="text-sm font-medium text-gray-700">Click to upload or drag & drop</p>
+                <p class="text-xs text-gray-500 mt-1">JPG, PNG, GIF, WEBP — max 2MB</p>`;
+        }
+
+        // Drag & Drop
+        uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('drag-over'); });
+        uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('drag-over'));
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                profileInput.files = dt.files;
+                showPreview(file);
             }
         });
     </script>

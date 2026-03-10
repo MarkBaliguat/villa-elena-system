@@ -166,6 +166,26 @@
         .table-row { transition: background-color 0.2s; }
         .table-row:hover { background-color: #f9fafb !important; }
 
+        /* ===== AVATAR ===== */
+        .staff-avatar {
+            flex-shrink: 0;
+            overflow: hidden;
+            background: linear-gradient(135deg, #3b82f6, #4f46e5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            border-radius: 0.5rem;
+        }
+
+        .staff-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
         /* ===== MOBILE CARD VIEW ===== */
         .staff-card-item {
             display: none;
@@ -528,24 +548,42 @@
         // ============================================
         // BOOTSTRAP — seed from server-rendered data
         // ============================================
-        // We embed the PHP collection as JSON so no extra AJAX call is needed.
-        // If you prefer AJAX, replace this with a fetch().
         const staffData = @json($staff);
 
         document.addEventListener('DOMContentLoaded', () => {
             allStaff = staffData.map(m => ({
-                id:          m.userID,
-                name:        m.name,
-                username:    m.username,
-                email:       m.email,
-                phone:       m.phoneNumber ?? 'N/A',
-                role:        m.role,
-                created_at:  m.created_at,
+                id:            m.userID,
+                name:          m.name,
+                username:      m.username,
+                email:         m.email,
+                phone:         m.phoneNumber ?? 'N/A',
+                role:          m.role,
+                created_at:    m.created_at,
+                profile_image: m.profile_image ?? null,
             }));
 
             updateStats();
             applyFilters();
         });
+
+        // ============================================
+        // AVATAR HELPER
+        // ============================================
+        function avatarHtml(m, size = 'sm') {
+            const dim   = size === 'lg' ? 'width:3rem;height:3rem;font-size:1rem;' : 'width:2.5rem;height:2.5rem;font-size:0.8rem;';
+            const initials = m.name.substring(0, 2).toUpperCase();
+
+            if (m.profile_image) {
+                return `<div class="staff-avatar" style="${dim}border-radius:0.5rem;">
+                            <img src="/storage/${escHtml(m.profile_image)}" alt="${escHtml(m.name)}"
+                                 onerror="this.parentElement.innerHTML='${initials}'">
+                        </div>`;
+            }
+
+            return `<div class="staff-avatar" style="${dim}">
+                        ${initials}
+                    </div>`;
+        }
 
         // ============================================
         // FILTERS & SEARCH
@@ -606,9 +644,7 @@
                 <tr class="border-b border-gray-100 table-row">
                     <td class="py-4 px-4">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
-                                ${m.name.substring(0, 2).toUpperCase()}
-                            </div>
+                            ${avatarHtml(m, 'sm')}
                             <div>
                                 <p class="font-semibold text-gray-900">${escHtml(m.name)}</p>
                                 <p class="text-sm text-gray-500">@${escHtml(m.username)}</p>
@@ -659,9 +695,7 @@
                 <div class="staff-card-item">
                     <div class="card-header">
                         <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center text-white font-semibold flex-shrink-0">
-                                ${m.name.substring(0, 2).toUpperCase()}
-                            </div>
+                            ${avatarHtml(m, 'lg')}
                             <div>
                                 <p class="font-semibold text-gray-900">${escHtml(m.name)}</p>
                                 <p class="text-sm text-gray-500">@${escHtml(m.username)}</p>
