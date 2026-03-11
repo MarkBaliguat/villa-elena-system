@@ -61,20 +61,23 @@
                     <select name="virtualTourPanorama" id="virtualTourPanorama" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">No Virtual Tour</option>
                         <optgroup label="Accommodations - Cottages">
+                            <option value="2joypavillionandevelyncottage.jpg">Evelyn Cottage</option>
+                            <option value="4centro.jpg">Elsa, Edna, Emma, Pavillion 1 Cottage</option>
                             <option value="3tonicottageandihawan.jpg">Toni Cottage</option>
                             <option value="6arcelicottageandhardin.jpg">Arceli Cottage</option>
                             <option value="9estercottage.jpg">Ester Cottage</option>
-                            <option value="16backminicottages.jpg">Back Mini Cottages</option>
-                            <option value="villaelenafront.jpg">Villa Elena Front</option>
-                            <option value="villaelenaparking.jpg">Villa Elena Parking</option>
+                            <option value="10sunflowerhouse.jpg">Mini Cottage</option>
+                            <option value="16backminicottages.jpg">Back Cottages</option>
+                            <option value="villaelenafront.jpg">Villa Elena Front</option> 
+                            <option value="31campsite4.jpg">Pavillion 2</option>
                         </optgroup>
-                        <optgroup label="Special Units">
+                        {{-- <optgroup label="Special Units">
                             <option value="36sunflowerhousefunctionhall.jpg">Sunflower House Function Hall</option>
                             <option value="4centro.jpg">Resort FrontSide</option>
                             <option value="13backside.jpg">Resort Backside</option>
                             <option value="5frontpool.jpg">Front Pool</option>
                             <option value="14backpool.jpg">Back Pool</option>
-                        </optgroup>
+                        </optgroup> --}}
                         <optgroup label="Sunflower House - Ground Floor Rooms">
                             <option value="37sunflowerhouseroom1ulit.jpg">Sunflower House Room 1</option>
                             <option value="39sunflowerhouseroom2.jpg">Sunflower House Room 2</option>

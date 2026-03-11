@@ -288,7 +288,7 @@
     </div>
     
     <script>
-        // ✅ Get payment intent ID from URL
+        //  Get payment intent ID from URL
         const urlParams = new URLSearchParams(window.location.search);
         const paymentIntentId = urlParams.get('payment_intent_id');
         
@@ -296,7 +296,7 @@
         console.log('Payment Intent ID:', paymentIntentId);
         
         if (paymentIntentId) {
-            // ✅ Call verify endpoint
+            //  Call verify endpoint
             console.log('🔍 Calling verification endpoint...');
             
             fetch(`/payment/gcash/verify?payment_intent_id=${paymentIntentId}`, {

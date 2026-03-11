@@ -296,7 +296,7 @@
         <div class="support-section">
             <p>
                 Need help? Contact us at 
-                <a href="mailto:support@villaelena.com">support@villaelena.com</a>
+                <a href="mailto:evelynbalaisserrano@gmail.com">evelynbalaisserrano@gmail.com</a>
             </p>
         </div>
     </div>

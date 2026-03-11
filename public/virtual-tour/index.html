@@ -852,7 +852,7 @@
                     <div class="dropdown-trigger" onclick="toggleDropdown('rooms-panel', this)">
                         <div class="trigger-left">
                             <i class="fa fa-bed nav-icon"></i>
-                            <span>Rooms 10</span>
+                            <span>Rooms</span>
                         </div>
                         <i class="fa fa-chevron-down chevron"></i>
                     </div>
@@ -881,12 +881,18 @@
                     </div>
                     <div class="dropdown-panel" id="cottages-panel">
                         <div class="sub-label">Front Cottages</div>
+                        <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('2joypavillionandevelyncottage.jpg')">Evelyn Cottage</div></div>
                         <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('3tonicottageandihawan.jpg')">Toni Cottage</div></div>
+                        <div class="dropdown-item-wrap"><div class="dropdown-item" data-location="emma-cottage" onclick="goToLocation('4centro.jpg', 'emma-cottage')">Emma Cottage</div></div>
+                        <div class="dropdown-item-wrap"><div class="dropdown-item" data-location="edna-cottage" onclick="goToLocation('4centro.jpg', 'edna-cottage')">Edna Cottage</div></div>
+                        <div class="dropdown-item-wrap"><div class="dropdown-item" data-location="elsa-cottage" onclick="goToLocation('4centro.jpg', 'elsa-cottage')">Elsa Cottage</div></div>
+                        <div class="dropdown-item-wrap"><div class="dropdown-item" data-location="pavillion1-cottage" onclick="goToLocation('4centro.jpg', 'pavillion1-cottage')">Pavillion 1 Cottage</div></div>
                         <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('6arcelicottageandhardin.jpg')">Arceli Cottage</div></div>
                         <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('9estercottage.jpg')">Ester Cottage</div></div>
-                        <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('villaelenafront.jpg')">Villa Elena</div></div>
+                        <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('10sunflowerhouse.jpg')">Mini Cottage</div></div>     
                         <div class="sub-label">Back Cottages</div>
-                        <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('16backminicottages.jpg')">Back Mini Cottages</div></div>
+                        <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('16backminicottages.jpg')">Back Cottage</div></div>
+                        <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('31campsite4.jpg')">Pavillion 2 Cottage</div></div>
                     </div>
                 </li>
                 <li>
@@ -903,7 +909,6 @@
                         <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('29campsite2.jpg')">Campsite 2</div></div>
                         <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('30campsite3.jpg')">Campsite 3</div></div>
                         <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('31campsite4.jpg')">Campsite 4</div></div>
-                        <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('32pavillion2.jpg')">Pavilion</div></div>
                     </div>
                 </li>
                 <li>
@@ -974,15 +979,16 @@
 
             let currentPanorama = "4centro.jpg";
 
+            // Tracks which specific location key is active (for shared-panorama items)
+            let activeLocationKey = null;
+
             // ── Touch-tap detection variables ──────────────────────────────
             let touchStartX = 0;
             let touchStartY = 0;
             let touchStartTime = 0;
-            // FIX 1: Increased thresholds for better mobile tap detection
-            const TAP_MOVE_THRESHOLD = 15;   // px – stricter to avoid false taps during drag
-            const TAP_TIME_THRESHOLD = 500;  // ms – more generous time window
+            const TAP_MOVE_THRESHOLD = 15;
+            const TAP_TIME_THRESHOLD = 500;
 
-            // FIX 2: Detect mobile device for larger sprite sizes
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
 
             init();
@@ -1025,15 +1031,9 @@
 
                 window.addEventListener("resize", onWindowResize);
                 renderer.domElement.addEventListener("wheel", onMouseWheel, { passive: false });
-
-                // ── Pinch-to-zoom (touch) ──────────────────────────────────
                 renderer.domElement.addEventListener("touchstart", handleTouchStart, { passive: false, capture: true });
                 renderer.domElement.addEventListener("touchmove",  handleTouchMove,  { passive: false, capture: true });
-
-                // ── Tap-to-click hotspot (touch) ───────────────────────────
                 renderer.domElement.addEventListener("touchend", handleTouchEnd, { passive: false, capture: true });
-
-                // ── Hover tooltip (mouse / pointer) ────────────────────────
                 renderer.domElement.addEventListener("pointermove", onPointerMove, false);
             }
 
@@ -1067,7 +1067,6 @@
                 }
             }
 
-            // ── FIX 3: Improved touch-end handler ──────────────────────────
             function handleTouchEnd(e) {
                 if (e.touches.length < 2) initialPinchDistance = null;
                 if (e.changedTouches.length < 1) return;
@@ -1078,23 +1077,19 @@
                 const dy      = touch.clientY - touchStartY;
                 const dist    = Math.sqrt(dx * dx + dy * dy);
 
-                // Not a tap — finger moved too much or held too long
                 if (dist > TAP_MOVE_THRESHOLD || elapsed > TAP_TIME_THRESHOLD) return;
 
-                // Convert touch position to NDC
                 const tapMouse = new THREE.Vector2(
                     (touch.clientX / window.innerWidth)  *  2 - 1,
                     (touch.clientY / window.innerHeight) * -2 + 1
                 );
 
-                // FIX 4: Larger hit threshold for mobile touch
                 const tapRaycaster = new THREE.Raycaster();
                 tapRaycaster.params.Sprite = { threshold: 60 };
                 tapRaycaster.setFromCamera(tapMouse, camera);
                 const intersects = tapRaycaster.intersectObjects(spriteHotspots);
 
                 if (intersects.length > 0) {
-                    // FIX 5: stopImmediatePropagation prevents OrbitControls interference
                     e.preventDefault();
                     e.stopPropagation();
                     e.stopImmediatePropagation();
@@ -1751,6 +1746,8 @@
             }
 
             function switchPanorama(panoramaName) {
+                // When switching via hotspot (not sidebar), clear the location key
+                activeLocationKey = null;
                 overlay.style.pointerEvents = "auto";
                 overlay.style.opacity = "1";
                 overlay.textContent = "Entering...";
@@ -1779,7 +1776,6 @@
                     const material = new THREE.SpriteMaterial({ map: texture });
                     const sprite = new THREE.Sprite(material);
                     sprite.position.copy(position);
-                    // FIX 6: Larger sprites on mobile for easier tapping
                     const baseScale = isMobile ? 55 : 40;
                     sprite.scale.set(baseScale, baseScale, 1);
                     const panoramaFileName = onClickCallback.toString().match(/switchPanorama\('(.*?)'\)/);
@@ -1909,8 +1905,39 @@
                 }
             }
 
-            function goToLocation(panoramaName) {
-                switchPanorama(panoramaName);
+            // locationKey is optional — used for items that share the same panorama
+            function goToLocation(panoramaName, locationKey) {
+                activeLocationKey = locationKey || null;
+
+                // If same panorama is already loaded, just update highlights
+                if (currentPanorama === panoramaName) {
+                    updateActiveLocation(panoramaName);
+                } else {
+                    // switchPanorama resets activeLocationKey, so we preserve it here
+                    const savedKey = activeLocationKey;
+                    overlay.style.pointerEvents = "auto";
+                    overlay.style.opacity = "1";
+                    overlay.textContent = "Entering...";
+                    new THREE.TextureLoader().load(
+                        `panoramas/${panoramaName}`,
+                        (tex) => {
+                            panoramaMesh.material.map = tex;
+                            panoramaMesh.material.needsUpdate = true;
+                            currentPanorama = panoramaName;
+                            activeLocationKey = savedKey;
+                            loadHotspotsFor(currentPanorama);
+                            updateCurrentLocation(getLocationName(panoramaName));
+                            updateActiveLocation(panoramaName);
+                            overlay.style.opacity = "0";
+                            overlay.style.pointerEvents = "none";
+                        },
+                        (xhr) => {
+                            const progress = (xhr.loaded / xhr.total) * 100;
+                            overlay.innerHTML = `<span class="loading-sunflower">🌻</span> Loading... ${progress.toFixed(0)}% <span class="loading-sunflower">🌻</span>`;
+                        }
+                    );
+                }
+
                 const sidebar = document.getElementById("sidebar");
                 const hamburger = document.getElementById("hamburgerBtn");
                 if (sidebar.classList.contains("active")) {
@@ -1924,12 +1951,16 @@
             }
 
             function updateActiveLocation(panoramaName) {
+                // Clear all active states first
                 document.querySelectorAll(".dropdown-item").forEach((el) => el.classList.remove("active"));
                 document.querySelectorAll(".nav-item").forEach((el) => el.classList.remove("active"));
-                document.querySelectorAll(".dropdown-item").forEach((el) => {
-                    if (el.getAttribute("onclick") && el.getAttribute("onclick").includes(panoramaName)) {
-                        el.classList.add("active");
-                        const panel = el.closest(".dropdown-panel");
+
+                if (activeLocationKey) {
+                    // Highlight by data-location key (for shared-panorama items)
+                    const target = document.querySelector(`.dropdown-item[data-location="${activeLocationKey}"]`);
+                    if (target) {
+                        target.classList.add("active");
+                        const panel = target.closest(".dropdown-panel");
                         if (panel) {
                             panel.classList.add("open");
                             const trigger = panel.previousElementSibling;
@@ -1938,12 +1969,30 @@
                             }
                         }
                     }
-                });
-                document.querySelectorAll(".nav-item").forEach((el) => {
-                    if (el.getAttribute("onclick") && el.getAttribute("onclick").includes(panoramaName)) {
-                        el.classList.add("active");
-                    }
-                });
+                } else {
+                    // Standard highlight by panorama name match in onclick
+                    document.querySelectorAll(".dropdown-item").forEach((el) => {
+                        const oc = el.getAttribute("onclick");
+                        // Skip items with a data-location (they are shared-panorama, handled above)
+                        if (oc && oc.includes(panoramaName) && !el.hasAttribute("data-location")) {
+                            el.classList.add("active");
+                            const panel = el.closest(".dropdown-panel");
+                            if (panel) {
+                                panel.classList.add("open");
+                                const trigger = panel.previousElementSibling;
+                                if (trigger && trigger.classList.contains("dropdown-trigger")) {
+                                    trigger.classList.add("open");
+                                }
+                            }
+                        }
+                    });
+                    document.querySelectorAll(".nav-item").forEach((el) => {
+                        const oc = el.getAttribute("onclick");
+                        if (oc && oc.includes(panoramaName)) {
+                            el.classList.add("active");
+                        }
+                    });
+                }
             }
 
             function getLocationName(panoramaName) {

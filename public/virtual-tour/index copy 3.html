@@ -548,7 +548,6 @@
             .unit-modal-card:hover .unit-modal-image img {
                 transform: scale(1.03);
             }
-            /* gradient overlay on image bottom */
             .unit-modal-image::after {
                 content: '';
                 position: absolute;
@@ -627,7 +626,6 @@
                 margin-bottom: 9px;
             }
 
-            /* Capacity chip */
             .unit-modal-info-row {
                 display: flex;
                 gap: 10px;
@@ -648,7 +646,6 @@
             }
             .unit-info-chip i { color: #e0b84f; font-size: 12px; }
 
-            /* Amenities list */
             .unit-modal-amenities {
                 list-style: none;
                 padding: 0; margin: 0 0 22px;
@@ -673,7 +670,6 @@
                 flex-shrink: 0;
             }
 
-            /* Rate + CTA */
             .unit-modal-rate {
                 margin-top: auto;
                 padding-top: 20px;
@@ -718,7 +714,6 @@
                 box-shadow: 0 6px 20px rgba(180, 160, 80, 0.4);
             }
 
-            /* Close button */
             .unit-modal-close {
                 position: absolute;
                 top: 14px; right: 14px;
@@ -762,7 +757,6 @@
                 #tmpcontent { padding: 20px; }
                 #tmpcontent img { max-width: 95%; max-height: 85vh; }
                 .mediaclosebutton { top: 20px; right: 20px; width: 45px; height: 45px; font-size: 22px; }
-                /* Modal responsive */
                 #unitModal { padding: 12px; }
                 .unit-modal-card { flex-direction: column; max-height: 96vh; border-radius: 14px; }
                 .unit-modal-image { flex: 0 0 210px; min-height: 210px; }
@@ -785,7 +779,6 @@
                     background: transparent;
                     padding-left: revert;
                 }
-                .hotspot-tooltip { display: none; }
             }
         </style>
     </head>
@@ -888,12 +881,18 @@
                     </div>
                     <div class="dropdown-panel" id="cottages-panel">
                         <div class="sub-label">Front Cottages</div>
+                        <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('2joypavillionandevelyncottage.jpg')">Evelyn Cottage</div></div>
                         <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('3tonicottageandihawan.jpg')">Toni Cottage</div></div>
+                        <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('4centro.jpg')">Emma Cottage</div></div>
+                        <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('4centro.jpg')">Edna Cottage</div></div>
+                        <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('4centro.jpg')">Elsa Cottage</div></div>
+                        <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('4centro.jpg')">Pavillion 1 Cottage</div></div>
                         <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('6arcelicottageandhardin.jpg')">Arceli Cottage</div></div>
                         <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('9estercottage.jpg')">Ester Cottage</div></div>
-                        <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('villaelenafront.jpg')">Villa Elena</div></div>
+                        <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('10sunflowerhouse.jpg')">Mini Cottage</div></div>     
                         <div class="sub-label">Back Cottages</div>
-                        <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('16backminicottages.jpg')">Back Mini Cottages</div></div>
+                        <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('16backminicottages.jpg')">Back Cottage</div></div>
+                        <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('31campsite4.jpg')">Pavillion 2 Cottage</div></div>
                     </div>
                 </li>
                 <li>
@@ -910,7 +909,6 @@
                         <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('29campsite2.jpg')">Campsite 2</div></div>
                         <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('30campsite3.jpg')">Campsite 3</div></div>
                         <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('31campsite4.jpg')">Campsite 4</div></div>
-                        <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('32pavillion2.jpg')">Pavilion</div></div>
                     </div>
                 </li>
                 <li>
@@ -981,6 +979,17 @@
 
             let currentPanorama = "4centro.jpg";
 
+            // ── Touch-tap detection variables ──────────────────────────────
+            let touchStartX = 0;
+            let touchStartY = 0;
+            let touchStartTime = 0;
+            // FIX 1: Increased thresholds for better mobile tap detection
+            const TAP_MOVE_THRESHOLD = 15;   // px – stricter to avoid false taps during drag
+            const TAP_TIME_THRESHOLD = 500;  // ms – more generous time window
+
+            // FIX 2: Detect mobile device for larger sprite sizes
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+
             init();
             animate();
 
@@ -1018,10 +1027,18 @@
                 loadHotspotsFor(currentPanorama);
                 updateCurrentLocation(getLocationName(currentPanorama));
                 updateActiveLocation(currentPanorama);
+
                 window.addEventListener("resize", onWindowResize);
                 renderer.domElement.addEventListener("wheel", onMouseWheel, { passive: false });
-                renderer.domElement.addEventListener("touchstart", handleTouchStart, { passive: false });
-                renderer.domElement.addEventListener("touchmove", handleTouchMove, { passive: false });
+
+                // ── Pinch-to-zoom (touch) ──────────────────────────────────
+                renderer.domElement.addEventListener("touchstart", handleTouchStart, { passive: false, capture: true });
+                renderer.domElement.addEventListener("touchmove",  handleTouchMove,  { passive: false, capture: true });
+
+                // ── Tap-to-click hotspot (touch) ───────────────────────────
+                renderer.domElement.addEventListener("touchend", handleTouchEnd, { passive: false, capture: true });
+
+                // ── Hover tooltip (mouse / pointer) ────────────────────────
                 renderer.domElement.addEventListener("pointermove", onPointerMove, false);
             }
 
@@ -1037,6 +1054,10 @@
                     const dy = e.touches[0].pageY - e.touches[1].pageY;
                     initialPinchDistance = Math.sqrt(dx * dx + dy * dy);
                     initialFov = targetFov;
+                } else if (e.touches.length === 1) {
+                    touchStartX    = e.touches[0].clientX;
+                    touchStartY    = e.touches[0].clientY;
+                    touchStartTime = Date.now();
                 }
             }
 
@@ -1048,6 +1069,42 @@
                     const newDistance = Math.sqrt(dx * dx + dy * dy);
                     const zoomFactor = initialPinchDistance / newDistance;
                     targetFov = THREE.MathUtils.clamp(initialFov * zoomFactor, 30, 100);
+                }
+            }
+
+            // ── FIX 3: Improved touch-end handler ──────────────────────────
+            function handleTouchEnd(e) {
+                if (e.touches.length < 2) initialPinchDistance = null;
+                if (e.changedTouches.length < 1) return;
+
+                const touch   = e.changedTouches[0];
+                const elapsed = Date.now() - touchStartTime;
+                const dx      = touch.clientX - touchStartX;
+                const dy      = touch.clientY - touchStartY;
+                const dist    = Math.sqrt(dx * dx + dy * dy);
+
+                // Not a tap — finger moved too much or held too long
+                if (dist > TAP_MOVE_THRESHOLD || elapsed > TAP_TIME_THRESHOLD) return;
+
+                // Convert touch position to NDC
+                const tapMouse = new THREE.Vector2(
+                    (touch.clientX / window.innerWidth)  *  2 - 1,
+                    (touch.clientY / window.innerHeight) * -2 + 1
+                );
+
+                // FIX 4: Larger hit threshold for mobile touch
+                const tapRaycaster = new THREE.Raycaster();
+                tapRaycaster.params.Sprite = { threshold: 60 };
+                tapRaycaster.setFromCamera(tapMouse, camera);
+                const intersects = tapRaycaster.intersectObjects(spriteHotspots);
+
+                if (intersects.length > 0) {
+                    // FIX 5: stopImmediatePropagation prevents OrbitControls interference
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    const tapped = intersects[0].object;
+                    if (tapped.userData.onClick) tapped.userData.onClick();
                 }
             }
 
@@ -1727,13 +1784,15 @@
                     const material = new THREE.SpriteMaterial({ map: texture });
                     const sprite = new THREE.Sprite(material);
                     sprite.position.copy(position);
-                    sprite.scale.set(40, 40, 1);
+                    // FIX 6: Larger sprites on mobile for easier tapping
+                    const baseScale = isMobile ? 55 : 40;
+                    sprite.scale.set(baseScale, baseScale, 1);
                     const panoramaFileName = onClickCallback.toString().match(/switchPanorama\('(.*?)'\)/);
                     let destinationName = "Open Hotspot";
                     if (panoramaFileName && panoramaFileName[1]) {
                         destinationName = getLocationName(panoramaFileName[1]);
                     }
-                    sprite.userData = { onClick: onClickCallback, targetScale: 40, destinationName: destinationName, tooltipElement: null };
+                    sprite.userData = { onClick: onClickCallback, targetScale: baseScale, destinationName: destinationName, tooltipElement: null };
                     spriteHotspots.push(sprite);
                     scene.add(sprite);
                     createTooltipForHotspot(sprite);
@@ -1757,17 +1816,19 @@
             }
 
             function onPointerMove(event) {
+                if (event.pointerType === 'touch') return;
+
                 mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
                 mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
                 raycaster.setFromCamera(mouse, camera);
                 const intersects = raycaster.intersectObjects(spriteHotspots);
                 spriteHotspots.forEach((sprite) => {
-                    sprite.userData.targetScale = 40;
+                    sprite.userData.targetScale = isMobile ? 55 : 40;
                     if (sprite.userData.tooltipElement) sprite.userData.tooltipElement.classList.remove("show");
                 });
                 if (intersects.length > 0) {
                     const intersectedSprite = intersects[0].object;
-                    intersectedSprite.userData.targetScale = 50;
+                    intersectedSprite.userData.targetScale = isMobile ? 65 : 50;
                     if (intersectedSprite.userData.tooltipElement) {
                         const vector = new THREE.Vector3();
                         intersectedSprite.getWorldPosition(vector);
@@ -1792,9 +1853,10 @@
                 requestAnimationFrame(animate);
                 camera.fov += (targetFov - camera.fov) * 0.1;
                 camera.updateProjectionMatrix();
+                const baseScale = isMobile ? 55 : 40;
                 spriteHotspots.forEach((sprite) => {
                     const currentScale = sprite.scale.x;
-                    const target = sprite.userData.targetScale || 40;
+                    const target = sprite.userData.targetScale || baseScale;
                     const newScale = THREE.MathUtils.lerp(currentScale, target, 0.1);
                     sprite.scale.set(newScale, newScale, 1);
                 });
@@ -1814,7 +1876,10 @@
                 renderer.render(scene, camera);
             }
 
+            // ── Mouse click handler (desktop) ─────────────────────────────
             document.addEventListener("click", function (event) {
+                if (event.sourceCapabilities && event.sourceCapabilities.firesTouchEvents) return;
+
                 const mouseClick = new THREE.Vector2(
                     (event.clientX / window.innerWidth) * 2 - 1,
                     -(event.clientY / window.innerHeight) * 2 + 1,
@@ -2097,7 +2162,6 @@
                     if (unit) {
                         showUnitModal(content, unit);
                     } else {
-                        // fallback: plain image in existing #tmp overlay
                         $("#tmpcontent").html("<img src='" + content + "' style='max-width:90%;max-height:88vh;border-radius:8px;'>");
                         $("#tmp").fadeIn();
                     }
@@ -2163,7 +2227,6 @@
                 document.body.style.overflow = '';
             }
 
-            // Close modal on Escape key
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') {
                     closeUnitModal();
