@@ -68,12 +68,12 @@
 
         /* ── Validation states ── */
         .input-enhanced.is-valid {
-            border-color: #22c55e !important;   /* green-500 */
+            border-color: #22c55e !important;
             box-shadow: 0 0 0 3px rgba(34,197,94,0.15);
         }
 
         .input-enhanced.is-invalid {
-            border-color: #ef4444 !important;   /* red-500 */
+            border-color: #ef4444 !important;
             box-shadow: 0 0 0 3px rgba(239,68,68,0.15);
         }
 
@@ -116,6 +116,17 @@
         .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
 
         .image-overlay { animation: fadeIn 1s ease-out; }
+
+        /* ── Password toggle wrapper fix ── */
+        .pw-toggle-wrap {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
@@ -163,8 +174,7 @@
                                 autocomplete="off"
                                 class="w-full mt-1 px-3 py-2 pr-9 border-2 border-gray-200 rounded-xl focus:outline-none transition input-enhanced @error('name') is-invalid @enderror"
                             />
-                            <!-- status icon -->
-                            <span id="name-icon" class="absolute right-3 top-1/2 -translate-y-1/2 mt-0.5 hidden text-sm pointer-events-none"></span>
+                            <span id="name-icon" class="absolute right-3 top-1/2 -translate-y-1/2 hidden text-sm pointer-events-none"></span>
                         </div>
                         <p id="name-msg" class="field-msg"><i class="fas fa-circle-info text-xs"></i><span id="name-msg-text"></span></p>
                         @error('name')
@@ -187,7 +197,7 @@
                                 autocomplete="off"
                                 class="w-full mt-1 px-3 py-2 pr-9 border-2 border-gray-200 rounded-xl focus:outline-none transition input-enhanced @error('username') is-invalid @enderror"
                             />
-                            <span id="username-icon" class="absolute right-3 top-1/2 -translate-y-1/2 mt-0.5 hidden text-sm pointer-events-none"></span>
+                            <span id="username-icon" class="absolute right-3 top-1/2 -translate-y-1/2 hidden text-sm pointer-events-none"></span>
                         </div>
                         <p id="username-msg" class="field-msg"><i class="fas fa-circle-info text-xs"></i><span id="username-msg-text"></span></p>
                         @error('username')
@@ -209,7 +219,7 @@
                                 autocomplete="off"
                                 class="w-full mt-1 px-3 py-2 pr-9 border-2 border-gray-200 rounded-xl focus:outline-none transition input-enhanced @error('email') is-invalid @enderror"
                             />
-                            <span id="email-icon" class="absolute right-3 top-1/2 -translate-y-1/2 mt-0.5 hidden text-sm pointer-events-none"></span>
+<span id="email-icon" class="absolute right-3 top-1/2 -translate-y-1/2 hidden text-sm pointer-events-none"></span>
                         </div>
                         <p id="email-msg" class="field-msg"><i class="fas fa-circle-info text-xs"></i><span id="email-msg-text"></span></p>
                         @error('email')
@@ -229,10 +239,9 @@
                                 required
                                 class="w-full mt-1 px-3 py-2 pr-16 border-2 border-gray-200 rounded-xl focus:outline-none transition input-enhanced @error('password') is-invalid @enderror"
                             />
-                            <!-- strength label + toggle -->
-                            <div class="absolute right-3 top-1/2 -translate-y-1/2 mt-0.5 flex items-center gap-1.5">
+                            <div class="pw-toggle-wrap">
                                 <span id="strength-label" class="text-xs font-medium hidden"></span>
-                                <button type="button" id="togglePassword" class="text-gray-400 hover:text-gray-600 transition">
+                                <button type="button" id="togglePassword" class="text-gray-400 hover:text-gray-600 transition leading-none">
                                     <i class="far fa-eye"></i>
                                 </button>
                             </div>
@@ -259,7 +268,7 @@
                                 required
                                 class="w-full mt-1 px-3 py-2 pr-9 border-2 border-gray-200 rounded-xl focus:outline-none transition input-enhanced @error('password_confirmation') is-invalid @enderror"
                             />
-                            <button type="button" id="toggleConfirmPassword" class="absolute right-3 top-1/2 -translate-y-1/2 mt-0.5 text-gray-400 hover:text-gray-600 transition">
+                            <button type="button" id="toggleConfirmPassword" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition leading-none">
                                 <i class="far fa-eye"></i>
                             </button>
                         </div>
@@ -389,22 +398,23 @@
         });
 
         /* =========================================================
-           EMAIL
+           EMAIL — @gmail.com only
         ========================================================= */
         const emailInput   = document.getElementById('email');
         const emailIcon    = document.getElementById('email-icon');
         const emailMsg     = document.getElementById('email-msg');
         const emailMsgText = document.getElementById('email-msg-text');
-        const emailRegex   = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        const emailRegex = /^[a-zA-Z0-9._%+\-]+@gmail\.com$/;
 
         emailInput.addEventListener('input', function () {
             const v = this.value.trim();
             if (v === '') {
                 clearState(this, emailIcon, emailMsg);
             } else if (!emailRegex.test(v)) {
-                setInvalid(this, emailIcon, emailMsg, 'Please enter a valid email address.', emailMsgText);
+                setInvalid(this, emailIcon, emailMsg, 'Only @gmail.com email addresses are accepted.', emailMsgText);
             } else {
-                setValid(this, emailIcon, emailMsg, 'Valid email address.', emailMsgText);
+                setValid(this, emailIcon, emailMsg, 'Valid Gmail address.', emailMsgText);
             }
         });
 
@@ -434,40 +444,40 @@
         function getStrengthScore(val) {
             if (val.length < 6) return 0;
             let score = 1;
-            if (val.length >= 8)              score++;
-            if (/[A-Z]/.test(val))            score++;
-            if (/[0-9]/.test(val))            score++;
-            if (/[^A-Za-z0-9]/.test(val))     score++;
+            if (val.length >= 8)          score++;
+            if (/[A-Z]/.test(val))        score++;
+            if (/[0-9]/.test(val))        score++;
+            if (/[^A-Za-z0-9]/.test(val)) score++;
             return Math.min(score, 4);
         }
+
+        const dummyPwIcon = { classList: { add: () => {}, remove: () => {} }, innerHTML: '' };
 
         passwordInput.addEventListener('input', function () {
             const v = this.value;
 
             if (v === '') {
-                clearState(this, { classList: { add: () => {}, remove: () => {} } }, passwordMsg);
+                clearState(this, dummyPwIcon, passwordMsg);
                 strengthBar.style.width = '0%';
                 strengthLabel.classList.add('hidden');
                 return;
             }
 
-            const score  = getStrengthScore(v);
-            const level  = strengthLevels[score];
+            const score = getStrengthScore(v);
+            const level = strengthLevels[score];
             strengthBar.style.width      = level.width;
             strengthBar.style.background = level.color;
             strengthLabel.textContent    = level.label;
             strengthLabel.style.color    = level.color;
             strengthLabel.classList.remove('hidden');
 
-            // Inline password rules check
+            // ✅ FIX: number and special character are now separate checks
             const errors = [];
-            if (v.length < 8)                     errors.push('at least 8 characters');
-            if (!/[A-Z]/.test(v))                 errors.push('one uppercase letter');
-            if (!/[a-z]/.test(v))                 errors.push('one lowercase letter');
-            if (!/[0-9!@#$%^&*]/.test(v))         errors.push('one number or special character');
-
-            // We create a dummy icon element since password field doesn't have a standalone icon slot
-            const dummyIcon = { classList: { add: () => {}, remove: () => {} }, innerHTML: '' };
+            if (v.length < 8)               errors.push('at least 8 characters');
+            if (!/[A-Z]/.test(v))           errors.push('one uppercase letter');
+            if (!/[a-z]/.test(v))           errors.push('one lowercase letter');
+            if (!/[0-9]/.test(v))           errors.push('one number');
+            if (!/[!@#$%^&*]/.test(v))      errors.push('one special character (!@#$%^&*)');
 
             if (errors.length) {
                 this.classList.remove('is-valid');
@@ -489,13 +499,7 @@
 
         passwordInput.addEventListener('blur', function () {
             if (this.value === '') {
-                setInvalid(
-                    this,
-                    { classList: { add: () => {}, remove: () => {} }, innerHTML: '' },
-                    passwordMsg,
-                    'Password is required.',
-                    passwordMsgText
-                );
+                setInvalid(this, dummyPwIcon, passwordMsg, 'Password is required.', passwordMsgText);
                 strengthBar.style.width = '0%';
                 strengthLabel.classList.add('hidden');
             }
@@ -504,9 +508,9 @@
         /* =========================================================
            CONFIRM PASSWORD
         ========================================================= */
-        const confirmInput   = document.getElementById('password_confirmation');
-        const confirmMsg     = document.getElementById('confirm-msg');
-        const confirmMsgText = document.getElementById('confirm-msg-text');
+        const confirmInput     = document.getElementById('password_confirmation');
+        const confirmMsg       = document.getElementById('confirm-msg');
+        const confirmMsgText   = document.getElementById('confirm-msg-text');
         const dummyConfirmIcon = { classList: { add: () => {}, remove: () => {} }, innerHTML: '' };
 
         function validateConfirm() {
@@ -541,8 +545,6 @@
             document.getElementById(btnId).addEventListener('click', function () {
                 const input = document.getElementById(inputId);
                 const icon  = this.querySelector('i');
-                this.style.transform = 'scale(0.9) translateY(-50%)';
-                setTimeout(() => this.style.transform = 'scale(1) translateY(-50%)', 100);
                 if (input.type === 'password') {
                     input.type = 'text';
                     icon.classList.replace('fa-eye', 'fa-eye-slash');
@@ -560,7 +562,6 @@
            FORM SUBMIT
         ========================================================= */
         document.getElementById('registerForm').addEventListener('submit', function (e) {
-            // Trigger blur validation on all fields
             ['name','username','email','password','password_confirmation'].forEach(id => {
                 document.getElementById(id).dispatchEvent(new Event('blur'));
             });
@@ -568,8 +569,9 @@
             const hasInvalid = this.querySelectorAll('.is-invalid').length > 0;
             const hasEmpty   = ['name','username','email','password','password_confirmation']
                                 .some(id => document.getElementById(id).value.trim() === '');
+            const emailOk    = emailRegex.test(emailInput.value.trim());
 
-            if (hasInvalid || hasEmpty) {
+            if (hasInvalid || hasEmpty || !emailOk) {
                 e.preventDefault();
                 Swal.fire({
                     icon: 'warning',
@@ -590,13 +592,10 @@
             spin.classList.remove('hidden');
         });
 
-        // Reset loader on page load (handles back-navigation / error redirects)
-        const btn  = document.getElementById('registerButton');
-        const text = document.getElementById('buttonText');
-        const spin = document.getElementById('buttonLoader');
-        btn.disabled = false;
-        text.classList.remove('hidden');
-        spin.classList.add('hidden');
+        // Reset loader on page load
+        document.getElementById('registerButton').disabled = false;
+        document.getElementById('buttonText').classList.remove('hidden');
+        document.getElementById('buttonLoader').classList.add('hidden');
     });
     </script>
 

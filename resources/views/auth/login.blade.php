@@ -268,16 +268,18 @@
         const emailIcon    = document.getElementById('email-icon');
         const emailMsg     = document.getElementById('email-msg');
         const emailMsgText = document.getElementById('email-msg-text');
-        const emailRegex   = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        // Only @gmail.com addresses are accepted
+        const emailRegex = /^[a-zA-Z0-9._%+\-]+@gmail\.com$/;
 
         emailInput.addEventListener('input', function () {
             const v = this.value.trim();
             if (v === '') {
                 clearState(this, emailIcon, emailMsg);
             } else if (!emailRegex.test(v)) {
-                setInvalid(this, emailIcon, emailMsg, 'Please enter a valid email address.', emailMsgText);
+                setInvalid(this, emailIcon, emailMsg, 'Only @gmail.com email addresses are accepted.', emailMsgText);
             } else {
-                setValid(this, emailIcon, emailMsg, 'Valid email address.', emailMsgText);
+                setValid(this, emailIcon, emailMsg, 'Valid Gmail address.', emailMsgText);
             }
         });
 
@@ -293,17 +295,30 @@
         const passwordInput   = document.getElementById('password');
         const passwordMsg     = document.getElementById('password-msg');
         const passwordMsgText = document.getElementById('password-msg-text');
+
         // Password field has a toggle button in the right slot, so we use a dummy icon object
         const dummyIcon = { classList: { add: () => {}, remove: () => {} }, innerHTML: '' };
+
+        // Returns an error string if invalid, or null if all rules pass
+        function getPasswordError(v) {
+            if (v.length < 8)             return 'Password must be at least 8 characters.';
+            if (!/[A-Z]/.test(v))         return 'Password must contain at least 1 uppercase letter.';
+            if (!/[0-9]/.test(v))         return 'Password must contain at least 1 number.';
+            if (!/[^a-zA-Z0-9]/.test(v))  return 'Password must contain at least 1 special character (e.g. !@#$%).';
+            return null;
+        }
 
         passwordInput.addEventListener('input', function () {
             const v = this.value;
             if (v === '') {
                 clearState(this, dummyIcon, passwordMsg);
-            } else if (v.length < 8) {
-                setInvalid(this, dummyIcon, passwordMsg, 'Password must be at least 8 characters.', passwordMsgText);
             } else {
-                setValid(this, dummyIcon, passwordMsg, 'Password looks good.', passwordMsgText);
+                const err = getPasswordError(v);
+                if (err) {
+                    setInvalid(this, dummyIcon, passwordMsg, err, passwordMsgText);
+                } else {
+                    setValid(this, dummyIcon, passwordMsg, 'Password meets all requirements.', passwordMsgText);
+                }
             }
         });
 
@@ -340,8 +355,10 @@
 
             const hasInvalid = this.querySelectorAll('.is-invalid').length > 0;
             const hasEmpty   = [emailInput, passwordInput].some(i => i.value.trim() === '');
+            const emailOk    = emailRegex.test(emailInput.value.trim());
+            const passOk     = !getPasswordError(passwordInput.value);
 
-            if (hasInvalid || hasEmpty) {
+            if (hasInvalid || hasEmpty || !emailOk || !passOk) {
                 e.preventDefault();
                 Swal.fire({
                     icon: 'warning',

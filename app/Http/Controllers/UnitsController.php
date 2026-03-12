@@ -1,4 +1,5 @@
 <?php
+
 // app/Http/Controllers/UnitsController.php
 
 namespace App\Http\Controllers;
@@ -39,11 +40,44 @@ class UnitsController extends Controller
 
         $units = $query->paginate(12);
 
+        // ===== DATE FILTER: Find booked unit IDs on the selected date =====
+        $bookedUnitIds = collect();
+        $filterDate = null;
+
+        if ($request->has('date') && $request->date != '') {
+            $filterDate = Carbon::parse($request->date)->format('Y-m-d');
+
+            // Normal bookings (day-use, overnight): checkInDate <= date <= checkOutDate
+            $normalCartIds = Booking::whereIn('bookingStatus', ['confirmed', 'pending'])
+                ->whereIn('bookingType', ['day-use', 'overnight'])
+                ->whereHas('cart', function ($q) use ($filterDate) {
+                    $q->where('checkInDate', '<=', $filterDate)
+                      ->where('checkOutDate', '>=', $filterDate);
+                })
+                ->pluck('cartID');
+
+            // Special event bookings: eventStartTime <= date <= eventEndTime
+            $specialCartIds = Booking::whereIn('bookingStatus', ['confirmed', 'pending'])
+                ->where('bookingType', 'special-event')
+                ->whereNotNull('eventStartTime')
+                ->whereNotNull('eventEndTime')
+                ->whereDate('eventStartTime', '<=', $filterDate)
+                ->whereDate('eventEndTime', '>=', $filterDate)
+                ->pluck('cartID');
+
+            $allCartIds = $normalCartIds->merge($specialCartIds)->unique();
+
+            $bookedUnitIds = CartItem::whereIn('cartID', $allCartIds)
+                ->pluck('unitID')
+                ->unique();
+        }
+        // ===== END DATE FILTER =====
+
         if ($request->ajax()) {
-            return view('adminFolder.partials.units-grid', compact('units'))->render();
+            return view('adminFolder.partials.units-grid', compact('units', 'bookedUnitIds', 'filterDate'))->render();
         }
 
-        return view('adminFolder.rooms-cottages.rooms-cottages', compact('units'));
+        return view('adminFolder.rooms-cottages.rooms-cottages', compact('units', 'bookedUnitIds', 'filterDate'));
     }
 
     public function store(Request $request)
