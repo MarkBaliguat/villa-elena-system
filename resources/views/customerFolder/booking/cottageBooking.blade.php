@@ -1270,15 +1270,21 @@
 
                 if (!validateBookingDate(checkIn)) return;
                 
-                // For cottages, check-out is always same as check-in (same day)
                 currentCheckIn = checkIn;
                 currentCheckOut = checkIn;
                 currentGuests = guests;
                 
-                // Update check-out input
                 checkOutInput.value = checkIn;
                 
                 loadUnits('cottages');
+
+                // Smooth scroll papunta sa accommodation section
+                setTimeout(() => {
+                    document.querySelector('.accommodation-section').scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }, 300);
             });
             
             // Guest number picker functionality

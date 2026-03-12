@@ -1235,20 +1235,28 @@
                 cottageTab.classList.remove('active');
             }
             
-            // Search button functionality
+            // Search button  tapos scroll to rooms section
             document.getElementById('searchBtn').addEventListener('click', function() {
-                const checkIn = document.getElementById('check_in').value;
-                const checkOut = document.getElementById('check_out').value;
-                const guests = document.getElementById('guest-number').value;
+                    const checkIn = document.getElementById('check_in').value;
+                    const checkOut = document.getElementById('check_out').value;
+                    const guests = document.getElementById('guest-number').value;
 
-                if (!validateDates(checkIn, checkOut)) return;
-                
-                currentCheckIn = checkIn;
-                currentCheckOut = checkOut;
-                currentGuests = guests;
-                
-                loadUnits('rooms');
-            });
+                    if (!validateDates(checkIn, checkOut)) return;
+                    
+                    currentCheckIn = checkIn;
+                    currentCheckOut = checkOut;
+                    currentGuests = guests;
+                    
+                    loadUnits('rooms');
+
+                    // Smooth scroll papunta sa accommodation section
+                    setTimeout(() => {
+                        document.querySelector('.accommodation-section').scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }, 300);
+                });
             
             // Guest number picker functionality
             const guestNumberInput = document.getElementById('guest-number');
