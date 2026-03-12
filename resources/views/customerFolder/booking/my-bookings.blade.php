@@ -2159,9 +2159,12 @@ function renderVoucher(b) {
     `;
 }
 
+/* ─── FIX: render the already-visible voucher sheet directly,
+         auto-sizing the PDF to match the actual content height ─── */
 function triggerPrint() {
     const printBtn = document.querySelector('.voucher-action-bar .btn-print');
     const originalHTML = printBtn ? printBtn.innerHTML : '';
+    const actionBar = document.querySelector('#voucher-sheet-content .voucher-action-bar');
 
     // Get booking ID for filename
     const bookingIdEl = document.querySelector('#voucher-sheet-content .voucher-booking-id');
@@ -2174,29 +2177,27 @@ function triggerPrint() {
         printBtn.disabled = true;
     }
 
-    // Clone the voucher content WITHOUT the action bar so it's not in the PDF
-    const sheet = document.getElementById('voucher-sheet-content');
-    const clone = sheet.cloneNode(true);
-    const actionBar = clone.querySelector('.voucher-action-bar');
-    if (actionBar) actionBar.remove();
+    // Temporarily hide the action bar so it won't appear in the PDF
+    if (actionBar) actionBar.style.display = 'none';
 
-    // Wrap clone in a temp container (off-screen)
-    const wrapper = document.createElement('div');
-    wrapper.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:680px;font-family:Poppins,sans-serif;';
-    wrapper.appendChild(clone);
-    document.body.appendChild(wrapper);
+    const sheet = document.getElementById('voucher-sheet-content');
+
+    // Dynamically size the PDF to match the actual rendered content — no white space
+    const sheetWidth  = sheet.offsetWidth;
+    const sheetHeight = sheet.offsetHeight;
 
     const options = {
         margin:       0,
         filename:     filename,
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, logging: false },
-        jsPDF:        { unit: 'px', format: [680, 1100], orientation: 'portrait' }
+        html2canvas:  { scale: 2, useCORS: true, logging: false, allowTaint: true, scrollY: 0 },
+        jsPDF:        { unit: 'px', format: [sheetWidth, sheetHeight], orientation: 'portrait' }
     };
 
-    html2pdf().set(options).from(wrapper).save()
+    html2pdf().set(options).from(sheet).save()
         .then(() => {
-            document.body.removeChild(wrapper);
+            // Restore the action bar
+            if (actionBar) actionBar.style.display = '';
 
             // Show done state then auto-close
             if (printBtn) {
@@ -2209,7 +2210,8 @@ function triggerPrint() {
             setTimeout(() => closePrintVoucher(), 1200);
         })
         .catch(() => {
-            document.body.removeChild(wrapper);
+            // Restore the action bar on error too
+            if (actionBar) actionBar.style.display = '';
             if (printBtn) {
                 printBtn.innerHTML = originalHTML;
                 printBtn.disabled = false;
