@@ -149,7 +149,8 @@
                 max-width: 100% !important;
             }
             .filter-bar select,
-            .filter-bar button {
+            .filter-bar button,
+            .filter-bar input[type="date"] {
                 width: 100%;
             }
         }
@@ -209,6 +210,116 @@
             font-size: 2rem;
             color: #9ca3af;
         }
+
+        /* ===== DATE FILTER STYLES ===== */
+        .date-filter-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .date-filter-wrapper input[type="date"] {
+            padding: 0.625rem 0.75rem 0.625rem 2.25rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            color: #374151;
+            background-color: #fff;
+            min-width: 160px;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .date-filter-wrapper input[type="date"]:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+
+        .date-filter-wrapper input[type="date"].has-value {
+            border-color: #6366f1;
+            background-color: #eef2ff;
+        }
+
+        .date-filter-wrapper .date-icon {
+            position: absolute;
+            left: 0.625rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6366f1;
+            pointer-events: none;
+            font-size: 0.875rem;
+        }
+
+        .date-filter-clear {
+            position: absolute;
+            right: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 0;
+            font-size: 0.75rem;
+            line-height: 1;
+            display: none;
+        }
+
+        .date-filter-clear:hover {
+            color: #ef4444;
+        }
+
+        .date-filter-wrapper input[type="date"].has-value ~ .date-filter-clear {
+            display: block;
+        }
+
+        /* ===== DATE FILTER ACTIVE BANNER ===== */
+        .date-filter-banner {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: #eef2ff;
+            border: 1px solid #c7d2fe;
+            border-radius: 0.5rem;
+            padding: 0.5rem 0.875rem;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            color: #4338ca;
+        }
+
+        .date-filter-banner i {
+            color: #6366f1;
+        }
+
+        /* ===== BOOKED OVERLAY ON CARD ===== */
+        .unit-booked-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.75rem;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .unit-booked-overlay span {
+            background: #dc2626;
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.9rem;
+            letter-spacing: 0.08em;
+            padding: 0.35rem 1rem;
+            border-radius: 9999px;
+            text-transform: uppercase;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        /* Dim the card image when booked */
+        .unit-card.is-booked-on-date .h-48 img {
+            filter: grayscale(40%) brightness(0.75);
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -256,6 +367,7 @@
                 {{-- Search and Filter --}}
                 <form method="GET" action="{{ route('admin.rooms-cottages') }}" id="searchForm">
                     <div class="filter-bar mb-6">
+                        {{-- Search --}}
                         <div class="search-wrapper">
                             <i class="fas fa-search search-icon absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                             <input
@@ -267,22 +379,57 @@
                                 class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             >
                         </div>
+
+                        {{-- Status Filter --}}
                         <select name="status" id="statusFilter" class="px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
                             <option value="">All Status</option>
                             <option value="available" {{ request('status') == 'available' ? 'selected' : '' }}>Available</option>
                             <option value="blocked" {{ request('status') == 'blocked' ? 'selected' : '' }}>Blocked</option>
                         </select>
+
+                        {{-- Type Filter --}}
                         <select name="type" id="typeFilter" class="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
                             <option value="">All Types</option>
                             <option value="room" {{ request('type') == 'room' ? 'selected' : '' }}>Rooms</option>
                             <option value="cottage" {{ request('type') == 'cottage' ? 'selected' : '' }}>Cottages</option>
                             <option value="special" {{ request('type') == 'special' ? 'selected' : '' }}>Special Units</option>
                         </select>
+
+                        {{-- ===== DATE FILTER (NEW) ===== --}}
+                        <div class="date-filter-wrapper">
+                            {{-- <i class="fas fa-calendar-day date-icon"></i> --}}
+                            <input
+                                type="date"
+                                name="date"
+                                id="dateFilter"
+                                value="{{ request('date') }}"
+                                title="Filter availability by date"
+                                class="{{ request('date') ? 'has-value' : '' }}"
+                            >
+                            {{-- <button type="button" class="date-filter-clear" id="dateClearBtn" title="Clear date filter">
+                                <i class="fas fa-times"></i>
+                            </button> --}}
+                        </div>
+                        {{-- ===== END DATE FILTER ===== --}}
+
                         <button type="button" onclick="clearFilters()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2.5 rounded-lg font-medium">
                             Refresh
                         </button>
                     </div>
                 </form>
+
+                {{-- ===== DATE FILTER ACTIVE BANNER (NEW) ===== --}}
+                @if(request('date'))
+                <div class="date-filter-banner" id="dateFilterBanner">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>
+                        Showing availability for
+                        <strong>{{ \Carbon\Carbon::parse(request('date'))->format('F j, Y') }}</strong>
+                        &mdash; Units with active bookings on this date are marked as <strong>Booked</strong>.
+                    </span>
+                </div>
+                @endif
+                {{-- ===== END BANNER ===== --}}
 
                 {{-- Selection Info --}}
                 <div id="selectionInfo" class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4 hidden">
@@ -302,7 +449,20 @@
                     {{-- Units Grid --}}
                     <div id="unitsGrid" class="units-grid">
                         @forelse($units as $unit)
-                        <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition relative unit-card" data-unit-id="{{ $unit->unitID }}">
+
+                        {{-- ===== CHECK IF BOOKED ON SELECTED DATE (NEW) ===== --}}
+                        @php $isBookedOnDate = isset($bookedUnitIds) && $bookedUnitIds->contains($unit->unitID); @endphp
+
+                        <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition relative unit-card {{ $isBookedOnDate ? 'is-booked-on-date' : '' }}" data-unit-id="{{ $unit->unitID }}">
+
+                            {{-- ===== BOOKED OVERLAY (shown only when date filter active and unit is booked) ===== --}}
+                            @if($isBookedOnDate)
+                            <div class="unit-booked-overlay">
+                                <span><i class="fas fa-calendar-check mr-1"></i> Booked</span>
+                            </div>
+                            @endif
+                            {{-- ===== END BOOKED OVERLAY ===== --}}
+
                             @if(auth()->user()->role === 'manager')
                             <div class="checkbox-container">
                                 <input type="checkbox" class="unit-checkbox hidden h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" value="{{ $unit->unitID }}">
@@ -333,11 +493,21 @@
                             <div class="p-4">
                                 <div class="flex justify-between items-start mb-2">
                                     <h3 class="text-lg font-bold text-gray-800">{{ $unit->unitName }}</h3>
+
+                                    {{-- ===== STATUS BADGE: show Booked when date-filtered (NEW) ===== --}}
+                                    @if($isBookedOnDate)
+                                    <span class="px-3 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-700">
+                                        Booked
+                                    </span>
+                                    @else
                                     <span class="px-3 py-1 text-xs font-semibold rounded-full
                                         {{ $unit->unitStatus == 'available' ? 'bg-green-100 text-green-700' : '' }}
                                         {{ $unit->unitStatus == 'blocked' ? 'bg-red-100 text-red-700' : '' }}">
                                         {{ ucfirst($unit->unitStatus) }}
                                     </span>
+                                    @endif
+                                    {{-- ===== END STATUS BADGE ===== --}}
+
                                 </div>
                                 <p class="text-sm text-gray-600 mb-3">{{ Str::limit($unit->description, 70) }}</p>
                                 <div class="space-y-1 mb-4">
@@ -686,6 +856,8 @@
             })
             .then(html => {
                 updateUnitsDisplay(html);
+                // Update banner after AJAX refresh
+                updateDateFilterBanner();
             })
             .catch(error => {
                 console.error('Search error:', error);
@@ -735,8 +907,110 @@
             document.getElementById('searchInput').value = '';
             document.getElementById('statusFilter').value = '';
             document.getElementById('typeFilter').value = '';
+            // ===== CLEAR DATE FILTER (NEW) =====
+            const dateFilter = document.getElementById('dateFilter');
+            if (dateFilter) {
+                dateFilter.value = '';
+                dateFilter.classList.remove('has-value');
+            }
+            // Remove banner
+            const banner = document.getElementById('dateFilterBanner');
+            if (banner) banner.remove();
+            // ===== END CLEAR DATE FILTER =====
             performSearch();
         }
+
+        // ============================================
+        // ===== DATE FILTER LOGIC (NEW) =====
+        // ============================================
+
+        function updateDateFilterBanner() {
+            const dateFilter = document.getElementById('dateFilter');
+            const existingBanner = document.getElementById('dateFilterBanner');
+            const selectionInfo = document.getElementById('selectionInfo');
+
+            if (!dateFilter) return;
+
+            const dateValue = dateFilter.value;
+
+            // Remove old banner
+            if (existingBanner) existingBanner.remove();
+
+            if (dateValue) {
+                // Format date nicely
+                const dateObj = new Date(dateValue + 'T00:00:00');
+                const formatted = dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+                const banner = document.createElement('div');
+                banner.id = 'dateFilterBanner';
+                banner.className = 'date-filter-banner';
+                banner.innerHTML = `
+                    <i class="fas fa-calendar-check"></i>
+                    <span>
+                        Showing availability for <strong>${formatted}</strong>
+                        &mdash; Units with active bookings on this date are marked as <strong>Booked</strong>.
+                    </span>
+                `;
+
+                // Insert banner before selectionInfo
+                if (selectionInfo) {
+                    selectionInfo.parentNode.insertBefore(banner, selectionInfo);
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // ===== DATE FILTER INIT =====
+            const dateFilter = document.getElementById('dateFilter');
+            const dateClearBtn = document.getElementById('dateClearBtn');
+
+            if (dateFilter) {
+                // Trigger search on date change
+                dateFilter.addEventListener('change', function() {
+                    if (this.value) {
+                        this.classList.add('has-value');
+                    } else {
+                        this.classList.remove('has-value');
+                    }
+                    performSearch();
+                });
+            }
+
+            if (dateClearBtn) {
+                dateClearBtn.addEventListener('click', function() {
+                    if (dateFilter) {
+                        dateFilter.value = '';
+                        dateFilter.classList.remove('has-value');
+                    }
+                    const banner = document.getElementById('dateFilterBanner');
+                    if (banner) banner.remove();
+                    performSearch();
+                });
+            }
+            // ===== END DATE FILTER INIT =====
+
+            document.addEventListener('click', handleEditButtonClick);
+
+            initializeUnitSelection();
+
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(performSearch, 500);
+                });
+            }
+
+            const statusFilter = document.getElementById('statusFilter');
+            if (statusFilter) {
+                statusFilter.addEventListener('change', performSearch);
+            }
+
+            const typeFilter = document.getElementById('typeFilter');
+            if (typeFilter) {
+                typeFilter.addEventListener('change', performSearch);
+            }
+        });
 
         // ============================================
         // DELETE CONFIRMATION WITH VALIDATION
@@ -859,33 +1133,6 @@
             }
         }
 
-        // ============================================
-        // INITIALIZATION
-        // ============================================
-
-        document.addEventListener('DOMContentLoaded', function() {
-            document.addEventListener('click', handleEditButtonClick);
-
-            initializeUnitSelection();
-
-            const searchInput = document.getElementById('searchInput');
-            if (searchInput) {
-                searchInput.addEventListener('input', function() {
-                    clearTimeout(searchTimeout);
-                    searchTimeout = setTimeout(performSearch, 500);
-                });
-            }
-
-            const statusFilter = document.getElementById('statusFilter');
-            if (statusFilter) {
-                statusFilter.addEventListener('change', performSearch);
-            }
-
-            const typeFilter = document.getElementById('typeFilter');
-            if (typeFilter) {
-                typeFilter.addEventListener('change', performSearch);
-            }
-        });
     </script>
 
 </body>
