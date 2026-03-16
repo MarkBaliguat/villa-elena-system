@@ -1519,8 +1519,8 @@ function showError(container, err) {
         <div class="empty-state">
             <div class="empty-icon" style="color:var(--red)"><i class="fas fa-exclamation-triangle"></i></div>
             <h3>Error loading cart</h3>
-            <p>${err.message || 'Please login first or add items to your cart.'}</p>
-            <button onclick="loadCartItems()" class="btn btn-cottages"><i class="fas fa-redo"></i> Retry</button>
+            <p>${'Please verify your email first.'}</p>
+            <a href="{{ route('profile.edit') }}" class="btn btn-cottages"><i class="fas fa-user"></i> Profile</a>
         </div>`;
 }
 
