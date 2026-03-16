@@ -219,13 +219,13 @@
         }
 
         .date-filter-wrapper input[type="date"] {
-            padding: 0.625rem 0.75rem 0.625rem 2.25rem;
+            /* padding: 0.625rem 0.75rem 0.625rem 2.25rem; */
             border: 1px solid #d1d5db;
             border-radius: 0.5rem;
             font-size: 0.875rem;
             color: #374151;
             background-color: #fff;
-            min-width: 160px;
+            min-width: 140px;
             transition: border-color 0.15s, box-shadow 0.15s;
         }
 
