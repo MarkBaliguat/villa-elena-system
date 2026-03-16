@@ -1273,11 +1273,22 @@
                 }
             });
             
+            // guestNumberInput.addEventListener('input', function() {
+            //     let value = parseInt(this.value);
+            //     if (isNaN(value) || value < 1) value = 1;
+            //     else if (value > 20) value = 20;
+            //     this.value = value;
+            // });
+
             guestNumberInput.addEventListener('input', function() {
                 let value = parseInt(this.value);
-                if (isNaN(value) || value < 1) value = 1;
-                else if (value > 20) value = 20;
-                this.value = value;
+                if (value > 20) this.value = 20;
+            });
+
+            guestNumberInput.addEventListener('blur', function() {
+                let value = parseInt(this.value);
+                if (isNaN(value) || value < 1) this.value = 1;
+                else if (value > 20) this.value = 20;
             });
             
             guestNumberInput.addEventListener('wheel', function(e) {

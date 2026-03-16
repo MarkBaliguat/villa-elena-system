@@ -1302,11 +1302,22 @@
                 }
             });
             
+            // guestNumberInput.addEventListener('input', function() {
+            //     let value = parseInt(this.value);
+            //     if (isNaN(value) || value < 1) value = 1;
+            //     else if (value > 40) value = 40;
+            //     this.value = value;
+            // });
+
             guestNumberInput.addEventListener('input', function() {
                 let value = parseInt(this.value);
-                if (isNaN(value) || value < 1) value = 1;
-                else if (value > 40) value = 40;
-                this.value = value;
+                if (value > 30) this.value = 30;
+            });
+
+            guestNumberInput.addEventListener('blur', function() {
+                let value = parseInt(this.value);
+                if (isNaN(value) || value < 1) this.value = 1;
+                else if (value > 30) this.value = 30;
             });
             
             guestNumberInput.addEventListener('wheel', function(e) {
@@ -1314,7 +1325,7 @@
                 let value = parseInt(this.value);
                 
                 if (e.deltaY < 0) {
-                    if (value < 40) this.value = value + 1;
+                    if (value < 30) this.value = value + 1;
                 } else {
                     if (value > 1) this.value = value - 1;
                 }
