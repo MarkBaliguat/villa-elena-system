@@ -787,7 +787,7 @@
                 text-align: center;
                 text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
                 margin: 0;
-                animation: welcomeFadeUp 0.7s ease both;
+                animation: welcomeFadeUp 0.5s ease both;
             }
             .welcome-subtitle {
                 font-family: 'Poppins', sans-serif;
@@ -1010,8 +1010,8 @@
                         <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('45sunflowerhouseroom7.jpg')">Room 7</div></div>
                         <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('46sunflowerhouseroom8siguro.jpg')">Room 8</div></div>
                         <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('47sunflowerhouseroom9siguro.jpg')">Room 9</div></div>
-                        <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('52room10.jpg')">Room 10</div></div>
-                        <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('49sunflowerhouseroom11ulit.jpg')">Room 11</div></div>
+                        <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('49sunflowerhouseroom11ulit.jpg')">Room 10</div></div>
+                        <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('52room10.jpg')">Room 11</div></div>
                         <div class="dropdown-item-wrap"><div class="dropdown-item" onclick="goToLocation('50sunflowerhousebalconyview.jpg')">Balcony View</div></div>
                     </div>
                 </li>
@@ -1851,10 +1851,10 @@
 
 			if (panorama === '48sunflowerhouselobby2ndfloorpart2retake.jpg') {
 				addHotspot('images/chevrontilted.png', new THREE.Vector3(292.35406026912136, -246.92278857070716, 113.64251157206643), () => {
-		switchPanorama('52room10.jpg');
+		switchPanorama('49sunflowerhouseroom11ulit.jpg');
 	});
 	addHotspot('images/chevronright.png', new THREE.Vector3(-82.07920334172675, -149.04402081887588, 361.5082045795019), () => {
-		switchPanorama('49sunflowerhouseroom11ulit.jpg');
+		switchPanorama('52room10.jpg');
 	});
 	addHotspot('images/chevrontilted.png', new THREE.Vector3(22.579869952501383, -139.67232290247398, 373.10562963744644), () => {
 		switchPanorama('50sunflowerhousebalconyview.jpg');
@@ -1917,17 +1917,47 @@
             function addHotspot(imageUrl, position, onClickCallback) {
                 const textureLoader = new THREE.TextureLoader();
                 textureLoader.load(imageUrl, (texture) => {
-                    const material = new THREE.SpriteMaterial({ map: texture });
+                    const baseScale = isMobile ? 58 : 45;
+
+                    // --- OUTLINE SPRITE (behind, black shadow) ---
+                    const outlineMat = new THREE.SpriteMaterial({
+                        map: texture,
+                        color: 0xe0b84f,
+                        
+                        transparent: true,
+                        depthTest: false,
+                    });
+                    const outlineSprite = new THREE.Sprite(outlineMat);
+                    outlineSprite.position.copy(position);
+                    outlineSprite.scale.set(baseScale * 1.4, baseScale * 1.4, 1);
+                    outlineSprite.renderOrder = 0;
+                    scene.add(outlineSprite);
+
+                    // --- MAIN SPRITE (on top) ---
+                    const material = new THREE.SpriteMaterial({
+                        map: texture,
+                        transparent: true,
+                        depthTest: false,
+                    });
                     const sprite = new THREE.Sprite(material);
                     sprite.position.copy(position);
-                    const baseScale = isMobile ? 55 : 40;
                     sprite.scale.set(baseScale, baseScale, 1);
+                    sprite.renderOrder = 1;
+
                     const panoramaFileName = onClickCallback.toString().match(/switchPanorama\('(.*?)'\)/);
                     let destinationName = "Open Hotspot";
                     if (panoramaFileName && panoramaFileName[1]) {
                         destinationName = getLocationName(panoramaFileName[1]);
                     }
-                    sprite.userData = { onClick: onClickCallback, targetScale: baseScale, destinationName: destinationName, tooltipElement: null };
+
+                    sprite.userData = {
+                        onClick: onClickCallback,
+                        targetScale: baseScale,
+                        destinationName: destinationName,
+                        tooltipElement: null,
+                        outlineSprite: outlineSprite,
+                    };
+
                     spriteHotspots.push(sprite);
                     scene.add(sprite);
                     createTooltipForHotspot(sprite);
@@ -1945,6 +1975,7 @@
             function clearHotspots() {
                 spriteHotspots.forEach((sprite) => {
                     if (sprite.userData.tooltipElement) sprite.userData.tooltipElement.remove();
+                    if (sprite.userData.outlineSprite) scene.remove(sprite.userData.outlineSprite);
                     scene.remove(sprite);
                 });
                 spriteHotspots = [];
@@ -1958,12 +1989,12 @@
                 raycaster.setFromCamera(mouse, camera);
                 const intersects = raycaster.intersectObjects(spriteHotspots);
                 spriteHotspots.forEach((sprite) => {
-                    sprite.userData.targetScale = isMobile ? 55 : 40;
+                    sprite.userData.targetScale = isMobile ? 58 : 45;
                     if (sprite.userData.tooltipElement) sprite.userData.tooltipElement.classList.remove("show");
                 });
                 if (intersects.length > 0) {
                     const intersectedSprite = intersects[0].object;
-                    intersectedSprite.userData.targetScale = isMobile ? 65 : 50;
+                    intersectedSprite.userData.targetScale = isMobile ? 58 : 45;
                     if (intersectedSprite.userData.tooltipElement) {
                         const vector = new THREE.Vector3();
                         intersectedSprite.getWorldPosition(vector);
@@ -1988,7 +2019,7 @@
                 requestAnimationFrame(animate);
                 camera.fov += (targetFov - camera.fov) * 0.1;
                 camera.updateProjectionMatrix();
-                const baseScale = isMobile ? 55 : 40;
+                const baseScale = isMobile ? 58 : 45;
                 spriteHotspots.forEach((sprite) => {
                     const currentScale = sprite.scale.x;
                     const target = sprite.userData.targetScale || baseScale;
@@ -2435,7 +2466,7 @@
                 }
 
                 // Auto-dismiss after 7 seconds
-                setTimeout(dismissSplash, 7000);
+                setTimeout(dismissSplash, 5000);
 
                 splash.addEventListener('click', dismissSplash);
                 splash.addEventListener('touchend', function (e) {
