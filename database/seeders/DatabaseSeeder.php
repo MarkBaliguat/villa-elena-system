@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
             'phoneNumber' => null,
             'email_verified_at' => now(),
         ]);
-
+    //try
     }
 }
 
