@@ -68,21 +68,26 @@
             display: none;
         }
 
-        /* ===== PAGINATION — matches reservations page ===== */
-        .pagination-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.25rem;
-            justify-content: center;
+        /* ===== PAGINATION ===== */
+        .pagination .page-item {
+            display: inline-block;
+            margin: 0 2px;
         }
-
-        @media (max-width: 640px) {
-            .pagination-container button,
-            .pagination-container a {
-                min-width: 36px;
-                padding: 0.5rem 0.625rem;
-                font-size: 0.75rem;
-            }
+        .pagination .page-link {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            color: #374151;
+            text-decoration: none;
+        }
+        .pagination .page-item.active .page-link {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+        .pagination .page-item.disabled .page-link {
+            color: #9ca3af;
+            cursor: not-allowed;
         }
 
         /* ===== RESPONSIVE GRID ===== */
@@ -214,6 +219,7 @@
         }
 
         .date-filter-wrapper input[type="date"] {
+            /* padding: 0.625rem 0.75rem 0.625rem 2.25rem; */
             border: 1px solid #d1d5db;
             border-radius: 0.5rem;
             font-size: 0.875rem;
@@ -232,6 +238,16 @@
         .date-filter-wrapper input[type="date"].has-value {
             border-color: #6366f1;
             background-color: #eef2ff;
+        }
+
+        .date-filter-wrapper .date-icon {
+            position: absolute;
+            left: 0.625rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6366f1;
+            pointer-events: none;
+            font-size: 0.875rem;
         }
 
         .date-filter-clear {
@@ -379,8 +395,9 @@
                             <option value="special" {{ request('type') == 'special' ? 'selected' : '' }}>Special Units</option>
                         </select>
 
-                        {{-- Date Filter --}}
+                        {{-- ===== DATE FILTER (NEW) ===== --}}
                         <div class="date-filter-wrapper">
+                            {{-- <i class="fas fa-calendar-day date-icon"></i> --}}
                             <input
                                 type="date"
                                 name="date"
@@ -389,7 +406,11 @@
                                 title="Filter availability by date"
                                 class="{{ request('date') ? 'has-value' : '' }}"
                             >
+                            {{-- <button type="button" class="date-filter-clear" id="dateClearBtn" title="Clear date filter">
+                                <i class="fas fa-times"></i>
+                            </button> --}}
                         </div>
+                        {{-- ===== END DATE FILTER ===== --}}
 
                         <button type="button" onclick="clearFilters()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2.5 rounded-lg font-medium">
                             Refresh
@@ -397,7 +418,7 @@
                     </div>
                 </form>
 
-                {{-- Date Filter Active Banner --}}
+                {{-- ===== DATE FILTER ACTIVE BANNER (NEW) ===== --}}
                 @if(request('date'))
                 <div class="date-filter-banner" id="dateFilterBanner">
                     <i class="fas fa-calendar-check"></i>
@@ -408,6 +429,7 @@
                     </span>
                 </div>
                 @endif
+                {{-- ===== END BANNER ===== --}}
 
                 {{-- Selection Info --}}
                 <div id="selectionInfo" class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4 hidden">
@@ -428,16 +450,18 @@
                     <div id="unitsGrid" class="units-grid">
                         @forelse($units as $unit)
 
+                        {{-- ===== CHECK IF BOOKED ON SELECTED DATE (NEW) ===== --}}
                         @php $isBookedOnDate = isset($bookedUnitIds) && $bookedUnitIds->contains($unit->unitID); @endphp
 
                         <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition relative unit-card {{ $isBookedOnDate ? 'is-booked-on-date' : '' }}" data-unit-id="{{ $unit->unitID }}">
 
-                            {{-- Booked Overlay --}}
+                            {{-- ===== BOOKED OVERLAY (shown only when date filter active and unit is booked) ===== --}}
                             @if($isBookedOnDate)
                             <div class="unit-booked-overlay">
                                 <span><i class="fas fa-calendar-check mr-1"></i> Booked</span>
                             </div>
                             @endif
+                            {{-- ===== END BOOKED OVERLAY ===== --}}
 
                             @if(auth()->user()->role === 'manager')
                             <div class="checkbox-container">
@@ -470,7 +494,7 @@
                                 <div class="flex justify-between items-start mb-2">
                                     <h3 class="text-lg font-bold text-gray-800">{{ $unit->unitName }}</h3>
 
-                                    {{-- Status Badge --}}
+                                    {{-- ===== STATUS BADGE: show Booked when date-filtered (NEW) ===== --}}
                                     @if($isBookedOnDate)
                                     <span class="px-3 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-700">
                                         Booked
@@ -482,6 +506,7 @@
                                         {{ ucfirst($unit->unitStatus) }}
                                     </span>
                                     @endif
+                                    {{-- ===== END STATUS BADGE ===== --}}
 
                                 </div>
                                 <p class="text-sm text-gray-600 mb-3">{{ Str::limit($unit->description, 70) }}</p>
@@ -532,7 +557,7 @@
                         </div>
 
                         @empty
-                        {{-- Empty State --}}
+                        {{-- Empty State: No units in database at all --}}
                         <div class="col-span-full py-16 text-center" id="emptyStateDB">
                             <div class="empty-state-icon-wrap">
                                 <i class="fas fa-building"></i>
@@ -556,7 +581,7 @@
                         </div>
                     </div>
 
-                    {{-- No Results Message --}}
+                    {{-- No Results Message (shown when filter/search returns nothing) --}}
                     <div id="noResults" class="hidden text-center py-16">
                         <div class="empty-state-icon-wrap">
                             <i class="fas fa-magnifying-glass"></i>
@@ -568,78 +593,17 @@
                         </button>
                     </div>
 
-                    {{-- ===== PAGINATION — same design as reservations page ===== --}}
+                    {{-- Pagination --}}
                     @if($units->isNotEmpty())
-                    <div class="flex flex-col sm:flex-row justify-between items-center mt-6 pt-6 border-t border-gray-200 gap-4" id="paginationSection">
-                        <div class="text-sm text-gray-600 text-center sm:text-left">
+                    <div id="paginationSection" class="flex justify-between items-center">
+                        <div class="text-sm text-gray-600">
                             Showing {{ $units->firstItem() }} to {{ $units->lastItem() }} of {{ $units->total() }} results
                         </div>
-                        <div class="pagination-container">
-                            {{-- Previous button --}}
-                            @if($units->onFirstPage())
-                                <button class="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed" disabled>
-                                    <i class="fas fa-chevron-left"></i>
-                                </button>
-                            @else
-                                <a href="{{ $units->previousPageUrl() }}&{{ http_build_query(request()->except('page')) }}"
-                                   class="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">
-                                    <i class="fas fa-chevron-left"></i>
-                                </a>
-                            @endif
-
-                            {{-- Page numbers --}}
-                            @php
-                                $lastPage   = $units->lastPage();
-                                $currentPage = $units->currentPage();
-                                $window     = 2;
-                                $start      = max(1, $currentPage - $window);
-                                $end        = min($lastPage, $currentPage + $window);
-                            @endphp
-
-                            {{-- First page + ellipsis --}}
-                            @if($start > 1)
-                                <a href="{{ $units->url(1) }}&{{ http_build_query(request()->except('page')) }}"
-                                   class="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">1</a>
-                                @if($start > 2)
-                                    <span class="px-3 py-2 text-sm text-gray-400">...</span>
-                                @endif
-                            @endif
-
-                            {{-- Page window --}}
-                            @for($page = $start; $page <= $end; $page++)
-                                @if($page == $currentPage)
-                                    <button class="px-3 py-2 text-sm border border-blue-500 bg-blue-500 text-white rounded-lg">{{ $page }}</button>
-                                @else
-                                    <a href="{{ $units->url($page) }}&{{ http_build_query(request()->except('page')) }}"
-                                       class="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">{{ $page }}</a>
-                                @endif
-                            @endfor
-
-                            {{-- Last page + ellipsis --}}
-                            @if($end < $lastPage)
-                                @if($end < $lastPage - 1)
-                                    <span class="px-3 py-2 text-sm text-gray-400">...</span>
-                                @endif
-                                <a href="{{ $units->url($lastPage) }}&{{ http_build_query(request()->except('page')) }}"
-                                   class="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">{{ $lastPage }}</a>
-                            @endif
-
-                            {{-- Next button --}}
-                            @if($units->hasMorePages())
-                                <a href="{{ $units->nextPageUrl() }}&{{ http_build_query(request()->except('page')) }}"
-                                   class="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">
-                                    <i class="fas fa-chevron-right"></i>
-                                </a>
-                            @else
-                                <button class="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed" disabled>
-                                    <i class="fas fa-chevron-right"></i>
-                                </button>
-                            @endif
+                        <div class="flex gap-2 pagination">
+                            {{ $units->links() }}
                         </div>
                     </div>
                     @endif
-                    {{-- ===== END PAGINATION ===== --}}
-
                 </div>
             </div>
         </div>
@@ -892,6 +856,7 @@
             })
             .then(html => {
                 updateUnitsDisplay(html);
+                // Update banner after AJAX refresh
                 updateDateFilterBanner();
             })
             .catch(error => {
@@ -923,6 +888,7 @@
                 const emptyStateDB = document.getElementById('emptyStateDB');
 
                 if (unitsGrid && noResults) {
+                    // Count only actual unit-cards (not the empty state div)
                     const unitCards = unitsGrid.querySelectorAll('.unit-card');
                     const hasResults = unitCards.length > 0;
                     const hasEmptyStateDB = !!emptyStateDB;
@@ -930,6 +896,7 @@
                     if (hasResults) {
                         noResults.classList.add('hidden');
                     } else if (!hasEmptyStateDB) {
+                        // No results from filter/search (not an empty DB)
                         noResults.classList.remove('hidden');
                     }
                 }
@@ -940,18 +907,21 @@
             document.getElementById('searchInput').value = '';
             document.getElementById('statusFilter').value = '';
             document.getElementById('typeFilter').value = '';
+            // ===== CLEAR DATE FILTER (NEW) =====
             const dateFilter = document.getElementById('dateFilter');
             if (dateFilter) {
                 dateFilter.value = '';
                 dateFilter.classList.remove('has-value');
             }
+            // Remove banner
             const banner = document.getElementById('dateFilterBanner');
             if (banner) banner.remove();
+            // ===== END CLEAR DATE FILTER =====
             performSearch();
         }
 
         // ============================================
-        // DATE FILTER LOGIC
+        // ===== DATE FILTER LOGIC (NEW) =====
         // ============================================
 
         function updateDateFilterBanner() {
@@ -963,9 +933,11 @@
 
             const dateValue = dateFilter.value;
 
+            // Remove old banner
             if (existingBanner) existingBanner.remove();
 
             if (dateValue) {
+                // Format date nicely
                 const dateObj = new Date(dateValue + 'T00:00:00');
                 const formatted = dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -980,6 +952,7 @@
                     </span>
                 `;
 
+                // Insert banner before selectionInfo
                 if (selectionInfo) {
                     selectionInfo.parentNode.insertBefore(banner, selectionInfo);
                 }
@@ -987,10 +960,12 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
+            // ===== DATE FILTER INIT =====
             const dateFilter = document.getElementById('dateFilter');
             const dateClearBtn = document.getElementById('dateClearBtn');
 
             if (dateFilter) {
+                // Trigger search on date change
                 dateFilter.addEventListener('change', function() {
                     if (this.value) {
                         this.classList.add('has-value');
@@ -1012,6 +987,7 @@
                     performSearch();
                 });
             }
+            // ===== END DATE FILTER INIT =====
 
             document.addEventListener('click', handleEditButtonClick);
 
