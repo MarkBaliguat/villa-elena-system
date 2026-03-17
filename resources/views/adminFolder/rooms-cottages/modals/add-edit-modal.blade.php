@@ -102,7 +102,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Images</label>
                     <div class="border-2 border-dashed border-gray-300 rounded-lg p-4">
                         <input type="file" name="images[]" multiple accept="image/*" class="w-full" id="imageInput">
-                        <p class="text-sm text-gray-500 mt-2">Select multiple images (JPEG, PNG, JPG, GIF) - Max 2MB each</p>
+                        <p class="text-sm text-gray-500 mt-2">Select multiple images (JPEG, PNG, JPG, GIF) - Max 5MB each</p>
                     </div>
                     
                     {{-- Image Preview --}}
@@ -458,8 +458,8 @@ function setupImagePreview() {
  * Validates image file
  */
 function validateImageFile(file) {
-    if (file.size > 2 * 1024 * 1024) {
-        Swal.fire({ icon: 'warning', title: 'File Too Large', text: `File ${file.name} is too large. Maximum size is 2MB.`, confirmButtonColor: '#3b82f6' });
+    if (file.size > 5 * 1024 * 1024) {
+        Swal.fire({ icon: 'warning', title: 'File Too Large', text: `File ${file.name} is too large. Maximum size is 5MB.`, confirmButtonColor: '#3b82f6' });
         return false;
     }
     if (!file.type.match('image.*')) {
