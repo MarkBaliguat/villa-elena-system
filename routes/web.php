@@ -13,9 +13,16 @@ use App\Http\Controllers\CottageController;
 use App\Http\Controllers\CustomerBookingController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\DashboardController; 
+use Illuminate\Support\Facades\Auth;
 
 // Guest routes
+// Route::get('/', function () {
+//     return view('welcome');
+// })->name('home');
 Route::get('/', function () {
+    if (Auth::check() && in_array(Auth::user()->role, ['manager', 'staff'])) {
+        return redirect()->route('admin.dashboard');
+    }
     return view('welcome');
 })->name('home');
 
