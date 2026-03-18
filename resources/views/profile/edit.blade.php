@@ -680,7 +680,7 @@
                                 <input id="p-email" name="email" type="email" class="form-input"
                                     value="{{ old('email', $user->email) }}"
                                     required autocomplete="email"
-                                    placeholder="your.email@example.com" readonly />
+                                    placeholder="your.email@example1.com"/>
                                 <x-input-error class="error-message" :messages="$errors->get('email')" />
                             </div>
 
