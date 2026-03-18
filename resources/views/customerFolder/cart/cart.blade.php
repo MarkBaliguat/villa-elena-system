@@ -2023,7 +2023,7 @@ function proceedToCheckout() {
     .catch(err => {
         btn.innerHTML = orig;
         btn.disabled  = false;
-        showNotification('Validation failed. Check your connection.', 'error');
+        showNotification('Validation failed. Try to remove the item and book again.', 'error');
     });
 }
 
