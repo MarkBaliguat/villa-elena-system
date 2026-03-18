@@ -905,14 +905,57 @@ function editBooking(bookingId) {
             checkinInput.parentNode.replaceChild(newCheckinInput, checkinInput);
             checkoutInput.parentNode.replaceChild(newCheckoutInput, checkoutInput);
 
+            // ✅ Check-in date change — with past date validation
             newCheckinInput.addEventListener('change', function () {
+                const today = new Date().toISOString().split('T')[0];
+
+                // ✅ Reject manually typed past dates
+                if (this.value < today) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Invalid Date',
+                        text: 'Check-in date cannot be in the past.',
+                        confirmButtonColor: '#f59e0b'
+                    });
+                    this.value = today;
+                    return;
+                }
+
                 newCheckoutInput.min = this.value;
                 if (originalBookingType === 'day-use') newCheckoutInput.value = this.value;
                 clearEditConflictMessage();
                 loadEditAvailableUnits();
             });
 
+            // ✅ Check-out date change — with past date + before checkin validation
             newCheckoutInput.addEventListener('change', function () {
+                const today = new Date().toISOString().split('T')[0];
+                const checkinVal = newCheckinInput.value;
+
+                // ✅ Reject manually typed past dates
+                if (this.value < today) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Invalid Date',
+                        text: 'Check-out date cannot be in the past.',
+                        confirmButtonColor: '#f59e0b'
+                    });
+                    this.value = checkinVal || today;
+                    return;
+                }
+
+                // ✅ Reject checkout before checkin
+                if (checkinVal && this.value < checkinVal) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Invalid Date',
+                        text: 'Check-out date cannot be before check-in date.',
+                        confirmButtonColor: '#f59e0b'
+                    });
+                    this.value = checkinVal;
+                    return;
+                }
+
                 clearEditConflictMessage();
                 loadEditAvailableUnits();
             });

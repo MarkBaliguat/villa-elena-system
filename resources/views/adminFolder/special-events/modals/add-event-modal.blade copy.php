@@ -386,24 +386,6 @@ function initializeSpecialEventForm() {
     checkinInput.min = today;
 }
 
-// ✅ PAST DATE VALIDATION — fires while typing in the Add modal date field
-document.getElementById('checkin_date').addEventListener('input', function () {
-    const value = this.value;
-    if (!value) return;
-
-    const today = new Date().toISOString().split('T')[0];
-
-    if (value < today) {
-        this.value = '';
-        Swal.fire({
-            icon: 'warning',
-            title: 'Invalid Date',
-            text: 'Event date cannot be in the past. Please select today or a future date.',
-            confirmButtonColor: '#f59e0b'
-        });
-    }
-});
-
 // ENHANCED: Check date availability in real-time - Now allows multiple events
 function checkDateAvailability(date) {
     if (!date) return;

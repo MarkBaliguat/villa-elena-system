@@ -290,9 +290,6 @@ function openEditModal() {
             setupPhoneValidation('edit_phone');
         }
 
-        // ✅ PAST DATE VALIDATION — attach on every modal open to handle the cloned input
-        attachEditDatePastValidation();
-
         setTimeout(() => {
             document.addEventListener('click', handleEditOutsideClick);
         }, 100);
@@ -364,37 +361,6 @@ function handleEditOutsideClick(event) {
     if (modalContent && !modalContent.contains(event.target)) {
         closeEditModal();
     }
-}
-
-// ✅ PAST DATE VALIDATION — attach listener on the current edit date input
-// Called each time the modal opens (after any cloneNode replacements)
-function attachEditDatePastValidation() {
-    const dateInput = document.getElementById('edit_checkin_date');
-    if (!dateInput) return;
-
-    // Use a named handler stored on the element to avoid stacking duplicates
-    if (dateInput._pastDateHandler) {
-        dateInput.removeEventListener('input', dateInput._pastDateHandler);
-    }
-
-    dateInput._pastDateHandler = function () {
-        const value = this.value;
-        if (!value) return;
-
-        const today = new Date().toISOString().split('T')[0];
-
-        if (value < today) {
-            this.value = '';
-            Swal.fire({
-                icon: 'warning',
-                title: 'Invalid Date',
-                text: 'Event date cannot be in the past. Please select today or a future date.',
-                confirmButtonColor: '#f59e0b'
-            });
-        }
-    };
-
-    dateInput.addEventListener('input', dateInput._pastDateHandler);
 }
 
 // ---------- Booking Status Change Handler ----------
@@ -781,9 +747,6 @@ window.editEvent = function (bookingId) {
                     clearEditEventUnitNotes();
                     loadEditEventAvailableUnits();
                 });
-
-                // ✅ Re-attach past date validation after cloneNode
-                attachEditDatePastValidation();
             }
 
             // Load payment summary

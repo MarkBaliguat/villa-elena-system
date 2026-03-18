@@ -419,24 +419,9 @@ document.getElementById('booking_type').addEventListener('change', function() {
     setTimeout(checkDateConflict, 100);
 });
 
-// ✅ Handle checkin date change — with past date validation
+// Handle checkin date change
 document.getElementById('checkin_date').addEventListener('change', function() {
     console.log('Checkin date changed to:', this.value);
-
-    const today = new Date().toISOString().split('T')[0];
-
-    // ✅ Reject manually typed past dates
-    if (this.value < today) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Invalid Date',
-            text: 'Check-in date cannot be in the past.',
-            confirmButtonColor: '#f59e0b'
-        });
-        this.value = today;
-        return;
-    }
-
     const bookingType = document.getElementById('booking_type').value;
     const checkoutInput = document.getElementById('checkout_date');
     
@@ -452,37 +437,9 @@ document.getElementById('checkin_date').addEventListener('change', function() {
     setTimeout(checkDateConflict, 100);
 });
 
-// ✅ Handle checkout date change — with past date + before checkin validation
+// Handle checkout date change
 document.getElementById('checkout_date').addEventListener('change', function() {
     console.log('Checkout date changed to:', this.value);
-
-    const today = new Date().toISOString().split('T')[0];
-    const checkinDate = document.getElementById('checkin_date').value;
-
-    // ✅ Reject manually typed past dates
-    if (this.value < today) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Invalid Date',
-            text: 'Check-out date cannot be in the past.',
-            confirmButtonColor: '#f59e0b'
-        });
-        this.value = checkinDate || today;
-        return;
-    }
-
-    // ✅ Reject checkout before checkin
-    if (checkinDate && this.value < checkinDate) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Invalid Date',
-            text: 'Check-out date cannot be before check-in date.',
-            confirmButtonColor: '#f59e0b'
-        });
-        this.value = checkinDate;
-        return;
-    }
-
     clearConflictMessage();
     updateTotalPrice();
     setTimeout(checkDateConflict, 100);
