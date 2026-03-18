@@ -43,10 +43,20 @@
                         </div>
                     </div>
 
-                    <h2 class="text-2xl font-bold mb-3 text-gray-800 text-center">Verify Your Email</h2>
-                    
+                    <h2 class="text-2xl font-bold mb-3 text-gray-800 text-center">
+                        @if (session('status') == 'verification-link-sent')
+                            Email Sent!
+                        @else
+                            Verify Your Email
+                        @endif
+                    </h2>
+
                     <div class="mb-5 text-sm text-gray-600 leading-relaxed text-center">
-                        Thanks for signing up! Before getting started, please verify your email address by clicking on the link we just emailed to you.
+                        @if (session('status') == 'verification-link-sent')
+                            We've sent a new verification link to your email. Didn't get it? You can resend below.
+                        @else
+                            Thanks for signing up! Before getting started, please verify your email address by clicking on the link we just emailed to you.
+                        @endif
                     </div>
 
                     <!-- Action Buttons -->
@@ -58,7 +68,13 @@
                                 type="submit" 
                                 id="resendButton"
                                 class="w-full bg-black text-white py-2.5 rounded-xl hover:bg-gray-800 transition font-semibold text-base btn-primary">
-                                <span id="buttonText">Resend Verification Email</span>
+                                <span id="buttonText">
+                                    @if (session('status') == 'verification-link-sent')
+                                        Resend Verification Email
+                                    @else
+                                        Send Verification Email
+                                    @endif
+                                </span>
                                 <span id="buttonLoader" class="hidden">
                                     <svg class="animate-spin h-5 w-5 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

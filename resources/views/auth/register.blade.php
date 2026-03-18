@@ -155,7 +155,18 @@
         <!-- RIGHT SIDE FORM -->
         <div class="flex flex-col justify-center px-6 py-6 md:px-12 md:py-8 bg-white">
             <div class="animate-form">
-                <h2 class="text-2xl font-bold mb-5 text-center text-gray-800">Create Account</h2>
+                <div class="relative flex items-center mb-6 md:mb-8">
+                    <a href="{{ route('home') }}"
+                    class="absolute left-0 text-gray-400 hover:text-gray-700 transition-colors duration-200"
+                    title="Back to Home">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                    </a>
+                    <h2 class="text-2xl font-bold text-gray-800 w-full text-center">Create Account</h2>
+                </div>
+                
 
                 <form method="POST" action="{{ route('register') }}" id="registerForm" novalidate>
                     @csrf
