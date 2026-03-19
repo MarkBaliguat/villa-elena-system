@@ -308,7 +308,7 @@ class BookingController extends Controller
                     'username' => strtolower(str_replace(' ', '', $validated['guest_name'])) . rand(1000, 9999),
                     'email' => $validated['email'],
                     'phoneNumber' => $validated['phone'],
-                    'password' => bcrypt('temporary123'),
+                    'password' => bcrypt('Temporary123!'),
                     'email_verified_at' => now(),
                     'role' => 'guest'
                 ]);

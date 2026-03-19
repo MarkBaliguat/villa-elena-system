@@ -513,7 +513,7 @@
 
         // Pagination variables
         let currentPage = 1;
-        const perPage = 2;
+        const perPage = 10;
         let totalBookings = 0;
         let allBookings = [];
 
