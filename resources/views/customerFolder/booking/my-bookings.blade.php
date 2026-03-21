@@ -1737,9 +1737,21 @@ function cardHTML(b, i) {
                     <h4><i class="fas fa-calendar-day"></i> Dates</h4>
                     <p>${start} – ${end}</p>
                 </div>
+                
                 <div class="detail-box">
                     <h4><i class="fas fa-home"></i> Accommodations</h4>
-                    <p>${accomCnt} item${accomCnt !== 1 ? 's' : ''}</p>
+                    <p>${
+                        b.accommodations && b.accommodations.length
+                            ? b.accommodations.map(a =>
+                                `<span style="display:block;font-size:0.82rem;font-weight:700;color:var(--booking-text-dark);">
+                                    ${a.name}
+                                    <span style="font-size:0.7rem;font-weight:600;color:${a.type === 'room' ? 'var(--booking-blue)' : 'var(--booking-green)'};">
+                                        (${a.type})
+                                    </span>
+                                </span>`
+                            ).join('')
+                            : `${accomCnt} item${accomCnt !== 1 ? 's' : ''}`
+                    }</p>
                 </div>
                 <div class="detail-box">
                     <h4><i class="fas fa-star"></i> Type</h4>
