@@ -460,9 +460,7 @@ class CustomerBookingController extends Controller
     }
 
     // ═══════════════════════════════════════════════════════
-    //  PROCESS CARD PAYMENT ✅ SECURE
-    //  Receives only payment_method_id (token) from frontend
-    //  Raw card details never touch this server
+    //  PROCESS CARD PAYMENT
     // ═══════════════════════════════════════════════════════
     public function processCardPayment(Request $request)
     {
@@ -472,11 +470,10 @@ class CustomerBookingController extends Controller
             return response()->json(['success' => false, 'message' => 'Please login to complete payment'], 401);
         }
 
-        // ✅ Only accept token ID — no raw card fields
         $validator = Validator::make($request->all(), [
             'booking_data'      => 'required|array',
             'payment_data'      => 'required|array',
-            'payment_method_id' => 'required|string', // PayMongo token from frontend
+            'payment_method_id' => 'required|string',
         ]);
 
         if ($validator->fails()) {
@@ -486,9 +483,8 @@ class CustomerBookingController extends Controller
         try {
             $bookingData     = $request->booking_data;
             $paymentData     = $request->payment_data;
-            $paymentMethodId = $request->payment_method_id; // token only
+            $paymentMethodId = $request->payment_method_id;
 
-            // Update phone if provided
             if (isset($bookingData['phone'])) {
                 $user = User::find(Auth::id());
                 if ($user && (empty($user->phoneNumber) || $user->phoneNumber !== $bookingData['phone'])) {
@@ -499,33 +495,28 @@ class CustomerBookingController extends Controller
 
             $amount = floatval($paymentData['payment_amount']);
 
-            // STEP 1: Create payment intent
             $paymentIntent = $this->payMongoService->createCardPaymentIntent($amount, 'Villa Elena Booking');
             Log::info('Card Payment Intent Created', ['intent_id' => $paymentIntent['data']['id']]);
 
-            // STEP 2: Store in session for 3DS callback
             session([
                 'card_booking_data'      => $bookingData,
                 'card_payment_data'      => $paymentData,
                 'card_payment_intent_id' => $paymentIntent['data']['id']
             ]);
 
-            // STEP 3: Build return URL for 3DS
             $returnUrl = route('customer.card.payment.success', [
                 'payment_intent_id' => $paymentIntent['data']['id']
             ]);
 
-            // STEP 4: Attach the tokenized payment method — triggers 3DS if needed
             $attachedPayment = $this->payMongoService->attachPaymentMethod(
                 $paymentIntent['data']['id'],
-                $paymentMethodId, // token from frontend
+                $paymentMethodId,
                 $returnUrl
             );
 
             $intentStatus = $attachedPayment['data']['attributes']['status'] ?? 'unknown';
             Log::info('Card Payment Attach Status', ['status' => $intentStatus]);
 
-            // STEP 5: Check if 3DS redirect is needed
             $nextAction  = $attachedPayment['data']['attributes']['next_action'] ?? null;
             $redirectUrl = $nextAction['redirect']['url'] ?? null;
 
@@ -539,7 +530,6 @@ class CustomerBookingController extends Controller
                 ]);
             }
 
-            // STEP 6: No 3DS — payment succeeded immediately
             if ($intentStatus === 'succeeded') {
                 $result = $this->createBookingAfterCardPayment(
                     $paymentIntent['data']['id'],
@@ -601,6 +591,8 @@ class CustomerBookingController extends Controller
 
     // ═══════════════════════════════════════════════════════
     //  HELPER — Create booking after card payment succeeded
+    //  ✅ Re-checks unit availability AFTER payment to guard
+    //  against race conditions during 3DS redirect gap
     // ═══════════════════════════════════════════════════════
     private function createBookingAfterCardPayment(string $paymentIntentId, float $amountPaid): array
     {
@@ -611,14 +603,72 @@ class CustomerBookingController extends Controller
             throw new \Exception('Session data expired. Please restart booking.');
         }
 
+        // Load cart with user relationship for email sending later
         $cart     = Cart::with(['items.unit', 'user'])->findOrFail($bookingData['cart_id']);
         $checkIn  = Carbon::parse($bookingData['event_start'])->startOfDay();
         $checkOut = Carbon::parse($bookingData['event_end'])->startOfDay();
 
+        // ── Re-check 1: Special event conflict ──
         if ($this->hasStrictSpecialEventConflict($checkIn, $checkOut)) {
-            throw new \Exception('Date conflict detected. Please restart booking.');
+            Log::error('=== CARD: SPECIAL EVENT CONFLICT AFTER CHARGE ===', [
+                'payment_intent_id' => $paymentIntentId,
+                'amount_paid'       => $amountPaid,
+                'cart_id'           => $cart->cartID,
+            ]);
+            session()->forget(['card_booking_data', 'card_payment_data', 'card_payment_intent_id']);
+            throw new \Exception(
+                'Your payment was received but the dates are no longer available due to a special event. ' .
+                'Please contact us at 0917-301-0790 for an immediate refund.'
+            );
         }
 
+        // ── Re-check 2: Unit availability (race condition guard) ──
+        $unavailableUnits = [];
+        foreach ($cart->items->where('isBooked', false) as $item) {
+            $unit = $item->unit;
+
+            if ($unit->for_special_events && $unit->unitStatus === 'blocked') {
+                $unavailableUnits[] = "{$unit->unitName} is reserved for special events only.";
+                continue;
+            }
+
+            if ($this->isUnitBlocked($unit, $checkIn, $checkOut)) {
+                $blockStart         = $unit->blockStartDate ? Carbon::parse($unit->blockStartDate)->format('M d, Y') : 'N/A';
+                $blockEnd           = $unit->blockEndDate   ? Carbon::parse($unit->blockEndDate)->format('M d, Y')   : 'N/A';
+                $unavailableUnits[] = "{$unit->unitName} was blocked ({$blockStart} – {$blockEnd}) while your payment was processing.";
+                continue;
+            }
+
+            if ($this->isUnitAlreadyBooked($unit->unitID, $checkIn, $checkOut, $cart->cartID)) {
+                $unavailableUnits[] = "{$unit->unitName} was just booked by another guest while your payment was processing.";
+                continue;
+            }
+
+            if ($unit->unitStatus !== 'available') {
+                $unavailableUnits[] = "{$unit->unitName} is no longer available (status: {$unit->unitStatus}).";
+                continue;
+            }
+        }
+
+        if (!empty($unavailableUnits)) {
+            // Payment is already charged — log everything for manual refund, DO NOT rollback payment
+            Log::error('=== CARD: UNIT CONFLICT AFTER CHARGE — MANUAL REFUND NEEDED ===', [
+                'payment_intent_id' => $paymentIntentId,
+                'amount_paid'       => $amountPaid,
+                'conflicts'         => $unavailableUnits,
+                'cart_id'           => $cart->cartID,
+                'user_id'           => $cart->user_id,
+                'user_email'        => $cart->user->email ?? 'unknown',
+            ]);
+            session()->forget(['card_booking_data', 'card_payment_data', 'card_payment_intent_id']);
+            throw new \Exception(
+                'Your payment was received but the following units are no longer available: ' .
+                implode(' | ', $unavailableUnits) .
+                ' Please contact us at 0917-301-0790 for an immediate refund. Reference: ' . $paymentIntentId
+            );
+        }
+
+        // ── Update phone number if provided ──
         if (isset($bookingData['phone'])) {
             $user = User::find($cart->user_id);
             if ($user && (empty($user->phoneNumber) || $user->phoneNumber !== $bookingData['phone'])) {
@@ -627,6 +677,7 @@ class CustomerBookingController extends Controller
             }
         }
 
+        // ── Create booking and payment records ──
         DB::beginTransaction();
         try {
             $booking = Booking::create([
@@ -662,7 +713,10 @@ class CustomerBookingController extends Controller
 
             session()->forget(['card_booking_data', 'card_payment_data', 'card_payment_intent_id']);
 
-            Log::info('=== CARD BOOKING COMPLETED SUCCESSFULLY ===');
+            Log::info('=== CARD BOOKING COMPLETED SUCCESSFULLY ===', [
+                'booking_id'        => $booking->bookingID,
+                'payment_reference' => $paymentReference,
+            ]);
 
             try {
                 Mail::to($cart->user->email)->send(
@@ -770,6 +824,8 @@ class CustomerBookingController extends Controller
 
     // ═══════════════════════════════════════════════════════
     //  GCASH — Verify Payment
+    //  ✅ Re-checks unit availability AFTER payment to guard
+    //  against race conditions during GCash redirect gap
     // ═══════════════════════════════════════════════════════
     public function verifyGCashPayment(Request $request)
     {
@@ -804,14 +860,74 @@ class CustomerBookingController extends Controller
                     throw new \Exception('Session data expired. Please restart booking.');
                 }
 
+                // Load cart with user relationship for email sending later
                 $cart     = Cart::with(['items.unit', 'user'])->findOrFail($bookingData['cart_id']);
                 $checkIn  = Carbon::parse($bookingData['event_start'])->startOfDay();
                 $checkOut = Carbon::parse($bookingData['event_end'])->startOfDay();
 
+                // ── Re-check 1: Special event conflict ──
                 if ($this->hasStrictSpecialEventConflict($checkIn, $checkOut)) {
-                    throw new \Exception('Date conflict detected. Please restart booking.');
+                    Log::error('=== GCASH: SPECIAL EVENT CONFLICT AFTER CHARGE ===', [
+                        'payment_intent_id' => $paymentIntentId,
+                        'amount_paid'       => $paymentIntent['data']['attributes']['amount'] / 100,
+                        'cart_id'           => $cart->cartID,
+                    ]);
+                    DB::rollBack();
+                    session()->forget(['gcash_booking_data', 'gcash_payment_data', 'gcash_payment_intent_id']);
+                    throw new \Exception(
+                        'Your payment was received but the dates are no longer available due to a special event. ' .
+                        'Please contact us at 0917-301-0790 for an immediate refund.'
+                    );
                 }
 
+                // ── Re-check 2: Unit availability (race condition guard) ──
+                $unavailableUnits = [];
+                foreach ($cart->items->where('isBooked', false) as $item) {
+                    $unit = $item->unit;
+
+                    if ($unit->for_special_events && $unit->unitStatus === 'blocked') {
+                        $unavailableUnits[] = "{$unit->unitName} is reserved for special events only.";
+                        continue;
+                    }
+
+                    if ($this->isUnitBlocked($unit, $checkIn, $checkOut)) {
+                        $blockStart         = $unit->blockStartDate ? Carbon::parse($unit->blockStartDate)->format('M d, Y') : 'N/A';
+                        $blockEnd           = $unit->blockEndDate   ? Carbon::parse($unit->blockEndDate)->format('M d, Y')   : 'N/A';
+                        $unavailableUnits[] = "{$unit->unitName} was blocked ({$blockStart} – {$blockEnd}) while your payment was processing.";
+                        continue;
+                    }
+
+                    if ($this->isUnitAlreadyBooked($unit->unitID, $checkIn, $checkOut, $cart->cartID)) {
+                        $unavailableUnits[] = "{$unit->unitName} was just booked by another guest while your payment was processing.";
+                        continue;
+                    }
+
+                    if ($unit->unitStatus !== 'available') {
+                        $unavailableUnits[] = "{$unit->unitName} is no longer available (status: {$unit->unitStatus}).";
+                        continue;
+                    }
+                }
+
+                if (!empty($unavailableUnits)) {
+                    // Payment is already charged — log everything for manual refund, DO NOT rollback payment
+                    Log::error('=== GCASH: UNIT CONFLICT AFTER CHARGE — MANUAL REFUND NEEDED ===', [
+                        'payment_intent_id' => $paymentIntentId,
+                        'amount_paid'       => $paymentIntent['data']['attributes']['amount'] / 100,
+                        'conflicts'         => $unavailableUnits,
+                        'cart_id'           => $cart->cartID,
+                        'user_id'           => $cart->user_id,
+                        'user_email'        => $cart->user->email ?? 'unknown',
+                    ]);
+                    DB::rollBack();
+                    session()->forget(['gcash_booking_data', 'gcash_payment_data', 'gcash_payment_intent_id']);
+                    throw new \Exception(
+                        'Your payment was received but the following units are no longer available: ' .
+                        implode(' | ', $unavailableUnits) .
+                        ' Please contact us at 0917-301-0790 for an immediate refund. Reference: ' . $paymentIntentId
+                    );
+                }
+
+                // ── Update phone number if provided ──
                 if (isset($bookingData['phone'])) {
                     $user = User::find($cart->user_id);
                     if ($user && (empty($user->phoneNumber) || $user->phoneNumber !== $bookingData['phone'])) {
@@ -820,6 +936,7 @@ class CustomerBookingController extends Controller
                     }
                 }
 
+                // ── Create booking and payment records ──
                 $booking = Booking::create([
                     'cartID'                  => $bookingData['cart_id'],
                     'numGuests'               => $bookingData['num_guests'],
@@ -854,6 +971,11 @@ class CustomerBookingController extends Controller
                 DB::commit();
                 session()->forget(['gcash_booking_data', 'gcash_payment_data', 'gcash_payment_intent_id']);
 
+                Log::info('=== GCASH BOOKING COMPLETED SUCCESSFULLY ===', [
+                    'booking_id'        => $booking->bookingID,
+                    'payment_reference' => $paymentReference,
+                ]);
+
                 try {
                     Mail::to($cart->user->email)->send(
                         new BookingConfirmationEmail($booking->load('cart.user', 'cart.cartItems.unit'))
@@ -865,8 +987,16 @@ class CustomerBookingController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => 'Payment verified successfully',
-                    'booking' => ['bookingID' => $booking->bookingID, 'bookingStatus' => $booking->bookingStatus, 'totalPrice' => $booking->totalPrice],
-                    'payment' => ['paymentReference' => $payment->paymentReference, 'amountPaid' => $payment->amountPaid, 'paymentStatus' => $payment->paymentStatus]
+                    'booking' => [
+                        'bookingID'     => $booking->bookingID,
+                        'bookingStatus' => $booking->bookingStatus,
+                        'totalPrice'    => $booking->totalPrice
+                    ],
+                    'payment' => [
+                        'paymentReference' => $payment->paymentReference,
+                        'amountPaid'       => $payment->amountPaid,
+                        'paymentStatus'    => $payment->paymentStatus
+                    ]
                 ]);
 
             } catch (\Exception $e) {
@@ -973,8 +1103,19 @@ class CustomerBookingController extends Controller
                 return response()->json([
                     'success'     => true,
                     'has_booking' => true,
-                    'booking'     => ['id' => $booking->bookingID, 'status' => $booking->bookingStatus, 'total_price' => $booking->totalPrice, 'created_at' => $booking->created_at->format('Y-m-d H:i:s')],
-                    'cart'        => ['id' => $cart->cartID, 'check_in' => $cart->checkInDate, 'check_out' => $cart->checkOutDate, 'guests' => $cart->numGuests, 'has_booked_items' => $cart->items->where('isBooked', true)->count() > 0]
+                    'booking'     => [
+                        'id'         => $booking->bookingID,
+                        'status'     => $booking->bookingStatus,
+                        'total_price'=> $booking->totalPrice,
+                        'created_at' => $booking->created_at->format('Y-m-d H:i:s')
+                    ],
+                    'cart' => [
+                        'id'               => $cart->cartID,
+                        'check_in'         => $cart->checkInDate,
+                        'check_out'        => $cart->checkOutDate,
+                        'guests'           => $cart->numGuests,
+                        'has_booked_items' => $cart->items->where('isBooked', true)->count() > 0
+                    ]
                 ]);
             }
 
