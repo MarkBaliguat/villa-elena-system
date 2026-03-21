@@ -235,6 +235,9 @@
         /* ═══════════════════════════════════════
            CARD PAYMENT MODAL
         ═══════════════════════════════════════ */
+        /* ═══════════════════════════════════════
+        CARD PAYMENT MODAL — FULLY RESPONSIVE
+        ═══════════════════════════════════════ */
         .card-modal-overlay {
             position: fixed; inset: 0;
             background: rgba(0,0,0,0.6);
@@ -244,125 +247,149 @@
             padding: 1rem;
             opacity: 0; pointer-events: none;
             transition: opacity 0.3s;
+            overflow-y: auto;
         }
         .card-modal-overlay.open { opacity: 1; pointer-events: all; }
 
         .card-modal {
             background: #fff;
-            border-radius: 24px;
+            border-radius: 20px;
             box-shadow: 0 25px 60px rgba(0,0,0,0.3);
             width: 100%;
-            max-width: 480px;
-            overflow: hidden;
+            max-width: 460px;
+            max-height: calc(100dvh - 2rem);
+            overflow-y: auto;
+            overflow-x: hidden;
             transform: translateY(30px) scale(0.97);
             transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
             position: relative;
+            margin: auto;
+            /* smooth scroll inside modal */
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
         }
+        .card-modal::-webkit-scrollbar { display: none; }
         .card-modal-overlay.open .card-modal { transform: translateY(0) scale(1); }
 
         .card-modal-header {
-            padding: 1.8rem 2rem 1rem;
+            padding: 1.4rem 1.5rem 0.9rem;
             background: linear-gradient(135deg, #6366F1, #4F46E5);
             color: #fff;
             position: relative;
+            /* keep it sticky so header stays visible when scrolling */
+            position: sticky; top: 0; z-index: 2;
         }
         .card-modal-header h3 {
-            font-size: 1.3rem; font-weight: 800;
-            display: flex; align-items: center; gap: 0.8rem;
-            margin-bottom: 0.3rem;
+            font-size: 1.1rem; font-weight: 800;
+            display: flex; align-items: center; gap: 0.6rem;
+            margin-bottom: 0.2rem;
         }
-        .card-modal-header p { font-size: 0.8rem; opacity: 0.85; font-weight: 500; }
+        .card-modal-header p { font-size: 0.75rem; opacity: 0.85; font-weight: 500; }
         .card-modal-close {
-            position: absolute; top: 1.2rem; right: 1.2rem;
-            width: 34px; height: 34px;
+            position: absolute; top: 1rem; right: 1rem;
+            width: 32px; height: 32px;
             background: rgba(255,255,255,0.2);
             border: none; border-radius: 50%;
             color: #fff; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             transition: background 0.2s;
+            /* make it easier to tap on mobile */
+            touch-action: manipulation;
         }
         .card-modal-close:hover { background: rgba(255,255,255,0.35); }
 
         .card-preview {
-            margin: 0 2rem 0;
+            margin: 0 1.2rem;
             background: linear-gradient(135deg, #1e1b4b, #312e81, #4338ca);
-            border-radius: 18px;
-            padding: 1.4rem 1.6rem;
+            border-radius: 14px;
+            padding: 1.1rem 1.3rem;
             color: #fff;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 12px 30px rgba(67, 56, 202, 0.4);
-            min-height: 110px;
-            margin-top: -0.5rem;
+            box-shadow: 0 8px 20px rgba(67,56,202,0.35);
+            min-height: 90px;
+            margin-top: -0.3rem;
         }
-        .card-preview::before { content:''; position:absolute; top:-30px; right:-30px; width:120px; height:120px; border-radius:50%; background:rgba(255,255,255,0.07); }
-        .card-preview::after  { content:''; position:absolute; bottom:-20px; left:20px; width:80px; height:80px; border-radius:50%; background:rgba(255,255,255,0.05); }
-        .card-preview-chip { width:38px; height:28px; background:linear-gradient(135deg,#d4af37,#f0d060); border-radius:6px; margin-bottom:0.8rem; display:flex; align-items:center; justify-content:center; }
-        .card-preview-chip::after { content:''; width:22px; height:16px; border:1.5px solid rgba(0,0,0,0.3); border-radius:3px; }
-        .card-preview-number { font-size:1.2rem; font-weight:700; letter-spacing:3px; font-family:'Courier New',monospace; margin-bottom:0.7rem; opacity:0.95; position:relative; z-index:1; }
-        .card-preview-bottom { display:flex; justify-content:space-between; align-items:flex-end; position:relative; z-index:1; }
-        .card-preview-label { font-size:0.6rem; opacity:0.7; text-transform:uppercase; letter-spacing:1px; margin-bottom:2px; }
-        .card-preview-value { font-size:0.85rem; font-weight:700; letter-spacing:1px; }
-        .card-preview-brand { font-size:1.6rem; opacity:0.9; }
+        .card-preview::before { content:''; position:absolute; top:-25px; right:-25px; width:100px; height:100px; border-radius:50%; background:rgba(255,255,255,0.07); }
+        .card-preview::after  { content:''; position:absolute; bottom:-15px; left:15px; width:70px; height:70px; border-radius:50%; background:rgba(255,255,255,0.05); }
+        .card-preview-chip { width:32px; height:24px; background:linear-gradient(135deg,#d4af37,#f0d060); border-radius:5px; margin-bottom:0.6rem; display:flex; align-items:center; justify-content:center; }
+        .card-preview-chip::after { content:''; width:18px; height:13px; border:1.5px solid rgba(0,0,0,0.3); border-radius:3px; }
+        .card-preview-number { font-size: clamp(0.85rem, 3.5vw, 1.1rem); font-weight:700; letter-spacing:2px; font-family:'Courier New',monospace; margin-bottom:0.5rem; opacity:0.95; position:relative; z-index:1; }
+        .card-preview-bottom { display:flex; justify-content:space-between; align-items:flex-end; position:relative; z-index:1; gap:0.5rem; }
+        .card-preview-label { font-size:0.55rem; opacity:0.7; text-transform:uppercase; letter-spacing:1px; margin-bottom:2px; }
+        .card-preview-value { font-size: clamp(0.7rem, 2.5vw, 0.85rem); font-weight:700; letter-spacing:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:120px; }
+        .card-preview-brand { font-size:1.4rem; opacity:0.9; flex-shrink:0; }
 
-        .card-modal-body { padding: 1.5rem 2rem 2rem; }
-        .card-input-group { margin-bottom: 1.2rem; }
-        .card-input-label { display:flex; align-items:center; gap:6px; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--booking-text-dark); margin-bottom:0.5rem; }
-        .card-input-label i { color:#6366F1; font-size:0.9rem; }
+        .card-modal-body { padding: 1.2rem 1.5rem 1.5rem; }
+        .card-input-group { margin-bottom: 1rem; }
+        .card-input-label { display:flex; align-items:center; gap:6px; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--booking-text-dark); margin-bottom:0.45rem; }
+        .card-input-label i { color:#6366F1; font-size:0.85rem; }
 
-        .card-field { width:100%; padding:12px 16px; border:2px solid #E5E7EB; border-radius:12px; font-size:0.95rem; font-family:'Poppins',sans-serif; font-weight:600; color:#1F2937; background:linear-gradient(135deg,#FFFFFF,#FAFAFA); transition:all 0.3s; box-sizing:border-box; }
-        .card-field:focus { outline:none; border-color:#6366F1; box-shadow:0 0 0 4px rgba(99,102,241,0.15); background:#fff; }
+        .card-field { width:100%; padding:11px 14px; border:2px solid #E5E7EB; border-radius:11px; font-size:0.9rem; font-family:'Poppins',sans-serif; font-weight:600; color:#1F2937; background:#FAFAFA; transition:all 0.3s; box-sizing:border-box; -webkit-appearance:none; appearance:none; }
+        .card-field:focus { outline:none; border-color:#6366F1; box-shadow:0 0 0 3px rgba(99,102,241,0.15); background:#fff; }
         .card-field.error { border-color:var(--booking-red)!important; box-shadow:0 0 0 3px rgba(239,68,68,0.15)!important; animation:shake 0.4s ease-in-out; }
         .card-field::placeholder { color:#D1D5DB; font-weight:400; }
 
         .card-number-wrap { position:relative; }
-        .card-number-wrap .card-field { padding-right:50px; letter-spacing:2px; }
-        .card-brand-icon { position:absolute; right:14px; top:50%; transform:translateY(-50%); font-size:1.4rem; opacity:0.7; }
-        .card-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
-        .card-error-msg { color:var(--booking-red); font-size:0.72rem; margin-top:0.3rem; display:none; font-weight:600; }
+        .card-number-wrap .card-field { padding-right:46px; letter-spacing:1.5px; }
+        .card-brand-icon { position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:1.3rem; opacity:0.7; }
+        /* Stack expiry/cvv on very small phones */
+        .card-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:0.8rem; }
+        .card-error-msg { color:var(--booking-red); font-size:0.7rem; margin-top:0.3rem; display:none; font-weight:600; }
         .card-error-msg.show { display:flex; align-items:center; gap:4px; }
 
-        .secure-badge { display:flex; align-items:center; gap:0.6rem; background:linear-gradient(135deg,#F0FDF4,#DCFCE7); border:1.5px solid #86EFAC; border-radius:10px; padding:0.7rem 1rem; font-size:0.75rem; color:#166534; font-weight:600; margin-bottom:1.2rem; }
-        .secure-badge i { color:#16A34A; font-size:0.9rem; }
+        .secure-badge { display:flex; align-items:center; gap:0.5rem; background:#F0FDF4; border:1.5px solid #86EFAC; border-radius:9px; padding:0.6rem 0.9rem; font-size:0.72rem; color:#166534; font-weight:600; margin-bottom:1rem; }
+        .secure-badge i { color:#16A34A; font-size:0.85rem; flex-shrink:0; }
 
-        .card-submit-btn { width:100%; padding:16px; background:linear-gradient(135deg,#6366F1,#4F46E5); color:#fff; border:none; border-radius:14px; font-size:1rem; font-weight:700; cursor:pointer; font-family:'Poppins',sans-serif; display:flex; align-items:center; justify-content:center; gap:10px; transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1); box-shadow:0 6px 20px rgba(99,102,241,0.4); position:relative; overflow:hidden; }
-        .card-submit-btn:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 10px 30px rgba(99,102,241,0.5); }
+        .card-submit-btn { width:100%; padding:14px; background:linear-gradient(135deg,#6366F1,#4F46E5); color:#fff; border:none; border-radius:12px; font-size:0.95rem; font-weight:700; cursor:pointer; font-family:'Poppins',sans-serif; display:flex; align-items:center; justify-content:center; gap:8px; transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1); box-shadow:0 4px 16px rgba(99,102,241,0.35); touch-action: manipulation; }
+        .card-submit-btn:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 8px 24px rgba(99,102,241,0.45); }
         .card-submit-btn:disabled { opacity:0.6; cursor:not-allowed; transform:none!important; }
 
-        .accepted-cards { display:flex; align-items:center; gap:0.6rem; justify-content:center; margin-top:1rem; font-size:0.72rem; color:var(--booking-text-light); font-weight:500; }
-        .accepted-cards span { display:inline-flex; align-items:center; justify-content:center; background:#F3F4F6; border-radius:6px; padding:4px 10px; font-weight:700; font-size:0.68rem; color:var(--booking-text-dark); letter-spacing:0.5px; }
+        .accepted-cards { display:flex; align-items:center; gap:0.5rem; justify-content:center; flex-wrap:wrap; margin-top:0.8rem; font-size:0.7rem; color:var(--booking-text-light); font-weight:500; }
+        .accepted-cards span { display:inline-flex; align-items:center; justify-content:center; background:#F3F4F6; border-radius:5px; padding:3px 8px; font-weight:700; font-size:0.65rem; color:var(--booking-text-dark); letter-spacing:0.5px; }
 
-        /* ─── RESPONSIVE ─── */
-        @media (max-width: 1024px) {
-            .content-layout { flex-direction:column; align-items:center; }
-            .stepper { position:static; flex-direction:row; justify-content:center; min-width:auto; width:100%; max-width:600px; margin:0 auto 2rem; }
-            .step-item { flex-direction:column; align-items:center; padding-bottom:0; flex:1; position:relative; }
-            .step-item::before { display:none; }
-            .step-item::after { content:''; position:absolute; top:24px; left:calc(50% + 25px); width:calc(100% - 50px); height:3px; background:linear-gradient(90deg,#E5E7EB,#D1D5DB); transition:all .6s cubic-bezier(.4,0,.2,1); }
-            .step-item:last-child::after { display:none; }
-            .step-item.active::after,.step-item.completed::after { background:linear-gradient(90deg,var(--booking-primary-yellow),var(--booking-secondary-yellow)); }
-            .step-content { align-items:center; text-align:center; margin-top:.5rem; }
-            .step-label { font-size:.75rem; }
-            .step-desc { display:none; }
-            .panels-container { width:100%; max-width:100%; }
+        /* ── Responsive breakpoints ── */
+        @media (max-width: 480px) {
+            .card-modal-overlay { padding: 0; align-items: flex-end; }
+            .card-modal {
+                border-radius: 20px 20px 0 0;
+                max-height: 93dvh;
+                max-height: 93vh; /* fallback */
+                width: 100%;
+            }
+            .card-modal-header { padding: 1.2rem 1.2rem 0.8rem; }
+            .card-modal-header h3 { font-size: 1rem; }
+            .card-preview { margin: 0 1rem; padding: 1rem 1.1rem; border-radius: 12px; }
+            .card-modal-body { padding: 1rem 1.2rem 1.4rem; }
+            .card-row-2 { grid-template-columns: 1fr 1fr; gap: 0.7rem; }
         }
-        @media (max-width: 640px) {
-            .main-content { margin-top:70px; padding:2rem 1rem 3rem; }
-            .row-2,.pay-grid,.amount-row,.row-3 { grid-template-columns:1fr; }
-            .card-row-2 { grid-template-columns:1fr; }
-            .card-body,.card-header { padding-left:1.5rem; padding-right:1.5rem; }
-            .rules-list,.rules-header { padding-left:1.5rem; padding-right:1.5rem; }
-            .contact-strip { flex-direction:column; gap:.8rem; }
-            .page-title { font-size:2rem; }
-            .step-circle { width:44px; height:44px; font-size:.9rem; }
-            .btn-row { flex-direction:column; }
-            .action-btn { width:100%; }
-            .stepper { padding:0 1rem; }
-            .step-label { font-size:.65rem; }
-            .card-modal-body,.card-modal-header { padding-left:1.5rem; padding-right:1.5rem; }
-            .card-preview { margin-left:1.5rem; margin-right:1.5rem; }
+
+        @media (max-width: 360px) {
+            .card-row-2 { grid-template-columns: 1fr; }
+            .card-preview-number { font-size: 0.8rem; letter-spacing: 1px; }
+            .card-preview-value { max-width: 90px; }
         }
+
+        @media (min-width: 481px) and (max-width: 768px) {
+            .card-modal { max-width: 420px; border-radius: 20px; }
+            .card-modal-overlay { padding: 1rem; align-items: center; }
+        }
+
+        @media (min-width: 769px) {
+            .card-modal { max-width: 460px; }
+            .card-modal-overlay { align-items: center; }
+        }
+
+        /* safe area inset for phones with notch/home bar */
+        @supports (padding-bottom: env(safe-area-inset-bottom)) {
+            @media (max-width: 480px) {
+                .card-modal-body { padding-bottom: calc(1.4rem + env(safe-area-inset-bottom)); }
+            }
+        }
+
+
+
     </style>
 </head>
 <body>
