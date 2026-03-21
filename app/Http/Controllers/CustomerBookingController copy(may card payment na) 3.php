@@ -159,8 +159,8 @@ class CustomerBookingController extends Controller
 
             if ($this->hasStrictSpecialEventConflict($checkIn, $checkOut)) {
                 return response()->json([
-                    'success'                    => false,
-                    'message'                    => 'Cannot book during special event period',
+                    'success'                   => false,
+                    'message'                   => 'Cannot book during special event period',
                     'has_special_event_conflict' => true,
                     'validation_errors'          => ['There is a special event scheduled during your selected dates.']
                 ], 400);
@@ -170,10 +170,10 @@ class CustomerBookingController extends Controller
                 $unit = $item->unit;
                 if ($unit->for_special_events && $unit->unitStatus === 'blocked') {
                     return response()->json([
-                        'success'                         => false,
-                        'message'                         => 'Selected unit is reserved for special events only',
+                        'success'                        => false,
+                        'message'                        => 'Selected unit is reserved for special events only',
                         'has_special_event_unit_conflict' => true,
-                        'validation_errors'               => ["{$unit->unitName} is permanently reserved for special events only."]
+                        'validation_errors'              => ["{$unit->unitName} is permanently reserved for special events only."]
                     ], 400);
                 }
             }
@@ -183,8 +183,8 @@ class CustomerBookingController extends Controller
             foreach ($cart->items as $item) {
                 $unit = $item->unit;
                 if ($this->isUnitBlocked($unit, $checkIn, $checkOut)) {
-                    $blockStart         = $unit->blockStartDate ? Carbon::parse($unit->blockStartDate)->format('M d, Y') : null;
-                    $blockEnd           = $unit->blockEndDate   ? Carbon::parse($unit->blockEndDate)->format('M d, Y')   : null;
+                    $blockStart = $unit->blockStartDate ? Carbon::parse($unit->blockStartDate)->format('M d, Y') : null;
+                    $blockEnd   = $unit->blockEndDate   ? Carbon::parse($unit->blockEndDate)->format('M d, Y')   : null;
                     $unavailableItems[] = ['cartItemID' => $item->cartItemID, 'unit' => $unit, 'reason' => 'Unit is blocked', 'conflict_type' => 'unit_blocked'];
                     $validationErrors[] = "{$unit->unitName} is blocked from {$blockStart} to {$blockEnd}.";
                     continue;
@@ -203,10 +203,10 @@ class CustomerBookingController extends Controller
 
             if (!empty($unavailableItems)) {
                 return response()->json([
-                    'success'                 => false,
-                    'message'                 => 'Some items in your cart are no longer available',
-                    'unavailable_items'       => $unavailableItems,
-                    'validation_errors'       => $validationErrors,
+                    'success'           => false,
+                    'message'           => 'Some items in your cart are no longer available',
+                    'unavailable_items' => $unavailableItems,
+                    'validation_errors' => $validationErrors,
                     'has_availability_issues' => true
                 ], 400);
             }
@@ -224,15 +224,24 @@ class CustomerBookingController extends Controller
                 }
             }
 
+            if ($this->hasStrictSpecialEventConflict($checkIn, $checkOut)) {
+                return response()->json([
+                    'success'                   => false,
+                    'message'                   => 'Cannot book during special event period',
+                    'has_special_event_conflict' => true,
+                    'validation_errors'          => ['There is a special event scheduled during your selected dates.']
+                ], 400);
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'All items in cart are available for booking',
                 'cart'    => [
-                    'cartID'       => $cart->cartID,
-                    'checkInDate'  => $cart->checkInDate,
-                    'checkOutDate' => $cart->checkOutDate,
-                    'daysCount'    => $cart->daysCount,
-                    'numGuests'    => $cart->numGuests
+                    'cartID'      => $cart->cartID,
+                    'checkInDate' => $cart->checkInDate,
+                    'checkOutDate'=> $cart->checkOutDate,
+                    'daysCount'   => $cart->daysCount,
+                    'numGuests'   => $cart->numGuests
                 ],
                 'total_items' => $cart->items->count()
             ]);
@@ -243,7 +252,7 @@ class CustomerBookingController extends Controller
     }
 
     // ═══════════════════════════════════════════════════════
-    //  STORE — main booking entry point (GCash / Card)
+    //  STORE — main booking entry point (Cash / GCash / Card)
     // ═══════════════════════════════════════════════════════
     public function store(Request $request)
     {
@@ -254,14 +263,14 @@ class CustomerBookingController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'full_name'            => 'required|string|max:255',
-            'email'                => 'required|email',
-            'phone'                => ['required', 'string', 'regex:/^09\d{9}$/'],
-            'booking_type'         => 'required|in:day-use,overnight',
-            'event_type'           => 'required|string',
-            'payment_method'       => 'required|string',
-            'payment_amount'       => 'required|numeric|min:0',
-            'special_requirements' => 'nullable|string'
+            'full_name'           => 'required|string|max:255',
+            'email'               => 'required|email',
+            'phone'               => ['required', 'string', 'regex:/^09\d{9}$/'],
+            'booking_type'        => 'required|in:day-use,overnight',
+            'event_type'          => 'required|string',
+            'payment_method'      => 'required|string',
+            'payment_amount'      => 'required|numeric|min:0',
+            'special_requirements'=> 'nullable|string'
         ], [
             'phone.required' => 'Phone number is required.',
             'phone.regex'    => 'Phone number must start with 09 and be exactly 11 digits.'
@@ -274,12 +283,14 @@ class CustomerBookingController extends Controller
         try {
             $userId = Auth::id();
 
+            // Update phone
             $user = User::find($userId);
             if ($user && (empty($user->phoneNumber) || $user->phoneNumber !== $request->phone)) {
                 $user->phoneNumber = $request->phone;
                 $user->save();
             }
 
+            // ── Cart retrieval ──
             $cart = Cart::with(['items' => fn($q) => $q->where('isBooked', false), 'items.unit'])
                 ->where('user_id', $userId)
                 ->where('is_active', true)
@@ -300,6 +311,7 @@ class CustomerBookingController extends Controller
             $checkIn  = Carbon::parse($cart->checkInDate)->startOfDay();
             $checkOut = Carbon::parse($cart->checkOutDate)->startOfDay();
 
+            // Validations 1–6 (same as before)
             if ($this->hasStrictSpecialEventConflict($checkIn, $checkOut)) {
                 return response()->json(['success' => false, 'message' => 'Cannot book during special event period.', 'has_special_event_conflict' => true], 400);
             }
@@ -316,8 +328,8 @@ class CustomerBookingController extends Controller
             foreach ($cart->items as $item) {
                 $unit = $item->unit;
                 if ($this->isUnitBlocked($unit, $checkIn, $checkOut)) {
-                    $blockStart         = $unit->blockStartDate ? Carbon::parse($unit->blockStartDate)->format('M d, Y') : null;
-                    $blockEnd           = $unit->blockEndDate   ? Carbon::parse($unit->blockEndDate)->format('M d, Y')   : null;
+                    $blockStart = $unit->blockStartDate ? Carbon::parse($unit->blockStartDate)->format('M d, Y') : null;
+                    $blockEnd   = $unit->blockEndDate   ? Carbon::parse($unit->blockEndDate)->format('M d, Y')   : null;
                     $unavailableItems[] = $unit->unitName;
                     $validationErrors[] = "{$unit->unitName} is blocked from {$blockStart} to {$blockEnd}.";
                     continue;
@@ -345,6 +357,10 @@ class CustomerBookingController extends Controller
                 if (!$entranceFee) {
                     return response()->json(['success' => false, 'message' => 'Cottage booking requires active entrance fee.'], 400);
                 }
+            }
+
+            if ($this->hasStrictSpecialEventConflict($checkIn, $checkOut)) {
+                return response()->json(['success' => false, 'message' => 'Cannot book during special event period.'], 400);
             }
 
             // ── Pricing ──
@@ -389,26 +405,27 @@ class CustomerBookingController extends Controller
             $bookingStatus    = $paymentAmount >= $totalPrice ? 'confirmed' : 'pending';
             $paymentStatus    = 'completed';
 
+            // ── Routing ──
             $method = $request->payment_method;
 
             // ── GCASH ──
             if ($method === 'gcash') {
                 return response()->json([
-                    'success'                => true,
-                    'message'                => 'Ready for GCash payment',
-                    'payment_method'         => 'gcash',
-                    'requires_payment_first' => true,
-                    'booking_data'           => [
-                        'cart_id'              => $cart->cartID,
-                        'num_guests'           => $totalGuests,
-                        'total_price'          => $totalPrice,
-                        'entrance_fee_id'      => $hasCottages && $entranceFee ? $entranceFee->entranceFeeID : null,
-                        'booking_type'         => $request->booking_type,
-                        'event_type'           => $request->event_type,
+                    'success'               => true,
+                    'message'               => 'Ready for GCash payment',
+                    'payment_method'        => 'gcash',
+                    'requires_payment_first'=> true,
+                    'booking_data' => [
+                        'cart_id'           => $cart->cartID,
+                        'num_guests'        => $totalGuests,
+                        'total_price'       => $totalPrice,
+                        'entrance_fee_id'   => $hasCottages && $entranceFee ? $entranceFee->entranceFeeID : null,
+                        'booking_type'      => $request->booking_type,
+                        'event_type'        => $request->event_type,
                         'special_requirements' => $request->special_requirements,
-                        'event_start'          => $cart->checkInDate,
-                        'event_end'            => $cart->checkOutDate,
-                        'phone'                => $request->phone,
+                        'event_start'       => $cart->checkInDate,
+                        'event_end'         => $cart->checkOutDate,
+                        'phone'             => $request->phone,
                     ],
                     'payment_data' => [
                         'payment_amount'    => $paymentAmount,
@@ -423,23 +440,23 @@ class CustomerBookingController extends Controller
             // ── CARD ──
             if ($method === 'card') {
                 return response()->json([
-                    'success'                => true,
-                    'message'                => 'Ready for Card payment',
-                    'payment_method'         => 'card',
-                    'requires_payment_first' => true,
-                    'booking_data'           => [
-                        'cart_id'              => $cart->cartID,
-                        'num_guests'           => $totalGuests,
-                        'total_price'          => $totalPrice,
-                        'entrance_fee_id'      => $hasCottages && $entranceFee ? $entranceFee->entranceFeeID : null,
-                        'booking_type'         => $request->booking_type,
-                        'event_type'           => $request->event_type,
+                    'success'               => true,
+                    'message'               => 'Ready for Card payment',
+                    'payment_method'        => 'card',
+                    'requires_payment_first'=> true,
+                    'booking_data' => [
+                        'cart_id'           => $cart->cartID,
+                        'num_guests'        => $totalGuests,
+                        'total_price'       => $totalPrice,
+                        'entrance_fee_id'   => $hasCottages && $entranceFee ? $entranceFee->entranceFeeID : null,
+                        'booking_type'      => $request->booking_type,
+                        'event_type'        => $request->event_type,
                         'special_requirements' => $request->special_requirements,
-                        'event_start'          => $cart->checkInDate,
-                        'event_end'            => $cart->checkOutDate,
-                        'phone'                => $request->phone,
-                        'email'                => $request->email,
-                        'full_name'            => $request->full_name,
+                        'event_start'       => $cart->checkInDate,
+                        'event_end'         => $cart->checkOutDate,
+                        'phone'             => $request->phone,
+                        'email'             => $request->email,
+                        'full_name'         => $request->full_name,
                     ],
                     'payment_data' => [
                         'payment_amount'    => $paymentAmount,
@@ -451,7 +468,62 @@ class CustomerBookingController extends Controller
                 ]);
             }
 
-            return response()->json(['success' => false, 'message' => 'Invalid payment method.'], 400);
+            // ── CASH ──
+            DB::beginTransaction();
+            try {
+                $booking = Booking::create([
+                    'cartID'              => $cart->cartID,
+                    'numGuests'           => $totalGuests,
+                    'totalPrice'          => $totalPrice,
+                    'entranceFeeID'       => $hasCottages && $entranceFee ? $entranceFee->entranceFeeID : null,
+                    'bookingStatus'       => $bookingStatus,
+                    'bookingType'         => $request->booking_type,
+                    'eventType'           => $request->event_type,
+                    'specialRequirements' => $request->special_requirements,
+                    'eventStartTime'      => $cart->checkInDate,
+                    'eventEndTime'        => $cart->checkOutDate,
+                    'created_at'          => now(),
+                    'updated_at'          => now(),
+                ]);
+
+                $paymentReference = 'VLE' . time() . $booking->bookingID;
+                Payment::create([
+                    'bookingID'        => $booking->bookingID,
+                    'paymentReference' => $paymentReference,
+                    'paymentMethod'    => 'cash',
+                    'paymentType'      => $paymentType,
+                    'amountPaid'       => $paymentAmount,
+                    'remainingBalance' => $remainingBalance,
+                    'paymentDate'      => now(),
+                    'paymentStatus'    => $paymentStatus,
+                    'created_at'       => now(),
+                    'updated_at'       => now(),
+                ]);
+
+                CartItem::where('cartID', $cart->cartID)->where('isBooked', false)->update(['isBooked' => true]);
+                $cart->update(['is_active' => false, 'updated_at' => now()]);
+                DB::commit();
+
+                try {
+                    Mail::to($request->email)->send(new BookingConfirmationEmail($booking->load('cart.user', 'cart.cartItems.unit')));
+                } catch (\Exception $e) {
+                    Log::error('Failed to send email: ' . $e->getMessage());
+                }
+
+                return response()->json([
+                    'success'           => true,
+                    'message'           => $bookingStatus === 'confirmed' ? 'Booking confirmed successfully!' : 'Booking submitted successfully!',
+                    'booking_reference' => $paymentReference,
+                    'booking_id'        => $booking->bookingID,
+                    'booking_status'    => $bookingStatus,
+                    'payment_amount'    => $paymentAmount,
+                    'is_confirmed'      => $bookingStatus === 'confirmed'
+                ]);
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+                throw $e;
+            }
 
         } catch (\Exception $e) {
             Log::error('Booking Error: ' . $e->getMessage());
@@ -460,9 +532,7 @@ class CustomerBookingController extends Controller
     }
 
     // ═══════════════════════════════════════════════════════
-    //  PROCESS CARD PAYMENT ✅ SECURE
-    //  Receives only payment_method_id (token) from frontend
-    //  Raw card details never touch this server
+    //  PROCESS CARD PAYMENT — create intent + attach method
     // ═══════════════════════════════════════════════════════
     public function processCardPayment(Request $request)
     {
@@ -472,21 +542,23 @@ class CustomerBookingController extends Controller
             return response()->json(['success' => false, 'message' => 'Please login to complete payment'], 401);
         }
 
-        // ✅ Only accept token ID — no raw card fields
         $validator = Validator::make($request->all(), [
-            'booking_data'      => 'required|array',
-            'payment_data'      => 'required|array',
-            'payment_method_id' => 'required|string', // PayMongo token from frontend
+            'booking_data'           => 'required|array',
+            'payment_data'           => 'required|array',
+            'card_number'            => 'required|string|min:13|max:19',
+            'card_exp_month'         => 'required|string|size:2',
+            'card_exp_year'          => 'required|string|size:4',
+            'card_cvc'               => 'required|string|min:3|max:4',
+            'card_name'              => 'required|string|max:255',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['success' => false, 'message' => 'Invalid payment request.', 'errors' => $validator->errors()], 422);
+            return response()->json(['success' => false, 'message' => 'Invalid card details.', 'errors' => $validator->errors()], 422);
         }
 
         try {
-            $bookingData     = $request->booking_data;
-            $paymentData     = $request->payment_data;
-            $paymentMethodId = $request->payment_method_id; // token only
+            $bookingData = $request->booking_data;
+            $paymentData = $request->payment_data;
 
             // Update phone if provided
             if (isset($bookingData['phone'])) {
@@ -497,49 +569,66 @@ class CustomerBookingController extends Controller
                 }
             }
 
-            $amount = floatval($paymentData['payment_amount']);
+            // STEP 1: Create card payment method via PayMongo (server-side)
+            $cardDetails = [
+                'card_number' => preg_replace('/\s+/', '', $request->card_number),
+                'exp_month'   => $request->card_exp_month,
+                'exp_year'    => $request->card_exp_year,
+                'cvc'         => $request->card_cvc,
+            ];
 
-            // STEP 1: Create payment intent
+            $billingDetails = [
+                'name'  => $request->card_name,
+                'email' => $bookingData['email'] ?? Auth::user()->email,
+                'phone' => $bookingData['phone'] ?? null,
+            ];
+
+            $paymentMethod = $this->payMongoService->createCardPaymentMethod($cardDetails, $billingDetails);
+            Log::info('Card Payment Method Created', ['method_id' => $paymentMethod['data']['id']]);
+
+            // STEP 2: Create payment intent for card
+            $amount        = floatval($paymentData['payment_amount']);
             $paymentIntent = $this->payMongoService->createCardPaymentIntent($amount, 'Villa Elena Booking');
             Log::info('Card Payment Intent Created', ['intent_id' => $paymentIntent['data']['id']]);
 
-            // STEP 2: Store in session for 3DS callback
+            // STEP 3: Store in session
             session([
                 'card_booking_data'      => $bookingData,
                 'card_payment_data'      => $paymentData,
                 'card_payment_intent_id' => $paymentIntent['data']['id']
             ]);
 
-            // STEP 3: Build return URL for 3DS
+            // STEP 4: Build return URL
             $returnUrl = route('customer.card.payment.success', [
                 'payment_intent_id' => $paymentIntent['data']['id']
             ]);
 
-            // STEP 4: Attach the tokenized payment method — triggers 3DS if needed
+            // STEP 5: Attach payment method — this triggers 3DS if needed
             $attachedPayment = $this->payMongoService->attachPaymentMethod(
                 $paymentIntent['data']['id'],
-                $paymentMethodId, // token from frontend
+                $paymentMethod['data']['id'],
                 $returnUrl
             );
 
             $intentStatus = $attachedPayment['data']['attributes']['status'] ?? 'unknown';
             Log::info('Card Payment Attach Status', ['status' => $intentStatus]);
 
-            // STEP 5: Check if 3DS redirect is needed
+            // STEP 6: Check if 3DS redirect is needed
             $nextAction  = $attachedPayment['data']['attributes']['next_action'] ?? null;
             $redirectUrl = $nextAction['redirect']['url'] ?? null;
 
             if ($redirectUrl) {
+                // 3DS required — redirect customer to bank
                 Log::info('3DS required, redirecting to bank', ['url' => $redirectUrl]);
                 return response()->json([
-                    'success'           => true,
-                    'requires_3ds'      => true,
-                    'redirect_url'      => $redirectUrl,
-                    'payment_intent_id' => $paymentIntent['data']['id']
+                    'success'            => true,
+                    'requires_3ds'       => true,
+                    'redirect_url'       => $redirectUrl,
+                    'payment_intent_id'  => $paymentIntent['data']['id']
                 ]);
             }
 
-            // STEP 6: No 3DS — payment succeeded immediately
+            // STEP 7: No 3DS needed — payment succeeded immediately
             if ($intentStatus === 'succeeded') {
                 $result = $this->createBookingAfterCardPayment(
                     $paymentIntent['data']['id'],
@@ -619,6 +708,7 @@ class CustomerBookingController extends Controller
             throw new \Exception('Date conflict detected. Please restart booking.');
         }
 
+        // Update phone
         if (isset($bookingData['phone'])) {
             $user = User::find($cart->user_id);
             if ($user && (empty($user->phoneNumber) || $user->phoneNumber !== $bookingData['phone'])) {
@@ -630,17 +720,17 @@ class CustomerBookingController extends Controller
         DB::beginTransaction();
         try {
             $booking = Booking::create([
-                'cartID'                  => $bookingData['cart_id'],
-                'numGuests'               => $bookingData['num_guests'],
-                'totalPrice'              => $bookingData['total_price'],
-                'entranceFeeID'           => $bookingData['entrance_fee_id'],
-                'bookingStatus'           => $paymentData['booking_status'],
-                'bookingType'             => $bookingData['booking_type'],
-                'eventType'               => $bookingData['event_type'],
-                'specialRequirements'     => $bookingData['special_requirements'],
-                'gcash_payment_intent_id' => $paymentIntentId,
-                'created_at'              => now(),
-                'updated_at'              => now(),
+                'cartID'              => $bookingData['cart_id'],
+                'numGuests'           => $bookingData['num_guests'],
+                'totalPrice'          => $bookingData['total_price'],
+                'entranceFeeID'       => $bookingData['entrance_fee_id'],
+                'bookingStatus'       => $paymentData['booking_status'],
+                'bookingType'         => $bookingData['booking_type'],
+                'eventType'           => $bookingData['event_type'],
+                'specialRequirements' => $bookingData['special_requirements'],
+                'gcash_payment_intent_id' => $paymentIntentId, // reusing column for card too
+                'created_at'          => now(),
+                'updated_at'          => now(),
             ]);
 
             $paymentReference = 'CARD-' . $paymentIntentId;
@@ -706,7 +796,7 @@ class CustomerBookingController extends Controller
     }
 
     // ═══════════════════════════════════════════════════════
-    //  GCASH — Process Payment
+    //  GCASH methods (unchanged)
     // ═══════════════════════════════════════════════════════
     public function processGCashPayment(Request $request)
     {
@@ -768,9 +858,6 @@ class CustomerBookingController extends Controller
         }
     }
 
-    // ═══════════════════════════════════════════════════════
-    //  GCASH — Verify Payment
-    // ═══════════════════════════════════════════════════════
     public function verifyGCashPayment(Request $request)
     {
         Log::info('=== GCASH PAYMENT VERIFICATION START ===');

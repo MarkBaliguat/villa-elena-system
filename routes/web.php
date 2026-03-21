@@ -57,6 +57,18 @@ Route::middleware(['auth'])->group(function () {
         ->name('customer.payment.verify');
     Route::get('/payment/gcash/failed', [CustomerBookingController::class, 'gcashPaymentFailed'])
         ->name('customer.payment.failed');
+    
+    
+        //card payment
+    Route::post('/card/process-payment', [CustomerBookingController::class, 'processCardPayment'])
+    ->name('customer.card.payment.process');
+ 
+    Route::get('/payment/card/success', [CustomerBookingController::class, 'cardPaymentSuccess'])
+        ->name('customer.card.payment.success');
+    
+    Route::get('/payment/card/verify', [CustomerBookingController::class, 'verifyCardPayment'])
+        ->name('customer.card.payment.verify');
+ 
 });
 
 

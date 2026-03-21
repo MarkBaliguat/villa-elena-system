@@ -83,6 +83,7 @@
         .step-item.active::before,.step-item.completed::before { background:linear-gradient(180deg,var(--booking-primary-yellow),var(--booking-secondary-yellow)); }
         .step-circle { width:50px; height:50px; border-radius:50%; border:4px solid #E5E7EB; background:linear-gradient(135deg,#FFFFFF,#F9FAFB); display:flex; align-items:center; justify-content:center; font-size:1rem; font-weight:700; color:var(--booking-text-light); position:relative; z-index:2; transition:all .5s cubic-bezier(.34,1.56,.64,1); box-shadow:0 4px 12px rgba(0,0,0,.08); flex-shrink:0; }
         .step-circle.active,.step-circle.completed { border-color:transparent; background:linear-gradient(135deg,var(--booking-primary-yellow),var(--booking-secondary-yellow)); color:#fff; box-shadow:0 8px 20px rgba(255,215,0,.4); transform:scale(1.15); }
+        @keyframes pulse { 0%,100%{transform:scale(1);opacity:.6} 50%{transform:scale(1.2);opacity:0} }
         .step-circle i { font-size:1.1rem; }
         .step-content { display:flex; flex-direction:column; gap:.3rem; padding-top:.5rem; }
         .step-label { font-size:.95rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--booking-text-light); transition:all .4s; }
@@ -266,12 +267,14 @@
             color: #fff;
             position: relative;
         }
+
         .card-modal-header h3 {
             font-size: 1.3rem; font-weight: 800;
             display: flex; align-items: center; gap: 0.8rem;
             margin-bottom: 0.3rem;
         }
         .card-modal-header p { font-size: 0.8rem; opacity: 0.85; font-weight: 500; }
+
         .card-modal-close {
             position: absolute; top: 1.2rem; right: 1.2rem;
             width: 34px; height: 34px;
@@ -284,6 +287,7 @@
         }
         .card-modal-close:hover { background: rgba(255,255,255,0.35); }
 
+        /* Card preview */
         .card-preview {
             margin: 0 2rem 0;
             background: linear-gradient(135deg, #1e1b4b, #312e81, #4338ca);
@@ -296,42 +300,115 @@
             min-height: 110px;
             margin-top: -0.5rem;
         }
-        .card-preview::before { content:''; position:absolute; top:-30px; right:-30px; width:120px; height:120px; border-radius:50%; background:rgba(255,255,255,0.07); }
-        .card-preview::after  { content:''; position:absolute; bottom:-20px; left:20px; width:80px; height:80px; border-radius:50%; background:rgba(255,255,255,0.05); }
-        .card-preview-chip { width:38px; height:28px; background:linear-gradient(135deg,#d4af37,#f0d060); border-radius:6px; margin-bottom:0.8rem; display:flex; align-items:center; justify-content:center; }
-        .card-preview-chip::after { content:''; width:22px; height:16px; border:1.5px solid rgba(0,0,0,0.3); border-radius:3px; }
-        .card-preview-number { font-size:1.2rem; font-weight:700; letter-spacing:3px; font-family:'Courier New',monospace; margin-bottom:0.7rem; opacity:0.95; position:relative; z-index:1; }
-        .card-preview-bottom { display:flex; justify-content:space-between; align-items:flex-end; position:relative; z-index:1; }
-        .card-preview-label { font-size:0.6rem; opacity:0.7; text-transform:uppercase; letter-spacing:1px; margin-bottom:2px; }
-        .card-preview-value { font-size:0.85rem; font-weight:700; letter-spacing:1px; }
-        .card-preview-brand { font-size:1.6rem; opacity:0.9; }
+        .card-preview::before {
+            content: '';
+            position: absolute;
+            top: -30px; right: -30px;
+            width: 120px; height: 120px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.07);
+        }
+        .card-preview::after {
+            content: '';
+            position: absolute;
+            bottom: -20px; left: 20px;
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+        }
+        .card-preview-chip {
+            width: 38px; height: 28px;
+            background: linear-gradient(135deg, #d4af37, #f0d060);
+            border-radius: 6px; margin-bottom: 0.8rem;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .card-preview-chip::after {
+            content: '';
+            width: 22px; height: 16px;
+            border: 1.5px solid rgba(0,0,0,0.3);
+            border-radius: 3px;
+        }
+        .card-preview-number {
+            font-size: 1.2rem; font-weight: 700; letter-spacing: 3px;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 0.7rem; opacity: 0.95;
+            position: relative; z-index: 1;
+        }
+        .card-preview-bottom {
+            display: flex; justify-content: space-between; align-items: flex-end;
+            position: relative; z-index: 1;
+        }
+        .card-preview-label { font-size: 0.6rem; opacity: 0.7; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
+        .card-preview-value { font-size: 0.85rem; font-weight: 700; letter-spacing: 1px; }
+        .card-preview-brand { font-size: 1.6rem; opacity: 0.9; }
 
+        /* Modal body */
         .card-modal-body { padding: 1.5rem 2rem 2rem; }
+
         .card-input-group { margin-bottom: 1.2rem; }
-        .card-input-label { display:flex; align-items:center; gap:6px; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--booking-text-dark); margin-bottom:0.5rem; }
-        .card-input-label i { color:#6366F1; font-size:0.9rem; }
+        .card-input-label {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 0.75rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            color: var(--booking-text-dark); margin-bottom: 0.5rem;
+        }
+        .card-input-label i { color: #6366F1; font-size: 0.9rem; }
 
-        .card-field { width:100%; padding:12px 16px; border:2px solid #E5E7EB; border-radius:12px; font-size:0.95rem; font-family:'Poppins',sans-serif; font-weight:600; color:#1F2937; background:linear-gradient(135deg,#FFFFFF,#FAFAFA); transition:all 0.3s; box-sizing:border-box; }
-        .card-field:focus { outline:none; border-color:#6366F1; box-shadow:0 0 0 4px rgba(99,102,241,0.15); background:#fff; }
-        .card-field.error { border-color:var(--booking-red)!important; box-shadow:0 0 0 3px rgba(239,68,68,0.15)!important; animation:shake 0.4s ease-in-out; }
-        .card-field::placeholder { color:#D1D5DB; font-weight:400; }
+        .card-field {
+            width: 100%; padding: 12px 16px;
+            border: 2px solid #E5E7EB; border-radius: 12px;
+            font-size: 0.95rem; font-family: 'Poppins', sans-serif;
+            font-weight: 600; color: #1F2937;
+            background: linear-gradient(135deg, #FFFFFF, #FAFAFA);
+            transition: all 0.3s;
+            box-sizing: border-box;
+        }
+        .card-field:focus { outline: none; border-color: #6366F1; box-shadow: 0 0 0 4px rgba(99,102,241,0.15); background: #fff; }
+        .card-field.error { border-color: var(--booking-red)!important; box-shadow: 0 0 0 3px rgba(239,68,68,0.15)!important; animation: shake 0.4s ease-in-out; }
+        .card-field::placeholder { color: #D1D5DB; font-weight: 400; }
 
-        .card-number-wrap { position:relative; }
-        .card-number-wrap .card-field { padding-right:50px; letter-spacing:2px; }
-        .card-brand-icon { position:absolute; right:14px; top:50%; transform:translateY(-50%); font-size:1.4rem; opacity:0.7; }
-        .card-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
-        .card-error-msg { color:var(--booking-red); font-size:0.72rem; margin-top:0.3rem; display:none; font-weight:600; }
-        .card-error-msg.show { display:flex; align-items:center; gap:4px; }
+        /* Card number with icon */
+        .card-number-wrap { position: relative; }
+        .card-number-wrap .card-field { padding-right: 50px; letter-spacing: 2px; }
+        .card-brand-icon { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 1.4rem; opacity: 0.7; }
 
-        .secure-badge { display:flex; align-items:center; gap:0.6rem; background:linear-gradient(135deg,#F0FDF4,#DCFCE7); border:1.5px solid #86EFAC; border-radius:10px; padding:0.7rem 1rem; font-size:0.75rem; color:#166534; font-weight:600; margin-bottom:1.2rem; }
-        .secure-badge i { color:#16A34A; font-size:0.9rem; }
+        .card-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 
-        .card-submit-btn { width:100%; padding:16px; background:linear-gradient(135deg,#6366F1,#4F46E5); color:#fff; border:none; border-radius:14px; font-size:1rem; font-weight:700; cursor:pointer; font-family:'Poppins',sans-serif; display:flex; align-items:center; justify-content:center; gap:10px; transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1); box-shadow:0 6px 20px rgba(99,102,241,0.4); position:relative; overflow:hidden; }
-        .card-submit-btn:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 10px 30px rgba(99,102,241,0.5); }
-        .card-submit-btn:disabled { opacity:0.6; cursor:not-allowed; transform:none!important; }
+        .card-error-msg { color: var(--booking-red); font-size: 0.72rem; margin-top: 0.3rem; display: none; font-weight: 600; }
+        .card-error-msg.show { display: flex; align-items: center; gap: 4px; }
 
-        .accepted-cards { display:flex; align-items:center; gap:0.6rem; justify-content:center; margin-top:1rem; font-size:0.72rem; color:var(--booking-text-light); font-weight:500; }
-        .accepted-cards span { display:inline-flex; align-items:center; justify-content:center; background:#F3F4F6; border-radius:6px; padding:4px 10px; font-weight:700; font-size:0.68rem; color:var(--booking-text-dark); letter-spacing:0.5px; }
+        /* Secure badge */
+        .secure-badge {
+            display: flex; align-items: center; gap: 0.6rem;
+            background: linear-gradient(135deg, #F0FDF4, #DCFCE7);
+            border: 1.5px solid #86EFAC;
+            border-radius: 10px; padding: 0.7rem 1rem;
+            font-size: 0.75rem; color: #166534; font-weight: 600;
+            margin-bottom: 1.2rem;
+        }
+        .secure-badge i { color: #16A34A; font-size: 0.9rem; }
+
+        .card-submit-btn {
+            width: 100%; padding: 16px;
+            background: linear-gradient(135deg, #6366F1, #4F46E5);
+            color: #fff; border: none; border-radius: 14px;
+            font-size: 1rem; font-weight: 700; cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 6px 20px rgba(99,102,241,0.4);
+            position: relative; overflow: hidden;
+        }
+        .card-submit-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(99,102,241,0.5); }
+        .card-submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none!important; }
+
+        /* accepted cards */
+        .accepted-cards {
+            display: flex; align-items: center; gap: 0.6rem;
+            justify-content: center; margin-top: 1rem;
+            font-size: 0.72rem; color: var(--booking-text-light); font-weight: 500;
+        }
+        .accepted-cards span { display: inline-flex; align-items: center; justify-content: center; background: #F3F4F6; border-radius: 6px; padding: 4px 10px; font-weight: 700; font-size: 0.68rem; color: var(--booking-text-dark); letter-spacing: 0.5px; }
 
         /* ─── RESPONSIVE ─── */
         @media (max-width: 1024px) {
@@ -370,12 +447,14 @@
 
     <div class="booking-page-wrapper">
         <div class="main-content">
+
             <div class="page-title-wrap">
                 <h1 class="page-title">Complete Your Booking</h1>
                 <div class="page-title-line"></div>
             </div>
 
             <div class="content-layout">
+
                 <!-- STEPPER -->
                 <div class="stepper">
                     <div class="step-item active" id="step-nav-1">
@@ -402,6 +481,7 @@
                 </div>
 
                 <div class="panels-container">
+
                     <!-- ══ STEP 1 ══ -->
                     <div class="step-panel active" id="panel-1">
                         <div class="booking-card">
@@ -412,11 +492,13 @@
                             <div class="card-body">
                                 <form id="bookingForm">
                                     @csrf
+
                                     <div class="form-group">
                                         <label class="form-label"><i class="fas fa-user"></i><span>Full Name</span><span class="required">*</span></label>
                                         <input type="text" name="full_name" id="input-name" class="form-input" readonly>
                                         <div class="error-message" id="error-name"><i class="fas fa-exclamation-circle"></i> Full name is required</div>
                                     </div>
+
                                     <div class="row-2">
                                         <div class="form-group">
                                             <label class="form-label"><i class="fas fa-envelope"></i><span>Email</span><span class="required">*</span></label>
@@ -429,19 +511,24 @@
                                             <div class="error-message" id="error-phone"><i class="fas fa-exclamation-circle"></i> Must start with 09 and be exactly 11 digits</div>
                                         </div>
                                     </div>
+
                                     <div class="form-group">
                                         <label class="form-label"><i class="fas fa-comment-dots"></i><span>Special Requirements</span></label>
                                         <textarea name="special_requirements" class="form-textarea" placeholder="Any special requests or requirements…"></textarea>
                                     </div>
+
+                                    <!-- Payment Method -->
                                     <div class="form-group">
                                         <label class="form-label"><i class="fas fa-credit-card"></i><span>Payment Method</span><span class="required">*</span></label>
                                         <div class="pay-grid" id="pay-grid">
+                                            <!-- CARD (replaces cash) -->
                                             <div class="pay-card" id="pay-card" onclick="selectPayMethod('card')">
                                                 <div class="pay-check"><i class="fas fa-check"></i></div>
                                                 <div class="pay-icon"><i class="fas fa-credit-card"></i></div>
                                                 <div class="pay-title">Card</div>
                                                 <div class="pay-sub">Credit / Debit card</div>
                                             </div>
+                                            <!-- GCASH -->
                                             <div class="pay-card" id="pay-gcash" onclick="selectPayMethod('gcash')">
                                                 <div class="pay-check"><i class="fas fa-check"></i></div>
                                                 <div class="pay-icon"><i class="fas fa-mobile-alt"></i></div>
@@ -451,6 +538,8 @@
                                         </div>
                                         <div class="error-message" id="error-payment"><i class="fas fa-exclamation-circle"></i> Please select a payment method</div>
                                     </div>
+
+                                    <!-- Amount Selection -->
                                     <div id="amount-section" style="display:none;">
                                         <div class="form-group">
                                             <label class="form-label"><i class="fas fa-peso-sign"></i><span>Payment Amount</span><span class="required">*</span></label>
@@ -471,11 +560,13 @@
                                             <div class="error-message" id="error-amount"><i class="fas fa-exclamation-circle"></i> Please select a payment amount</div>
                                         </div>
                                     </div>
+
                                     <input type="hidden" name="payment_method" id="h-payment-method">
                                     <input type="hidden" name="payment_amount" id="h-payment-amount">
                                     <input type="hidden" name="booking_type" id="h-booking-type">
                                     <input type="hidden" name="event_type" value="normal-booking">
                                 </form>
+
                                 <div class="btn-row">
                                     <button class="action-btn btn-primary" id="btn-next1" onclick="goToStep2()" disabled>
                                         <span>Next Step</span><i class="fas fa-arrow-right"></i>
@@ -516,6 +607,7 @@
                                 <li><i class="fas fa-circle ri y"></i> Quiet hours are from <strong>10:00 PM – 7:00 AM</strong>.</li>
                             </ul>
                         </div>
+
                         <div class="booking-card rules-card" id="cottage-rules-card" style="display:none;">
                             <div class="rules-header">
                                 <div class="rules-icon cottage-icon"><i class="fas fa-home"></i></div>
@@ -530,6 +622,7 @@
                                 <li><i class="fas fa-circle ri y"></i> Children must be accompanied by an adult at all times near the pool area.</li>
                             </ul>
                         </div>
+
                         <div class="booking-card rules-card">
                             <div class="rules-header">
                                 <div class="rules-icon general-icon"><i class="fas fa-info-circle"></i></div>
@@ -550,6 +643,7 @@
                                 </div>
                             </div>
                         </div>
+
                         <div class="btn-row">
                             <button class="action-btn btn-secondary" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i><span>Back</span></button>
                             <button class="action-btn btn-card" id="btn-confirm-card" style="display:none;" onclick="openCardModal()">
@@ -559,6 +653,7 @@
                                 <i class="fas fa-mobile-alt"></i><span>Pay with GCash</span>
                             </button>
                         </div>
+
                         <button class="action-btn btn-danger-ghost" onclick="cancelBooking()">
                             <i class="fas fa-times-circle"></i><span>Cancel Booking</span>
                         </button>
@@ -581,19 +676,26 @@
                             </div>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- CARD PAYMENT MODAL -->
+    <!-- ═══════════════════════════════════════════
+         CARD PAYMENT MODAL
+    ═══════════════════════════════════════════ -->
     <div class="card-modal-overlay" id="cardModalOverlay" onclick="handleModalOverlayClick(event)">
         <div class="card-modal" id="cardModal">
+
+            <!-- Header -->
             <div class="card-modal-header">
                 <h3><i class="fas fa-lock"></i> Secure Card Payment</h3>
                 <p>Your card details are encrypted and secure.</p>
                 <button class="card-modal-close" onclick="closeCardModal()"><i class="fas fa-times"></i></button>
             </div>
+
+            <!-- Card Preview -->
             <div class="card-preview" id="cardPreview">
                 <div class="card-preview-chip"></div>
                 <div class="card-preview-number" id="previewNumber">•••• •••• •••• ••••</div>
@@ -611,11 +713,16 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Body -->
             <div class="card-modal-body">
+
                 <div class="secure-badge">
                     <i class="fas fa-shield-alt"></i>
                     <span>256-bit SSL encrypted · Powered by PayMongo</span>
                 </div>
+
+                <!-- Card Number -->
                 <div class="card-input-group">
                     <div class="card-input-label"><i class="fas fa-credit-card"></i> Card Number</div>
                     <div class="card-number-wrap">
@@ -626,6 +733,8 @@
                     </div>
                     <div class="card-error-msg" id="err-cardNumber"><i class="fas fa-exclamation-circle"></i> <span></span></div>
                 </div>
+
+                <!-- Cardholder Name -->
                 <div class="card-input-group">
                     <div class="card-input-label"><i class="fas fa-user"></i> Cardholder Name</div>
                     <input type="text" id="cardName" class="card-field" placeholder="JUAN DELA CRUZ"
@@ -633,6 +742,8 @@
                            oninput="updatePreviewName(this.value)" onblur="validateCardField('cardName')">
                     <div class="card-error-msg" id="err-cardName"><i class="fas fa-exclamation-circle"></i> <span></span></div>
                 </div>
+
+                <!-- Expiry + CVV -->
                 <div class="card-row-2">
                     <div class="card-input-group">
                         <div class="card-input-label"><i class="fas fa-calendar"></i> Expiry Date</div>
@@ -649,10 +760,13 @@
                         <div class="card-error-msg" id="err-cardCVV"><i class="fas fa-exclamation-circle"></i> <span></span></div>
                     </div>
                 </div>
+
+                <!-- Submit -->
                 <button class="card-submit-btn" id="cardSubmitBtn" onclick="submitCardPayment()">
                     <i class="fas fa-lock"></i>
                     <span id="cardSubmitLabel">Pay ₱<span id="cardPayAmount">0.00</span></span>
                 </button>
+
                 <div class="accepted-cards">
                     <i class="fas fa-shield-alt" style="color:#10B981;"></i>
                     Accepted:
@@ -684,11 +798,10 @@ let hasCottage = false;
 let cartItems  = [];
 let cartData   = null;
 let currentStep = 1;
+
+// card modal state
 let pendingBookingData  = null;
 let pendingPaymentData  = null;
-
-// ══ PayMongo public key (safe to expose on frontend) ══
-const PAYMONGO_PUBLIC_KEY = '{{ config("services.paymongo.public_key") }}';
 
 // ═══════════════════════════════════════════════
 //  INIT
@@ -723,14 +836,6 @@ function showInlineError(id) {
 function hideInlineError(id) {
     const el = document.getElementById('error-' + id);
     if (el) el.classList.remove('show');
-}
-
-function resetCardSubmitBtn() {
-    const submitBtn = document.getElementById('cardSubmitBtn');
-    if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = `<i class="fas fa-lock"></i><span id="cardSubmitLabel">Pay ₱<span id="cardPayAmount">${selectedAmount.toFixed(2)}</span></span>`;
-    }
 }
 
 // ═══════════════════════════════════════════════
@@ -896,12 +1001,15 @@ function goToStep2() {
     const phone = document.getElementById('phone-input');
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (!name.value.trim())  { name.classList.add('error');  showInlineError('name');  showToast('error','Full name is required.'); name.focus(); return; }
+    if (!name.value.trim())  { name.classList.add('error');  showInlineError('name');    showToast('error','Full name is required.');                                    name.focus();  return; }
     name.classList.remove('error'); hideInlineError('name');
+
     if (!email.value.trim() || !emailRegex.test(email.value)) { email.classList.add('error'); showInlineError('email'); showToast('error','Please enter a valid email address.'); email.focus(); return; }
     email.classList.remove('error'); hideInlineError('email');
+
     if (!validatePhoneNumber(phone.value.trim())) { phone.classList.add('error'); showInlineError('phone'); showToast('error','Phone number must start with 09 and be exactly 11 digits.'); phone.focus(); return; }
     phone.classList.remove('error'); hideInlineError('phone');
+
     if (!selectedPayMethod) { document.getElementById('pay-grid').classList.add('error-highlight'); showInlineError('payment'); showToast('error','Please select a payment method.'); document.getElementById('pay-grid').scrollIntoView({behavior:'smooth',block:'center'}); return; }
     if (!selectedAmountType) { showInlineError('amount'); showToast('error','Please select a payment amount.'); document.getElementById('amount-section').scrollIntoView({behavior:'smooth',block:'center'}); return; }
 
@@ -989,13 +1097,9 @@ async function openCardModal() {
         return;
     }
 
+    // Validate and get booking data first
     const phone = document.getElementById('phone-input').value.trim();
-    if (!validatePhoneNumber(phone)) {
-        showToast('error','Invalid phone number.');
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-credit-card"></i><span>Pay with Card</span>';
-        return;
-    }
+    if (!validatePhoneNumber(phone)) { showToast('error','Invalid phone number.'); btn.disabled=false; btn.innerHTML='<i class="fas fa-credit-card"></i><span>Pay with Card</span>'; return; }
 
     const fd = new FormData(document.getElementById('bookingForm'));
     fd.set('phone', phone);
@@ -1006,22 +1110,25 @@ async function openCardModal() {
 
     try {
         const r = await fetch('/api/customer-bookings', {
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': csrf(), 'Accept': 'application/json' },
+            method:'POST',
+            headers:{'X-CSRF-TOKEN':csrf(),'Accept':'application/json'},
             body: fd
         });
         const d = await r.json();
 
         if (!d.success || !d.requires_payment_first) throw new Error(d.message || 'Validation failed');
 
+        // Store for later use
         pendingBookingData = d.booking_data;
         pendingPaymentData = d.payment_data;
 
+        // Update modal pay amount
         document.getElementById('cardPayAmount').textContent = selectedAmount.toFixed(2);
 
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-credit-card"></i><span>Pay with Card</span>';
 
+        // Open modal
         document.getElementById('cardModalOverlay').classList.add('open');
         document.body.style.overflow = 'hidden';
 
@@ -1036,6 +1143,7 @@ function closeCardModal() {
     document.getElementById('cardModalOverlay').classList.remove('open');
     document.body.style.overflow = '';
 
+    // Reset card fields
     ['cardNumber','cardName','cardExpiry','cardCVV'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = '';
@@ -1050,11 +1158,12 @@ function closeCardModal() {
     document.getElementById('previewBrand').innerHTML    = '<i class="fas fa-credit-card"></i>';
     document.getElementById('cardBrandIcon').innerHTML   = '<i class="fas fa-credit-card"></i>';
 
-    resetCardSubmitBtn();
-}
-
-function handleModalOverlayClick(e) {
-    if (e.target === document.getElementById('cardModalOverlay')) closeCardModal();
+    // ✅ FIX: Reset the entire button safely
+    const submitBtn = document.getElementById('cardSubmitBtn');
+    if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<i class="fas fa-lock"></i><span id="cardSubmitLabel">Pay ₱<span id="cardPayAmount">${selectedAmount.toFixed(2)}</span></span>`;
+    }
 }
 
 // ═══════════════════════════════════════════════
@@ -1064,9 +1173,12 @@ function formatCardNumber(input) {
     let v = input.value.replace(/\D/g,'').slice(0,16);
     input.value = v.match(/.{1,4}/g)?.join(' ') || v;
 
+    // Update preview
     const padded = v.padEnd(16,'•');
-    document.getElementById('previewNumber').textContent = padded.match(/.{1,4}/g).join(' ');
+    document.getElementById('previewNumber').textContent =
+        padded.match(/.{1,4}/g).join(' ');
 
+    // Detect brand
     const brand = detectCardBrand(v);
     const brandIcons = {
         visa:       '<i class="fab fa-cc-visa" style="color:#1A1F71;"></i>',
@@ -1082,9 +1194,9 @@ function formatCardNumber(input) {
 }
 
 function detectCardBrand(num) {
-    if (/^4/.test(num))               return 'visa';
-    if (/^5[1-5]/.test(num))          return 'mastercard';
-    if (/^2[2-7]/.test(num))          return 'mastercard';
+    if (/^4/.test(num))           return 'visa';
+    if (/^5[1-5]/.test(num))      return 'mastercard';
+    if (/^2[2-7]/.test(num))      return 'mastercard';
     if (/^35(2[89]|[3-8])/.test(num)) return 'jcb';
     return 'default';
 }
@@ -1094,6 +1206,7 @@ function formatExpiry(input) {
     if (v.length >= 2) v = v.slice(0,2) + ' / ' + v.slice(2);
     input.value = v;
 
+    // Update preview
     const raw = input.value.replace(/\D/g,'');
     if (raw.length >= 4) document.getElementById('previewExpiry').textContent = raw.slice(0,2) + ' / ' + raw.slice(2,4);
     else if (raw.length >= 2) document.getElementById('previewExpiry').textContent = raw.slice(0,2) + ' / ';
@@ -1158,8 +1271,7 @@ function validateAllCardFields() {
 }
 
 // ═══════════════════════════════════════════════
-//  SUBMIT CARD PAYMENT — ✅ SECURE (frontend tokenization)
-//  Card details go directly to PayMongo, NOT to our server
+//  SUBMIT CARD PAYMENT
 // ═══════════════════════════════════════════════
 async function submitCardPayment() {
     if (!validateAllCardFields()) {
@@ -1172,68 +1284,35 @@ async function submitCardPayment() {
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing…';
 
     try {
+        // Parse expiry
         const expiryRaw = document.getElementById('cardExpiry').value.replace(/\D/g,'');
+        const expMonth  = expiryRaw.slice(0,2);
+        const expYear   = '20' + expiryRaw.slice(2,4);
 
-        // ✅ STEP 1: Tokenize card directly with PayMongo using PUBLIC KEY
-        // Raw card details NEVER touch our server — only PayMongo receives them
-        const pmResponse = await fetch('https://api.paymongo.com/v1/payment_methods', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Basic ' + btoa(PAYMONGO_PUBLIC_KEY + ':')
-            },
-            body: JSON.stringify({
-                data: {
-                    attributes: {
-                        type: 'card',
-                        details: {
-                            card_number: document.getElementById('cardNumber').value.replace(/\s/g, ''),
-                            exp_month:   parseInt(expiryRaw.slice(0, 2)),
-                            exp_year:    parseInt('20' + expiryRaw.slice(2, 4)),
-                            cvc:         document.getElementById('cardCVV').value,
-                        },
-                        billing: {
-                            name:  document.getElementById('cardName').value.trim(),
-                            email: pendingBookingData?.email ?? '{{ Auth::user()->email ?? "" }}',
-                            phone: pendingBookingData?.phone ?? null,
-                        }
-                    }
-                }
-            })
-        });
-
-        const pmData = await pmResponse.json();
-
-        if (!pmResponse.ok) {
-            const errMsg = pmData.errors?.[0]?.detail || 'Card tokenization failed. Please check your card details.';
-            throw new Error(errMsg);
-        }
-
-        // ✅ STEP 2: Send only the token ID to our server — no raw card data
-        const paymentMethodId = pmData.data.id;
+        const payload = {
+            booking_data:  pendingBookingData,
+            payment_data:  pendingPaymentData,
+            card_number:   document.getElementById('cardNumber').value.replace(/\s/g,''),
+            card_exp_month: expMonth,
+            card_exp_year:  expYear,
+            card_cvc:       document.getElementById('cardCVV').value,
+            card_name:      document.getElementById('cardName').value.trim()
+        };
 
         const r = await fetch('/card/process-payment', {
             method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': csrf(),
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                booking_data:      pendingBookingData,
-                payment_data:      pendingPaymentData,
-                payment_method_id: paymentMethodId   // token only, no raw card details
-            })
+            headers: { 'X-CSRF-TOKEN': csrf(), 'Accept': 'application/json', 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
         });
-
         const d = await r.json();
 
         if (d.success) {
             if (d.requires_3ds && d.redirect_url) {
+                // Redirect to bank 3DS page
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Redirecting to bank…';
                 window.location.href = d.redirect_url;
             } else {
-                // No 3DS — payment succeeded immediately
+                // Payment succeeded immediately (no 3DS)
                 closeCardModal();
                 showSuccess({
                     booking_reference: d.payment?.paymentReference || 'N/A',
@@ -1247,7 +1326,8 @@ async function submitCardPayment() {
 
     } catch(e) {
         showToast('error', e.message);
-        resetCardSubmitBtn();
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-lock"></i> Pay ₱<span id="cardPayAmount">' + selectedAmount.toFixed(2) + '</span>';
     }
 }
 
