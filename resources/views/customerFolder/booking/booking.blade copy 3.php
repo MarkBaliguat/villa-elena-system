@@ -1196,30 +1196,6 @@ async function submitCardPayment() {
 
     const btn = document.getElementById('cardSubmitBtn');
     btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking availability…';
-
-    // ── Re-validate unit availability right before charging the card ──
-    try {
-        const validationRes = await fetch('/api/cart/pre-validate', {
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': csrf(), 'Accept': 'application/json', 'Content-Type': 'application/json' }
-        });
-        const validationData = await validationRes.json();
-
-        if (!validationData.success) {
-            const errors = validationData.validation_errors
-                ? validationData.validation_errors.join(' ')
-                : (validationData.message || 'One or more units are no longer available.');
-            showToast('error', errors);
-            resetCardSubmitBtn();
-            return;
-        }
-    } catch (e) {
-        showToast('error', 'Could not verify availability. Please try again.');
-        resetCardSubmitBtn();
-        return;
-    }
-
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing…';
 
     try {
