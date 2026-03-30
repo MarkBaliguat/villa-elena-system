@@ -681,16 +681,16 @@
                             <p class="text-sm"><span class="font-medium">Event Date:</span> ${eventDate}</p>
                             <p class="text-sm"><span class="font-medium">Time:</span> ${booking.event_start_time || '08:00'} - ${booking.event_end_time || '17:00'}</p>
                             <p class="text-sm"><span class="font-medium">Guests:</span> ${booking.num_guests}</p>
-                            <p class="text-sm"><span class="font-medium">Price:</span> PHP ${totalPrice.toFixed(2)}</p>
+                            <p class="text-sm"><span class="font-medium">Price:</span> PHP ${totalPrice.toLocaleString('en-PH', {minimumFractionDigits: 2})}</p>
                             ${booking.special_requirements ? `<p class="text-sm mt-1"><span class="font-medium">Notes:</span> ${booking.special_requirements}</p>` : ''}
                         </div>
                     </td>
                     <td class="py-4 px-4">
                         <div class="space-y-1">
-                            <p class="text-sm"><span class="font-medium">Total:</span> PHP ${totalPrice.toFixed(2)}</p>
-                            <p class="text-sm"><span class="font-medium">Paid:</span> <span class="text-green-600 font-semibold">PHP ${totalPaid.toFixed(2)}</span></p>
-                            <p class="text-sm"><span class="font-medium">Refunded:</span> <span class="text-orange-600">PHP ${totalRefunded.toFixed(2)}</span></p>
-                            <p class="text-sm"><span class="font-medium">Balance:</span> <span class="${calculatedBalance === 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}">PHP ${calculatedBalance.toFixed(2)}</span></p>
+                            <p class="text-sm"><span class="font-medium">Total:</span> PHP ${totalPrice.toLocaleString('en-PH', {minimumFractionDigits: 2})}</p>
+                            <p class="text-sm"><span class="font-medium">Paid:</span> <span class="text-green-600 font-semibold">PHP ${totalPaid.toLocaleString('en-PH', {minimumFractionDigits: 2})}</span></p>
+                            <p class="text-sm"><span class="font-medium">Refunded:</span> <span class="text-orange-600"> PHP ${totalRefunded.toLocaleString('en-PH', {minimumFractionDigits: 2})}</span></p>
+                            <p class="text-sm"><span class="font-medium">Balance:</span> <span class="${calculatedBalance === 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}"> PHP ${calculatedBalance.toLocaleString('en-PH', {minimumFractionDigits: 2})}</span></p>
                             ${booking.payment_status ? `<p class="text-xs ${getPaymentStatusColor(booking.payment_status)}">${booking.payment_status.toUpperCase()}</p>` : ''}
                         </div>
                     </td>
@@ -771,19 +771,19 @@
                         </div>
                         <div class="card-item">
                             <span class="card-label">Total Price</span>
-                            <span class="card-value font-semibold text-violet-600">PHP ${totalPrice.toFixed(2)}</span>
+                            <span class="card-value font-semibold text-violet-600"> PHP ${totalPrice.toLocaleString('en-PH', {minimumFractionDigits: 2})}</span>
                         </div>
                         <div class="card-item">
                             <span class="card-label">Amount Paid</span>
-                            <span class="card-value text-green-600 font-semibold">PHP ${totalPaid.toFixed(2)}</span>
+                            <span class="card-value text-green-600 font-semibold"> PHP ${totalPaid.toLocaleString('en-PH', {minimumFractionDigits: 2})}</span>
                         </div>
                         <div class="card-item">
                             <span class="card-label">Refunded</span>
-                            <span class="card-value text-orange-600">PHP ${totalRefunded.toFixed(2)}</span>
+                            <span class="card-value text-orange-600"> PHP ${totalRefunded.toLocaleString('en-PH', {minimumFractionDigits: 2})}</span>
                         </div>
                         <div class="card-item">
                             <span class="card-label">Balance</span>
-                            <span class="card-value ${calculatedBalance === 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}">PHP ${calculatedBalance.toFixed(2)}</span>
+                            <span class="card-value ${calculatedBalance === 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}"> PHP ${calculatedBalance.toLocaleString('en-PH', {minimumFractionDigits: 2})}</span>
                         </div>
                         ${booking.payment_status ? `
                         <div class="card-item">
