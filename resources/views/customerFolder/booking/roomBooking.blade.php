@@ -1090,7 +1090,7 @@
                         <!-- Number of Guests -->
                         <div class="form-group">
                             <label class="form-label">Number of Guests</label>
-                            <input type="number" name="guests" id="guest-number" class="form-input" value="1" min="1" max="20" required>
+                            <input type="number" name="guests" id="guest-number" class="form-input" value="2" min="2" max="20" required>
                         </div>
                         
                         <!-- Submit Button -->
@@ -1269,7 +1269,7 @@
                 } else if (e.key === 'ArrowDown') {
                     e.preventDefault();
                     let value = parseInt(this.value);
-                    if (value > 1) this.value = value - 1;
+                    if (value > 2) this.value = value - 1;
                 }
             });
             
@@ -1287,7 +1287,7 @@
 
             guestNumberInput.addEventListener('blur', function() {
                 let value = parseInt(this.value);
-                if (isNaN(value) || value < 1) this.value = 1;
+                if (isNaN(value) || value < 2) this.value = 2;
                 else if (value > 20) this.value = 20;
             });
             
@@ -1298,7 +1298,7 @@
                 if (e.deltaY < 0) {
                     if (value < 20) this.value = value + 1;
                 } else {
-                    if (value > 1) this.value = value - 1;
+                    if (value > 2) this.value = value - 1;
                 }
             });
 
@@ -1677,7 +1677,7 @@
                         <div class="card-price-section">
                             <div class="card-price">
                                 ₱${parseInt(unit.unitRatePrice).toLocaleString()}
-                                <span class="price-period">/ night</span>
+                                <span class="price-period">/ guest / night</span>
                             </div>
                         </div>
                         

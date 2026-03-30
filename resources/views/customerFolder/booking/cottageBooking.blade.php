@@ -1122,7 +1122,7 @@
                         <!-- Number of Guests -->
                         <div class="form-group">
                             <label class="form-label">Number of Guests</label>
-                            <input type="number" name="guests" id="guest-number" class="form-input" value="1" min="1" max="40" required>
+                            <input type="number" name="guests" id="guest-number" class="form-input" value="2" min="2" max="40" required>
                         </div>
                         
                         <!-- Submit Button -->
@@ -1204,7 +1204,7 @@
         // Global variables
         let currentCheckIn = '';
         let currentCheckOut = '';
-        let currentGuests = 1;
+        let currentGuests = ;
         let cartItemCount = 0;
         let cartItems = [];
         let cartDates = { checkIn: '', checkOut: '' };
@@ -1298,7 +1298,7 @@
                 } else if (e.key === 'ArrowDown') {
                     e.preventDefault();
                     let value = parseInt(this.value);
-                    if (value > 1) this.value = value - 1;
+                    if (value > 2) this.value = value - 1;
                 }
             });
             
@@ -1316,7 +1316,7 @@
 
             guestNumberInput.addEventListener('blur', function() {
                 let value = parseInt(this.value);
-                if (isNaN(value) || value < 1) this.value = 1;
+                if (isNaN(value) || value < 2) this.value = 2;
                 else if (value > 30) this.value = 30;
             });
             
@@ -1327,7 +1327,7 @@
                 if (e.deltaY < 0) {
                     if (value < 30) this.value = value + 1;
                 } else {
-                    if (value > 1) this.value = value - 1;
+                    if (value > 2) this.value = value - 1;
                 }
             });
 
@@ -1753,7 +1753,7 @@
         function resetSearch() {
             document.getElementById('check_in').value = '';
             document.getElementById('check_out').value = '';
-            document.getElementById('guest-number').value = 1;
+            document.getElementById('guest-number').value = 2;
             
             currentCheckIn = '';
             currentCheckOut = '';
