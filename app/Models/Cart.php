@@ -14,7 +14,7 @@ class Cart extends Model
         'checkInDate',
         'checkOutDate',
         'daysCount',
-        'numGuests',
+        // 'numGuests',
         'is_active'
     ];
 

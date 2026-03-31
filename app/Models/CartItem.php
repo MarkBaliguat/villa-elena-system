@@ -13,6 +13,7 @@ class CartItem extends Model
     protected $fillable = [
         'cartID',
         'unitID',
+        'numGuests',
         'subtotalPrice',
         'isBooked', 
         

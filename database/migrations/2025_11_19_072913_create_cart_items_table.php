@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id('cartItemID');
             $table->foreignId('cartID')->constrained('carts', 'cartID');
             $table->foreignId('unitID')->constrained('units', 'unitID');
+            $table->integer('numGuests');
             $table->decimal('subtotalPrice', 10, 2);
             $table->boolean('isBooked')->default(false);
             $table->timestamps();

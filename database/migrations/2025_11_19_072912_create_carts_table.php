@@ -14,7 +14,7 @@ return new class extends Migration
             $table->date('checkInDate');
             $table->date('checkOutDate');
             $table->integer('daysCount')->default(1);
-            $table->integer('numGuests');
+            // $table->integer('numGuests');
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
