@@ -99,11 +99,13 @@
         .page-title {
             font-size: 2.8rem;
             font-weight: 800;
+            /* background: linear-gradient(135deg, #F59E0B, #D97706, #B45309); */
             background: #1F2937;
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
             display: inline-block;
+            /* text-shadow: 0 4px 12px rgba(245, 158, 11, 0.2); */
             letter-spacing: -0.5px;
         }
 
@@ -151,6 +153,7 @@
             left: 0;
             right: 0;
             height: 4px;
+            /* background: linear-gradient(90deg, var(--booking-primary-yellow), var(--booking-secondary-yellow), var(--booking-yellow-dark)); */
             border-radius: 20px 20px 0 0;
         }
 
@@ -258,6 +261,7 @@
             left: 0;
             right: 0;
             height: 4px;
+            /* background: linear-gradient(90deg, var(--booking-primary-yellow), var(--booking-secondary-yellow), var(--booking-yellow-dark)); */
             border-radius: 20px 20px 0 0;
         }
 
@@ -357,6 +361,7 @@
             left: 0;
             right: 0;
             height: 6px;
+            /* background: linear-gradient(90deg, var(--booking-primary-yellow), var(--booking-secondary-yellow), var(--booking-yellow-dark)); */
         }
 
         .booking-card:hover {
@@ -681,6 +686,7 @@
             left: 0;
             right: 0;
             height: 6px;
+            /* background: linear-gradient(90deg, var(--booking-primary-yellow), var(--booking-secondary-yellow), var(--booking-yellow-dark)); */
             border-radius: 20px 20px 0 0;
         }
 
@@ -784,6 +790,7 @@
             left: 0;
             right: 0;
             height: 6px;
+            /* background: linear-gradient(90deg, var(--booking-primary-yellow), var(--booking-secondary-yellow), var(--booking-yellow-dark)); */
             border-radius: 24px 24px 0 0;
         }
 
@@ -1088,6 +1095,7 @@
         }
 
         @media print {
+            /* Hide everything except the print voucher */
             body > *:not(#print-voucher-overlay) { display: none !important; }
             #print-voucher-overlay {
                 display: block !important;
@@ -1099,6 +1107,7 @@
             }
         }
 
+        /* Print Voucher Overlay (shown on screen before printing) */
         #print-voucher-overlay {
             display: none;
             position: fixed;
@@ -1597,13 +1606,6 @@ document.addEventListener('DOMContentLoaded', function () {
     setupFilters();
 });
 
-/* ═══════════════════════════════════════════════════════════
-   MONEY FORMATTER — adds comma separators
-═══════════════════════════════════════════════════════════ */
-function formatMoney(amount) {
-    return parseFloat(amount || 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-
 /* ─── FILTERS ─── */
 function setupFilters() {
     document.querySelectorAll('.filter-tab').forEach(tab => {
@@ -1705,9 +1707,9 @@ function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : 'Pending';
 
 /* ─── CARD HTML ─── */
 function cardHTML(b, i) {
-    const total    = formatMoney(b.totalPrice || 0);
-    const paid     = formatMoney(b.total_paid || 0);
-    const balance  = formatMoney((parseFloat(b.totalPrice || 0) - parseFloat(b.total_paid || 0)));
+    const total    = parseFloat(b.totalPrice || 0).toFixed(2);
+    const paid     = parseFloat(b.total_paid || 0).toFixed(2);
+    const balance  = (parseFloat(total) - parseFloat(paid)).toFixed(2);
     const guests = b.accommodations && b.accommodations.length
         ? b.accommodations.reduce((sum, a) => sum + (a.numGuests || 1), 0)
         : (b.numGuests || b.cart?.numGuests || 1);
@@ -1769,6 +1771,8 @@ function cardHTML(b, i) {
         <div class="card-actions">
             <button onclick="viewBooking(${b.bookingID})" class="btn btn-primary"><i class="fas fa-eye"></i> View Details</button>
             <button onclick="printBooking(${b.bookingID})" class="btn btn-print"><i class="fas fa-print"></i> Print</button>
+            ${ /* (status === 'pending' || status === 'confirmed') ?
+                `<button onclick="cancelBooking(${b.bookingID})" class="btn btn-danger"><i class="fas fa-times"></i> Cancel</button>` : '' */ ''}
         </div>
         
     </div>`;
@@ -1805,6 +1809,7 @@ function viewBooking(id) {
 
 function renderModal(b) {
     const status  = b.bookingStatus || 'pending';
+    // guests computed per-item below; keep a fallback for the header
     const totalGuests = b.cart?.items?.reduce((s, i) => s + (i.numGuests || 1), 0)
         || b.numGuests || 1;
     const start   = b.formatted_details?.event_start || 'N/A';
@@ -1830,7 +1835,7 @@ function renderModal(b) {
                     <div class="name">${unit.unitName || 'N/A'}</div>
                     <div class="type ${unit.unitType || ''}">${unit.unitType ? cap(unit.unitType) : ''} • ${itemGuests} guest${itemGuests>1?'s':''}</div>
                 </div>
-                <div class="price">₱${formatMoney(price)}</div>
+                <div class="price">₱${price.toFixed(2)}</div>
             </div>`;
         }).join('');
     }
@@ -1847,7 +1852,7 @@ function renderModal(b) {
                     <div class="info">${date} • ${p.paymentMethod || 'N/A'} • ${p.paymentType || 'Payment'}</div>
                 </div>
                 <div>
-                    <div class="amount">₱${formatMoney(p.amountPaid || 0)}</div>
+                    <div class="amount">₱${parseFloat(p.amountPaid || 0).toFixed(2)}</div>
                 </div>
             </div>`;
         }).join('');
@@ -1899,10 +1904,17 @@ function renderModal(b) {
             <h4><i class="fas fa-sticky-note"></i> Special Requirements</h4>
             <p>${b.specialRequirements}</p>
         </div>` : ''}
+
+        ${ /* <div class="modal-actions">
+            ${(status === 'pending' || status === 'confirmed') ?
+                `<button onclick="cancelBooking(${b.bookingID}, true)" class="btn btn-danger"><i class="fas fa-times"></i> Cancel Booking</button>` : ''}
+            <button onclick="closeModal()" class="btn btn-ghost"><i class="fas fa-times"></i> Close</button>
+        </div> */ ''}
     `;
 }
 
 /* ─── CANCEL ─── */
+
 function cancelBooking(id, fromModal = false) {
     Swal.fire({
         title: 'Cancel Booking?',
@@ -2015,7 +2027,7 @@ function printBooking(id) {
 function renderVoucher(b) {
     const sheet   = document.getElementById('voucher-sheet-content');
     const status  = b.bookingStatus || 'pending';
-    const guests = b.numGuests || b.cart?.numGuests || 1;
+    const guests = b.numGuests || b.cart?.numGuests || 1; // fallback for header
     const start   = b.formatted_details?.event_start || b.formatted_event_start || 'N/A';
     const end     = b.formatted_details?.event_end || b.formatted_event_end || 'N/A';
     const booked  = b.formatted_details?.created_at
@@ -2042,7 +2054,7 @@ function renderVoucher(b) {
                     <div class="v-name">${unit.unitName || 'N/A'}</div>
                     <div class="v-type">${unit.unitType ? cap(unit.unitType) : ''} • ${itemGuests} guest${itemGuests > 1 ? 's' : ''} • ${days} night${days !== 1 ? 's' : ''}</div>
                 </div>
-                <div class="v-price">₱${formatMoney(price)}</div>
+                <div class="v-price">₱${price.toFixed(2)}</div>
             </div>`;
         }).join('');
     }
@@ -2058,7 +2070,7 @@ function renderVoucher(b) {
                     <div class="v-ref">${p.paymentReference || 'Payment'}</div>
                     <div class="v-info">${date} • ${p.paymentMethod || 'N/A'} • ${p.paymentType || 'Payment'}</div>
                 </div>
-                <div class="v-amt">₱${formatMoney(p.amountPaid || 0)}</div>
+                <div class="v-amt">₱${parseFloat(p.amountPaid || 0).toFixed(2)}</div>
             </div>`;
         }).join('');
     }
@@ -2165,24 +2177,30 @@ function renderVoucher(b) {
     `;
 }
 
+/* ─── FIX: render the already-visible voucher sheet directly,
+         auto-sizing the PDF to match the actual content height ─── */
 function triggerPrint() {
     const printBtn = document.querySelector('.voucher-action-bar .btn-print');
     const originalHTML = printBtn ? printBtn.innerHTML : '';
     const actionBar = document.querySelector('#voucher-sheet-content .voucher-action-bar');
 
+    // Get booking ID for filename
     const bookingIdEl = document.querySelector('#voucher-sheet-content .voucher-booking-id');
     const idText = bookingIdEl ? bookingIdEl.textContent.replace('#', '').trim() : 'Unknown';
     const filename = `VillaElena_Booking_${idText}.pdf`;
 
+    // Show loading state
     if (printBtn) {
         printBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
         printBtn.disabled = true;
     }
 
+    // Temporarily hide the action bar so it won't appear in the PDF
     if (actionBar) actionBar.style.display = 'none';
 
     const sheet = document.getElementById('voucher-sheet-content');
 
+    // Dynamically size the PDF to match the actual rendered content — no white space
     const sheetWidth  = sheet.offsetWidth;
     const sheetHeight = sheet.offsetHeight;
 
@@ -2196,8 +2214,10 @@ function triggerPrint() {
 
     html2pdf().set(options).from(sheet).save()
         .then(() => {
+            // Restore the action bar
             if (actionBar) actionBar.style.display = '';
 
+            // Show done state then auto-close
             if (printBtn) {
                 printBtn.innerHTML = '<i class="fas fa-check-circle"></i> Downloaded!';
                 printBtn.style.background = 'linear-gradient(135deg, #D1FAE5, #A7F3D0)';
@@ -2208,6 +2228,7 @@ function triggerPrint() {
             setTimeout(() => closePrintVoucher(), 1200);
         })
         .catch(() => {
+            // Restore the action bar on error too
             if (actionBar) actionBar.style.display = '';
             if (printBtn) {
                 printBtn.innerHTML = originalHTML;
@@ -2221,6 +2242,7 @@ function closePrintVoucher() {
     document.body.style.overflow = 'auto';
 }
 
+// Close print overlay on overlay background click
 document.getElementById('print-voucher-overlay').addEventListener('click', function(e) {
     if (e.target === this) closePrintVoucher();
 });

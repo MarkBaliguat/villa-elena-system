@@ -699,6 +699,13 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // ═══════════════════════════════════════════════
+//  MONEY FORMATTER — adds comma separators
+// ═══════════════════════════════════════════════
+function formatMoney(amount) {
+    return amount.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+// ═══════════════════════════════════════════════
 //  HELPERS
 // ═══════════════════════════════════════════════
 function validatePhoneNumber(phone) { return /^09\d{9}$/.test(phone); }
@@ -727,7 +734,7 @@ function resetCardSubmitBtn() {
     const submitBtn = document.getElementById('cardSubmitBtn');
     if (submitBtn) {
         submitBtn.disabled = false;
-        submitBtn.innerHTML = `<i class="fas fa-lock"></i><span id="cardSubmitLabel">Pay ₱<span id="cardPayAmount">${selectedAmount.toFixed(2)}</span></span>`;
+        submitBtn.innerHTML = `<i class="fas fa-lock"></i><span id="cardSubmitLabel">Pay ₱<span id="cardPayAmount">${formatMoney(selectedAmount)}</span></span>`;
     }
 }
 
@@ -790,7 +797,7 @@ function computeTotals() {
             const roomTotal = price * mult * daysCount;
             roomSubtotal   += roomTotal;
             item._total     = roomTotal;
-            item._calc      = `₱${price.toFixed(2)} × ${mult} guest${mult > 1 ? 's' : ''} × ${daysCount} day${daysCount > 1 ? 's' : ''}`;
+            item._calc      = `₱${formatMoney(price)} × ${mult} guest${mult > 1 ? 's' : ''} × ${daysCount} day${daysCount > 1 ? 's' : ''}`;
 
         } else if (unit.unitType === 'cottage') {
             hasCottage = true;
@@ -799,7 +806,7 @@ function computeTotals() {
                 const ef = entranceFeeAmount * itemGuests;
                 totalEntranceFees += ef;
                 item._total = price + ef;
-                item._calc  = `Cottage: ₱${price.toFixed(2)} + Entrance: ₱${ef.toFixed(2)} (₱${entranceFeeAmount.toFixed(2)} × ${itemGuests})`;
+                item._calc  = `Cottage: ₱${formatMoney(price)} + Entrance: ₱${formatMoney(ef)} (₱${formatMoney(entranceFeeAmount)} × ${itemGuests})`;
             } else {
                 item._total = price;
                 item._calc  = 'Cottage price only';
@@ -807,7 +814,7 @@ function computeTotals() {
 
         } else {
             item._total = price * daysCount;
-            item._calc  = `₱${price.toFixed(2)} × ${daysCount} day${daysCount > 1 ? 's' : ''}`;
+            item._calc  = `₱${formatMoney(price)} × ${daysCount} day${daysCount > 1 ? 's' : ''}`;
         }
     });
 
@@ -821,8 +828,8 @@ function computeTotals() {
 
 function updateAmountChips() {
     const down = Math.round(bookingTotal * 0.5 * 100) / 100;
-    document.getElementById('chip-down-amt').textContent = '₱' + down.toFixed(2);
-    document.getElementById('chip-full-amt').textContent = '₱' + bookingTotal.toFixed(2);
+    document.getElementById('chip-down-amt').textContent = '₱' + formatMoney(down);
+    document.getElementById('chip-full-amt').textContent = '₱' + formatMoney(bookingTotal);
 }
 
 // ═══════════════════════════════════════════════
@@ -963,15 +970,15 @@ function renderSummary() {
                     </span>
                     <div class="accom-calc">${item._calc}</div>
                 </div>
-                <div class="accom-price">₱${item._total.toFixed(2)}</div>
+                <div class="accom-price">₱${formatMoney(item._total)}</div>
             </div>`;
     }).join('');
 
     // Build pricing breakdown rows
     let pricingRows = '';
-    if (d._roomSubtotal    > 0) pricingRows += `<div class="s-row"><span class="s-label">Rooms Subtotal</span><span class="s-value">₱${d._roomSubtotal.toFixed(2)}</span></div>`;
-    if (d._cottageSubtotal > 0) pricingRows += `<div class="s-row"><span class="s-label">Cottages Subtotal</span><span class="s-value">₱${d._cottageSubtotal.toFixed(2)}</span></div>`;
-    if (d._entranceFees    > 0) pricingRows += `<div class="s-row"><span class="s-label">Entrance Fees</span><span class="s-value">₱${d._entranceFees.toFixed(2)}</span></div>`;
+    if (d._roomSubtotal    > 0) pricingRows += `<div class="s-row"><span class="s-label">Rooms Subtotal</span><span class="s-value">₱${formatMoney(d._roomSubtotal)}</span></div>`;
+    if (d._cottageSubtotal > 0) pricingRows += `<div class="s-row"><span class="s-label">Cottages Subtotal</span><span class="s-value">₱${formatMoney(d._cottageSubtotal)}</span></div>`;
+    if (d._entranceFees    > 0) pricingRows += `<div class="s-row"><span class="s-label">Entrance Fees</span><span class="s-value">₱${formatMoney(d._entranceFees)}</span></div>`;
 
     document.getElementById('summary-body').innerHTML = `
         <div class="summary-block">
@@ -990,13 +997,13 @@ function renderSummary() {
             ${pricingRows}
             <div class="total-price-box">
                 <span class="t-label">Total Amount</span>
-                <span class="t-amount">₱${bookingTotal.toFixed(2)}</span>
+                <span class="t-amount">₱${formatMoney(bookingTotal)}</span>
             </div>
         </div>
         <div class="summary-block">
             <div class="section-label">Payment</div>
             <div class="s-row"><span class="s-label">Method</span><span class="s-value">${methodLabel}</span></div>
-            <div class="s-row"><span class="s-label">${payLabel}</span><span class="s-value" style="color:#10b981;">₱${selectedAmount.toFixed(2)}</span></div>
+            <div class="s-row"><span class="s-label">${payLabel}</span><span class="s-value" style="color:#10b981;">₱${formatMoney(selectedAmount)}</span></div>
         </div>`;
 }
 
@@ -1063,7 +1070,7 @@ async function openCardModal() {
         pendingBookingData = d.booking_data;
         pendingPaymentData = d.payment_data;
 
-        document.getElementById('cardPayAmount').textContent = selectedAmount.toFixed(2);
+        document.getElementById('cardPayAmount').textContent = formatMoney(selectedAmount);
 
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-credit-card"></i><span>Pay with Card</span>';

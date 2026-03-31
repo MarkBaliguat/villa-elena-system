@@ -1350,6 +1350,7 @@ function renderCart(cart, items, container) {
     const checkIn  = cart.checkInDate;
     const checkOut = cart.checkOutDate;
 
+    // ✅ numGuests is now per item — no more cart-level guests
     const hasCottageInCart = cartUnitType === 'cottage' || cartUnitType === 'mixed';
     const canProceed = !(hasCottageInCart && !hasActiveEntranceFee);
 
@@ -1363,6 +1364,7 @@ function renderCart(cart, items, container) {
         const rate = parseFloat(unit.unitRatePrice);
         const type = unit.unitType;
 
+        // ✅ READ numGuests from each item, NOT from cart
         const guests = parseInt(item.numGuests) || 1;
 
         let total      = 0;
@@ -1376,8 +1378,7 @@ function renderCart(cart, items, container) {
             const effectiveGuests = guests === 1 ? 2 : guests;
             total      = rate * effectiveGuests * days;
             totalRoom += total;
-            // ✅ formatPHP applied
-            calc       = `<strong>Calculation:</strong> ₱${formatPHP(rate)} × ${effectiveGuests} guest${effectiveGuests > 1 ? 's' : ''} × ${days} day${days > 1 ? 's' : ''} = ₱${formatPHP(total)}`;
+            calc       = `<strong>Calculation:</strong> ₱${rate.toFixed(2)} × ${effectiveGuests} guest${effectiveGuests > 1 ? 's' : ''} × ${days} day${days > 1 ? 's' : ''} = ₱${total.toFixed(2)}`;
             priceColor = 'blue';
         } else if (type === 'cottage') {
             if (hasActiveEntranceFee) {
@@ -1385,8 +1386,7 @@ function renderCart(cart, items, container) {
                 total             = entranceForItem + rate;
                 totalEntranceFee += entranceForItem;
                 totalCottage     += rate;
-                // ✅ formatPHP applied
-                calc              = `<strong>Calculation:</strong> (₱${formatPHP(entranceFeeAmount)} entrance fee × ${guests} guest${guests > 1 ? 's' : ''}) + ₱${formatPHP(rate)} cottage rate = ₱${formatPHP(total)}`;
+                calc              = `<strong>Calculation:</strong> (₱${entranceFeeAmount.toFixed(2)} entrance fee × ${guests} guest${guests > 1 ? 's' : ''}) + ₱${rate.toFixed(2)} cottage rate = ₱${total.toFixed(2)}`;
                 priceColor        = 'green';
             } else {
                 total         = rate;
@@ -1427,12 +1427,12 @@ function renderCart(cart, items, container) {
                                 </span>
                             </div>
                             <div class="item-price-section">
-                                {{-- ✅ formatPHP applied to item price --}}
-                                <div class="item-price ${priceColor}">₱${formatPHP(total)}</div>
+                                <div class="item-price ${priceColor}">₱${total.toFixed(2)}</div>
                             </div>
                         </div>
                         
                         <div class="item-tags">
+                            {{-- ✅ numGuests shown per item from cart_items --}}
                             <span class="item-tag ${isUnavailable ? 'red' : 'blue'}">
                                 <i class="fas fa-users"></i> ${guests} guest${guests > 1 ? 's' : ''}
                             </span>
@@ -1492,24 +1492,21 @@ function renderCart(cart, items, container) {
         breakdownRows += `
         <div class="price-row">
             <span><i class="fas fa-bed row-icon"></i> Rooms Subtotal</span>
-            {{-- ✅ formatPHP applied --}}
-            <span>₱${formatPHP(totalRoom)}</span>
+            <span>₱${totalRoom.toFixed(2)}</span>
         </div>`;
     }
     if (totalCottage > 0) {
         breakdownRows += `
         <div class="price-row">
             <span><i class="fas fa-home row-icon"></i> Cottages Base Price</span>
-            {{-- ✅ formatPHP applied --}}
-            <span>₱${formatPHP(totalCottage)}</span>
+            <span>₱${totalCottage.toFixed(2)}</span>
         </div>`;
     }
     if (totalEntranceFee > 0) {
         breakdownRows += `
         <div class="price-row">
             <span><i class="fas fa-ticket-alt row-icon"></i> Entrance Fees</span>
-            {{-- ✅ formatPHP applied --}}
-            <span>₱${formatPHP(totalEntranceFee)}</span>
+            <span>₱${totalEntranceFee.toFixed(2)}</span>
         </div>`;
     }
 
@@ -1524,6 +1521,7 @@ function renderCart(cart, items, container) {
                <i class="fas fa-ban"></i> Entrance Fee Required for Cottages
            </button>`;
 
+    // ✅ Booking Summary guest display — guestSummary & guestVaries from API
     const guestSummary = cart.guestSummary;
     const guestVaries  = cart.guestVaries;
 
@@ -1560,6 +1558,7 @@ function renderCart(cart, items, container) {
                         <div class="summary-item">
                             <i class="fas fa-users"></i>
                             <div class="summary-item-content">
+                                {{-- ✅ numGuests now per-item, show aggregate in summary --}}
                                 <div class="summary-label">Guests</div>
                                 <div class="summary-value">${guestDisplay}</div>
                             </div>
@@ -1586,8 +1585,7 @@ function renderCart(cart, items, container) {
                         ${breakdownRows}
                         <div class="price-total">
                             <span>Total Amount</span>
-                            {{-- ✅ formatPHP applied to grand total --}}
-                            <span>₱${formatPHP(grandTotal)}</span>
+                            <span>₱${grandTotal.toFixed(2)}</span>
                         </div>
                     </div>
                 </div>
@@ -1859,15 +1857,6 @@ function clearNotifications() {
 /* ═══════════════════════════════
    HELPERS
 ═══════════════════════════════ */
-
-// ✅ Format amount with comma separators e.g. 1000 → 1,000.00
-function formatPHP(amount) {
-    return parseFloat(amount).toLocaleString('en-PH', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    });
-}
-
 function csrfToken() {
     return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 }
