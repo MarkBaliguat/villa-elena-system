@@ -73,7 +73,7 @@ class SpecialEventsController extends Controller
                     'event_start_time' => $booking->eventStartTime ? Carbon::parse($booking->eventStartTime)->format('H:i') : null,
                     'event_end_time' => $booking->eventEndTime ? Carbon::parse($booking->eventEndTime)->format('H:i') : null,
                     'booking_type' => $booking->bookingType,
-                    'num_guests' => $booking->cart->numGuests,
+                    'num_guests' => $booking->cart->cartItems->first()?->numGuests,
                     'total_price' => $booking->totalPrice,
                     'total_paid' => $paymentSummary['total_paid'],
                     'total_refunded' => $paymentSummary['total_refunded'],
@@ -456,7 +456,6 @@ class SpecialEventsController extends Controller
                 'checkInDate' => $checkInDate,
                 'checkOutDate' => $checkInDate,
                 'daysCount' => 1,
-                'numGuests' => $validated['num_guests']
             ]);
 
             // Create cart item
@@ -464,7 +463,8 @@ class SpecialEventsController extends Controller
                 'cartID' => $cart->cartID,
                 'unitID' => $validated['unit_id'],
                 'subtotalPrice' => $validated['total_price'],
-                'isBooked' => true
+                'isBooked' => true,
+                'numGuests'     => $validated['num_guests']
             ]);
 
             // Create special event booking
@@ -606,8 +606,11 @@ class SpecialEventsController extends Controller
             $booking->cart->update([
                 'checkInDate' => $checkInDate,
                 'checkOutDate' => $checkInDate,
-                'numGuests' => $validated['num_guests'],
                 'is_active' => $isActive
+            ]);
+
+            $booking->cart->cartItems->first()?->update([
+                'numGuests' => $validated['num_guests']
             ]);
 
             // Update booking
@@ -714,7 +717,7 @@ class SpecialEventsController extends Controller
                     'event_start_time' => $eventStartTime,
                     'event_end_time' => $eventEndTime,
                     'booking_type' => $booking->bookingType,
-                    'num_guests' => $booking->cart->numGuests,
+                    'num_guests' => $booking->cart->cartItems->first()?->numGuests,
                     'total_price' => $booking->totalPrice,
                     'total_paid' => $paymentSummary['total_paid'],
                     'total_refunded' => $paymentSummary['total_refunded'],

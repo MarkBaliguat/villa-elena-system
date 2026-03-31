@@ -68,7 +68,11 @@ class BookingController extends Controller
                     'checkin_date' => $checkInDate,
                     'checkout_date' => $checkOutDate,
                     'booking_type' => $booking->bookingType,
-                    'num_guests' => $booking->cart->numGuests,
+                    'num_guests' => $booking->cart->cartItems->sum('numGuests'),
+                        'guests_breakdown' => $booking->cart->cartItems->map(fn($item) => [
+                            'unit_name' => $item->unit->unitName,
+                            'num_guests' => $item->numGuests,
+                        ]),
                     'total_price' => $booking->totalPrice,
                     'total_paid' => $paymentSummary['total_paid'],
                     'total_refunded' => $paymentSummary['total_refunded'],
@@ -326,6 +330,7 @@ class BookingController extends Controller
             CartItem::create([
                 'cartID' => $cart->cartID,
                 'unitID' => $validated['unit_id'],
+                'numGuests'     => $validated['num_guests'],
                 'subtotalPrice' => $totalPrice,
                 'isBooked' => true
             ]);
@@ -654,7 +659,11 @@ class BookingController extends Controller
                     'checkin_date' => $checkInDate,
                     'checkout_date' => $checkOutDate,
                     'booking_type' => $booking->bookingType,
-                    'num_guests' => $booking->cart->numGuests,
+                    'num_guests' => $booking->cart->cartItems->sum('numGuests'),
+                        'guests_breakdown' => $booking->cart->cartItems->map(fn($item) => [
+                            'unit_name' => $item->unit->unitName ?? 'N/A',
+                            'num_guests' => $item->numGuests,
+                        ]),
                     'total_price' => $booking->totalPrice,
                     'total_paid' => $paymentSummary['total_paid'],
                     'total_refunded' => $paymentSummary['total_refunded'],
@@ -960,7 +969,6 @@ class BookingController extends Controller
             $booking->cart->update([
                 'checkInDate' => $checkInDate,
                 'checkOutDate' => $checkOutDate,
-                'numGuests' => $validated['num_guests'],
                 'daysCount' => $daysCount,
                 'is_active' => $isActive
             ]);
@@ -970,12 +978,14 @@ class BookingController extends Controller
                 $cartItem = $booking->cart->cartItems->first();
                 $cartItem->update([
                     'unitID' => $newUnitId,
+                    'numGuests'     => $validated['num_guests'],
                     'subtotalPrice' => $validated['total_price']
                 ]);
             } else {
                 // Update subtotal price even if unit didn't change (price may differ due to guest/date changes)
                 $cartItem = $booking->cart->cartItems->first();
                 $cartItem->update([
+                    'numGuests'     => $validated['num_guests'],
                     'subtotalPrice' => $validated['total_price']
                 ]);
             }

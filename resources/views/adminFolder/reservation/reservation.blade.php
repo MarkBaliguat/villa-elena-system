@@ -680,7 +680,11 @@
                             <p class="text-sm"><span class="font-medium">Type:</span> ${booking.booking_type}</p>
                             <p class="text-sm"><span class="font-medium">Check-in:</span> ${booking.checkin_date}</p>
                             <p class="text-sm"><span class="font-medium">Check-out:</span> ${booking.checkout_date || 'N/A'}</p>
-                            <p class="text-sm"><span class="font-medium">Guests:</span> ${booking.num_guests}</p>
+                            <p class="text-sm"><span class="font-medium">Guests:</span> ${
+                                booking.guests_breakdown && booking.guests_breakdown.length > 1
+                                    ? booking.guests_breakdown.map(g => `${g.unit_name}: ${g.num_guests}`).join(', ')
+                                    : booking.num_guests
+                            }</p>
                             <p class="text-sm"><span class="font-medium">Price:</span> PHP ${totalPrice.toLocaleString('en-PH', {minimumFractionDigits: 2})}</p>
                         </div>
                     </td>
@@ -764,7 +768,11 @@
                         </div>
                         <div class="card-item">
                             <span class="card-label">Guests</span>
-                            <span class="card-value">${booking.num_guests}</span>
+                            <span class="card-value">${
+                                booking.guests_breakdown && booking.guests_breakdown.length > 1
+                                    ? booking.guests_breakdown.map(g => `${g.unit_name}: ${g.num_guests}`).join('<br>')
+                                    : booking.num_guests
+                            }</span>
                         </div>
                         <div class="card-item">
                             <span class="card-label">Units</span>

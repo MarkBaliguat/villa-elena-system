@@ -66,7 +66,8 @@
                     </select>
                 </div>
                 
-                <div>
+                {{-- Number of Guests — hidden for multi-unit (guests edited per-item below) --}}
+                <div id="edit_num_guests_wrapper">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Number of Guests</label>
                     <input type="number" id="edit_num_guests" min="1" required
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -100,13 +101,27 @@
                     <input type="text" id="edit_booking_type_display" readonly
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed">
                 </div>
-                
-                <div class="col-span-2">
+
+                {{-- SINGLE UNIT wrapper (shown when booking has only 1 cart item) --}}
+                <div class="col-span-2" id="edit_single_unit_wrapper">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Select Unit</label>
-                    <select id="edit_unit_id" required
+                    <select id="edit_unit_id"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">Loading units...</option>
                     </select>
+                    <div id="editUnitAvailabilityNotes" class="mt-2 text-sm"></div>
+                </div>
+
+                {{-- MULTI-UNIT wrapper (shown when booking has 2+ cart items) --}}
+                <div class="col-span-2 hidden" id="edit_multi_unit_wrapper">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-sm font-medium text-gray-700">Accommodations & Guests per Unit</label>
+                        <span class="text-xs text-blue-600 bg-blue-50 border border-blue-200 px-2 py-1 rounded-full font-medium">
+                            <i class="fas fa-layer-group mr-1"></i>Multi-unit booking
+                        </span>
+                    </div>
+                    <div id="edit_multi_unit_items" class="space-y-3"></div>
+                    {{-- Reuse the same notes div ID so existing JS still works --}}
                     <div id="editUnitAvailabilityNotes" class="mt-2 text-sm"></div>
                 </div>
 
@@ -266,6 +281,10 @@ let editCurrentEntranceFee = 0;
 let hasEditSpecialEventConflict = false;
 let originalUnitPrice    = 0;
 let editMaxRefund        = 0;
+// ── Multi-unit state ──
+let editIsMultiUnit      = false;
+let editBookingUnits     = [];   // full units array from booking.units
+let editGuestsBreakdown  = [];   // full guests_breakdown from API
 
 // ─────────────────────────────────────────
 // LOADING STATE
@@ -338,12 +357,24 @@ function resetEditModalState() {
     hasEditSpecialEventConflict = false;
     originalUnitPrice          = 0;
     editMaxRefund              = 0;
+    editIsMultiUnit            = false;
+    editBookingUnits           = [];
+    editGuestsBreakdown        = [];
 
     // Hide dynamic sections
     document.getElementById('cancellation_fields')?.classList.add('hidden');
     document.getElementById('completed_note')?.classList.add('hidden');
     document.getElementById('name-change-warning')?.classList.add('hidden');
     document.getElementById('email-change-warning')?.classList.add('hidden');
+
+    // Reset single/multi unit visibility
+    document.getElementById('edit_single_unit_wrapper')?.classList.remove('hidden');
+    document.getElementById('edit_multi_unit_wrapper')?.classList.add('hidden');
+    document.getElementById('edit_num_guests_wrapper')?.classList.remove('hidden');
+
+    // Clear multi-unit items
+    const multiItems = document.getElementById('edit_multi_unit_items');
+    if (multiItems) multiItems.innerHTML = '';
 
     clearEditConflictMessage();
     clearEditUnitNotes();
@@ -515,9 +546,125 @@ function loadPaymentSummaryForRefund(bookingId) {
 }
 
 // ─────────────────────────────────────────
+// RENDER MULTI-UNIT ITEMS
+// Called once when modal opens for multi-unit bookings.
+// Each row shows unit name (read-only) + editable guests input.
+// ─────────────────────────────────────────
+function renderMultiUnitItems() {
+    const container = document.getElementById('edit_multi_unit_items');
+    if (!container) return;
+
+    container.innerHTML = editGuestsBreakdown.map((item, idx) => {
+        const unitId = editBookingUnits[idx] ? editBookingUnits[idx].unitID : '';
+        return `
+        <div class="flex items-center gap-3 bg-white border border-gray-200 rounded-lg p-3 shadow-sm">
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-gray-800 truncate">${item.unit_name}</p>
+                <p class="text-xs text-gray-400 mt-0.5">
+                    ${originalUnitType.charAt(0).toUpperCase() + originalUnitType.slice(1)}
+                </p>
+            </div>
+            <div class="flex items-center gap-2 flex-shrink-0">
+                <label class="text-xs font-medium text-gray-600 whitespace-nowrap">Guests:</label>
+                <input type="number"
+                       id="edit_item_guests_${idx}"
+                       data-unit-id="${unitId}"
+                       data-item-index="${idx}"
+                       value="${item.num_guests}"
+                       min="1" max="40"
+                       class="w-20 px-2 py-1.5 border border-gray-300 rounded-lg text-sm font-semibold text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+        </div>`;
+    }).join('');
+
+    // Attach input listeners for live price recompute
+    editGuestsBreakdown.forEach((_, idx) => {
+        const input = document.getElementById(`edit_item_guests_${idx}`);
+        if (input) {
+            input.addEventListener('input', function () {
+                // Sync total guests hidden field
+                syncMultiUnitTotalGuests();
+                updateEditTotalPriceMulti();
+            });
+        }
+    });
+
+    // Initial price compute
+    syncMultiUnitTotalGuests();
+    updateEditTotalPriceMulti();
+}
+
+// ─────────────────────────────────────────
+// SYNC TOTAL GUESTS for multi-unit
+// (keeps edit_num_guests in sync as the sum of per-item guests)
+// ─────────────────────────────────────────
+function syncMultiUnitTotalGuests() {
+    let total = 0;
+    editGuestsBreakdown.forEach((_, idx) => {
+        const input = document.getElementById(`edit_item_guests_${idx}`);
+        total += parseInt(input?.value || 1);
+    });
+    const numGuestsInput = document.getElementById('edit_num_guests');
+    if (numGuestsInput) numGuestsInput.value = total;
+    const guestCount = document.getElementById('edit_guest_count');
+    if (guestCount) guestCount.textContent = total;
+}
+
+// ─────────────────────────────────────────
+// PRICE CALCULATION — MULTI-UNIT
+// Sums each item's price independently (same formula as single-unit).
+// ─────────────────────────────────────────
+function updateEditTotalPriceMulti() {
+    let totalPrice        = 0;
+    let totalEntranceFees = 0;
+
+    editGuestsBreakdown.forEach((_, idx) => {
+        const input      = document.getElementById(`edit_item_guests_${idx}`);
+        const guests     = parseInt(input?.value || 1);
+        const unitType   = originalUnitType;
+        const bookingType = originalBookingType;
+
+        if (unitType === 'cottage') {
+            const entranceFee  = editCurrentEntranceFee;
+            const entranceAmt  = entranceFee * guests;
+            totalEntranceFees += entranceAmt;
+            totalPrice        += entranceAmt + originalUnitPrice;
+        } else {
+            if (bookingType === 'day-use') {
+                totalPrice += guests === 1 ? originalUnitPrice * 2 : originalUnitPrice * guests;
+            } else {
+                const daysCount = calculateEditDaysCount();
+                totalPrice     += originalUnitPrice * guests * daysCount;
+            }
+        }
+    });
+
+    const unitPriceDisplay  = document.getElementById('edit_unit_price_display');
+    const entranceFeeTotal  = document.getElementById('edit_entrance_fee_total');
+    const totalPriceDisplay = document.getElementById('edit_total_price_display');
+
+    if (unitPriceDisplay)  unitPriceDisplay.textContent  = '₱' + originalUnitPrice.toFixed(2) + ' × each unit';
+    if (entranceFeeTotal)  entranceFeeTotal.textContent  = originalUnitType === 'cottage' ? '₱' + totalEntranceFees.toFixed(2) : '₱0.00';
+    if (totalPriceDisplay) totalPriceDisplay.textContent = '₱' + totalPrice.toFixed(2);
+
+    const autoHint = document.getElementById('edit_auto_price_hint');
+    if (autoHint) autoHint.textContent = '₱' + totalPrice.toFixed(2);
+
+    console.log('Multi-unit total price:', totalPrice);
+}
+
+// ─────────────────────────────────────────
 // LOAD AVAILABLE UNITS FOR EDIT
 // ─────────────────────────────────────────
 function loadEditAvailableUnits() {
+    // Multi-unit: units are fixed (no unit switching for multi-unit bookings)
+    // Just re-render per-item guests and recompute price
+    if (editIsMultiUnit) {
+        showEditUnitNotes(`${editGuestsBreakdown.length} units in this booking (read-only)`, 'info');
+        updateEditTotalPriceMulti();
+        return;
+    }
+
     const unitType    = originalUnitType;
     const bookingType = originalBookingType;
     const checkinDate  = document.getElementById('edit_checkin_date').value;
@@ -600,7 +747,7 @@ function loadEditAvailableUnits() {
 }
 
 // ─────────────────────────────────────────
-// PRICE CALCULATION
+// PRICE CALCULATION — SINGLE UNIT
 // ─────────────────────────────────────────
 function calculateEditDaysCount() {
     const checkinDate  = document.getElementById('edit_checkin_date').value;
@@ -616,6 +763,12 @@ function calculateEditDaysCount() {
 }
 
 function updateEditTotalPrice() {
+    // If multi-unit, delegate to multi-unit calculator
+    if (editIsMultiUnit) {
+        updateEditTotalPriceMulti();
+        return;
+    }
+
     const unitSelect     = document.getElementById('edit_unit_id');
     const selectedOption = unitSelect.options[unitSelect.selectedIndex];
     const numGuests      = parseInt(document.getElementById('edit_num_guests').value) || 1;
@@ -693,6 +846,9 @@ document.getElementById('edit_num_guests').addEventListener('input', function ()
 // CONFLICT CHECK
 // ─────────────────────────────────────────
 function checkEditDateConflict() {
+    // Multi-unit: skip conflict check on the single-unit dropdown (it's hidden)
+    if (editIsMultiUnit) return;
+
     const bookingId    = document.getElementById('edit_booking_id').value;
     const unitId       = document.getElementById('edit_unit_id').value;
     const checkinDate  = document.getElementById('edit_checkin_date').value;
@@ -837,23 +993,37 @@ function editBooking(bookingId) {
             originalBookingId   = booking.bookingID;
             originalBookingType = booking.booking_type;
 
-            if (booking.units && booking.units.length > 0) {
-                originalUnitId   = booking.units[0].unitID;
-                originalUnitType = booking.units[0].unitType;
+            // ── Store full units array and guests breakdown ──
+            editBookingUnits    = booking.units || [];
+            editGuestsBreakdown = booking.guests_breakdown || [];
+            editIsMultiUnit     = editBookingUnits.length > 1;
+
+            if (editBookingUnits.length > 0) {
+                originalUnitId   = editBookingUnits[0].unitID;
+                originalUnitType = editBookingUnits[0].unitType;
 
                 const totalPrice = parseFloat(booking.total_price);
                 const numGuests  = parseInt(booking.num_guests);
 
                 if (originalUnitType === 'cottage') {
-                    originalUnitPrice = totalPrice;
+                    // For cottage, originalUnitPrice = rate price (not total)
+                    // We back-calculate: if single unit: totalPrice = entrance*guests + rate
+                    // For multi-unit we store as-is; price updater handles per-item calc
+                    originalUnitPrice = parseFloat(editBookingUnits[0].unitRatePrice ?? 0) || totalPrice;
                 } else {
-                    if (originalBookingType === 'day-use') {
-                        originalUnitPrice = numGuests === 1 ? totalPrice / 2 : totalPrice / numGuests;
+                    if (!editIsMultiUnit) {
+                        // Single unit: back-calculate unit rate
+                        if (originalBookingType === 'day-use') {
+                            originalUnitPrice = numGuests === 1 ? totalPrice / 2 : totalPrice / numGuests;
+                        } else {
+                            const checkin  = new Date(booking.checkin_date);
+                            const checkout = new Date(booking.checkout_date);
+                            const days     = Math.max(1, Math.ceil((checkout - checkin) / (1000 * 3600 * 24)));
+                            originalUnitPrice = totalPrice / (numGuests * days);
+                        }
                     } else {
-                        const checkin  = new Date(booking.checkin_date);
-                        const checkout = new Date(booking.checkout_date);
-                        const days     = Math.max(1, Math.ceil((checkout - checkin) / (1000 * 3600 * 24)));
-                        originalUnitPrice = totalPrice / (numGuests * days);
+                        // Multi-unit: use actual unit rate from first unit
+                        originalUnitPrice = parseFloat(editBookingUnits[0].unitRatePrice ?? 0) || 0;
                     }
                 }
             } else {
@@ -862,13 +1032,12 @@ function editBooking(bookingId) {
                 originalUnitPrice = 0;
             }
 
-            // Populate form fields
+            // ── Populate form fields ──
             document.getElementById('edit_booking_id').value           = booking.bookingID;
             document.getElementById('edit_guest_name').value           = originalName;
             document.getElementById('edit_email').value                = originalEmail;
             document.getElementById('edit_phone').value                = booking.phone;
             document.getElementById('edit_booking_status').value       = booking.booking_status;
-            document.getElementById('edit_num_guests').value           = booking.num_guests;
             document.getElementById('edit_special_requirements').value = booking.special_requirements || '';
 
             document.getElementById('edit_unit_type_display').value =
@@ -876,7 +1045,37 @@ function editBooking(bookingId) {
             document.getElementById('edit_booking_type_display').value =
                 originalBookingType === 'day-use' ? 'Day Use' : 'Overnight';
 
-            // Dates
+            // ── Show single or multi-unit section ──
+            const singleWrapper   = document.getElementById('edit_single_unit_wrapper');
+            const multiWrapper    = document.getElementById('edit_multi_unit_wrapper');
+            const numGuestsWrapper = document.getElementById('edit_num_guests_wrapper');
+
+            if (editIsMultiUnit) {
+                // Hide single-unit select; show multi-unit per-item editors
+                singleWrapper.classList.add('hidden');
+                multiWrapper.classList.remove('hidden');
+                // Hide the top-level guests field (guests are edited per-item)
+                numGuestsWrapper.classList.add('hidden');
+
+                // Set hidden num_guests to current sum (for payload)
+                document.getElementById('edit_num_guests').value = booking.num_guests;
+
+                // Render per-item rows
+                renderMultiUnitItems();
+
+            } else {
+                // Normal single-unit flow
+                singleWrapper.classList.remove('hidden');
+                multiWrapper.classList.add('hidden');
+                numGuestsWrapper.classList.remove('hidden');
+
+                const firstItemGuests = editGuestsBreakdown.length > 0
+                    ? editGuestsBreakdown[0].num_guests
+                    : booking.num_guests;
+                document.getElementById('edit_num_guests').value = firstItemGuests;
+            }
+
+            // ── Dates ──
             const checkinDate  = formatDateForInput(booking.checkin_date);
             const checkoutDate = booking.checkout_date ? formatDateForInput(booking.checkout_date) : '';
 
@@ -909,7 +1108,6 @@ function editBooking(bookingId) {
             newCheckinInput.addEventListener('change', function () {
                 const today = new Date().toISOString().split('T')[0];
 
-                // ✅ Reject manually typed past dates
                 if (this.value < today) {
                     Swal.fire({
                         icon: 'warning',
@@ -932,7 +1130,6 @@ function editBooking(bookingId) {
                 const today = new Date().toISOString().split('T')[0];
                 const checkinVal = newCheckinInput.value;
 
-                // ✅ Reject manually typed past dates
                 if (this.value < today) {
                     Swal.fire({
                         icon: 'warning',
@@ -944,7 +1141,6 @@ function editBooking(bookingId) {
                     return;
                 }
 
-                // ✅ Reject checkout before checkin
                 if (checkinVal && this.value < checkinVal) {
                     Swal.fire({
                         icon: 'warning',
@@ -998,14 +1194,33 @@ document.getElementById('editBookingForm').addEventListener('submit', async func
     const newStatus    = document.getElementById('edit_booking_status')?.value       || 'pending';
     const checkinDate  = document.getElementById('edit_checkin_date')?.value         || '';
     const checkoutDate = document.getElementById('edit_checkout_date')?.value        || '';
-    const numGuests    = parseInt(document.getElementById('edit_num_guests')?.value  || 1);
-    const unitId       = document.getElementById('edit_unit_id')?.value              || '';
     const phone        = (document.getElementById('edit_phone')?.value || '').replace(/\D/g, '');
     const specialReqs  = document.getElementById('edit_special_requirements')?.value || '';
 
     const cancellationReason = document.getElementById('edit_cancellation_reason')?.value || '';
     const refundAmount       = parseFloat(document.getElementById('edit_refund_amount')?.value || 0);
     const refundMethod       = document.getElementById('edit_refund_method')?.value || '';
+
+    // ── Collect guests and item_guests ──
+    let numGuests        = 0;
+    let itemGuestsPayload = [];
+
+    if (editIsMultiUnit) {
+        // Multi-unit: collect per-item guests
+        editGuestsBreakdown.forEach((_, idx) => {
+            const input  = document.getElementById(`edit_item_guests_${idx}`);
+            const guests = parseInt(input?.value || 1);
+            const unitId = input?.dataset.unitId || '';
+            numGuests   += guests;
+            itemGuestsPayload.push({ unit_id: unitId, num_guests: guests });
+        });
+    } else {
+        numGuests = parseInt(document.getElementById('edit_num_guests')?.value || 1);
+    }
+
+    const unitId = editIsMultiUnit
+        ? originalUnitId   // backend update() uses first item; item_guests handles each
+        : (document.getElementById('edit_unit_id')?.value || '');
 
     // ✅ KEY FIX: Safe null check — toggle only exists for managers
     const toggleEl       = document.getElementById('edit_price_override_toggle');
@@ -1085,7 +1300,8 @@ document.getElementById('editBookingForm').addEventListener('submit', async func
         booking_type:         originalBookingType,
         cancellation_reason:  cancellationReason,
         refund_amount:        refundAmount,
-        refund_method:        refundMethod
+        refund_method:        refundMethod,
+        item_guests:          itemGuestsPayload   // empty array for single-unit
     };
 
     console.log('=== SUBMITTING UPDATE ===');
