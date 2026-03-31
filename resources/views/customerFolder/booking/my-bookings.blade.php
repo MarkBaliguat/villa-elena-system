@@ -1710,7 +1710,9 @@ function cardHTML(b, i) {
     const total    = parseFloat(b.totalPrice || 0).toFixed(2);
     const paid     = parseFloat(b.total_paid || 0).toFixed(2);
     const balance  = (parseFloat(total) - parseFloat(paid)).toFixed(2);
-    const guests   = b.numGuests || b.cart?.numGuests || 1;
+    const guests = b.accommodations && b.accommodations.length
+        ? b.accommodations.reduce((sum, a) => sum + (a.numGuests || 1), 0)
+        : (b.numGuests || b.cart?.numGuests || 1);
     const start    = b.formatted_event_start || 'N/A';
     const end      = b.formatted_event_end || 'N/A';
     const booked   = b.formatted_created_at ? b.formatted_created_at.split(' ')[0] : 'N/A';
@@ -1746,7 +1748,7 @@ function cardHTML(b, i) {
                                 `<span style="display:block;font-size:0.82rem;font-weight:700;color:var(--booking-text-dark);">
                                     ${a.name}
                                     <span style="font-size:0.7rem;font-weight:600;color:${a.type === 'room' ? 'var(--booking-blue)' : 'var(--booking-green)'};">
-                                        (${a.type})
+                                        (${a.type}) · ${a.numGuests || 1} guest${(a.numGuests || 1) > 1 ? 's' : ''}
                                     </span>
                                 </span>`
                             ).join('')
@@ -1807,7 +1809,9 @@ function viewBooking(id) {
 
 function renderModal(b) {
     const status  = b.bookingStatus || 'pending';
-    const guests  = b.numGuests || b.cart?.numGuests || 1;
+    // guests computed per-item below; keep a fallback for the header
+    const totalGuests = b.cart?.items?.reduce((s, i) => s + (i.numGuests || 1), 0)
+        || b.numGuests || 1;
     const start   = b.formatted_details?.event_start || 'N/A';
     const end     = b.formatted_details?.event_end || 'N/A';
     const booked  = b.formatted_details?.created_at ? b.formatted_details.created_at.split(' ')[0] : 'N/A';
@@ -1818,9 +1822,10 @@ function renderModal(b) {
         accomHTML = b.cart.items.map(item => {
             const unit = item.unit || {};
             const days = b.cart.daysCount || 1;
+            const itemGuests = item.numGuests || 1;
             let price = 0;
             if (unit.unitType === 'room') {
-                price = parseFloat(unit.unitRatePrice || 0) * (guests < 2 ? 2 : guests) * days;
+                price = parseFloat(unit.unitRatePrice || 0) * (itemGuests < 2 ? 2 : itemGuests) * days;
             } else {
                 price = parseFloat(item.subtotalPrice || unit.unitRatePrice || 0);
             }
@@ -1828,7 +1833,7 @@ function renderModal(b) {
             <div class="accom-item">
                 <div>
                     <div class="name">${unit.unitName || 'N/A'}</div>
-                    <div class="type ${unit.unitType || ''}">${unit.unitType ? cap(unit.unitType) : ''} • ${guests} guest${guests>1?'s':''}</div>
+                    <div class="type ${unit.unitType || ''}">${unit.unitType ? cap(unit.unitType) : ''} • ${itemGuests} guest${itemGuests>1?'s':''}</div>
                 </div>
                 <div class="price">₱${price.toFixed(2)}</div>
             </div>`;
@@ -2022,7 +2027,7 @@ function printBooking(id) {
 function renderVoucher(b) {
     const sheet   = document.getElementById('voucher-sheet-content');
     const status  = b.bookingStatus || 'pending';
-    const guests  = b.numGuests || b.cart?.numGuests || 1;
+    const guests = b.numGuests || b.cart?.numGuests || 1; // fallback for header
     const start   = b.formatted_details?.event_start || b.formatted_event_start || 'N/A';
     const end     = b.formatted_details?.event_end || b.formatted_event_end || 'N/A';
     const booked  = b.formatted_details?.created_at
@@ -2036,9 +2041,10 @@ function renderVoucher(b) {
         accomRows = b.cart.items.map(item => {
             const unit = item.unit || {};
             const days = b.cart.daysCount || 1;
+            const itemGuests = item.numGuests || 1;
             let price = 0;
             if (unit.unitType === 'room') {
-                price = parseFloat(unit.unitRatePrice || 0) * (guests < 2 ? 2 : guests) * days;
+                price = parseFloat(unit.unitRatePrice || 0) * (itemGuests < 2 ? 2 : itemGuests) * days;
             } else {
                 price = parseFloat(item.subtotalPrice || unit.unitRatePrice || 0);
             }
@@ -2046,7 +2052,7 @@ function renderVoucher(b) {
             <div class="voucher-accom-row">
                 <div>
                     <div class="v-name">${unit.unitName || 'N/A'}</div>
-                    <div class="v-type">${unit.unitType ? cap(unit.unitType) : ''} • ${guests} guest${guests > 1 ? 's' : ''} • ${days} night${days !== 1 ? 's' : ''}</div>
+                    <div class="v-type">${unit.unitType ? cap(unit.unitType) : ''} • ${itemGuests} guest${itemGuests > 1 ? 's' : ''} • ${days} night${days !== 1 ? 's' : ''}</div>
                 </div>
                 <div class="v-price">₱${price.toFixed(2)}</div>
             </div>`;

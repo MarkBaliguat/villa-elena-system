@@ -16,14 +16,11 @@
            PROFESSIONAL COLOR PALETTE - BRIGHT & VIBRANT
         ═══════════════════════════════ */
         :root {
-            /* Bright whites for freshness */
             --white-pure:     #FFFFFF;
             --white-soft:     #FEFEFE;
             --white-warm:     #FDFCFB;
             --white-pearl:    #F9F9F9;
             --white-ivory:    #F7F7F7;
-            
-            /* Warm, inviting tones */
             --cream:        #FFF9F0;
             --cream-dark:   #FFF3E0;
             --sunflower:    #FFB84D;
@@ -34,8 +31,6 @@
             --text-faint:   #95A5A6;
             --border:       #E8E8E8;
             --border-light: #F0F0F0;
-            
-            /* Vibrant accent colors */
             --red:          #FF6B6B;
             --red-light:    #FFE5E5;
             --red-dark:     #EE5A52;
@@ -78,7 +73,7 @@
         }
 
         /* ═══════════════════════════════
-           LAYOUT - NEW GRID SYSTEM
+           LAYOUT
         ═══════════════════════════════ */
         .main-content {
             margin-top: 80px;
@@ -111,7 +106,7 @@
         }
 
         /* ═══════════════════════════════
-           PAGE TITLE - MATCH BOOKING PAGE
+           PAGE TITLE
         ═══════════════════════════════ */
         .page-title-wrap {
             text-align: center;
@@ -122,13 +117,11 @@
         .page-title {
             font-size: 2.8rem;
             font-weight: 800;
-             /* background: linear-gradient(135deg, #F59E0B, #D97706, #B45309); */
-             background: #1F2937;
+            background: #1F2937;
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
             display: inline-block;
-            /* text-shadow: 0 4px 12px rgba(245, 158, 11, 0.2); */
             letter-spacing: -0.5px;
         }
 
@@ -149,7 +142,7 @@
         }
 
         /* ═══════════════════════════════
-           LEFT SIDEBAR CARD - COMBINED SUMMARY
+           LEFT SIDEBAR CARD
         ═══════════════════════════════ */
         .sidebar-card {
             background: var(--white-pure);
@@ -160,9 +153,7 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         }
 
-        /* BOOKING SUMMARY SECTION */
         .summary-header {
-            /* background: linear-gradient(135deg, var(--sunflower) 0%, var(--sun-dark) 100%); */
             padding: 1.5rem;
             text-align: center;
         }
@@ -231,37 +222,22 @@
             color: var(--text);
         }
 
-        .booking-type-badge {
+        /* ✅ NEW: Guest varies badge */
+        .guest-varies-badge {
             display: inline-flex;
             align-items: center;
-            gap: 0.4rem;
-            padding: 0.4rem 0.9rem;
-            border-radius: 100px;
-            font-size: 0.75rem;
+            gap: 0.35rem;
+            font-size: 0.7rem;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.7px;
+            letter-spacing: 0.5px;
+            padding: 0.25rem 0.6rem;
+            border-radius: 100px;
+            background: var(--blue-light);
+            color: var(--blue-dark);
             margin-top: 0.3rem;
         }
 
-        .booking-type-badge.room {
-            background: var(--blue-light);
-            color: var(--blue-dark);
-        }
-
-        .booking-type-badge.cottage {
-            background: var(--green-light);
-            color: var(--green-dark);
-        }
-
-        /* ✅ NEW: Mixed booking badge */
-        .booking-type-badge.mixed {
-            background: linear-gradient(135deg, var(--blue-light), var(--green-light));
-            color: var(--dark);
-            border: 2px solid var(--border);
-        }
-
-        /* PRICE SUMMARY SECTION - INSIDE SAME CARD */
         .price-divider {
             height: 2px;
             background: linear-gradient(to right, transparent, var(--sunflower), transparent);
@@ -332,7 +308,6 @@
             font-size: 1.05rem;
             font-weight: 700;
             color: var(--text);
-            /* background: linear-gradient(135deg, var(--green-light) 0%, #D4F1E0 100%); */
             border-radius: 12px;
             margin-top: 0.5rem;
         }
@@ -379,7 +354,7 @@
         }
 
         /* ═══════════════════════════════
-           WARNING BANNERS - ENHANCED
+           WARNING BANNERS
         ═══════════════════════════════ */
         .warning-banner {
             border-radius: 16px;
@@ -436,7 +411,7 @@
         .warning-banner.red p { color: #C62828; }
 
         /* ═══════════════════════════════
-           CART ITEM CARD - BRIGHT & CLEAN
+           CART ITEM CARD
         ═══════════════════════════════ */
         .items-section {
             background: var(--white-pure);
@@ -500,7 +475,6 @@
         }
 
         .item-card:hover {
-            /* background: var(--cream); */
             box-shadow: inset 0 0 0 2px var(--border);
         }
 
@@ -516,7 +490,7 @@
         }
 
         /* ═══════════════════════════════
-           IMAGE CONTAINER - WITH GALLERY
+           IMAGE CONTAINER
         ═══════════════════════════════ */
         .item-img-wrapper {
             position: relative;
@@ -530,7 +504,6 @@
         .item-img {
             width: 100%;
             height: 100%;
-            /* min-height: 180px; */
             object-fit: cover;
             display: block;
             transition: transform 0.4s ease;
@@ -741,19 +714,9 @@
             justify-content: center;
         }
 
-        .gallery-thumbnails::-webkit-scrollbar {
-            height: 6px;
-        }
-
-        .gallery-thumbnails::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-        }
-
-        .gallery-thumbnails::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 3px;
-        }
+        .gallery-thumbnails::-webkit-scrollbar { height: 6px; }
+        .gallery-thumbnails::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); border-radius: 3px; }
+        .gallery-thumbnails::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 3px; }
 
         .gallery-thumb {
             width: 100px;
@@ -848,7 +811,7 @@
             padding: 0.3rem 0.75rem;
             border-radius: 100px;
         }
-        .item-badge.room { background: var(--blue-light); color: var(--blue-dark); }
+        .item-badge.room    { background: var(--blue-light);  color: var(--blue-dark); }
         .item-badge.cottage { background: var(--green-light); color: var(--green-dark); }
 
         .item-price-section {
@@ -865,11 +828,10 @@
             white-space: nowrap;
             letter-spacing: -0.5px;
         }
-        .item-price.blue { color: var(--blue-dark); }
+        .item-price.blue  { color: var(--blue-dark); }
         .item-price.green { color: var(--green-dark); }
         .item-price.red   { color: var(--red); }
 
-        /* tags row */
         .item-tags {
             display: flex;
             gap: 0.6rem;
@@ -885,12 +847,11 @@
             align-items: center;
             gap: 0.4rem;
         }
-        .item-tag.blue  { background: var(--blue-light); color: var(--blue-dark); }
+        .item-tag.blue  { background: var(--blue-light);  color: var(--blue-dark); }
         .item-tag.green { background: var(--green-light); color: var(--green-dark); }
-        .item-tag.red   { background: var(--red-light); color: var(--red); }
+        .item-tag.red   { background: var(--red-light);   color: var(--red); }
         .item-tag i { font-size: 0.72rem; }
 
-        /* calculation note */
         .calc-note {
             background: var(--white-warm);
             border: 1px solid var(--border);
@@ -987,12 +948,9 @@
             transform: translateY(-3px);
             box-shadow: 0 6px 24px rgba(0,0,0,0.2);
         }
-        .btn:active {
-            transform: translateY(-1px);
-        }
+        .btn:active { transform: translateY(-1px); }
         .btn i { font-size: 0.85rem; }
 
-        /* Professional Button Colors */
         .btn-rooms {
             background: #1F2937;
             color: var(--white-pure);
@@ -1029,14 +987,6 @@
             filter: grayscale(0.3);
         }
 
-        .btn-warning {
-            grid-column: 1 / -1;
-            background: linear-gradient(135deg, var(--sunflower) 0%, var(--sun-dark) 100%);
-            color: var(--white-pure);
-            font-size: 1.05rem;
-            padding: 1.3rem 1.8rem;
-        }
-
         .btn-error {
             grid-column: 1 / -1;
             background: linear-gradient(135deg, var(--red) 0%, var(--red-dark) 100%);
@@ -1045,34 +995,16 @@
             padding: 1.3rem 1.8rem;
         }
 
-        /* Small buttons */
         .btn-sm {
             font-size: 0.8rem;
             padding: 0.55rem 1rem;
             border-radius: 12px;
         }
-        .btn-sm-dark { 
-            background: linear-gradient(135deg, var(--dark) 0%, var(--dark-hover) 100%);
-            color: var(--white-pure); 
-        }
-        .btn-sm-sun  { 
-            background: linear-gradient(135deg, var(--sunflower) 0%, var(--sun-dark) 100%);
-            color: var(--white-pure); 
-        }
-        .btn-sm-red  { 
-            background: linear-gradient(135deg, var(--red) 0%, var(--red-dark) 100%);
-            color: var(--white-pure); 
-        }
-        .btn-sm-ghost { 
-            background: var(--white-pure); 
-            color: var(--text-soft); 
-            border: 2px solid var(--border); 
-        }
-        .btn-sm-ghost:hover { 
-            border-color: var(--text-soft); 
-            color: var(--text); 
-            background: var(--white-warm);
-        }
+        .btn-sm-dark  { background: linear-gradient(135deg, var(--dark) 0%, var(--dark-hover) 100%); color: var(--white-pure); }
+        .btn-sm-sun   { background: linear-gradient(135deg, var(--sunflower) 0%, var(--sun-dark) 100%); color: var(--white-pure); }
+        .btn-sm-red   { background: linear-gradient(135deg, var(--red) 0%, var(--red-dark) 100%); color: var(--white-pure); }
+        .btn-sm-ghost { background: var(--white-pure); color: var(--text-soft); border: 2px solid var(--border); }
+        .btn-sm-ghost:hover { border-color: var(--text-soft); color: var(--text); background: var(--white-warm); }
 
         /* ═══════════════════════════════
            EMPTY STATE
@@ -1101,23 +1033,9 @@
             border: 2px solid var(--border);
             box-shadow: 0 4px 16px rgba(255, 184, 77, 0.2);
         }
-        .empty-state h3 { 
-            font-size: 1.5rem; 
-            font-weight: 700; 
-            margin-bottom: 0.6rem;
-            color: var(--text);
-        }
-        .empty-state p { 
-            font-size: 1rem; 
-            color: var(--text-soft); 
-            margin-bottom: 2rem; 
-        }
-        .empty-btns { 
-            display: flex; 
-            gap: 1rem; 
-            justify-content: center; 
-            flex-wrap: wrap; 
-        }
+        .empty-state h3 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.6rem; color: var(--text); }
+        .empty-state p  { font-size: 1rem; color: var(--text-soft); margin-bottom: 2rem; }
+        .empty-btns     { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
 
         /* ═══════════════════════════════
            NOTIFICATIONS
@@ -1145,91 +1063,27 @@
             transform: translateX(120%);
             transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
-        .notification.show {
-            transform: translateX(0);
-        }
-        
-        .notification.success {
-            background: linear-gradient(135deg, #51CF66, #40C057);
-            color: white;
-        }
-        
-        .notification.error {
-            background: linear-gradient(135deg, #FF6B6B, #EE5A52);
-            color: white;
-        }
-        
-        .notification.info {
-            background: linear-gradient(135deg, var(--sunflower), var(--sun-light));
-            color: var(--dark);
-        }
-        
-        .notification.warning {
-            background: linear-gradient(135deg, #FFB84D, #FF9F1C);
-            color: white;
-        }
-        
-        .notification-icon {
-            font-size: 1.5rem;
-            flex-shrink: 0;
-        }
-        
-        .notification-content {
-            flex-grow: 1;
-        }
-        
-        .notification-title {
-            font-weight: 600;
-            margin-bottom: 5px;
-            font-size: 1rem;
-        }
-        
-        .notification-message {
-            font-size: 0.95rem;
-            opacity: 0.95;
-            line-height: 1.5;
-        }
-        
+        .notification.show { transform: translateX(0); }
+        .notification.success { background: linear-gradient(135deg, #51CF66, #40C057); color: white; }
+        .notification.error   { background: linear-gradient(135deg, #FF6B6B, #EE5A52); color: white; }
+        .notification.info    { background: linear-gradient(135deg, var(--sunflower), var(--sun-light)); color: var(--dark); }
+        .notification.warning { background: linear-gradient(135deg, #FFB84D, #FF9F1C); color: white; }
+        .notification-icon    { font-size: 1.5rem; flex-shrink: 0; }
+        .notification-content { flex-grow: 1; }
+        .notification-title   { font-weight: 600; margin-bottom: 5px; font-size: 1rem; }
+        .notification-message { font-size: 0.95rem; opacity: 0.95; line-height: 1.5; }
         .notification-close {
-            background: none;
-            border: none;
-            color: inherit;
-            cursor: pointer;
-            font-size: 1.2rem;
-            opacity: 0.8;
-            transition: opacity 0.3s;
-            padding: 0;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 6px;
+            background: none; border: none; color: inherit; cursor: pointer;
+            font-size: 1.2rem; opacity: 0.8; transition: opacity 0.3s; padding: 0;
+            width: 24px; height: 24px; display: flex; align-items: center;
+            justify-content: center; border-radius: 6px;
         }
-        
-        .notification-close:hover {
-            opacity: 1;
-            background: rgba(255, 255, 255, 0.1);
-        }
+        .notification-close:hover { opacity: 1; background: rgba(255, 255, 255, 0.1); }
 
-
-        /* Removed item from cart design */
-        .swal-custom-popup {
-            border-radius: 20px !important;
-            font-family: 'Poppins', sans-serif !important;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2) !important;
-        }
-        .swal-confirm-btn {
-            border-radius: 12px !important;
-            font-weight: 700 !important;
-            padding: 0.7rem 1.5rem !important;
-        }
-        .swal-cancel-btn {
-            border-radius: 12px !important;
-            font-weight: 700 !important;
-            padding: 0.7rem 1.5rem !important;
-        }
+        /* SweetAlert */
+        .swal-custom-popup { border-radius: 20px !important; font-family: 'Poppins', sans-serif !important; box-shadow: 0 20px 60px rgba(0,0,0,0.2) !important; }
+        .swal-confirm-btn  { border-radius: 12px !important; font-weight: 700 !important; padding: 0.7rem 1.5rem !important; }
+        .swal-cancel-btn   { border-radius: 12px !important; font-weight: 700 !important; padding: 0.7rem 1.5rem !important; }
 
         /* ═══════════════════════════════
            AVAILABILITY MODAL
@@ -1267,153 +1121,62 @@
             background: linear-gradient(135deg, #FFF0F0 0%, #FFE0E0 100%);
             border-radius: 24px 24px 0 0;
         }
-        .modal-head h2 {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--red);
-            display: flex;
-            align-items: center;
-            gap: 0.7rem;
-        }
+        .modal-head h2 { font-size: 1.2rem; font-weight: 700; color: var(--red); display: flex; align-items: center; gap: 0.7rem; }
         .modal-close {
-            background: var(--white-pure);
-            border: 2px solid var(--red-light);
-            color: var(--red);
-            font-size: 1.2rem;
-            cursor: pointer;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
+            background: var(--white-pure); border: 2px solid var(--red-light); color: var(--red);
+            font-size: 1.2rem; cursor: pointer; width: 36px; height: 36px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; transition: all 0.3s;
         }
-        .modal-close:hover { 
-            background: var(--red);
-            color: var(--white-pure);
-            transform: rotate(90deg);
-        }
+        .modal-close:hover { background: var(--red); color: var(--white-pure); transform: rotate(90deg); }
 
         .modal-body { padding: 2rem; }
 
         .modal-info-box {
-            background: var(--blue-light);
-            border: 2px solid #a3d5ff;
-            border-radius: 14px;
-            padding: 1rem 1.2rem;
-            display: flex;
-            gap: 0.7rem;
-            margin-bottom: 1.5rem;
+            background: var(--blue-light); border: 2px solid #a3d5ff; border-radius: 14px;
+            padding: 1rem 1.2rem; display: flex; gap: 0.7rem; margin-bottom: 1.5rem;
         }
-        .modal-info-box i { 
-            color: var(--blue-dark); 
-            font-size: 1rem; 
-        }
-        .modal-info-box p { 
-            font-size: 0.85rem; 
-            color: #1565C0; 
-            font-weight: 500; 
-            line-height: 1.6; 
-        }
+        .modal-info-box i { color: var(--blue-dark); font-size: 1rem; }
+        .modal-info-box p { font-size: 0.85rem; color: #1565C0; font-weight: 500; line-height: 1.6; }
 
         .unavail-item {
-            background: var(--white-warm);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 1.1rem 1.3rem;
-            margin-bottom: 0.8rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 1rem;
+            background: var(--white-warm); border: 1px solid var(--border); border-radius: 14px;
+            padding: 1.1rem 1.3rem; margin-bottom: 0.8rem; display: flex;
+            justify-content: space-between; align-items: flex-start; gap: 1rem;
         }
-        .unavail-item .ui-name { 
-            font-size: 0.95rem; 
-            font-weight: 700; 
-            color: var(--text); 
-        }
-        .unavail-item .ui-reason { 
-            font-size: 0.78rem; 
-            color: var(--red); 
-            font-weight: 600; 
-        }
+        .unavail-item .ui-name   { font-size: 0.95rem; font-weight: 700; color: var(--text); }
+        .unavail-item .ui-reason { font-size: 0.78rem; color: var(--red); font-weight: 600; }
 
         .modal-foot {
-            display: flex;
-            gap: 0.8rem;
-            padding: 1.5rem 2rem;
-            border-top: 1px solid var(--white-pearl);
-            background: var(--white-warm);
+            display: flex; gap: 0.8rem; padding: 1.5rem 2rem;
+            border-top: 1px solid var(--white-pearl); background: var(--white-warm);
             border-radius: 0 0 24px 24px;
         }
 
         /* ═══════════════════════════════
-           RESPONSIVE DESIGN
+           RESPONSIVE
         ═══════════════════════════════ */
         @media (max-width: 1200px) {
-            .cart-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .left-sidebar {
-                order: 2;
-            }
-
-            .main-column {
-                order: 1;
-            }
+            .cart-grid { grid-template-columns: 1fr; }
+            .left-sidebar { order: 2; }
+            .main-column  { order: 1; }
         }
 
         @media (max-width: 768px) {
-            .actions-grid { 
-                grid-template-columns: 1fr;
-            }
-
-            .page-title {
-                font-size: 2.2rem;
-            }
-
-            .item-row {
-                flex-direction: column;
-            }
-
-            .item-img-wrapper {
-                width: 100%;
-                height: 200px;
-            }
-
-            .item-img {
-                height: 200px;
-            }
-
-            .item-content {
-                padding: 1.2rem 3.5rem 1.2rem 1.2rem;
-            }
-
-            .gallery-nav {
-                width: 44px;
-                height: 44px;
-                font-size: 1.2rem;
-            }
-
+            .actions-grid { grid-template-columns: 1fr; }
+            .page-title   { font-size: 2.2rem; }
+            .item-row     { flex-direction: column; }
+            .item-img-wrapper { width: 100%; height: 200px; }
+            .item-img         { height: 200px; }
+            .item-content     { padding: 1.2rem 3.5rem 1.2rem 1.2rem; }
+            .gallery-nav      { width: 44px; height: 44px; font-size: 1.2rem; }
             .gallery-nav.prev { left: 0.8rem; }
             .gallery-nav.next { right: 0.8rem; }
         }
 
-
         @media (max-width: 480px) {
-            .main-content {
-                padding: 2rem 1rem 4rem;
-            }
-            
-            .page-title {
-                font-size: 1.8rem;
-            }
-
-            .cart-grid {
-                gap: 1.5rem;
-            }
+            .main-content { padding: 2rem 1rem 4rem; }
+            .page-title   { font-size: 1.8rem; }
+            .cart-grid    { gap: 1.5rem; }
         }
     </style>
 </head>
@@ -1443,23 +1206,18 @@
 
     @include('customerFolder.partials.footer')
 
-    <!-- Notifications -->
     <div id="notification-container" class="notification-container"></div>
-
-    <!-- Availability modal -->
     <div id="availability-modal-container"></div>
-
-    <!-- Image Gallery Modal -->
     <div id="gallery-modal-container"></div>
 
 <script>
 /* ═══════════════════════════════
    GLOBALS
 ═══════════════════════════════ */
-let entranceFeeAmount = 0;
+let entranceFeeAmount    = 0;
 let hasActiveEntranceFee = false;
-let cartUnitType = null;
-let cartItemCount = 0;
+let cartUnitType         = null;
+let cartItemCount        = 0;
 
 document.addEventListener('DOMContentLoaded', loadCartItems);
 
@@ -1479,17 +1237,10 @@ function loadCartItems() {
     .then(r => { if (!r.ok) throw new Error('Network error'); return r.json(); })
     .then(data => {
         if (data.success && data.cart && data.items && data.items.length > 0) {
-            cartItemCount  = data.items.length;
-            cartUnitType   = data.cart_type;
-            entranceFeeAmount     = parseFloat(data.entrance_fee) || 0;
-            hasActiveEntranceFee  = data.has_active_entrance_fee || false;
-            
-            console.log('Cart loaded:', {
-                entranceFee: entranceFeeAmount,
-                hasActive: hasActiveEntranceFee,
-                cartType: cartUnitType
-            });
-            
+            cartItemCount        = data.items.length;
+            cartUnitType         = data.cart_type;
+            entranceFeeAmount    = parseFloat(data.entrance_fee) || 0;
+            hasActiveEntranceFee = data.has_active_entrance_fee || false;
             renderCart(data.cart, data.items, container);
         } else {
             showEmpty(container);
@@ -1519,27 +1270,18 @@ function showError(container, err) {
         <div class="empty-state">
             <div class="empty-icon" style="color:var(--red)"><i class="fas fa-exclamation-triangle"></i></div>
             <h3>Error loading cart</h3>
-            <p>${'Please verify your email first.'}</p>
+            <p>Please verify your email first.</p>
             <a href="{{ route('profile.edit') }}" class="btn btn-cottages"><i class="fas fa-user"></i> Profile</a>
         </div>`;
 }
 
 /* ═══════════════════════════════
-   IMAGE GALLERY FUNCTIONS
+   IMAGE GALLERY
 ═══════════════════════════════ */
-let currentGallery = {
-    images: [],
-    currentIndex: 0,
-    unitName: ''
-};
+let currentGallery = { images: [], currentIndex: 0, unitName: '' };
 
 function openGallery(images, unitName, startIndex = 0) {
-    currentGallery = {
-        images: images,
-        currentIndex: startIndex,
-        unitName: unitName
-    };
-    
+    currentGallery = { images, currentIndex: startIndex, unitName };
     renderGalleryModal();
 }
 
@@ -1554,31 +1296,16 @@ function renderGalleryModal() {
     const modalExists = document.getElementById('gallery-modal');
     
     if (modalExists) {
-        // Just update the image with fade effect
         const mainImg = document.querySelector('.gallery-main-img');
         const counter = document.querySelector('.gallery-counter');
-        const thumbs = document.querySelectorAll('.gallery-thumb');
+        const thumbs  = document.querySelectorAll('.gallery-thumb');
         
         if (mainImg) {
             mainImg.classList.add('fade-out');
-            setTimeout(() => {
-                mainImg.src = images[currentIndex];
-                mainImg.classList.remove('fade-out');
-            }, 150);
+            setTimeout(() => { mainImg.src = images[currentIndex]; mainImg.classList.remove('fade-out'); }, 150);
         }
-        
-        if (counter && images.length > 1) {
-            counter.textContent = `${currentIndex + 1} / ${images.length}`;
-        }
-        
-        thumbs.forEach((thumb, idx) => {
-            if (idx === currentIndex) {
-                thumb.classList.add('active');
-            } else {
-                thumb.classList.remove('active');
-            }
-        });
-        
+        if (counter && images.length > 1) counter.textContent = `${currentIndex + 1} / ${images.length}`;
+        thumbs.forEach((t, i) => t.classList.toggle('active', i === currentIndex));
         return;
     }
     
@@ -1586,74 +1313,33 @@ function renderGalleryModal() {
         <div class="gallery-modal-overlay show" id="gallery-modal" onclick="closeGalleryOnBackdrop(event)">
             <div class="gallery-modal">
                 <div class="gallery-header">
-                    <div class="gallery-title">
-                        <i class="fas fa-images"></i>
-                        ${unitName}
-                    </div>
-                    <button class="gallery-close" onclick="closeGallery()">
-                        <i class="fas fa-times"></i>
-                    </button>
+                    <div class="gallery-title"><i class="fas fa-images"></i> ${unitName}</div>
+                    <button class="gallery-close" onclick="closeGallery()"><i class="fas fa-times"></i></button>
                 </div>
-                
                 <div class="gallery-main">
                     <img src="${images[currentIndex]}" class="gallery-main-img" alt="${unitName}">
-                    
                     ${images.length > 1 ? `
-                        <button class="gallery-nav prev" onclick="prevGalleryImage()">
-                            <i class="fas fa-chevron-left"></i>
-                        </button>
-                        <button class="gallery-nav next" onclick="nextGalleryImage()">
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                        
-                        <div class="gallery-counter">
-                            ${currentIndex + 1} / ${images.length}
-                        </div>
+                        <button class="gallery-nav prev" onclick="prevGalleryImage()"><i class="fas fa-chevron-left"></i></button>
+                        <button class="gallery-nav next" onclick="nextGalleryImage()"><i class="fas fa-chevron-right"></i></button>
+                        <div class="gallery-counter">${currentIndex + 1} / ${images.length}</div>
                     ` : ''}
                 </div>
-                
-                ${images.length > 1 ? `
-                    <div class="gallery-thumbnails">
-                        ${thumbnailsHTML}
-                    </div>
-                ` : ''}
+                ${images.length > 1 ? `<div class="gallery-thumbnails">${thumbnailsHTML}</div>` : ''}
             </div>
         </div>`;
 }
 
-function changeGalleryImage(index) {
-    currentGallery.currentIndex = index;
-    renderGalleryModal();
-}
+function changeGalleryImage(index) { currentGallery.currentIndex = index; renderGalleryModal(); }
+function nextGalleryImage() { currentGallery.currentIndex = (currentGallery.currentIndex + 1) % currentGallery.images.length; renderGalleryModal(); }
+function prevGalleryImage() { currentGallery.currentIndex = (currentGallery.currentIndex - 1 + currentGallery.images.length) % currentGallery.images.length; renderGalleryModal(); }
+function closeGallery() { document.getElementById('gallery-modal-container').innerHTML = ''; }
+function closeGalleryOnBackdrop(event) { if (event.target.id === 'gallery-modal') closeGallery(); }
 
-function nextGalleryImage() {
-    currentGallery.currentIndex = (currentGallery.currentIndex + 1) % currentGallery.images.length;
-    renderGalleryModal();
-}
-
-function prevGalleryImage() {
-    currentGallery.currentIndex = (currentGallery.currentIndex - 1 + currentGallery.images.length) % currentGallery.images.length;
-    renderGalleryModal();
-}
-
-function closeGallery() {
-    document.getElementById('gallery-modal-container').innerHTML = '';
-}
-
-function closeGalleryOnBackdrop(event) {
-    if (event.target.id === 'gallery-modal') {
-        closeGallery();
-    }
-}
-
-// Keyboard navigation for gallery
 document.addEventListener('keydown', function(e) {
-    const modal = document.getElementById('gallery-modal');
-    if (!modal) return;
-    
-    if (e.key === 'Escape') closeGallery();
-    if (e.key === 'ArrowRight') nextGalleryImage();
-    if (e.key === 'ArrowLeft') prevGalleryImage();
+    if (!document.getElementById('gallery-modal')) return;
+    if (e.key === 'Escape')      closeGallery();
+    if (e.key === 'ArrowRight')  nextGalleryImage();
+    if (e.key === 'ArrowLeft')   prevGalleryImage();
 });
 
 /* ═══════════════════════════════
@@ -1661,52 +1347,52 @@ document.addEventListener('keydown', function(e) {
 ═══════════════════════════════ */
 function renderCart(cart, items, container) {
     const days     = cart.daysCount > 0 ? cart.daysCount : 1;
-    const guests   = parseInt(cart.numGuests);
     const checkIn  = cart.checkInDate;
     const checkOut = cart.checkOutDate;
 
-    let totalRoom = 0;
-    let totalCottage = 0;
-    let totalEntranceFee = 0;
-    
+    // ✅ numGuests is now per item — no more cart-level guests
     const hasCottageInCart = cartUnitType === 'cottage' || cartUnitType === 'mixed';
-    
-    // FIX: Allow checkout if no cottage OR if cottage has entrance fee
-    // OLD: const canProceed = !(hasCottageInCart && !hasActiveEntranceFee) && cartUnitType !== 'mixed';
-    const canProceed = !(hasCottageInCart && !hasActiveEntranceFee); // ✅ REMOVED mixed cart restriction
+    const canProceed = !(hasCottageInCart && !hasActiveEntranceFee);
 
-    // ─── Items HTML with Gallery Support ───
-    const itemsHTML = items.map((item, i) => {
+    let totalRoom        = 0;
+    let totalCottage     = 0;
+    let totalEntranceFee = 0;
+
+    // ─── Items HTML ───
+    const itemsHTML = items.map((item) => {
         const unit = item.unit;
         const rate = parseFloat(unit.unitRatePrice);
         const type = unit.unitType;
-        let total  = 0;
-        let calc   = '';
+
+        // ✅ READ numGuests from each item, NOT from cart
+        const guests = parseInt(item.numGuests) || 1;
+
+        let total      = 0;
+        let calc       = '';
         let priceColor = 'blue';
 
-        // Get all images for this unit
-        const images = getUnitImages(unit);
+        const images     = getUnitImages(unit);
         const imageCount = images.length;
 
         if (type === 'room') {
-            const guestCount = guests === 1 ? 2 : guests;
-            total = rate * guestCount * days;
+            const effectiveGuests = guests === 1 ? 2 : guests;
+            total      = rate * effectiveGuests * days;
             totalRoom += total;
-            calc = `<strong>Calculation:</strong> ₱${rate.toFixed(2)} × ${guestCount} guest${guestCount > 1 ? 's' : ''} × ${days} day${days > 1 ? 's' : ''} = ₱${total.toFixed(2)}`;
+            calc       = `<strong>Calculation:</strong> ₱${rate.toFixed(2)} × ${effectiveGuests} guest${effectiveGuests > 1 ? 's' : ''} × ${days} day${days > 1 ? 's' : ''} = ₱${total.toFixed(2)}`;
             priceColor = 'blue';
         } else if (type === 'cottage') {
             if (hasActiveEntranceFee) {
-                const entranceFeeForItem = entranceFeeAmount * guests;
-                total = entranceFeeForItem + rate;
-                totalEntranceFee += entranceFeeForItem;
-                totalCottage += rate;
-                calc = `<strong>Calculation:</strong> (₱${entranceFeeAmount.toFixed(2)} entrance fee × ${guests} guest${guests > 1 ? 's' : ''}) + ₱${rate.toFixed(2)} cottage rate = ₱${total.toFixed(2)}`;
-                priceColor = 'green';
+                const entranceForItem = entranceFeeAmount * guests;
+                total             = entranceForItem + rate;
+                totalEntranceFee += entranceForItem;
+                totalCottage     += rate;
+                calc              = `<strong>Calculation:</strong> (₱${entranceFeeAmount.toFixed(2)} entrance fee × ${guests} guest${guests > 1 ? 's' : ''}) + ₱${rate.toFixed(2)} cottage rate = ₱${total.toFixed(2)}`;
+                priceColor        = 'green';
             } else {
-                total = rate;
+                total         = rate;
                 totalCottage += rate;
-                calc = `<strong>Cannot proceed:</strong> Active entrance fee required for cottage bookings.`;
-                priceColor = 'red';
+                calc          = `<strong>Cannot proceed:</strong> Active entrance fee required for cottage bookings.`;
+                priceColor    = 'red';
             }
         }
 
@@ -1724,8 +1410,7 @@ function renderCart(cart, items, container) {
                         <img class="item-img ${isUnavailable ? 'grayscale' : ''}" src="${images[0]}" alt="${unit.unitName}">
                         ${imageCount > 1 ? `
                         <div class="img-count-badge">
-                            <i class="fas fa-images"></i>
-                            ${imageCount}
+                            <i class="fas fa-images"></i> ${imageCount}
                         </div>` : ''}
                         <div class="img-view-overlay">
                             <i class="fas fa-search-plus"></i>
@@ -1737,8 +1422,8 @@ function renderCart(cart, items, container) {
                             <div class="item-title-section">
                                 <div class="item-name">${unit.unitName}</div>
                                 <span class="item-badge ${type}">
-                                    <i class="fas ${type==='room'?'fa-bed':'fa-home'}"></i> 
-                                    ${type.charAt(0).toUpperCase()+type.slice(1)}
+                                    <i class="fas ${type === 'room' ? 'fa-bed' : 'fa-home'}"></i> 
+                                    ${type.charAt(0).toUpperCase() + type.slice(1)}
                                 </span>
                             </div>
                             <div class="item-price-section">
@@ -1747,18 +1432,19 @@ function renderCart(cart, items, container) {
                         </div>
                         
                         <div class="item-tags">
-                            <span class="item-tag ${isUnavailable?'red':'blue'}">
-                                <i class="fas fa-users"></i> ${guests} guest${guests>1?'s':''}
+                            {{-- ✅ numGuests shown per item from cart_items --}}
+                            <span class="item-tag ${isUnavailable ? 'red' : 'blue'}">
+                                <i class="fas fa-users"></i> ${guests} guest${guests > 1 ? 's' : ''}
                             </span>
-                            <span class="item-tag ${isUnavailable?'red':'blue'}">
-                                <i class="fas ${type==='room'?'fa-calendar-alt':'fa-calendar-day'}"></i> 
-                                ${type==='room' ? days+' day(s)' : 'Day use'}
+                            <span class="item-tag ${isUnavailable ? 'red' : 'blue'}">
+                                <i class="fas ${type === 'room' ? 'fa-calendar-alt' : 'fa-calendar-day'}"></i> 
+                                ${type === 'room' ? days + ' day(s)' : 'Day use'}
                             </span>
                         </div>
                         
                         ${calc ? `
-                        <div class="calc-note ${isUnavailable?'red':''}">
-                            <i class="fas ${isUnavailable?'fa-exclamation-triangle':'fa-calculator'}"></i>
+                        <div class="calc-note ${isUnavailable ? 'red' : ''}">
+                            <i class="fas ${isUnavailable ? 'fa-exclamation-triangle' : 'fa-calculator'}"></i>
                             <p>${calc}</p>
                         </div>` : ''}
                         
@@ -1779,34 +1465,8 @@ function renderCart(cart, items, container) {
         </div>`;
     }).join('');
 
-    // ─── Warning banners ───
+    // ─── Warning banner ───
     let warnings = '';
-    
-    // ✅ COMMENTED OUT: Old mixed cart warning
-    /*
-    if (cartUnitType === 'mixed') {
-        const roomCount    = items.filter(i => i.unit?.unitType === 'room').length;
-        const cottageCount = items.filter(i => i.unit?.unitType === 'cottage').length;
-        warnings = `
-        <div class="warning-banner yellow">
-            <div class="w-icon"><i class="fas fa-exclamation-triangle"></i></div>
-            <div>
-                <h4>Mixed Cart Detected</h4>
-                <p>Rooms and cottages cannot be booked together in a single reservation. Please remove one type to continue.</p>
-                <div class="w-actions">
-                    <button onclick="removeAllRooms()" class="btn btn-sm btn-sm-dark">
-                        <i class="fas fa-bed"></i> Remove Rooms (${roomCount})
-                    </button>
-                    <button onclick="removeAllCottages()" class="btn btn-sm btn-sm-sun">
-                        <i class="fas fa-home"></i> Remove Cottages (${cottageCount})
-                    </button>
-                </div>
-            </div>
-        </div>`;
-    } else 
-    */
-    
-    // ✅ ONLY show warning if cottage without entrance fee
     if (hasCottageInCart && !hasActiveEntranceFee) {
         warnings = `
         <div class="warning-banner red">
@@ -1826,7 +1486,7 @@ function renderCart(cart, items, container) {
         </div>`;
     }
 
-    // ─── Price breakdown rows ───
+    // ─── Price breakdown ───
     let breakdownRows = '';
     if (totalRoom > 0) {
         breakdownRows += `
@@ -1845,49 +1505,38 @@ function renderCart(cart, items, container) {
     if (totalEntranceFee > 0) {
         breakdownRows += `
         <div class="price-row">
-            <span><i class="fas fa-ticket-alt row-icon"></i> Entrance Fees (${guests} guest${guests>1?'s':''})</span>
+            <span><i class="fas fa-ticket-alt row-icon"></i> Entrance Fees</span>
             <span>₱${totalEntranceFee.toFixed(2)}</span>
         </div>`;
     }
-    
+
     const grandTotal = totalRoom + totalCottage + totalEntranceFee;
 
     // ─── Checkout button ───
-    let checkoutBtn = '';
-    
-    // ✅ SIMPLIFIED: Only check entrance fee, not mixed cart
-    /*
-    // OLD CODE:
-    if (canProceed) {
-        checkoutBtn = `...`;
-    } else if (cartUnitType === 'mixed') {
-        checkoutBtn = `...`;
-    } else {
-        checkoutBtn = `...`;
-    }
-    */
-    
-    // ✅ NEW CODE:
-    if (canProceed) {
-        checkoutBtn = `
-        <button onclick="proceedToCheckout()" class="btn btn-checkout checkout-button">
-            <i class="fas fa-lock"></i> Proceed to Secure Checkout
-        </button>`;
-    } else {
-        // Only case now is missing entrance fee
-        checkoutBtn = `
-        <button class="btn btn-error btn-disabled">
-            <i class="fas fa-ban"></i> Entrance Fee Required for Cottages
-        </button>`;
-    }
+    const checkoutBtn = canProceed
+        ? `<button onclick="proceedToCheckout()" class="btn btn-checkout checkout-button">
+               <i class="fas fa-lock"></i> Proceed to Secure Checkout
+           </button>`
+        : `<button class="btn btn-error btn-disabled">
+               <i class="fas fa-ban"></i> Entrance Fee Required for Cottages
+           </button>`;
 
-    // ─── NEW LAYOUT WITH COMBINED SIDEBAR CARD ───
+    // ✅ Booking Summary guest display — guestSummary & guestVaries from API
+    const guestSummary = cart.guestSummary;
+    const guestVaries  = cart.guestVaries;
+
+    const guestDisplay = guestVaries
+        ? `${guestSummary} guests
+           <br><span class="guest-varies-badge">
+               <i class="fas fa-info-circle"></i> Varies per unit
+           </span>`
+        : `${guestSummary} Guest${parseInt(guestSummary) > 1 ? 's' : ''}`;
+
     container.innerHTML = `
         <div class="cart-grid">
-            <!-- LEFT SIDEBAR - COMBINED CARD -->
+            <!-- LEFT SIDEBAR -->
             <div class="left-sidebar">
                 <div class="sidebar-card">
-                    <!-- Booking Summary Section -->
                     <div class="summary-header">
                         <h3>Booking Summary</h3>
                     </div>
@@ -1909,35 +1558,33 @@ function renderCart(cart, items, container) {
                         <div class="summary-item">
                             <i class="fas fa-users"></i>
                             <div class="summary-item-content">
+                                {{-- ✅ numGuests now per-item, show aggregate in summary --}}
                                 <div class="summary-label">Guests</div>
-                                <div class="summary-value">${guests} Guest${guests>1?'s':''}</div>
+                                <div class="summary-value">${guestDisplay}</div>
                             </div>
                         </div>
-                        ${/* ✅ UPDATED: Show booking type for all cases including mixed */ ''}
                         <div class="summary-item">
-                            <i class="fas ${cartUnitType==='room'?'fa-bed':cartUnitType==='cottage'?'fa-home':'fa-hotel'}"></i>
+                            <i class="fas ${cartUnitType === 'room' ? 'fa-bed' : cartUnitType === 'cottage' ? 'fa-home' : 'fa-hotel'}"></i>
                             <div class="summary-item-content">
                                 <div class="summary-label">Booking Type</div>
                                 <div class="summary-value">
-                                    ${cartUnitType==='room'?'Rooms Only':
-                                      cartUnitType==='cottage'?'Cottages Only':
+                                    ${cartUnitType === 'room'    ? 'Rooms Only'   :
+                                      cartUnitType === 'cottage' ? 'Cottages Only' :
                                       'Mixed (Rooms + Cottages)'}
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Divider -->
                     <div class="price-divider"></div>
 
-                    <!-- Price Summary Section -->
                     <div class="price-section-title">
-                        <h4>Price Summary</h4>
+                        <h4><i class="fas fa-receipt"></i> Price Summary</h4>
                     </div>
                     <div class="price-content">
                         ${breakdownRows}
                         <div class="price-total">
-                            <span></i> Total Amount</span>
+                            <span>Total Amount</span>
                             <span>₱${grandTotal.toFixed(2)}</span>
                         </div>
                     </div>
@@ -1948,7 +1595,6 @@ function renderCart(cart, items, container) {
             <div class="main-column">
                 ${warnings}
 
-                <!-- Cart Items -->
                 <div class="items-section">
                     <div class="items-header">
                         <h3><i class="fas fa-shopping-bag"></i> Cart Items</h3>
@@ -1959,7 +1605,6 @@ function renderCart(cart, items, container) {
                     </div>
                 </div>
 
-                <!-- Action Buttons -->
                 <div class="actions-card">
                     <div class="actions-header">
                         <h3><i class="fas fa-plus-circle"></i> Quick Actions</h3>
@@ -1992,18 +1637,18 @@ function proceedToCheckout() {
     clearNotifications();
 
     fetch('/api/cart/items', {
-        headers: { 'Accept':'application/json', 'X-CSRF-TOKEN': csrfToken() }
+        headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken() }
     })
-    .then(r => { if(!r.ok) throw new Error('Network error'); return r.json(); })
+    .then(r => { if (!r.ok) throw new Error('Network error'); return r.json(); })
     .then(d => {
         if (!d.success || !d.cart) throw new Error('Cart not found');
         return fetch('/api/cart/validate-before-checkout', {
-            method:'POST',
-            headers: { 'Content-Type':'application/json', 'X-CSRF-TOKEN': csrfToken(), 'Accept':'application/json' },
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken(), 'Accept': 'application/json' },
             body: JSON.stringify({})
         });
     })
-    .then(r => { if(!r.ok) throw new Error('Server error'); return r.json(); })
+    .then(r => { if (!r.ok) throw new Error('Server error'); return r.json(); })
     .then(v => {
         if (v.success) {
             showNotification('All items available! Redirecting to checkout…', 'success', 2500);
@@ -2020,7 +1665,7 @@ function proceedToCheckout() {
             }
         }
     })
-    .catch(err => {
+    .catch(() => {
         btn.innerHTML = orig;
         btn.disabled  = false;
         showNotification('Validation failed. Try to remove the item and book again.', 'error');
@@ -2035,9 +1680,7 @@ function showUnavailableModal(items, errors) {
         <div class="unavail-item">
             <div>
                 <div class="ui-name">${item.unit?.unitName || 'Unknown'}</div>
-                <div class="ui-reason">
-                    <i class="fas fa-exclamation-circle"></i> ${item.reason || 'Not available'}
-                </div>
+                <div class="ui-reason"><i class="fas fa-exclamation-circle"></i> ${item.reason || 'Not available'}</div>
             </div>
             ${item.cartItemID ? `
             <button onclick="removeUnavailItem(${item.cartItemID})" class="btn btn-sm btn-sm-red">
@@ -2045,21 +1688,19 @@ function showUnavailableModal(items, errors) {
             </button>` : ''}
         </div>`).join('');
 
-    const ids = JSON.stringify(items.filter(i=>i.cartItemID).map(i=>i.cartItemID));
+    const ids = JSON.stringify(items.filter(i => i.cartItemID).map(i => i.cartItemID));
 
     document.getElementById('availability-modal-container').innerHTML = `
         <div class="modal-overlay show" id="avail-modal">
             <div class="modal">
                 <div class="modal-head">
                     <h2><i class="fas fa-exclamation-circle"></i> Booking Issues (${items.length})</h2>
-                    <button class="modal-close" onclick="closeAvailModal()">
-                        <i class="fas fa-times"></i>
-                    </button>
+                    <button class="modal-close" onclick="closeAvailModal()"><i class="fas fa-times"></i></button>
                 </div>
                 <div class="modal-body">
                     <div class="modal-info-box">
                         <i class="fas fa-info-circle"></i>
-                        <p>Some accommodations are no longer available for your selected dates. Please remove them to continue with your booking.</p>
+                        <p>Some accommodations are no longer available for your selected dates. Please remove them to continue.</p>
                     </div>
                     ${itemsHTML}
                 </div>
@@ -2092,11 +1733,7 @@ function removeFromCart(id) {
         cancelButtonColor: '#6B7280',
         confirmButtonText: '<i class="fas fa-trash-alt"></i> Yes, Remove',
         cancelButtonText: '<i class="fas fa-times"></i> Cancel',
-        customClass: {
-            popup: 'swal-custom-popup',
-            confirmButton: 'swal-confirm-btn',
-            cancelButton: 'swal-cancel-btn'
-        }
+        customClass: { popup: 'swal-custom-popup', confirmButton: 'swal-confirm-btn', cancelButton: 'swal-cancel-btn' }
     }).then((result) => {
         if (!result.isConfirmed) return;
 
@@ -2115,26 +1752,13 @@ function removeFromCart(id) {
                     confirmButtonColor: '#51CF66',
                     confirmButtonText: 'OK',
                     customClass: { popup: 'swal-custom-popup' }
-                }).then(() => {
-                    loadCartItems();
-                    updateBadge();
-                });
+                }).then(() => { loadCartItems(); updateBadge(); });
             } else {
-                Swal.fire({
-                    title: 'Failed!',
-                    text: d.message || 'Could not remove item.',
-                    icon: 'error',
-                    confirmButtonColor: '#FF6B6B'
-                });
+                Swal.fire({ title: 'Failed!', text: d.message || 'Could not remove item.', icon: 'error', confirmButtonColor: '#FF6B6B' });
             }
         })
         .catch(() => {
-            Swal.fire({
-                title: 'Error',
-                text: 'Something went wrong. Please try again.',
-                icon: 'error',
-                confirmButtonColor: '#FF6B6B'
-            });
+            Swal.fire({ title: 'Error', text: 'Something went wrong. Please try again.', icon: 'error', confirmButtonColor: '#FF6B6B' });
         });
     });
 }
@@ -2142,13 +1766,10 @@ function removeFromCart(id) {
 function removeUnavailItem(id) {
     closeAvailModal();
     fetch(`/api/cart/remove/${id}`, {
-        method:'DELETE',
-        headers: { 'X-CSRF-TOKEN': csrfToken(), 'Accept':'application/json' }
+        method: 'DELETE',
+        headers: { 'X-CSRF-TOKEN': csrfToken(), 'Accept': 'application/json' }
     })
-    .then(() => { 
-        showNotification('Item removed.', 'success'); 
-        setTimeout(loadCartItems, 600); 
-    })
+    .then(() => { showNotification('Item removed.', 'success'); setTimeout(loadCartItems, 600); })
     .catch(() => showNotification('Error.', 'error'));
 }
 
@@ -2156,46 +1777,36 @@ function removeAllUnavail(ids) {
     if (!confirm('Remove all unavailable items?')) return;
     closeAvailModal();
     Promise.all(ids.map(id => fetch(`/api/cart/remove/${id}`, {
-        method:'DELETE', headers: { 'X-CSRF-TOKEN': csrfToken(), 'Accept':'application/json' }
+        method: 'DELETE', headers: { 'X-CSRF-TOKEN': csrfToken(), 'Accept': 'application/json' }
     })))
-    .then(() => { 
-        showNotification('All unavailable items removed.', 'success'); 
-        setTimeout(() => { loadCartItems(); updateBadge(); }, 500); 
-    })
+    .then(() => { showNotification('All unavailable items removed.', 'success'); setTimeout(() => { loadCartItems(); updateBadge(); }, 500); })
     .catch(() => showNotification('Some items could not be removed.', 'error'));
 }
 
-// ✅ KEEP THESE FUNCTIONS (still useful for individual cleanup)
 function removeAllRooms() {
     if (!confirm('Remove all room items from your cart?')) return;
-    fetch('/api/cart/items', { headers: { 'Accept':'application/json', 'X-CSRF-TOKEN': csrfToken() } })
+    fetch('/api/cart/items', { headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken() } })
     .then(r => r.json())
     .then(d => {
-        const rooms = (d.items||[]).filter(i => i.unit?.unitType === 'room');
+        const rooms = (d.items || []).filter(i => i.unit?.unitType === 'room');
         if (!rooms.length) return showNotification('No room items found.', 'info');
         return Promise.all(rooms.map(i => fetch(`/api/cart/remove/${i.cartItemID}`, {
-            method:'DELETE', headers: { 'X-CSRF-TOKEN': csrfToken(), 'Accept':'application/json' }
-        }))).then(() => { 
-            showNotification('All rooms removed.', 'success'); 
-            setTimeout(() => { loadCartItems(); updateBadge(); }, 500); 
-        });
+            method: 'DELETE', headers: { 'X-CSRF-TOKEN': csrfToken(), 'Accept': 'application/json' }
+        }))).then(() => { showNotification('All rooms removed.', 'success'); setTimeout(() => { loadCartItems(); updateBadge(); }, 500); });
     })
     .catch(() => showNotification('Error.', 'error'));
 }
 
 function removeAllCottages() {
     if (!confirm('Remove all cottage items from your cart?')) return;
-    fetch('/api/cart/items', { headers: { 'Accept':'application/json', 'X-CSRF-TOKEN': csrfToken() } })
+    fetch('/api/cart/items', { headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken() } })
     .then(r => r.json())
     .then(d => {
-        const cottages = (d.items||[]).filter(i => i.unit?.unitType === 'cottage');
+        const cottages = (d.items || []).filter(i => i.unit?.unitType === 'cottage');
         if (!cottages.length) return showNotification('No cottage items found.', 'info');
         return Promise.all(cottages.map(i => fetch(`/api/cart/remove/${i.cartItemID}`, {
-            method:'DELETE', headers: { 'X-CSRF-TOKEN': csrfToken(), 'Accept':'application/json' }
-        }))).then(() => { 
-            showNotification('All cottages removed.', 'success'); 
-            setTimeout(() => { loadCartItems(); updateBadge(); }, 500); 
-        });
+            method: 'DELETE', headers: { 'X-CSRF-TOKEN': csrfToken(), 'Accept': 'application/json' }
+        }))).then(() => { showNotification('All cottages removed.', 'success'); setTimeout(() => { loadCartItems(); updateBadge(); }, 500); });
     })
     .catch(() => showNotification('Error.', 'error'));
 }
@@ -2205,28 +1816,16 @@ function removeAllCottages() {
 ═══════════════════════════════ */
 let activeNotifications = new Set();
 
-function showNotification(msg, type='info', duration=3500) {
-    const id = 'notification-' + Date.now() + '-' + Math.random().toString(36).substr(2,6);
-    const icons = { 
-        success:'fa-check-circle', 
-        error:'fa-exclamation-circle', 
-        warning:'fa-exclamation-triangle', 
-        info:'fa-info-circle' 
-    };
-    const titles = { 
-        success:'Success', 
-        error:'Error', 
-        warning:'Warning', 
-        info:'Information' 
-    };
+function showNotification(msg, type = 'info', duration = 3500) {
+    const id = 'notification-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6);
+    const icons  = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
+    const titles = { success: 'Success', error: 'Error', warning: 'Warning', info: 'Information' };
 
     const el = document.createElement('div');
     el.id = id;
     el.className = `notification ${type}`;
     el.innerHTML = `
-        <div class="notification-icon">
-            <i class="fas ${icons[type]}"></i>
-        </div>
+        <div class="notification-icon"><i class="fas ${icons[type]}"></i></div>
         <div class="notification-content">
             <div class="notification-title">${titles[type]}</div>
             <div class="notification-message">${msg}</div>
@@ -2237,11 +1836,7 @@ function showNotification(msg, type='info', duration=3500) {
 
     document.getElementById('notification-container').appendChild(el);
     activeNotifications.add(id);
-    
-    requestAnimationFrame(() => {
-        el.classList.add('show');
-    });
-    
+    requestAnimationFrame(() => el.classList.add('show'));
     setTimeout(() => removeNotification(id), duration);
     return id;
 }
@@ -2255,22 +1850,15 @@ function removeNotification(id) {
 }
 
 function clearNotifications() {
-    document.querySelectorAll('.notification').forEach(n => { 
-        n.classList.remove('show');
-        setTimeout(() => n.remove(), 500); 
-    });
+    document.querySelectorAll('.notification').forEach(n => { n.classList.remove('show'); setTimeout(() => n.remove(), 500); });
     activeNotifications.clear();
-}
-
-function clearAllNotifications() {
-    clearNotifications();
 }
 
 /* ═══════════════════════════════
    HELPERS
 ═══════════════════════════════ */
-function csrfToken() { 
-    return document.querySelector('meta[name="csrf-token"]').getAttribute('content'); 
+function csrfToken() {
+    return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 }
 
 function getUnitImages(unit) {
@@ -2288,7 +1876,7 @@ function getUnitImages(unit) {
 }
 
 function updateBadge() {
-    fetch('/api/cart/count', { headers: { 'Accept':'application/json' } })
+    fetch('/api/cart/count', { headers: { 'Accept': 'application/json' } })
     .then(r => r.json())
     .then(d => {
         const badge = document.querySelector('.cart-badge');
@@ -2296,7 +1884,7 @@ function updateBadge() {
             badge.style.display = (d.success && d.count > 0) ? 'flex' : 'none';
             if (d.count > 0) badge.textContent = d.count;
         }
-    }).catch(()=>{});
+    }).catch(() => {});
 }
 </script>
 </body>

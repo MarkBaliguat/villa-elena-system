@@ -62,10 +62,8 @@ class RoomController extends Controller
         $checkInDate = Carbon::parse($checkIn)->startOfDay();
         $checkOutDate = Carbon::parse($checkOut)->startOfDay();
         
-        // Calculate the difference in days
         $daysCount = $checkInDate->diffInDays($checkOutDate);
         
-        // If it's the same day, count as 1 day
         if ($daysCount === 0) {
             $daysCount = 1;
         }
@@ -81,7 +79,6 @@ class RoomController extends Controller
             ->whereIn('bookingStatus', ['pending', 'confirmed'])
             ->exists();
 
-        // If there's a special event booking during the selected dates, return no rooms available
         if ($specialEventBookings) {
             return response()->json([
                 'success' => true,
@@ -101,11 +98,9 @@ class RoomController extends Controller
             ->where('capacity', '>=', $guestCount)
             ->get()
             ->filter(function($room) use ($checkIn, $checkOut) {
-                // Check if room is blocked during the selected dates - IGNORE unitStatus
                 return !$this->isUnitBlocked($room, $checkIn, $checkOut);
             })
             ->filter(function($room) use ($checkIn, $checkOut) {
-                // Check for booking conflicts (normal bookings)
                 return !$this->checkBookingConflict($room->unitID, $checkIn, $checkOut);
             })
             ->map(function($room) {
@@ -132,7 +127,6 @@ class RoomController extends Controller
     {
         $roomData = $room->toArray();
         
-        // Add virtual tour URL if panorama is set
         if ($room->virtualTourPanorama) {
             $roomData['virtual_tour_url'] = url('/virtual-tour?panorama=' . $room->virtualTourPanorama);
             $roomData['has_virtual_tour'] = true;
@@ -149,7 +143,6 @@ class RoomController extends Controller
      */
     private function isUnitBlocked($unit, $checkinDate, $checkoutDate)
     {
-        // Kung walang block dates set, UNIT IS NOT BLOCKED
         if (!$unit->blockStartDate || !$unit->blockEndDate) {
             return false;
         }
@@ -159,7 +152,6 @@ class RoomController extends Controller
         $blockStart = Carbon::parse($unit->blockStartDate)->startOfDay();
         $blockEnd = Carbon::parse($unit->blockEndDate)->startOfDay();
 
-        // Check if booking dates overlap with block period
         return (
             ($newCheckin->between($blockStart, $blockEnd)) ||
             ($newCheckout->between($blockStart, $blockEnd)) ||
@@ -174,7 +166,6 @@ class RoomController extends Controller
      */
     private function checkBookingConflict($unitId, $checkinDate, $checkoutDate)
     {
-        // Get only normal bookings for this unit
         $existingBookings = Booking::whereHas('cart.cartItems', function($q) use ($unitId) {
                 $q->where('unitID', $unitId);
             })
@@ -196,7 +187,6 @@ class RoomController extends Controller
             $existingCheckin = Carbon::parse($booking->cart->checkInDate)->startOfDay();
             $existingCheckout = Carbon::parse($booking->cart->checkOutDate)->startOfDay();
 
-            // Check for date overlap
             $hasOverlap = (
                 ($newCheckin->between($existingCheckin, $existingCheckout)) ||
                 ($newCheckout->between($existingCheckin, $existingCheckout)) ||
@@ -214,11 +204,10 @@ class RoomController extends Controller
     }
 
     /**
-     * Add room to cart with CORRECT calculation including same-day
+     * Add room to cart
      */
     public function addToCart(Request $request)
     {
-        // Check if user is authenticated
         if (!Auth::check()) {
             return response()->json([
                 'success' => false,
@@ -243,10 +232,9 @@ class RoomController extends Controller
             // ✅ STANDARDIZE: Convert to date-only format
             $checkIn = Carbon::parse($request->check_in)->format('Y-m-d');
             $checkOut = Carbon::parse($request->check_out)->format('Y-m-d');
-            
             $guests = $request->guests;
 
-            // Check for special event bookings before adding to cart
+            // Check for special event bookings
             $specialEventBookings = Booking::where('bookingType', 'special-event')
                 ->where(function($query) use ($checkIn, $checkOut) {
                     $query->where(function($q) use ($checkIn, $checkOut) {
@@ -297,36 +285,31 @@ class RoomController extends Controller
             $checkInDate = Carbon::parse($checkIn)->startOfDay();
             $checkOutDate = Carbon::parse($checkOut)->startOfDay();
             
-            // Calculate the difference in days
             $daysCount = $checkInDate->diffInDays($checkOutDate);
             
-            // If it's the same day, count as 1 day
             if ($daysCount === 0) {
                 $daysCount = 1;
             }
 
-            // ✅ FIX: Check if user has an active cart with different dates
+            // ✅ Check if user has an active cart
             $cart = Cart::where('user_id', $userId)
                 ->where('is_active', true)
                 ->first();
 
             if (!$cart) {
-                // Create new active cart
+                // Create new active cart — NO numGuests here
                 $cart = Cart::create([
                     'user_id' => $userId,
                     'checkInDate' => $checkIn,
                     'checkOutDate' => $checkOut,
                     'daysCount' => $daysCount,
-                    'numGuests' => $guests,
                     'is_active' => true
                 ]);
             } else {
-                // Check if dates are different
                 $existingCheckIn = Carbon::parse($cart->checkInDate)->format('Y-m-d');
                 $existingCheckOut = Carbon::parse($cart->checkOutDate)->format('Y-m-d');
                 
                 if ($existingCheckIn !== $checkIn || $existingCheckOut !== $checkOut) {
-                    // Check if current cart has items
                     $existingCartItems = CartItem::where('cartID', $cart->cartID)
                         ->where('isBooked', false)
                         ->count();
@@ -343,17 +326,15 @@ class RoomController extends Controller
                             ]
                         ], 400);
                     } else {
-                        // Update existing cart with new dates
+                        // Update cart dates only — NO numGuests
                         $cart->update([
                             'checkInDate' => $checkIn,
                             'checkOutDate' => $checkOut,
                             'daysCount' => $daysCount,
-                            'numGuests' => $guests
                         ]);
                     }
-                } else {
-                    $cart->update(['numGuests' => $guests]);
                 }
+                // ✅ Removed: $cart->update(['numGuests' => $guests]) — numGuests now lives in CartItem
             }
 
             // ✅ ROOM CALCULATION: If single guest (1), multiply by 2
@@ -369,12 +350,18 @@ class RoomController extends Controller
                 ->first();
 
             if ($existingCartItem) {
-                $existingCartItem->update(['subtotalPrice' => $subtotal]);
+                // ✅ Update numGuests in CartItem
+                $existingCartItem->update([
+                    'numGuests' => $guests,
+                    'subtotalPrice' => $subtotal
+                ]);
                 $cartItem = $existingCartItem;
             } else {
+                // ✅ Create CartItem with numGuests
                 $cartItem = CartItem::create([
                     'cartID' => $cart->cartID,
                     'unitID' => $unitId,
+                    'numGuests' => $guests,
                     'subtotalPrice' => $subtotal
                 ]);
             }
@@ -440,11 +427,9 @@ class RoomController extends Controller
             'check_out' => 'required|date|after_or_equal:check_in'
         ]);
 
-        // ✅ STANDARDIZE: Convert to date-only format
         $checkIn = Carbon::parse($request->check_in)->format('Y-m-d');
         $checkOut = Carbon::parse($request->check_out)->format('Y-m-d');
 
-        // Check for special event bookings
         $specialEventBookings = Booking::where('bookingType', 'special-event')
             ->where(function($query) use ($checkIn, $checkOut) {
                 $query->where(function($q) use ($checkIn, $checkOut) {

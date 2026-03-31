@@ -1204,7 +1204,7 @@
         // Global variables
         let currentCheckIn = '';
         let currentCheckOut = '';
-        let currentGuests = ;
+        let currentGuests = 2;
         let cartItemCount = 0;
         let cartItems = [];
         let cartDates = { checkIn: '', checkOut: '' };
@@ -1757,7 +1757,7 @@
             
             currentCheckIn = '';
             currentCheckOut = '';
-            currentGuests = 1;
+            currentGuests = 2;
             
             loadUnits('cottages');
         }

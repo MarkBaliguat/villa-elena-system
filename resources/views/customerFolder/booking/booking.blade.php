@@ -235,9 +235,6 @@
         /* ═══════════════════════════════════════
            CARD PAYMENT MODAL
         ═══════════════════════════════════════ */
-        /* ═══════════════════════════════════════
-        CARD PAYMENT MODAL — FULLY RESPONSIVE
-        ═══════════════════════════════════════ */
         .card-modal-overlay {
             position: fixed; inset: 0;
             background: rgba(0,0,0,0.6);
@@ -264,7 +261,6 @@
             transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
             position: relative;
             margin: auto;
-            /* smooth scroll inside modal */
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
         }
@@ -275,15 +271,9 @@
             padding: 1.4rem 1.5rem 0.9rem;
             background: linear-gradient(135deg, #6366F1, #4F46E5);
             color: #fff;
-            position: relative;
-            /* keep it sticky so header stays visible when scrolling */
             position: sticky; top: 0; z-index: 2;
         }
-        .card-modal-header h3 {
-            font-size: 1.1rem; font-weight: 800;
-            display: flex; align-items: center; gap: 0.6rem;
-            margin-bottom: 0.2rem;
-        }
+        .card-modal-header h3 { font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.2rem; }
         .card-modal-header p { font-size: 0.75rem; opacity: 0.85; font-weight: 500; }
         .card-modal-close {
             position: absolute; top: 1rem; right: 1rem;
@@ -294,7 +284,6 @@
             display: flex; align-items: center; justify-content: center;
             font-size: 0.85rem;
             transition: background 0.2s;
-            /* make it easier to tap on mobile */
             touch-action: manipulation;
         }
         .card-modal-close:hover { background: rgba(255,255,255,0.35); }
@@ -334,7 +323,6 @@
         .card-number-wrap { position:relative; }
         .card-number-wrap .card-field { padding-right:46px; letter-spacing:1.5px; }
         .card-brand-icon { position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:1.3rem; opacity:0.7; }
-        /* Stack expiry/cvv on very small phones */
         .card-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:0.8rem; }
         .card-error-msg { color:var(--booking-red); font-size:0.7rem; margin-top:0.3rem; display:none; font-weight:600; }
         .card-error-msg.show { display:flex; align-items:center; gap:4px; }
@@ -349,47 +337,33 @@
         .accepted-cards { display:flex; align-items:center; gap:0.5rem; justify-content:center; flex-wrap:wrap; margin-top:0.8rem; font-size:0.7rem; color:var(--booking-text-light); font-weight:500; }
         .accepted-cards span { display:inline-flex; align-items:center; justify-content:center; background:#F3F4F6; border-radius:5px; padding:3px 8px; font-weight:700; font-size:0.65rem; color:var(--booking-text-dark); letter-spacing:0.5px; }
 
-        /* ── Responsive breakpoints ── */
         @media (max-width: 480px) {
             .card-modal-overlay { padding: 0; align-items: flex-end; }
-            .card-modal {
-                border-radius: 20px 20px 0 0;
-                max-height: 93dvh;
-                max-height: 93vh; /* fallback */
-                width: 100%;
-            }
+            .card-modal { border-radius: 20px 20px 0 0; max-height: 93dvh; max-height: 93vh; width: 100%; }
             .card-modal-header { padding: 1.2rem 1.2rem 0.8rem; }
             .card-modal-header h3 { font-size: 1rem; }
             .card-preview { margin: 0 1rem; padding: 1rem 1.1rem; border-radius: 12px; }
             .card-modal-body { padding: 1rem 1.2rem 1.4rem; }
             .card-row-2 { grid-template-columns: 1fr 1fr; gap: 0.7rem; }
         }
-
         @media (max-width: 360px) {
             .card-row-2 { grid-template-columns: 1fr; }
             .card-preview-number { font-size: 0.8rem; letter-spacing: 1px; }
             .card-preview-value { max-width: 90px; }
         }
-
         @media (min-width: 481px) and (max-width: 768px) {
             .card-modal { max-width: 420px; border-radius: 20px; }
             .card-modal-overlay { padding: 1rem; align-items: center; }
         }
-
         @media (min-width: 769px) {
             .card-modal { max-width: 460px; }
             .card-modal-overlay { align-items: center; }
         }
-
-        /* safe area inset for phones with notch/home bar */
         @supports (padding-bottom: env(safe-area-inset-bottom)) {
             @media (max-width: 480px) {
                 .card-modal-body { padding-bottom: calc(1.4rem + env(safe-area-inset-bottom)); }
             }
         }
-
-
-
     </style>
 </head>
 <body>
@@ -702,9 +676,7 @@ let selectedPayMethod    = null;
 let selectedAmountType   = null;
 let selectedAmount       = 0;
 let daysCount            = 1;
-let numGuests            = 1;
 let entranceFeeAmount    = 0;
-let totalEntranceFees    = 0;
 let hasActiveEntranceFee = false;
 let hasRoom    = false;
 let hasCottage = false;
@@ -714,7 +686,6 @@ let currentStep = 1;
 let pendingBookingData  = null;
 let pendingPaymentData  = null;
 
-// ══ PayMongo public key (safe to expose on frontend) ══
 const PAYMONGO_PUBLIC_KEY = '{{ config("services.paymongo.public_key") }}';
 
 // ═══════════════════════════════════════════════
@@ -774,11 +745,14 @@ async function loadEntranceFee() {
 }
 
 function loadBookingSummary() {
-    return fetch('/api/cart/items').then(r=>r.json()).then(data => {
+    return fetch('/api/cart/items').then(r => r.json()).then(data => {
         if (data.success && data.cart && data.items.length > 0) {
-            cartData = data.cart; cartItems = data.items; computeTotals();
+            cartData  = data.cart;
+            cartItems = data.items;
+            computeTotals();
         } else {
-            document.getElementById('summary-body').innerHTML = '<p style="color:#dc2626;font-size:.82rem;text-align:center;padding:1rem 0;">No items in cart. Please add accommodations first.</p>';
+            document.getElementById('summary-body').innerHTML =
+                '<p style="color:#dc2626;font-size:.82rem;text-align:center;padding:1rem 0;">No items in cart. Please add accommodations first.</p>';
         }
     }).catch(e => console.error('Cart:', e));
 }
@@ -787,37 +761,53 @@ function csrf() { return document.querySelector('meta[name="csrf-token"]').getAt
 
 // ═══════════════════════════════════════════════
 //  COMPUTE TOTALS
+//  numGuests is now per cart item — each item has
+//  its own guest count from cart_items.numGuests
 // ═══════════════════════════════════════════════
 function computeTotals() {
     daysCount = parseInt(cartData.daysCount) || 1;
-    numGuests = parseInt(cartData.numGuests) || 1;
 
     const checkIn  = new Date(cartData.checkInDate);
     const checkOut = new Date(cartData.checkOutDate);
-    document.getElementById('h-booking-type').value = checkIn.toDateString() === checkOut.toDateString() ? 'day-use' : 'overnight';
+    document.getElementById('h-booking-type').value =
+        checkIn.toDateString() === checkOut.toDateString() ? 'day-use' : 'overnight';
 
-    let roomSubtotal = 0, cottageSubtotal = 0;
-    totalEntranceFees = 0; hasRoom = false; hasCottage = false;
+    let roomSubtotal    = 0;
+    let cottageSubtotal = 0;
+    let totalEntranceFees = 0;
+    hasRoom = false; hasCottage = false;
 
     cartItems.forEach(item => {
-        const unit  = item.unit;
-        const price = parseFloat(unit.unitRatePrice);
+        const unit       = item.unit;
+        const price      = parseFloat(unit.unitRatePrice);
+        // ✅ Use per-item numGuests — this is the key fix
+        const itemGuests = parseInt(item.numGuests) || 1;
+
         if (unit.unitType === 'room') {
             hasRoom = true;
-            const mult      = numGuests === 1 ? 2 : numGuests;
+            // Minimum multiplier of 2 when only 1 guest (same as backend logic)
+            const mult      = itemGuests === 1 ? 2 : itemGuests;
             const roomTotal = price * mult * daysCount;
             roomSubtotal   += roomTotal;
             item._total     = roomTotal;
-            item._calc      = `₱${price.toFixed(2)} × ${mult} guest${mult>1?'s':''} × ${daysCount} day${daysCount>1?'s':''}`;
+            item._calc      = `₱${price.toFixed(2)} × ${mult} guest${mult > 1 ? 's' : ''} × ${daysCount} day${daysCount > 1 ? 's' : ''}`;
+
         } else if (unit.unitType === 'cottage') {
-            hasCottage       = true;
+            hasCottage = true;
             cottageSubtotal += price;
             if (hasActiveEntranceFee) {
-                const ef = entranceFeeAmount * numGuests;
+                const ef = entranceFeeAmount * itemGuests;
                 totalEntranceFees += ef;
                 item._total = price + ef;
-                item._calc  = `Cottage: ₱${price.toFixed(2)} + Entrance fees: ₱${ef.toFixed(2)} (₱${entranceFeeAmount.toFixed(2)} × ${numGuests})`;
-            } else { item._total = price; item._calc = 'Cottage price only'; }
+                item._calc  = `Cottage: ₱${price.toFixed(2)} + Entrance: ₱${ef.toFixed(2)} (₱${entranceFeeAmount.toFixed(2)} × ${itemGuests})`;
+            } else {
+                item._total = price;
+                item._calc  = 'Cottage price only';
+            }
+
+        } else {
+            item._total = price * daysCount;
+            item._calc  = `₱${price.toFixed(2)} × ${daysCount} day${daysCount > 1 ? 's' : ''}`;
         }
     });
 
@@ -825,7 +815,7 @@ function computeTotals() {
     cartData._roomSubtotal    = roomSubtotal;
     cartData._cottageSubtotal = cottageSubtotal;
     cartData._entranceFees    = totalEntranceFees;
-    cartData._subtotal        = bookingTotal;
+
     updateAmountChips();
 }
 
@@ -847,7 +837,7 @@ function prefillUserInfo() {
     phoneInput.readOnly = false;
 
     phoneInput.addEventListener('input', function () {
-        this.value = this.value.replace(/\D/g,'').slice(0,11);
+        this.value = this.value.replace(/\D/g, '').slice(0, 11);
         if (validatePhoneNumber(this.value)) { this.classList.remove('error'); hideInlineError('phone'); }
         validateForm();
     });
@@ -862,11 +852,11 @@ function prefillUserInfo() {
 //  FORM VALIDATION
 // ═══════════════════════════════════════════════
 function validateForm() {
-    const name  = document.getElementById('input-name').value.trim();
-    const email = document.getElementById('input-email').value.trim();
-    const phone = document.getElementById('phone-input').value.trim();
+    const name       = document.getElementById('input-name').value.trim();
+    const email      = document.getElementById('input-email').value.trim();
+    const phone      = document.getElementById('phone-input').value.trim();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    let ok = name && email && emailRegex.test(email) && validatePhoneNumber(phone) && selectedPayMethod && (!selectedPayMethod || selectedAmountType);
+    const ok = name && email && emailRegex.test(email) && validatePhoneNumber(phone) && selectedPayMethod && selectedAmountType;
     document.getElementById('btn-next1').disabled = !ok;
     return ok;
 }
@@ -889,7 +879,9 @@ function selectAmount(type) {
     selectedAmountType = type;
     document.getElementById('chip-down').classList.toggle('selected', type === 'downpayment');
     document.getElementById('chip-full').classList.toggle('selected', type === 'full');
-    selectedAmount = type === 'downpayment' ? Math.round(bookingTotal * 0.5 * 100) / 100 : bookingTotal;
+    selectedAmount = type === 'downpayment'
+        ? Math.round(bookingTotal * 0.5 * 100) / 100
+        : bookingTotal;
     document.getElementById('h-payment-amount').value = selectedAmount.toFixed(2);
     hideInlineError('amount');
     validateForm();
@@ -918,9 +910,9 @@ function goToStep(n) {
 }
 
 function goToStep2() {
-    const name  = document.getElementById('input-name');
-    const email = document.getElementById('input-email');
-    const phone = document.getElementById('phone-input');
+    const name       = document.getElementById('input-name');
+    const email      = document.getElementById('input-email');
+    const phone      = document.getElementById('phone-input');
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!name.value.trim())  { name.classList.add('error');  showInlineError('name');  showToast('error','Full name is required.'); name.focus(); return; }
@@ -937,10 +929,10 @@ function goToStep2() {
 }
 
 function goToStep3() {
-    document.getElementById('room-rules-card').style.display   = hasRoom    ? 'block' : 'none';
-    document.getElementById('cottage-rules-card').style.display= hasCottage ? 'block' : 'none';
-    document.getElementById('btn-confirm-card').style.display  = selectedPayMethod === 'card'  ? 'flex' : 'none';
-    document.getElementById('btn-confirm-gcash').style.display = selectedPayMethod === 'gcash' ? 'flex' : 'none';
+    document.getElementById('room-rules-card').style.display    = hasRoom    ? 'block' : 'none';
+    document.getElementById('cottage-rules-card').style.display = hasCottage ? 'block' : 'none';
+    document.getElementById('btn-confirm-card').style.display   = selectedPayMethod === 'card'  ? 'flex' : 'none';
+    document.getElementById('btn-confirm-gcash').style.display  = selectedPayMethod === 'gcash' ? 'flex' : 'none';
     goToStep(3);
 }
 
@@ -948,22 +940,38 @@ function goToStep3() {
 //  RENDER SUMMARY
 // ═══════════════════════════════════════════════
 function renderSummary() {
-    const d = cartData;
-    const checkIn  = new Date(d.checkInDate);
-    const checkOut = new Date(d.checkOutDate);
+    const d         = cartData;
+    const checkIn   = new Date(d.checkInDate);
+    const checkOut  = new Date(d.checkOutDate);
     const bookingType = checkIn.toDateString() === checkOut.toDateString() ? 'Day Use' : 'Overnight';
     const payLabel    = selectedAmountType === 'downpayment' ? 'Downpayment (50%)' : 'Full Payment';
     const methodLabel = selectedPayMethod === 'card' ? 'Credit / Debit Card' : 'GCash';
 
+    // Build per-item accommodation rows
     const itemsHTML = cartItems.map(item => {
-        const u = item.unit;
-        return `<div class="accom-item"><div><div class="accom-name">${u.unitName}</div><span class="accom-badge ${u.unitType}"><i class="fas fa-${u.unitType==='room'?'bed':'home'}"></i> ${u.unitType}</span><div class="accom-calc">${item._calc}</div></div><div class="accom-price">₱${item._total.toFixed(2)}</div></div>`;
+        const u          = item.unit;
+        const itemGuests = parseInt(item.numGuests) || 1;
+        return `
+            <div class="accom-item">
+                <div>
+                    <div class="accom-name">${u.unitName}</div>
+                    <span class="accom-badge ${u.unitType}">
+                        <i class="fas fa-${u.unitType === 'room' ? 'bed' : 'home'}"></i> ${u.unitType}
+                    </span>
+                    <span style="font-size:.72rem;color:#6B7280;margin-left:.5rem;">
+                        <i class="fas fa-users"></i> ${itemGuests} guest${itemGuests > 1 ? 's' : ''}
+                    </span>
+                    <div class="accom-calc">${item._calc}</div>
+                </div>
+                <div class="accom-price">₱${item._total.toFixed(2)}</div>
+            </div>`;
     }).join('');
 
+    // Build pricing breakdown rows
     let pricingRows = '';
     if (d._roomSubtotal    > 0) pricingRows += `<div class="s-row"><span class="s-label">Rooms Subtotal</span><span class="s-value">₱${d._roomSubtotal.toFixed(2)}</span></div>`;
     if (d._cottageSubtotal > 0) pricingRows += `<div class="s-row"><span class="s-label">Cottages Subtotal</span><span class="s-value">₱${d._cottageSubtotal.toFixed(2)}</span></div>`;
-    if (d._entranceFees    > 0) pricingRows += `<div class="s-row"><span class="s-label">Entrance Fees (${numGuests} guest${numGuests>1?'s':''})</span><span class="s-value">₱${d._entranceFees.toFixed(2)}</span></div>`;
+    if (d._entranceFees    > 0) pricingRows += `<div class="s-row"><span class="s-label">Entrance Fees</span><span class="s-value">₱${d._entranceFees.toFixed(2)}</span></div>`;
 
     document.getElementById('summary-body').innerHTML = `
         <div class="summary-block">
@@ -972,7 +980,6 @@ function renderSummary() {
             <div class="s-row"><span class="s-label">Check-out</span><span class="s-value">${d.checkOutDate}</span></div>
             <div class="s-row"><span class="s-label">Duration</span><span class="s-value">${daysCount} day(s)</span></div>
             <div class="s-row"><span class="s-label">Booking Type</span><span class="s-value">${bookingType}</span></div>
-            <div class="s-row"><span class="s-label">Guests</span><span class="s-value">${numGuests}</span></div>
         </div>
         <div class="summary-block">
             <div class="section-label">Accommodations</div>
@@ -981,7 +988,10 @@ function renderSummary() {
         <div class="summary-block">
             <div class="section-label">Pricing</div>
             ${pricingRows}
-            <div class="total-price-box"><span class="t-label">Total Amount</span><span class="t-amount">₱${bookingTotal.toFixed(2)}</span></div>
+            <div class="total-price-box">
+                <span class="t-label">Total Amount</span>
+                <span class="t-amount">₱${bookingTotal.toFixed(2)}</span>
+            </div>
         </div>
         <div class="summary-block">
             <div class="section-label">Payment</div>
@@ -995,11 +1005,20 @@ function renderSummary() {
 // ═══════════════════════════════════════════════
 async function validateCartBeforeSubmit() {
     try {
-        const r = await fetch('/api/cart/pre-validate', { method:'POST', headers:{'X-CSRF-TOKEN':csrf(),'Accept':'application/json','Content-Type':'application/json'} });
+        const r = await fetch('/api/cart/pre-validate', {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': csrf(), 'Accept': 'application/json', 'Content-Type': 'application/json' }
+        });
         const d = await r.json();
-        if (!d.success) { showToast('error', d.validation_errors ? d.validation_errors.join(' ') : (d.message||'Validation failed.')); return false; }
+        if (!d.success) {
+            showToast('error', d.validation_errors ? d.validation_errors.join(' ') : (d.message || 'Validation failed.'));
+            return false;
+        }
         return true;
-    } catch(e) { showToast('error','Validation error. Please try again.'); return false; }
+    } catch(e) {
+        showToast('error', 'Validation error. Please try again.');
+        return false;
+    }
 }
 
 // ═══════════════════════════════════════════════
@@ -1018,7 +1037,7 @@ async function openCardModal() {
 
     const phone = document.getElementById('phone-input').value.trim();
     if (!validatePhoneNumber(phone)) {
-        showToast('error','Invalid phone number.');
+        showToast('error', 'Invalid phone number.');
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-credit-card"></i><span>Pay with Card</span>';
         return;
@@ -1063,12 +1082,11 @@ function closeCardModal() {
     document.getElementById('cardModalOverlay').classList.remove('open');
     document.body.style.overflow = '';
 
-    ['cardNumber','cardName','cardExpiry','cardCVV'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = '';
+    ['cardNumber', 'cardName', 'cardExpiry', 'cardCVV'].forEach(id => {
+        const el  = document.getElementById(id);
         const err = document.getElementById('err-' + id);
+        if (el)  { el.value = ''; el.classList.remove('error'); }
         if (err) err.classList.remove('show');
-        el?.classList.remove('error');
     });
 
     document.getElementById('previewNumber').textContent = '•••• •••• •••• ••••';
@@ -1088,13 +1106,13 @@ function handleModalOverlayClick(e) {
 //  CARD FIELD FORMATTING
 // ═══════════════════════════════════════════════
 function formatCardNumber(input) {
-    let v = input.value.replace(/\D/g,'').slice(0,16);
+    let v = input.value.replace(/\D/g, '').slice(0, 16);
     input.value = v.match(/.{1,4}/g)?.join(' ') || v;
 
-    const padded = v.padEnd(16,'•');
+    const padded = v.padEnd(16, '•');
     document.getElementById('previewNumber').textContent = padded.match(/.{1,4}/g).join(' ');
 
-    const brand = detectCardBrand(v);
+    const brand      = detectCardBrand(v);
     const brandIcons = {
         visa:       '<i class="fab fa-cc-visa" style="color:#1A1F71;"></i>',
         mastercard: '<i class="fab fa-cc-mastercard" style="color:#EB001B;"></i>',
@@ -1117,14 +1135,14 @@ function detectCardBrand(num) {
 }
 
 function formatExpiry(input) {
-    let v = input.value.replace(/\D/g,'').slice(0,4);
-    if (v.length >= 2) v = v.slice(0,2) + ' / ' + v.slice(2);
+    let v = input.value.replace(/\D/g, '').slice(0, 4);
+    if (v.length >= 2) v = v.slice(0, 2) + ' / ' + v.slice(2);
     input.value = v;
 
-    const raw = input.value.replace(/\D/g,'');
-    if (raw.length >= 4) document.getElementById('previewExpiry').textContent = raw.slice(0,2) + ' / ' + raw.slice(2,4);
-    else if (raw.length >= 2) document.getElementById('previewExpiry').textContent = raw.slice(0,2) + ' / ';
-    else document.getElementById('previewExpiry').textContent = 'MM / YY';
+    const raw = input.value.replace(/\D/g, '');
+    if (raw.length >= 4)      document.getElementById('previewExpiry').textContent = raw.slice(0, 2) + ' / ' + raw.slice(2, 4);
+    else if (raw.length >= 2) document.getElementById('previewExpiry').textContent = raw.slice(0, 2) + ' / ';
+    else                      document.getElementById('previewExpiry').textContent = 'MM / YY';
 
     validateCardField('cardExpiry');
 }
@@ -1144,8 +1162,8 @@ function validateCardField(fieldId) {
 
     switch (fieldId) {
         case 'cardNumber':
-            const num = field.value.replace(/\s/g,'');
-            if (!num) msg = 'Card number is required.';
+            const num = field.value.replace(/\s/g, '');
+            if (!num)             msg = 'Card number is required.';
             else if (num.length < 13) msg = 'Card number is too short.';
             else if (num.length > 16) msg = 'Card number is too long.';
             break;
@@ -1153,18 +1171,18 @@ function validateCardField(fieldId) {
             if (!field.value.trim()) msg = 'Cardholder name is required.';
             break;
         case 'cardExpiry':
-            const raw = field.value.replace(/\D/g,'');
-            if (!raw) { msg = 'Expiry date is required.'; break; }
-            if (raw.length < 4) { msg = 'Enter a valid expiry date.'; break; }
-            const month = parseInt(raw.slice(0,2));
-            const year  = parseInt('20' + raw.slice(2,4));
+            const raw = field.value.replace(/\D/g, '');
+            if (!raw)              { msg = 'Expiry date is required.'; break; }
+            if (raw.length < 4)    { msg = 'Enter a valid expiry date.'; break; }
+            const month = parseInt(raw.slice(0, 2));
+            const year  = parseInt('20' + raw.slice(2, 4));
             const now   = new Date();
-            if (month < 1 || month > 12) { msg = 'Invalid month.'; break; }
-            if (year < now.getFullYear() || (year === now.getFullYear() && month < now.getMonth()+1)) { msg = 'Card has expired.'; break; }
+            if (month < 1 || month > 12)                                                          { msg = 'Invalid month.'; break; }
+            if (year < now.getFullYear() || (year === now.getFullYear() && month < now.getMonth() + 1)) { msg = 'Card has expired.'; break; }
             break;
         case 'cardCVV':
-            if (!field.value) msg = 'CVV is required.';
-            else if (field.value.length < 3) msg = 'CVV must be 3-4 digits.';
+            if (!field.value)           msg = 'CVV is required.';
+            else if (field.value.length < 3) msg = 'CVV must be 3–4 digits.';
             break;
     }
 
@@ -1176,17 +1194,15 @@ function validateCardField(fieldId) {
         field.classList.remove('error');
         errEl.classList.remove('show');
     }
-
     return !msg;
 }
 
 function validateAllCardFields() {
-    return ['cardNumber','cardName','cardExpiry','cardCVV'].every(id => validateCardField(id));
+    return ['cardNumber', 'cardName', 'cardExpiry', 'cardCVV'].every(id => validateCardField(id));
 }
 
 // ═══════════════════════════════════════════════
-//  SUBMIT CARD PAYMENT — ✅ SECURE (frontend tokenization)
-//  Card details go directly to PayMongo, NOT to our server
+//  SUBMIT CARD PAYMENT
 // ═══════════════════════════════════════════════
 async function submitCardPayment() {
     if (!validateAllCardFields()) {
@@ -1198,23 +1214,20 @@ async function submitCardPayment() {
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking availability…';
 
-    // ── Re-validate unit availability right before charging the card ──
     try {
-        const validationRes = await fetch('/api/cart/pre-validate', {
+        const validationRes  = await fetch('/api/cart/pre-validate', {
             method: 'POST',
             headers: { 'X-CSRF-TOKEN': csrf(), 'Accept': 'application/json', 'Content-Type': 'application/json' }
         });
         const validationData = await validationRes.json();
-
         if (!validationData.success) {
-            const errors = validationData.validation_errors
+            showToast('error', validationData.validation_errors
                 ? validationData.validation_errors.join(' ')
-                : (validationData.message || 'One or more units are no longer available.');
-            showToast('error', errors);
+                : (validationData.message || 'One or more units are no longer available.'));
             resetCardSubmitBtn();
             return;
         }
-    } catch (e) {
+    } catch(e) {
         showToast('error', 'Could not verify availability. Please try again.');
         resetCardSubmitBtn();
         return;
@@ -1223,10 +1236,9 @@ async function submitCardPayment() {
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing…';
 
     try {
-        const expiryRaw = document.getElementById('cardExpiry').value.replace(/\D/g,'');
+        const expiryRaw = document.getElementById('cardExpiry').value.replace(/\D/g, '');
 
-        // ✅ STEP 1: Tokenize card directly with PayMongo using PUBLIC KEY
-        // Raw card details NEVER touch our server — only PayMongo receives them
+        // ✅ Tokenize card directly with PayMongo — raw details never touch our server
         const pmResponse = await fetch('https://api.paymongo.com/v1/payment_methods', {
             method: 'POST',
             headers: {
@@ -1254,26 +1266,19 @@ async function submitCardPayment() {
         });
 
         const pmData = await pmResponse.json();
-
         if (!pmResponse.ok) {
             const errMsg = pmData.errors?.[0]?.detail || 'Card tokenization failed. Please check your card details.';
             throw new Error(errMsg);
         }
 
-        // ✅ STEP 2: Send only the token ID to our server — no raw card data
-        const paymentMethodId = pmData.data.id;
-
+        // ✅ Send only the token ID to our server
         const r = await fetch('/card/process-payment', {
             method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': csrf(),
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
+            headers: { 'X-CSRF-TOKEN': csrf(), 'Accept': 'application/json', 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 booking_data:      pendingBookingData,
                 payment_data:      pendingPaymentData,
-                payment_method_id: paymentMethodId   // token only, no raw card details
+                payment_method_id: pmData.data.id
             })
         });
 
@@ -1284,7 +1289,6 @@ async function submitCardPayment() {
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Redirecting to bank…';
                 window.location.href = d.redirect_url;
             } else {
-                // No 3DS — payment succeeded immediately
                 closeCardModal();
                 showSuccess({
                     booking_reference: d.payment?.paymentReference || 'N/A',
@@ -1313,7 +1317,7 @@ async function submitGCashBooking() {
     if (!(await validateCartBeforeSubmit())) { resetGCashBtn(btn); return; }
 
     const phone = document.getElementById('phone-input').value.trim();
-    if (!validatePhoneNumber(phone)) { showToast('error','Invalid phone number.'); resetGCashBtn(btn); return; }
+    if (!validatePhoneNumber(phone)) { showToast('error', 'Invalid phone number.'); resetGCashBtn(btn); return; }
 
     const fd = new FormData(document.getElementById('bookingForm'));
     fd.set('phone', phone);
@@ -1323,18 +1327,29 @@ async function submitGCashBooking() {
     fd.set('event_type', 'normal-booking');
 
     try {
-        const vr = await fetch('/api/customer-bookings', { method:'POST', headers:{'X-CSRF-TOKEN':csrf(),'Accept':'application/json'}, body:fd });
+        const vr = await fetch('/api/customer-bookings', {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': csrf(), 'Accept': 'application/json' },
+            body: fd
+        });
         const vd = await vr.json();
-        if (!vd.success || !vd.requires_payment_first) throw new Error(vd.message||'Validation failed');
+        if (!vd.success || !vd.requires_payment_first) throw new Error(vd.message || 'Validation failed');
 
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Processing payment…</span>';
 
-        const pr = await fetch('/gcash/process-payment', { method:'POST', headers:{'X-CSRF-TOKEN':csrf(),'Accept':'application/json','Content-Type':'application/json'}, body:JSON.stringify({booking_data:vd.booking_data,payment_data:vd.payment_data}) });
+        const pr = await fetch('/gcash/process-payment', {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': csrf(), 'Accept': 'application/json', 'Content-Type': 'application/json' },
+            body: JSON.stringify({ booking_data: vd.booking_data, payment_data: vd.payment_data })
+        });
         const pd = await pr.json();
         if (pd.success && pd.checkout_url) { window.location.href = pd.checkout_url; }
-        else throw new Error(pd.message||'GCash payment failed');
+        else throw new Error(pd.message || 'GCash payment failed');
 
-    } catch(e) { showToast('error', e.message); resetGCashBtn(btn); }
+    } catch(e) {
+        showToast('error', e.message);
+        resetGCashBtn(btn);
+    }
 }
 
 function resetGCashBtn(btn) {
@@ -1372,20 +1387,27 @@ function cancelBooking() {
         reverseButtons: true, focusCancel: true,
         customClass: { popup:'swal-booking-popup', title:'swal-booking-title', confirmButton:'swal-confirm-btn', cancelButton:'swal-cancel-btn' },
         backdrop: 'rgba(0,0,0,0.5)', showLoaderOnConfirm: true,
-        preConfirm: () => fetch('/api/cart/clear',{method:'DELETE',headers:{'X-CSRF-TOKEN':csrf()}}).then(r=>r.json()).then(d=>{if(!d.success)Swal.showValidationMessage('Failed to clear cart.');return d;}).catch(()=>Swal.showValidationMessage('Network error.')),
+        preConfirm: () => fetch('/api/cart/clear', { method: 'DELETE', headers: { 'X-CSRF-TOKEN': csrf() } })
+            .then(r => r.json())
+            .then(d => { if (!d.success) Swal.showValidationMessage('Failed to clear cart.'); return d; })
+            .catch(() => Swal.showValidationMessage('Network error.')),
         allowOutsideClick: () => !Swal.isLoading()
     }).then(result => {
         if (result.isConfirmed) {
-            Swal.fire({ title:'Booking Cancelled', text:'Your cart has been cleared.', icon:'success', iconColor:'#10B981', confirmButtonColor:'#10B981', confirmButtonText:'Go to Home', timer:3000, timerProgressBar:true })
-                .then(() => { window.location.href = '{{ route("home") }}'; });
+            Swal.fire({
+                title: 'Booking Cancelled', text: 'Your cart has been cleared.',
+                icon: 'success', iconColor: '#10B981',
+                confirmButtonColor: '#10B981', confirmButtonText: 'Go to Home',
+                timer: 3000, timerProgressBar: true
+            }).then(() => { window.location.href = '{{ route("home") }}'; });
         }
     });
 }
 </script>
 
 <style>
-    .swal-booking-popup { border-radius:20px!important; font-family:'Poppins',sans-serif!important; padding:2rem!important; box-shadow:0 25px 60px rgba(0,0,0,.2)!important; }
-    .swal-booking-title { font-size:1.4rem!important; font-weight:800!important; color:#1F2937!important; }
+    .swal-booking-popup  { border-radius:20px!important; font-family:'Poppins',sans-serif!important; padding:2rem!important; box-shadow:0 25px 60px rgba(0,0,0,.2)!important; }
+    .swal-booking-title  { font-size:1.4rem!important; font-weight:800!important; color:#1F2937!important; }
     .swal2-icon.swal2-warning { border-color:#EF4444!important; color:#EF4444!important; }
     .swal-confirm-btn,.swal-cancel-btn { border-radius:12px!important; padding:12px 22px!important; font-weight:700!important; font-size:.88rem!important; font-family:'Poppins',sans-serif!important; display:flex!important; align-items:center!important; gap:8px!important; }
 </style>

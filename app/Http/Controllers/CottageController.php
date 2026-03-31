@@ -21,7 +21,6 @@ class CottageController extends Controller
     {
         $cottageData = $cottage->toArray();
         
-        // Add virtual tour URL if panorama is set
         if ($cottage->virtualTourPanorama) {
             $cottageData['virtual_tour_url'] = url('/virtual-tour?panorama=' . $cottage->virtualTourPanorama);
             $cottageData['has_virtual_tour'] = true;
@@ -117,11 +116,9 @@ class CottageController extends Controller
             ->where('capacity', '>=', $guestCount)
             ->get()
             ->filter(function($cottage) use ($checkIn, $checkOut) {
-                // Check if cottage is blocked during the selected dates - IGNORE unitStatus
                 return !$this->isUnitBlocked($cottage, $checkIn, $checkOut);
             })
             ->filter(function($cottage) use ($checkIn, $checkOut) {
-                // Check for booking conflicts
                 return !$this->checkBookingConflict($cottage->unitID, $checkIn, $checkOut);
             })
             ->map(function($cottage) {
@@ -146,7 +143,6 @@ class CottageController extends Controller
      */
     private function isUnitBlocked($unit, $checkinDate, $checkoutDate)
     {
-        // Kung walang block dates set, UNIT IS NOT BLOCKED
         if (!$unit->blockStartDate || !$unit->blockEndDate) {
             return false;
         }
@@ -156,7 +152,6 @@ class CottageController extends Controller
         $blockStart = Carbon::parse($unit->blockStartDate)->startOfDay();
         $blockEnd = Carbon::parse($unit->blockEndDate)->startOfDay();
 
-        // Check if booking dates overlap with block period
         return (
             ($newCheckin->between($blockStart, $blockEnd)) ||
             ($newCheckout->between($blockStart, $blockEnd)) ||
@@ -171,7 +166,6 @@ class CottageController extends Controller
      */
     private function checkBookingConflict($unitId, $checkinDate, $checkoutDate)
     {
-        // Get only normal bookings for this unit
         $existingBookings = Booking::whereHas('cart.cartItems', function($q) use ($unitId) {
                 $q->where('unitID', $unitId);
             })
@@ -193,7 +187,6 @@ class CottageController extends Controller
             $existingCheckin = Carbon::parse($booking->cart->checkInDate)->startOfDay();
             $existingCheckout = Carbon::parse($booking->cart->checkOutDate)->startOfDay();
 
-            // Check for date overlap
             $hasOverlap = (
                 ($newCheckin->between($existingCheckin, $existingCheckout)) ||
                 ($newCheckout->between($existingCheckin, $existingCheckout)) ||
@@ -239,13 +232,12 @@ class CottageController extends Controller
             // ✅ STANDARDIZE: Convert to date-only format
             $checkIn = Carbon::parse($request->check_in)->format('Y-m-d');
             $checkOut = Carbon::parse($request->check_out)->format('Y-m-d');
-            
             $guests = $request->guests;
 
             // Get unit details
             $unit = Unit::findOrFail($unitId);
             
-            // ✅ CRITICAL: Check if it's a cottage and validate entrance fee BEFORE proceeding
+            // ✅ CRITICAL: Check entrance fee BEFORE proceeding
             if ($unit->unitType === 'cottage') {
                 $entranceFee = EntranceFee::where('isActive', true)->first();
                 
@@ -258,10 +250,6 @@ class CottageController extends Controller
                         'error_code' => 'NO_ACTIVE_ENTRANCE_FEE'
                     ], 400);
                 }
-                
-                // Store entrance fee ID for later use
-                $entranceFeeID = $entranceFee->entranceFeeID;
-                $entranceFeeAmount = $entranceFee->amount;
             }
 
             // Check for special event bookings
@@ -319,28 +307,25 @@ class CottageController extends Controller
                 $daysCount = 1;
             }
 
-            // ✅ FIX: Check if user has an active cart with different dates
+            // ✅ Check if user has an active cart
             $cart = Cart::where('user_id', $userId)
                 ->where('is_active', true)
                 ->first();
 
             if (!$cart) {
-                // Create new active cart
+                // Create new active cart — NO numGuests here
                 $cart = Cart::create([
                     'user_id' => $userId,
                     'checkInDate' => $checkIn,
                     'checkOutDate' => $checkOut,
                     'daysCount' => $daysCount,
-                    'numGuests' => $guests,
                     'is_active' => true
                 ]);
             } else {
-                // Check if dates are different
                 $existingCheckIn = Carbon::parse($cart->checkInDate)->format('Y-m-d');
                 $existingCheckOut = Carbon::parse($cart->checkOutDate)->format('Y-m-d');
                 
                 if ($existingCheckIn !== $checkIn || $existingCheckOut !== $checkOut) {
-                    // Check if current cart has items
                     $existingCartItems = CartItem::where('cartID', $cart->cartID)
                         ->where('isBooked', false)
                         ->count();
@@ -357,17 +342,15 @@ class CottageController extends Controller
                             ]
                         ], 400);
                     } else {
-                        // Update existing cart with new dates
+                        // Update cart dates only — NO numGuests
                         $cart->update([
                             'checkInDate' => $checkIn,
                             'checkOutDate' => $checkOut,
                             'daysCount' => $daysCount,
-                            'numGuests' => $guests
                         ]);
                     }
-                } else {
-                    $cart->update(['numGuests' => $guests]);
                 }
+                // ✅ Removed: $cart->update(['numGuests' => $guests]) — numGuests now lives in CartItem
             }
 
             // Calculate subtotal based on unit type
@@ -375,7 +358,6 @@ class CottageController extends Controller
             $calculationBreakdown = [];
             
             if ($unit->unitType === 'room') {
-                // ROOM calculation
                 if ($guests == 1) {
                     $subtotal = $unit->unitRatePrice * 2 * $daysCount;
                 } else {
@@ -389,7 +371,7 @@ class CottageController extends Controller
                 // ✅ COTTAGE calculation with entrance fee (already validated above)
                 $entranceFee = EntranceFee::where('isActive', true)->first();
                 $entranceTotal = $entranceFee->amount * $guests;
-                $subtotal = $entranceTotal + $unit->unitRatePrice; // Day use only
+                $subtotal = $entranceTotal + $unit->unitRatePrice;
                 $calculationBreakdown = [
                     'formula' => '(' . $entranceFee->amount . ' × ' . $guests . ') + ' . $unit->unitRatePrice,
                     'type' => 'cottage',
@@ -406,12 +388,18 @@ class CottageController extends Controller
                 ->first();
 
             if ($existingCartItem) {
-                $existingCartItem->update(['subtotalPrice' => $subtotal]);
+                // ✅ Update numGuests in CartItem
+                $existingCartItem->update([
+                    'numGuests' => $guests,
+                    'subtotalPrice' => $subtotal
+                ]);
                 $cartItem = $existingCartItem;
             } else {
+                // ✅ Create CartItem with numGuests
                 $cartItem = CartItem::create([
                     'cartID' => $cart->cartID,
                     'unitID' => $unitId,
+                    'numGuests' => $guests,
                     'subtotalPrice' => $subtotal,
                     'isBooked' => false
                 ]);
@@ -454,7 +442,6 @@ class CottageController extends Controller
      */
     public function getAllCottages()
     {
-        // Check if there's an active entrance fee first
         $entranceFee = EntranceFee::where('isActive', true)->first();
         
         $cottages = Unit::where('unitType', 'cottage')
@@ -485,11 +472,9 @@ class CottageController extends Controller
             'check_out' => 'required|date|after_or_equal:check_in'
         ]);
 
-        // ✅ STANDARDIZE: Convert to date-only format
         $checkIn = Carbon::parse($request->check_in)->format('Y-m-d');
         $checkOut = Carbon::parse($request->check_out)->format('Y-m-d');
 
-        // Check for special event bookings
         $specialEventBookings = Booking::where('bookingType', 'special-event')
             ->where(function($query) use ($checkIn, $checkOut) {
                 $query->where(function($q) use ($checkIn, $checkOut) {

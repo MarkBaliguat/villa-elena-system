@@ -57,9 +57,10 @@ class CustomerBookingController extends Controller
                     : Carbon::parse($booking->cart->checkOutDate)->format('Y-m-d');
                 $booking->total_paid = $booking->payments->where('paymentStatus', 'completed')->sum('amountPaid');
                 $booking->accommodations = $booking->cart->items->map(fn($item) => [
-                    'name'  => $item->unit->unitName,
-                    'type'  => $item->unit->unitType,
-                    'price' => $item->subtotalPrice
+                    'name'      => $item->unit->unitName,
+                    'type'      => $item->unit->unitType,
+                    'price'     => $item->subtotalPrice,
+                    'numGuests' => $item->numGuests,
                 ]);
                 return $booking;
             });
@@ -232,7 +233,6 @@ class CustomerBookingController extends Controller
                     'checkInDate'  => $cart->checkInDate,
                     'checkOutDate' => $cart->checkOutDate,
                     'daysCount'    => $cart->daysCount,
-                    'numGuests'    => $cart->numGuests
                 ],
                 'total_items' => $cart->items->count()
             ]);
@@ -347,25 +347,27 @@ class CustomerBookingController extends Controller
                 }
             }
 
-            // ── Pricing ──
-            $subtotal    = 0;
-            $totalGuests = $cart->numGuests;
-            $daysCount   = max(1, $cart->daysCount);
+            // ── Pricing — numGuests is now per cart item ──
+            $subtotal  = 0;
+            $daysCount = max(1, $cart->daysCount);
 
             foreach ($cart->items as $item) {
-                $unit         = $item->unit;
+                $unit        = $item->unit;
+                $itemGuests  = $item->numGuests; // ← per-item guest count
                 $itemSubtotal = 0;
+
                 if ($unit->unitType === 'room') {
-                    $mult         = $totalGuests == 1 ? 2 : $totalGuests;
+                    $mult         = $itemGuests == 1 ? 2 : $itemGuests;
                     $itemSubtotal = $unit->unitRatePrice * $mult * $daysCount;
                 } elseif ($unit->unitType === 'cottage') {
                     $itemSubtotal = $unit->unitRatePrice;
                     if ($entranceFee) {
-                        $itemSubtotal += $entranceFee->amount * $totalGuests;
+                        $itemSubtotal += $entranceFee->amount * $itemGuests;
                     }
                 } else {
                     $itemSubtotal = $unit->unitRatePrice * $daysCount;
                 }
+
                 $subtotal += $itemSubtotal;
             }
 
@@ -400,7 +402,6 @@ class CustomerBookingController extends Controller
                     'requires_payment_first' => true,
                     'booking_data'           => [
                         'cart_id'              => $cart->cartID,
-                        'num_guests'           => $totalGuests,
                         'total_price'          => $totalPrice,
                         'entrance_fee_id'      => $hasCottages && $entranceFee ? $entranceFee->entranceFeeID : null,
                         'booking_type'         => $request->booking_type,
@@ -429,7 +430,6 @@ class CustomerBookingController extends Controller
                     'requires_payment_first' => true,
                     'booking_data'           => [
                         'cart_id'              => $cart->cartID,
-                        'num_guests'           => $totalGuests,
                         'total_price'          => $totalPrice,
                         'entrance_fee_id'      => $hasCottages && $entranceFee ? $entranceFee->entranceFeeID : null,
                         'booking_type'         => $request->booking_type,
@@ -603,7 +603,6 @@ class CustomerBookingController extends Controller
             throw new \Exception('Session data expired. Please restart booking.');
         }
 
-        // Load cart with user relationship for email sending later
         $cart     = Cart::with(['items.unit', 'user'])->findOrFail($bookingData['cart_id']);
         $checkIn  = Carbon::parse($bookingData['event_start'])->startOfDay();
         $checkOut = Carbon::parse($bookingData['event_end'])->startOfDay();
@@ -651,7 +650,6 @@ class CustomerBookingController extends Controller
         }
 
         if (!empty($unavailableUnits)) {
-            // Payment is already charged — log everything for manual refund, DO NOT rollback payment
             Log::error('=== CARD: UNIT CONFLICT AFTER CHARGE — MANUAL REFUND NEEDED ===', [
                 'payment_intent_id' => $paymentIntentId,
                 'amount_paid'       => $amountPaid,
@@ -668,7 +666,6 @@ class CustomerBookingController extends Controller
             );
         }
 
-        // ── Update phone number if provided ──
         if (isset($bookingData['phone'])) {
             $user = User::find($cart->user_id);
             if ($user && (empty($user->phoneNumber) || $user->phoneNumber !== $bookingData['phone'])) {
@@ -677,12 +674,35 @@ class CustomerBookingController extends Controller
             }
         }
 
-        // ── Create booking and payment records ──
+        // ── Recompute total from cart items (numGuests per item) ──
+        $entranceFee = $bookingData['entrance_fee_id']
+            ? EntranceFee::find($bookingData['entrance_fee_id'])
+            : null;
+
+        $daysCount = max(1, $cart->daysCount);
+        $subtotal  = 0;
+
+        foreach ($cart->items->where('isBooked', false) as $item) {
+            $unit       = $item->unit;
+            $itemGuests = $item->numGuests;
+
+            if ($unit->unitType === 'room') {
+                $mult      = $itemGuests == 1 ? 2 : $itemGuests;
+                $subtotal += $unit->unitRatePrice * $mult * $daysCount;
+            } elseif ($unit->unitType === 'cottage') {
+                $subtotal += $unit->unitRatePrice;
+                if ($entranceFee) {
+                    $subtotal += $entranceFee->amount * $itemGuests;
+                }
+            } else {
+                $subtotal += $unit->unitRatePrice * $daysCount;
+            }
+        }
+
         DB::beginTransaction();
         try {
             $booking = Booking::create([
                 'cartID'                  => $bookingData['cart_id'],
-                'numGuests'               => $bookingData['num_guests'],
                 'totalPrice'              => $bookingData['total_price'],
                 'entranceFeeID'           => $bookingData['entrance_fee_id'],
                 'bookingStatus'           => $paymentData['booking_status'],
@@ -860,7 +880,6 @@ class CustomerBookingController extends Controller
                     throw new \Exception('Session data expired. Please restart booking.');
                 }
 
-                // Load cart with user relationship for email sending later
                 $cart     = Cart::with(['items.unit', 'user'])->findOrFail($bookingData['cart_id']);
                 $checkIn  = Carbon::parse($bookingData['event_start'])->startOfDay();
                 $checkOut = Carbon::parse($bookingData['event_end'])->startOfDay();
@@ -909,7 +928,6 @@ class CustomerBookingController extends Controller
                 }
 
                 if (!empty($unavailableUnits)) {
-                    // Payment is already charged — log everything for manual refund, DO NOT rollback payment
                     Log::error('=== GCASH: UNIT CONFLICT AFTER CHARGE — MANUAL REFUND NEEDED ===', [
                         'payment_intent_id' => $paymentIntentId,
                         'amount_paid'       => $paymentIntent['data']['attributes']['amount'] / 100,
@@ -927,7 +945,6 @@ class CustomerBookingController extends Controller
                     );
                 }
 
-                // ── Update phone number if provided ──
                 if (isset($bookingData['phone'])) {
                     $user = User::find($cart->user_id);
                     if ($user && (empty($user->phoneNumber) || $user->phoneNumber !== $bookingData['phone'])) {
@@ -936,10 +953,11 @@ class CustomerBookingController extends Controller
                     }
                 }
 
-                // ── Create booking and payment records ──
+                $amountPaid       = $paymentIntent['data']['attributes']['amount'] / 100;
+                $paymentReference = 'GCASH-' . $paymentIntentId;
+
                 $booking = Booking::create([
                     'cartID'                  => $bookingData['cart_id'],
-                    'numGuests'               => $bookingData['num_guests'],
                     'totalPrice'              => $bookingData['total_price'],
                     'entranceFeeID'           => $bookingData['entrance_fee_id'],
                     'bookingStatus'           => $paymentData['booking_status'],
@@ -950,9 +968,6 @@ class CustomerBookingController extends Controller
                     'created_at'              => now(),
                     'updated_at'              => now(),
                 ]);
-
-                $amountPaid       = $paymentIntent['data']['attributes']['amount'] / 100;
-                $paymentReference = 'GCASH-' . $paymentIntentId;
 
                 $payment = Payment::create([
                     'bookingID'        => $booking->bookingID,
@@ -1104,16 +1119,15 @@ class CustomerBookingController extends Controller
                     'success'     => true,
                     'has_booking' => true,
                     'booking'     => [
-                        'id'         => $booking->bookingID,
-                        'status'     => $booking->bookingStatus,
-                        'total_price'=> $booking->totalPrice,
-                        'created_at' => $booking->created_at->format('Y-m-d H:i:s')
+                        'id'          => $booking->bookingID,
+                        'status'      => $booking->bookingStatus,
+                        'total_price' => $booking->totalPrice,
+                        'created_at'  => $booking->created_at->format('Y-m-d H:i:s')
                     ],
                     'cart' => [
                         'id'               => $cart->cartID,
                         'check_in'         => $cart->checkInDate,
                         'check_out'        => $cart->checkOutDate,
-                        'guests'           => $cart->numGuests,
                         'has_booked_items' => $cart->items->where('isBooked', true)->count() > 0
                     ]
                 ]);
